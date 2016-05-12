@@ -1,0 +1,4 @@
+<p>create
+<form method=post action=@{OrganizationForumCreateH organization_id} enctype=#{enctype}>
+  ^{widget}
+  <button class="btn btn-success">Create Forum

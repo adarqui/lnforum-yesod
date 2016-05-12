@@ -1,0 +1,9 @@
+<p>Boards
+
+<a href=@{OrganizationForumBoardsCreateH organization_id forum_id}>create board
+
+<h1>Boards
+
+<ul>
+  $forall (Entity board_id board) <- boards
+    <li><a href="@{OrganizationForumBoardDisplayH organization_id forum_id board_id}">#{boardName board}</a>

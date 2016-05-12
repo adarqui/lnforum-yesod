@@ -1,0 +1,5 @@
+#!/bin/bash
+
+[ $# == 2 ] || { echo 'usage: post <id> <msg>' && exit 1; }
+
+curlx-json tests/$1 -d "{\"msg\":\"${2}\"}" -XPUT

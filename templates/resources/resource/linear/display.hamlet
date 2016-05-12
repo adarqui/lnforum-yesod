@@ -1,0 +1,9 @@
+<div .page-header>
+  <h1>#{leuronTypeToText leuron_data} : #{curr_offset}
+
+<div .well>
+  <p>^{leuronDisplay leuron leuron_data}
+
+<a .btn .btn-info role="button" href="@?{(ResourceLinearDisplayH resource_id, [("offset", T.pack (show prev_offset))])}">Prev</a>
+<a .btn .btn-info role="button" href="@?{(ResourceLinearDisplayH resource_id, [("offset", T.pack (show next_offset))])}">Next</a>
+<a .btn .btn-danger role="button" href="@{ResourceDisplayH resource_id}">Home</a>

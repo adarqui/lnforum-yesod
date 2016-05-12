@@ -1,0 +1,1 @@
+../../../ln-pure-apps/leurons-add/static/dist/app.js

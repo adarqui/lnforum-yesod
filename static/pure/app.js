@@ -1,0 +1,1 @@
+../../../ln-pure-apps/example-ajax/static/dist/app.js

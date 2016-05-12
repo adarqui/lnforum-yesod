@@ -1,0 +1,23 @@
+$doctype 5
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <title>#{pageTitle pc}
+    ^{pageHead pc}
+  <body>
+$#    ^{pageBody nav}
+
+    $maybe Entity userId user <- muser
+    $nothing
+      <li .nav-item.nav-item--button>
+        <a .button.button--light href=@{AuthR LoginR}>Sign in
+
+    ^{pageBody pc}
+    <div id="purescript-container">
+
+    <footer .footer>
+      <div .container.clearfix>
+        <p .footer-copy>
+          © #{appCopyright $ appSettings master}

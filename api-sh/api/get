@@ -1,0 +1,5 @@
+#!/bin/bash
+
+[ $# == 1 ] || { echo 'usage: post <id>' && exit 1; }
+
+curlx-json api/$1 -XGET

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+[ $# == 6 ] || { echo 'usage: post <name> <desc> <leurons> <resources> <categories> <filters>' && exit 1; }
+
+curlx-json buckets -d \
+  "{ \
+  \"name\":\"${1}\", \
+  \"desc\":\"${2}\", \
+  \"leurons\":[${3}], \
+  \"resources\":[${4}], \
+  \"categories\":[${5}], \
+  \"filters\":[${6}] \
+  }" -XPOST
+
+# ./api/buckets/post name5 desc 1,2,3,6 2 \"3\" 4,5,6

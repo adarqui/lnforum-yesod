@@ -1,0 +1,8 @@
+<div>
+  <h1>
+    Leuro
+
+  $maybe Entity _ _ <- muser
+    Authenticated
+  $nothing
+    Nope

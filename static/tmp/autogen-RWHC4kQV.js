@@ -1,0 +1,1 @@
+$(function(){sessionStorage.resource_id=71})

@@ -1,0 +1,11 @@
+flags:
+  ln-yesod:
+    library-only: false
+    dev: false
+packages:
+- '.'
+- '../ln-types'
+- '../ln-lib'
+- '../haskell-api-helpers'
+extra-deps: [stm-lifted-0.1.0.0, yesod-bootstrap-0.2.1, yesod-markdown-0.11.0, random-extras-0.19]
+resolver: lts-5.5

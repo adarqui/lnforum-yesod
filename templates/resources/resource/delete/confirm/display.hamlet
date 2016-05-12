@@ -1,0 +1,3 @@
+Are you sure you want to delete resource #{toPathPiece resource_id}?
+
+<a .btn .btn-danger role="button" href="@{ResourceDeleteH resource_id}">YES</a>

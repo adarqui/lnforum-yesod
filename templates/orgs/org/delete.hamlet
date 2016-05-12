@@ -1,0 +1,4 @@
+<p>Are you sure you want to delete? bla bla
+
+<form method=POST action=@?{(OrganizationDeleteH organization_id, [("_method","DELETE")])}>
+  <button class="btn btn-warning">Delete

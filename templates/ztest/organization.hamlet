@@ -1,0 +1,4 @@
+<p>hi
+<form method=post action=@{OrganizationsR} enctype=#{enctype}>
+  ^{widget}
+  <button class="btn btn-success">Create Organization

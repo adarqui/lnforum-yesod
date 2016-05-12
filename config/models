@@ -1,0 +1,499 @@
+-- https://github.com/yesodweb/persistent/wiki/Persistent-entity-syntax
+-- http://www.yesodweb.com/book/persistent
+
+
+
+Empty
+  userId      UserId
+  value       Bool
+  createdAt   UTCTime Maybe DEFAULT=now()
+  modifiedAt  UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+Organization
+  userId UserId
+  name         Text
+--  displayName Text
+  description  Text Maybe
+  company      Text
+  location     Text
+  email        Text
+  emailMD5     Text
+--  blog Text
+--  apiUrl Text
+--  htmlUrl Text
+--  avatarUrl Text
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedBy   UserId Maybe
+  modifiedAt   UTCTime Maybe
+  UniqueOrgName     name
+  UniqueOrgEmail    email
+
+--  UniqueDisplayName displayName
+  deriving Eq Show Typeable
+
+
+
+Team
+  userId      UserId
+  orgId       OrganizationId
+  name        Text
+--  displayName Text
+  description Text Maybe
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  UniqueTeam  orgId name
+
+--  UniqueTeam orgId displayName
+  deriving Eq Show Typeable
+
+
+
+User
+  nick        Text
+  displayNick Text
+  name        Text
+  email       Text
+  emailMD5    Text
+  plugin      Text
+  ident       Text
+  active      Bool
+  createdAt   UTCTime Maybe DEFAULT=now()
+  modifiedAt  UTCTime Maybe
+
+  UniqueNick nick
+  UniqueDisplayNick displayNick
+  UniqueUser plugin ident
+  UniqueEmail email
+  deriving Eq Show Typeable
+
+
+
+
+Profile
+  userId     UserId
+  gender     ProfileGender
+  birthdate  UTCTime
+  website    Text Maybe
+  location   Text Maybe
+  signature  Text Maybe
+  karmaGood  Int DEFAULT=0
+  karmaBad   Int DEFAULT=0
+  createdAt  UTCTime Maybe DEFAULT=now()
+  modifiedAt UTCTime Maybe
+
+  UniqueProfile userId
+  deriving Eq Show Typeable Generic
+
+
+
+
+Test
+  userId     UserId
+  msg        Text
+  createdAt  UTCTime Maybe DEFAULT=now()
+  modifiedAt UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+Api
+  userId     UserId
+  key        Text
+  comment    Text Maybe
+  active     Bool
+  createdAt  UTCTime Maybe DEFAULT=now()
+  modifiedAt UTCTime Maybe
+
+  UniqueApiKey key
+  deriving Eq Show Typeable
+
+
+
+Resource
+  userId        UserId
+  title         Text
+  description   Text
+  source        Text
+  author        [Text] Maybe
+  prerequisites [Text]
+  categories    [Text]
+  visibility    Text
+  counter       Int
+  version       Text Maybe
+  urls          [Text] Maybe
+  active        Bool
+  createdAt     UTCTime Maybe default=now()
+  modifiedAt    UTCTime Maybe
+
+  UniqueResourceTitle title
+  deriving Show Generic
+
+
+
+ResourceSubscribers
+  userId     UserId
+  resourceId ResourceId
+
+  UniqueResourceId userId resourceId
+
+
+
+Leuron
+  userId        UserId
+  resourceId    ResourceId
+  data          Text
+  title         Text Maybe
+  description   Text Maybe
+  section       Text Maybe
+  page          Text Maybe
+  examples      Text Maybe
+  strengths     Text Maybe
+  categories    Text Maybe
+  splits        Text Maybe
+  substitutions Text Maybe
+  tags          Text Maybe
+  style         Text Maybe
+  active        Bool
+  createdAt     UTCTime Maybe default=now()
+  modifiedAt    UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+LeuronSubscribers
+  userId   UserId
+  leuronId LeuronId
+
+  UniqueLeuronSubscribers userId leuronId
+  deriving Eq Show Typeable
+
+
+
+-- LeuronBucket
+Bucket
+  userId      UserId
+  name        Text
+  description Text Maybe
+  rounds      Int
+  scoreLo     Int default=-1000
+  scoreHi     Int default=3
+  leurons     [LeuronId]
+  resources   [ResourceId]
+  categories  [Text]
+  filters     [LeuronId]
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedAt  UTCTime Maybe
+
+  UniqueBucketName userId name
+  deriving Eq Show Typeable
+
+
+
+BucketLeuron
+  userId     UserId
+  bucketId   BucketId
+  active     Bool
+  leuronId   LeuronId
+  createdAt  UTCTime Maybe default=now()
+  modifiedAt UTCTime Maybe
+
+  UniqueBucketLeuron userId bucketId leuronId
+  deriving Eq Show Typeable
+
+
+
+BucketResource
+  userId     UserId
+  bucketId   BucketId
+  resourceId ResourceId
+  active     Bool
+  createdAt  UTCTime Maybe default=now()
+  modifiedAt UTCTime Maybe
+
+  UniqueBucketResource userId bucketId resourceId
+  deriving Eq Show Typeable
+
+
+
+BucketCategory
+  userId     UserId
+  bucketId   BucketId
+  category   Text
+  createdAt  UTCTime Maybe default=now()
+  modifiedAt UTCTime Maybe
+
+  UniqueBucketCategory userId bucketId category
+  deriving Eq Show Typeable
+
+
+
+LeuronTraining
+  userId           UserId
+  leuronId         LeuronId
+  score            Int
+  skip             Int
+  skipAt           UTCTime Maybe
+  rawScore         Int
+  rawKnow          Int
+  rawKnowAt        UTCTime Maybe
+  rawDontKnow      Int
+  rawDontKnowAt    UTCTime Maybe
+  splitsScore      Int
+  splitsKnow       Int
+  splitsKnowAt     UTCTime Maybe
+  splitsDontKnow   Int
+  splitsDontKnowAt UTCTime Maybe
+  subsScore        Int
+  subsKnow         Int
+  subsKnowAt       UTCTime Maybe
+  subsDontKnow     Int
+  subsDontKnowAt   UTCTime Maybe
+  care             Bool
+  careAt           UTCTime Maybe
+  active           Bool
+  createdAt        UTCTime Maybe default=now()
+  modifiedAt       UTCTime Maybe
+
+  UniqueLeuronTraining userId leuronId
+  deriving Eq Show Typeable
+
+
+
+LeuronHistory
+  userId    UserId
+  leuronId  LeuronId
+  op        Text
+  createdAt UTCTime Maybe default=now()
+
+  deriving Eq Show Typeable
+
+
+
+Blog
+  userId UserId
+  ident  Text
+  title  Text
+
+  UniqueBlog userId
+  deriving Eq Show Typeable
+
+
+
+BlogEntry
+  userId      UserId
+  blogId      BlogId
+  title       Text
+  description Text
+  body        Text
+  tags        [Text]
+
+  deriving Eq Show Typeable
+
+
+
+BlogEntryRating
+  userId      UserId
+  blogEntryId BlogEntryId
+  rating      Int
+
+  UniqueBlogEntryRating userId blogEntryId
+  deriving Eq Show Typeable
+
+
+
+BlogComment
+  userId      UserId
+  blogEntryId BlogEntryId
+  body        Text
+
+  deriving Eq Show Typeable
+
+
+
+BlogCommentRating
+  userId        UserId
+  blogCommentId BlogCommentId
+  rating        Int
+
+  UniqueBlogCommentRating userId blogCommentId
+  deriving Eq Show Typeable
+
+
+
+BlogSubscribers
+  userId UserId
+  blogId BlogId
+
+  UniqueBlogSubscribers userId blogId
+  deriving Eq Show Typeable
+
+
+
+ReminderFolder
+  userId      UserId
+  parentId    ReminderFolderId Maybe
+  name        Text
+  description Text Maybe
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedAt  UTCTime Maybe
+
+  UniqueReminderFolder userId name
+  deriving Eq Show Typeable
+
+
+
+Reminder
+  userId         UserId
+  parentFolderId ReminderFolderId
+  data           Text
+  active         Bool
+  createdAt      UTCTime Maybe default=now()
+  modifiedAt     UTCTime Maybe
+
+  UniqueReminder userId data
+  deriving Eq Show Typeable
+
+-- progress tracker
+-- similar folder structure?
+
+
+
+Forum
+  userId      UserId
+  orgId       OrganizationId
+  name        Text
+  description Text Maybe
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+
+  UniqueForum orgId name
+  deriving Eq Show Typeable
+
+
+
+Board
+--  orgId OrganizationId
+  userId      UserId
+  forumId     ForumId
+  parentId    BoardId Maybe
+  name        Text
+  description Text Maybe
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+--  UniqueBoard orgId forumId name
+
+  UniqueBoard forumId name
+  deriving Eq Show Typeable
+
+
+
+Thread
+  userId       UserId
+  boardId      BoardId
+  name         Text
+  description  Text Maybe
+  sticky       Bool
+  locked       Bool
+  poll         Text Maybe -- embed some poll crap here..
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedBy   UserId Maybe
+  modifiedAt   UTCTime Maybe
+  activityAt   UTCTime Maybe
+
+  UniqueThread userId boardId name
+  deriving Eq Show Typeable
+
+
+
+ThreadPost
+  userId      UserId
+  threadId    ThreadId
+  parentId    ThreadPostId Maybe
+  title       Text Maybe
+  body        Text
+  tags        [Text]
+  privateTags [Text]
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+ThreadPostLike
+  userId       UserId
+  threadPostId ThreadPostId
+  opt          LikeOpt
+  score        Int
+  reason       Text Maybe
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueThreadPostLike userId threadPostId
+  deriving Eq Show Typeable
+
+
+
+Pm
+  userId      UserId
+  toUserId    UserId
+  subject     Text
+  body        Text
+  active      Bool
+  createdAt   UTCTime Maybe default=now()
+  modifiedAt  UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+-- Pm Inbox
+PmIn
+  pmId           PmId
+  userId         UserId     -- recipient user id
+  label          Text Maybe
+  isRead         Bool
+  isStarred      Bool
+  isNew          Bool
+  isSaved        Bool
+  active         Bool
+  createdAt      UTCTime Maybe default=now()
+  modifiedAt     UTCTime Maybe
+
+  UniquePmIn userId pmId
+  deriving Eq Show Typeable
+
+
+
+-- Pm Outbox
+PmOut
+  pmId           PmId
+  userId         UserId     -- sender user id
+  label          Text Maybe
+  isSaved        Bool
+  active         Bool
+  createdAt      UTCTime Maybe default=now()
+  modifiedAt     UTCTime Maybe
+
+  UniquePmOut userId pmId
+
+  deriving Eq Show Typeable

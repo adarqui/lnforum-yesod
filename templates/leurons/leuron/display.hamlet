@@ -1,0 +1,5 @@
+<div .page-header>
+  <h1>#{leuronTypeToText leuron_data}
+
+  <div .well>
+    <p>^{leuronDisplay leuron leuron_data}

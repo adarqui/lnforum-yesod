@@ -1,0 +1,10 @@
+#!/bin/bash
+
+url=$1
+shift
+
+if [ -z ${AUTHID} ] ; then
+  AUTHID=1
+fi
+
+curl -s -H "Authorization: ${AUTHID}" -H 'Accept: application/json' localhost:3000/${url} "$@"

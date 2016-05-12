@@ -1,0 +1,143 @@
+/ SPAR GET
+
+/static StaticR Static appStatic
+/auth   AuthR   Auth   getAuth
+
+
+
+/favicon.ico FaviconR GET
+/robots.txt RobotsR GET
+
+
+
+/api/api ApisR GET POST
+/api/api/#ApiId ApiR GET PUT DELETE
+
+
+
+/api/emptys EmptysR GET POST
+/api/empty/#EmptyId EmptyR GET PUT DELETE
+
+
+
+/api/forums ForumsR GET POST
+/api/forum/#ForumId ForumR GET PUT DELETE
+!/api/forum/#Text ForumH GET
+
+
+
+/api/boards BoardsR GET POST
+/api/board/#BoardId BoardR GET PUT DELETE
+!/api/board/#Text BoardH GET
+
+/api/board_stats BoardStatsR GET
+/api/board_stat/#BoardId BoardStatR GET
+
+/api/board_packs BoardPacksR GET
+/api/board_pack/#BoardId BoardPackR GET
+
+
+
+/api/leurons LeuronsR GET POST
+/api/leuron/#LeuronId LeuronR GET PUT DELETE
+
+
+
+/api/me MeR GET
+/api/me_pack MePackR GET
+
+
+
+/api/organizations OrganizationsR GET POST
+/api/organization/#OrganizationId OrganizationR GET PUT DELETE
+!/api/organization/#Text OrganizationH GET PUT DELETE
+
+
+/api/pms PmsR GET POST
+/api/pm/#PmId PmR GET PUT DELETE
+
+
+
+/api/pm_ins PmInsR GET
+/api/pm_in/#PmInId PmInR GET PUT DELETE
+
+
+
+/api/pm_outs PmOutsR GET
+/api/pm_out/#PmOutId PmOutR GET PUT DELETE
+
+
+
+/api/user_profiles ProfilesR GET
+/api/user_profile/#ProfileId ProfileR GET PUT
+
+
+
+/api/reminders RemindersR GET POST
+/api/reminder/#ReminderId ReminderR GET PUT DELETE
+
+
+
+/api/reminder_folders ReminderFoldersR GET POST
+/api/reminder_folder/#ReminderFolderId ReminderFolderR GET POST PUT DELETE
+
+
+
+/api/resources ResourcesR GET POST
+/api/resource/#ResourceId ResourceR GET PUT DELETE
+/api/resource/#ResourceId/leurons ResourceLeuronsR GET POST
+
+
+
+/api/teams TeamsR GET POST
+/api/team/#TeamId TeamR GET PUT DELETE
+
+
+
+/api/threads ThreadsR GET POST
+/api/thread/#ThreadId ThreadR GET PUT DELETE
+!/api/thread/#Text ThreadH GET
+
+/api/thread_stats ThreadStatsR GET
+/api/thread_stat/#ThreadId ThreadStatR GET
+
+/api/thread_packs ThreadPacksR GET
+/api/thread_pack/#ThreadId ThreadPackR GET
+
+
+
+/api/thread_posts ThreadPostsR GET
+/api/thread_post ThreadPostR0 POST
+/api/thread_post/#ThreadPostId ThreadPostR GET PUT DELETE
+
+/api/thread_post_stats ThreadPostStatsR GET
+/api/thread_post_stat/#ThreadPostId ThreadPostStatR GET
+
+/api/thread_post_packs ThreadPostPacksR GET
+/api/thread_post_pack/#ThreadPostId ThreadPostPackR GET
+
+
+
+/api/thread_post_likes ThreadPostLikesR GET POST
+/api/thread_post_like/#ThreadPostLikeId ThreadPostLikeR GET PUT DELETE
+
+
+
+-- TODO FIXME: Also add non-sanitized versions for admin-hack
+-- TODO FIXME: rename UserBlah to UserSanitizedBlah in handlers/models etc
+/api/users_sanitized UsersR GET POST
+/api/user_sanitized/#UserId UserR GET PUT DELETE
+!/api/user_sanitized/#Text UserH GET
+
+/api/user_sanitized_stats UserStatsR GET
+/api/user_sanitized_stat/#UserId UserStatR GET
+
+/api/user_sanitized_packs UserPacksR GET
+/api/user_sanitized_pack/#UserId UserPackR GET
+!/api/user_sanitized_pack/#Text UserPackH GET
+
+
+
+/api/users_count CountUsersR GET
+/api/threads_count CountThreadsR GET
+/api/thread_posts_count CountThreadPostsR GET

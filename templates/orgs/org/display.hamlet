@@ -1,0 +1,4 @@
+<p>org
+
+<a href=@{OrganizationEditH organization_id}>edit
+<a href=@{OrganizationDeleteH organization_id}>delete

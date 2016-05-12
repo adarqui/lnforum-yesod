@@ -1,0 +1,5 @@
+#!/bin/bash
+
+[ $# -eq 1 ] || { echo 'usage: gets <resource_id>' && exit 1; }
+
+curlx-json resources/$1/leurons -XGET

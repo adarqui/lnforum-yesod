@@ -1,0 +1,1 @@
+$(function(){sessionStorage.poop="hello"})

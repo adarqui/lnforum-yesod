@@ -1,0 +1,10 @@
+#!/bin/bash
+
+[ $# == 4 ] || { echo 'usage: post <title> <description> <source> <author>' && exit 1; }
+
+curlx-json resources -d "{ \
+    \"title\":\"${1}\", \
+    \"desc\":\"${2}\", \
+    \"source\":\"${3}\", \
+    \"author\":[\"${4}\"] \
+  }" -XPOST

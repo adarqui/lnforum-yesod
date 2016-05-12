@@ -1,0 +1,10 @@
+module Handler.CounterSpec (spec) where
+
+import TestImport
+
+spec :: Spec
+spec = withApp $ do
+
+    describe "getCounterR" $ do
+        error "Spec not implemented: getCounterR"
+

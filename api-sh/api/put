@@ -1,0 +1,5 @@
+#!/bin/bash
+
+[ $# == 2 ] || { echo 'usage: post <id> <comment>' && exit 1; }
+
+curlx-json api/$1 -d "{\"comment\":\"${2}\"}" -XPUT

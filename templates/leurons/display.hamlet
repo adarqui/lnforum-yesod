@@ -1,0 +1,4 @@
+<ul .list-group>
+  $forall (Entity leuron_id leuron) <- leurons
+    <li .list-group-item>
+      <a href="@{LeuronDisplayH leuron_id}">#{toPathPiece leuron_id} : #{leuronTypeToTextM leuron}</a>

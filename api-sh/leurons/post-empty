@@ -1,0 +1,18 @@
+#!/bin/bash
+
+[ $# == 3 ] || { echo 'usage: post <resource_id> <title> <description>' && exit 1; }
+
+curlx-json resources/$1/leurons -d "{ \
+    \"data\": { \"tag\": \"LnEmpty\", \"contents\":[] }, \
+    \"title\":\"${2}\", \
+    \"desc\":\"${3}\", \
+    \"section\":null, \
+    \"page\":null, \
+    \"examples\":null, \
+    \"strengths\":null, \
+    \"categories\":[], \
+    \"splits\":null, \
+    \"subs\":null, \
+    \"tags\":null, \
+    \"style\":null
+  }" -XPOST

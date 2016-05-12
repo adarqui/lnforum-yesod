@@ -1,0 +1,10 @@
+<div .page-header>
+  <h1>Resources
+
+<a .btn .btn-info role="button" href="@{ResourcesCreateH}">Create</a>
+
+<ul .list-group>
+  $forall (Entity resource_id resource) <- resources
+    <li .list-group-item>
+      <a href="@{ResourceDisplayH resource_id}">#{resourceTitle resource}</a>
+      <a class="icon" href="@{ResourceDeleteConfirmH resource_id}"><span class="glyphicon glyphicon-trash"></span></span></a>

@@ -1,0 +1,19 @@
+<h1>#{boardName board}
+
+<a href=@{OrganizationForumBoardEditH organization_id forum_id board_id}>edit
+<a href=@{OrganizationForumBoardDeleteH organization_id forum_id board_id}>delete
+
+<a href=@{OrganizationForumBoardsCreateH organization_id forum_id}>create-sub-board
+<a href=@{OrganizationForumBoardThreadsCreateH organization_id forum_id board_id}>create-thread
+
+<h1>Sub-Boards
+
+<ul>
+  $forall (Entity board_id board) <- boards
+    <li><a href="@{OrganizationForumBoardDisplayH organization_id forum_id board_id}">#{boardName board}</a>
+
+<h1>Threads
+
+<ul>
+  $forall (Entity thread_id thread) <- threads
+    <li><a href="@{OrganizationForumBoardThreadDisplayH organization_id forum_id board_id thread_id}">#{threadName thread}</a>
