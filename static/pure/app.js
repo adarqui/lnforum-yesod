@@ -1,1 +1,0 @@
-../../../ln-ui/static/dist/app.js
