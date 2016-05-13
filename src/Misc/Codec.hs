@@ -18,6 +18,7 @@ import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Char8      as BSC
 import           Data.Either                (rights)
 import           Data.Int                   (Int64)
+import           Data.Text                  (Text)
 import           Database.Persist
 import           Database.Persist.Sql       (unSqlBackendKey)
 import           LN.Lib.Codec               as A
