@@ -162,8 +162,13 @@ getThreadPostStatM _ thread_post_id = do
     likes_flat = map (\(Entity _ ThreadPostLike{..}) -> threadPostLikeOpt) likes
   return $ ThreadPostStatResponse {
     threadPostStatResponseThreadPostId = keyToInt64 thread_post_id,
-    threadPostStatResponseLikes = foldl' (+) 0 $ map likeOptToScore64 $ filter (==Like) likes_flat,
-    threadPostStatResponseDislikes = foldl' (+) 0 $ map likeOptToScore64 $ filter (==DontLike) likes_flat,
-    threadPostStatResponseStarred = 0,
-    threadPostStatResponseViews = 0
+    threadPostStatResponseLikes        = fromIntegral $ length $ filter (==Like) likes_flat,
+    threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==Neutral) likes_flat,
+    threadPostStatResponseDislikes     = fromIntegral $ length $ filter (==Dislike) likes_flat,
+    threadPostStatResponseStars        = 0,
+    threadPostStatResponseViews        = 0
   }
+
+    -- threadPostStatResponseLikes = foldl' (+) 0 $ map likeOptToScore64 $ filter (==Like) likes_flat,
+    -- threadPostStatResponseNeutral = foldl' (+) 0 $ map likeOptToScore64 $ filter (==Neutral) likes_flat,
+    -- threadPostStatResponseDislikes = foldl' (+) 0 $ map likeOptToScore64 $ filter (==Dislike) likes_flat,

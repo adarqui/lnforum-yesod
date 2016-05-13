@@ -1,6 +1,6 @@
 module Handler.ThreadPostLike (
   getThreadPostLikesR,
-  postThreadPostLikesR,
+  postThreadPostLikeR0,
   getThreadPostLikeR,
   putThreadPostLikeR,
   deleteThreadPostLikeR
@@ -20,8 +20,8 @@ getThreadPostLikesR = do
 
 
 
-postThreadPostLikesR :: Handler Value
-postThreadPostLikesR = do
+postThreadPostLikeR0 :: Handler Value
+postThreadPostLikeR0 = do
 
   user_id <- requireAuthId
 

@@ -118,8 +118,15 @@
 
 
 
-/api/thread_post_likes ThreadPostLikesR GET POST
+/api/thread_post_likes ThreadPostLikesR GET
+/api/thread_post_like ThreadPostLikeR0 POST
 /api/thread_post_like/#ThreadPostLikeId ThreadPostLikeR GET PUT DELETE
+
+
+
+/api/thread_post_stars ThreadPostStarsR GET
+/api/thread_post_star ThreadPostStarR0 POST
+/api/thread_post_star/#ThreadPostStarId ThreadPostStarR GET PUT DELETE
 
 
 
