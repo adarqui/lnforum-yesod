@@ -42,6 +42,7 @@ library
                      Handler.Thread
                      Handler.ThreadPost
                      Handler.ThreadPostLike
+                     Handler.ThreadPostStar
                      Handler.User
                      Helper.Request
                      Import
@@ -119,6 +120,9 @@ library
                      Model.ThreadPostLike
                      Model.ThreadPostLike.Function
                      Model.ThreadPostLike.Internal
+                     Model.ThreadPostStar
+                     Model.ThreadPostStar.Function
+                     Model.ThreadPostStar.Internal
                      Model.User
                      Model.User.Function
                      Model.User.Internal

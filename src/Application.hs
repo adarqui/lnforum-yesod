@@ -66,6 +66,7 @@ import           Handler.Team
 import           Handler.Thread
 import           Handler.ThreadPost
 import           Handler.ThreadPostLike
+import           Handler.ThreadPostStar
 import           Handler.User
 
 -- This line actually creates our YesodDispatch instance. It is the second half

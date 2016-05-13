@@ -453,6 +453,19 @@ ThreadPostLike
 
 
 
+ThreadPostStar
+  userId       UserId
+  threadPostId ThreadPostId
+  reason       Text Maybe
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueThreadPostStar userId threadPostId
+  deriving Eq Show Typeable
+
+
+
 Pm
   userId      UserId
   toUserId    UserId

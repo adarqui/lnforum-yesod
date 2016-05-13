@@ -42,14 +42,14 @@ getThreadPostLikeM user_id thread_post_like_id = do
 
 
 getThreadPostLike_ByThreadPostM :: UserId -> Entity ThreadPost -> Handler (Maybe (Entity ThreadPostLike))
-getThreadPostLike_ByThreadPostM user_id thread_post@(Entity thread_post_id _) = do
-  selectFirstDb [ ThreadPostLikeThreadPostId ==. thread_post_id ] []
+getThreadPostLike_ByThreadPostM user_id (Entity thread_post_id _) = do
+  selectFirstDb [ ThreadPostLikeThreadPostId ==. thread_post_id, ThreadPostLikeUserId ==. user_id ] []
 
 
 
 getThreadPostLike_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler (Maybe (Entity ThreadPostLike))
 getThreadPostLike_ByThreadPostIdM user_id thread_post_id = do
-  selectFirstDb [ ThreadPostLikeThreadPostId ==. thread_post_id ] []
+  selectFirstDb [ ThreadPostLikeThreadPostId ==. thread_post_id, ThreadPostLikeUserId ==. user_id ] []
 
 
 
