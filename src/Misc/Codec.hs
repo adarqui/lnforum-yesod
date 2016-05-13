@@ -18,8 +18,6 @@ import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Char8      as BSC
 import           Data.Either                (rights)
 import           Data.Int                   (Int64)
-import           Data.Text                  (Text)
-import qualified Data.Text                  as T
 import           Database.Persist
 import           Database.Persist.Sql       (unSqlBackendKey)
 import           LN.Lib.Codec               as A
@@ -71,21 +69,14 @@ int64ToKeys = rights . map (\i64 -> keyFromValues [PersistInt64 i64])
 
 
 
--- keyToInt64 :: ToBackendKey SqlBackend record => Key record -> Int64
-{-
-      keyToInt64 :: forall record.
-                    ToBackendKey
-                      persistent-2.2.4:Database.Persist.Sql.Types.SqlBackend record =>
-                    Key record -> Int64
--}
+-- keyToInt64 :: forall record.
+--              ToBackendKey Database.Persist.Sql.Types.SqlBackend record =>
+--              Key record -> Int64
 keyToInt64 = unSqlBackendKey . toBackendKey
 
 
 
-{-
-      keyToInt64Sbs :: forall record.
-                       ToBackendKey
-                         persistent-2.2.4:Database.Persist.Sql.Types.SqlBackend record =>
-                       Key record -> ByteString
--}
+-- keyToInt64Sbs :: forall record.
+--                 ToBackendKey Database.Persist.Sql.Types.SqlBackend record =>
+--                 Key record -> ByteString
 keyToInt64Sbs = BSC.pack . show . keyToInt64
