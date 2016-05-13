@@ -83,9 +83,6 @@ insertThreadPostM user_id mthread_id mthread_post_id threadPost_request = do
 
   ts <- timestampH'
 
-  liftIO $ print "hello"
-  liftIO $ print mthread_id
-
   let
     thread_post = (threadPostRequestToThreadPost user_id (fromJust mthread_id) mthread_post_id threadPost_request) { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 

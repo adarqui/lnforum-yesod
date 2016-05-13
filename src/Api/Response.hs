@@ -6,7 +6,6 @@ module Api.Response (
 
 
 import Import
-import Data.Text (Text)
 
 
 

@@ -2,7 +2,6 @@ module Misc.Widget (
   addScriptRemoteBustCache
 ) where
 
-import           Data.Text             (Text)
 import qualified Data.Text             as T (pack)
 import           Data.Time.Clock.POSIX (getPOSIXTime)
 import           Import

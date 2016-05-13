@@ -20,14 +20,14 @@ import           Misc.Codec
 -- | ln:users:<users_id>:resources:<resource_id>
 --
 usersResourceKey :: UserId -> ResourceId -> LeuronId -> BSC.ByteString
-usersResourceKey = undefined
+usersResourceKey = error "not implemented"
 
 
 
 -- | ln:users:<users_id>:resources:<resources_id>
 --
 usersResourceLeuronKey :: UserId -> ResourceId -> LeuronId -> BSC.ByteString
-usersResourceLeuronKey = undefined
+usersResourceLeuronKey = error "not implemeneted"
 
 
 

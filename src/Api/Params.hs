@@ -37,7 +37,6 @@ import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import           Import
 import           Misc.Codec
-import           Prelude               (readsPrec)
 import qualified Database.Esqueleto      as E
 -- import           Database.Esqueleto      ((^.))
 import           LN.T.Param

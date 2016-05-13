@@ -14,7 +14,7 @@ import           Yesod.WebSockets
 getSPAR :: Handler Html
 getSPAR = do
 
-  user_id <- requireAuthId
+  void $ requireAuthId
 
   webSockets socketHub
   defaultLayout $ do

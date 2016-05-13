@@ -8,7 +8,7 @@ module Socket (
 import Import
 -- import Yesod.Core
 import Yesod.WebSockets
-import Conduit
+-- import Conduit
 
 
 socketHub :: WebSocketsT Handler ()
