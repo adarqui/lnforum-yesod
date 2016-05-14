@@ -94,18 +94,22 @@ getResourceStatsM _ = do
 
 
 getResourceStatM :: UserId -> ResourceId -> Handler ResourceStatResponse
-getResourceStatM _ thread_post_id = do
+getResourceStatM _ resource_id = do
+
+  -- leuron counts
+  leuron_count <- countDb [ LeuronResourceId ==. resource_id ]
 
   -- get like counts
-  likes <- selectListDb defaultStandardParams [ ResourceLikeResourceId ==. thread_post_id ] [] ResourceLikeId
+  likes <- selectListDb defaultStandardParams [ ResourceLikeResourceId ==. resource_id ] [] ResourceLikeId
 
   -- get star counts
-  stars <- selectListDb defaultStandardParams [ ResourceStarResourceId ==. thread_post_id ] [] ResourceStarId
+  stars <- selectListDb defaultStandardParams [ ResourceStarResourceId ==. resource_id ] [] ResourceStarId
 
   let
     likes_flat = map (\(Entity _ ResourceLike{..}) -> resourceLikeOpt) likes
   return $ ResourceStatResponse {
-    resourceStatResponseResourceId = keyToInt64 thread_post_id,
+    resourceStatResponseResourceId = keyToInt64 resource_id,
+    resourceStatResponseLeurons    = fromIntegral leuron_count,
     resourceStatResponseLikes      = fromIntegral $ length $ filter (==Like) likes_flat,
     resourceStatResponseNeutral    = fromIntegral $ length $ filter (==Neutral) likes_flat,
     resourceStatResponseDislikes   = fromIntegral $ length $ filter (==Dislike) likes_flat,
