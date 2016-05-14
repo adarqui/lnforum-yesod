@@ -35,6 +35,8 @@ library
                      Handler.Profile
                      Handler.Reminder
                      Handler.Resource
+                     Handler.ResourceLike
+                     Handler.ResourceStar
                      Handler.ResourceLeuron
                      Handler.Root
                      Handler.SPA
@@ -108,6 +110,12 @@ library
                      Model.Resource
                      Model.Resource.Function
                      Model.Resource.Internal
+                     Model.ResourceLike
+                     Model.ResourceLike.Function
+                     Model.ResourceLike.Internal
+                     Model.ResourceStar
+                     Model.ResourceStar.Function
+                     Model.ResourceStar.Internal
                      Model.Team
                      Model.Team.Function
                      Model.Team.Internal

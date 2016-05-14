@@ -53,9 +53,8 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
 
   return $ ThreadPostPackResponse {
     threadPostPackResponseThreadPost = threadPostToResponse thread_post,
-    threadPostPackResponseUser = userToSanitizedResponse thread_post_user,
-    threadPostPackResponseStat = thread_post_stat,
-    threadPostPackResponseLike = fmap threadPostLikeToResponse thread_post_like,
-    threadPostPackResponseStar = fmap threadPostStarToResponse thread_post_star
+    threadPostPackResponseUser       = userToSanitizedResponse thread_post_user,
+    threadPostPackResponseStat       = thread_post_stat,
+    threadPostPackResponseLike       = fmap threadPostLikeToResponse thread_post_like,
+    threadPostPackResponseStar       = fmap threadPostStarToResponse thread_post_star
   }
-

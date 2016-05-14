@@ -83,9 +83,33 @@
 
 
 
+
+
 /api/resources ResourcesR GET POST
 /api/resource/#ResourceId ResourceR GET PUT DELETE
 /api/resource/#ResourceId/leurons ResourceLeuronsR GET POST
+
+
+
+/api/resource_stats ResourceStatsR GET
+/api/resource_stat/#ResourceId ResourceStatR GET
+
+
+
+/api/resource_packs ResourcePacksR GET
+/api/resource_pack/#ResourceId ResourcePackR GET
+
+
+
+/api/resource_likes ResourceLikesR GET
+/api/resource_like ResourceLikeR0 POST
+/api/resource_like/#ResourceLikeId ResourceLikeR GET PUT DELETE
+
+
+
+/api/resource_stars ResourceStarsR GET
+/api/resource_star ResourceStarR0 POST
+/api/resource_star/#ResourceStarId ResourceStarR GET PUT DELETE
 
 
 

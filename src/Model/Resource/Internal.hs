@@ -6,6 +6,8 @@ module Model.Resource.Internal (
   insertResourceM,
   updateResourceM,
   deleteResourceM,
+  getResourceStatsM,
+  getResourceStatM
 ) where
 
 
@@ -76,3 +78,37 @@ updateResourceM user_id resource_id resource_request = do
 deleteResourceM :: UserId -> ResourceId -> Handler ()
 deleteResourceM user_id resource_id = do
   deleteWhereDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
+
+
+
+getResourceStatsM :: UserId -> Handler ResourceStatResponse
+getResourceStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spThreadId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+getResourceStatM :: UserId -> ResourceId -> Handler ResourceStatResponse
+getResourceStatM _ thread_post_id = do
+
+  -- get like counts
+  likes <- selectListDb defaultStandardParams [ ResourceLikeResourceId ==. thread_post_id ] [] ResourceLikeId
+
+  -- get star counts
+  stars <- selectListDb defaultStandardParams [ ResourceStarResourceId ==. thread_post_id ] [] ResourceStarId
+
+  let
+    likes_flat = map (\(Entity _ ResourceLike{..}) -> resourceLikeOpt) likes
+  return $ ResourceStatResponse {
+    resourceStatResponseResourceId = keyToInt64 thread_post_id,
+    resourceStatResponseLikes      = fromIntegral $ length $ filter (==Like) likes_flat,
+    resourceStatResponseNeutral    = fromIntegral $ length $ filter (==Neutral) likes_flat,
+    resourceStatResponseDislikes   = fromIntegral $ length $ filter (==Dislike) likes_flat,
+    resourceStatResponseStars      = fromIntegral $ length stars,
+    resourceStatResponseViews      = 0
+  }
