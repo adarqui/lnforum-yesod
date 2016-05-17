@@ -52,11 +52,13 @@ getUserPackBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler UserPackR
 getUserPackBy_UserIdM user_id lookup_user_id _ = do
 
   lookup_user <- getUserM user_id lookup_user_id
-  stats <- getUserStatM user_id lookup_user_id
-  profile <- getProfileBy_UserIdM user_id lookup_user_id
+  stats       <- getUserStatM user_id lookup_user_id
+  profile     <- getProfileBy_UserIdM user_id lookup_user_id
 
   return $ UserPackResponse {
-    userPackResponseUser = userToResponse lookup_user,
-    userPackResponseUserStat = stats,
-    userPackResponseUserProfile = profileToResponse profile
+    userPackResponseUser       = userToResponse lookup_user,
+    userPackResponseUserId     = entityKeyToInt64 lookup_user,
+    userPackResponseStat       = stats,
+    userPackResponseProfile    = profileToResponse profile,
+    userPackResponseProfileId  = entityKeyToInt64 profile
   }
