@@ -51,17 +51,21 @@ getThreadPackM user_id thread_id = do
 getThreadPack_ByThreadM :: UserId -> Entity Thread -> StandardParams -> Handler ThreadPackResponse
 getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
 
-  thread_user <- getUserM user_id threadUserId
-  thread_stats <- getThreadStatM user_id thread_id
+  thread_user   <- getUserM user_id threadUserId
+  thread_stats  <- getThreadStatM user_id thread_id
   mthread_posts <- getThreadPostsBy_ThreadIdM user_id thread_id sp
-  muser <- case (headMay mthread_posts) of
+  muser         <- case (headMay mthread_posts) of
     Nothing -> pure Nothing
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
 
   return $ ThreadPackResponse {
-    threadPackResponseThread = threadToResponse thread,
-    threadPackResponseThreadUser = userToSanitizedResponse thread_user,
-    threadPackResponseThreadStat = thread_stats,
-    threadPackResponseLatestThreadPost = fmap threadPostToResponse $ headMay mthread_posts,
+    threadPackResponseThread               = threadToResponse thread,
+    threadPackResponseThreadId             = keyToInt64 thread_id,
+    threadPackResponseUser                 = userToSanitizedResponse thread_user,
+    threadPackResponseUserId               = entityKeyToInt64 thread_user,
+    threadPackResponseStat                 = thread_stats,
+    threadPackResponseLike                 = Nothing,
+    threadPackResponseStar                 = Nothing,
+    threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay mthread_posts,
     threadPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser
   }

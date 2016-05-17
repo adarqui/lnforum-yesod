@@ -172,3 +172,5 @@
 /api/users_count CountUsersR GET
 /api/threads_count CountThreadsR GET
 /api/thread_posts_count CountThreadPostsR GET
+/api/resources_count CountResourcesR GET
+/api/leurons_count CountLeuronsR GET

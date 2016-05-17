@@ -63,8 +63,11 @@ getBoardPackM user_id board_id = do
 
   return $ BoardPackResponse {
     boardPackResponseBoard = boardToResponse board,
-    boardPackResponseBoardStat = board_stats,
+    boardPackResponseBoardId = keyToInt64 board_id,
+    boardPackResponseStat = board_stats,
     boardPackResponseLatestThread = fmap threadToResponse $ headMay mthreads,
     boardPackResponseLatestThreadPost = fmap threadPostToResponse $ headMay mthread_posts,
-    boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser
+    boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
+    boardPackResponseLike = Nothing,
+    boardPackResponseStar = Nothing
   }

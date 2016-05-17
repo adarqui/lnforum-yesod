@@ -3,7 +3,9 @@ module Handler.Leuron (
   postLeuronsR,
   getLeuronR,
   putLeuronR,
-  deleteLeuronR
+  deleteLeuronR,
+
+  getCountLeuronsR,
 ) where
 
 
@@ -62,3 +64,10 @@ deleteLeuronR leuron_id = do
   user_id <- requireAuthId
   void $ deleteLeuronM user_id leuron_id
   sendResponseStatus status200 ("DELETED" :: Text)
+
+
+
+getCountLeuronsR :: Handler Value
+getCountLeuronsR = do
+  user_id <- requireAuthId
+  toJSON <$> countLeuronsM user_id

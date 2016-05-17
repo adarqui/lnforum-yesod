@@ -60,15 +60,11 @@ import           Handler.PmOut
 import           Handler.Profile
 import           Handler.Reminder
 import           Handler.Resource
-import           Handler.ResourceLike
-import           Handler.ResourceStar
 import           Handler.ResourceLeuron
 import           Handler.SPA
 import           Handler.Team
 import           Handler.Thread
 import           Handler.ThreadPost
-import           Handler.ThreadPostLike
-import           Handler.ThreadPostStar
 import           Handler.User
 
 -- This line actually creates our YesodDispatch instance. It is the second half

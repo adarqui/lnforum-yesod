@@ -10,7 +10,9 @@ module Model.Leuron.Internal (
   getLeuronM,
   insertLeuronM,
   updateLeuronM,
-  deleteLeuronM
+  deleteLeuronM,
+
+  countLeuronsM,
 ) where
 
 
@@ -197,3 +199,16 @@ deleteLeuronR user_id resource_id leuron_id = do
     void $ R.srem (resourcesKey resource_id) [keyToInt64Sbs leuron_id]
 
   return ()
+
+
+
+countLeuronsM :: UserId -> Handler CountResponses
+countLeuronsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case (spUserId, spUserIds) of
+
+    (_, _) -> do
+      n <- countDb [ LeuronActive ==. True ]
+      return $ CountResponses [CountResponse 0 (fromIntegral n)]

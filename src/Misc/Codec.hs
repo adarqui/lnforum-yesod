@@ -9,7 +9,9 @@ module Misc.Codec (
   int64ToKeyMaybe,
   int64ToKeys,
   keyToInt64,
-  keyToInt64Sbs
+  keyToInt64Sbs,
+  entityKeyToInt64,
+  entityKeyToId
 ) where
 
 
@@ -81,3 +83,11 @@ keyToInt64 = unSqlBackendKey . toBackendKey
 --                 ToBackendKey Database.Persist.Sql.Types.SqlBackend record =>
 --                 Key record -> ByteString
 keyToInt64Sbs = BSC.pack . show . keyToInt64
+
+
+
+entityKeyToInt64 = unSqlBackendKey . toBackendKey . entityKey
+
+
+
+entityKeyToId = toBackendKey

@@ -2,10 +2,13 @@
 
 module Model.Resource.Internal (
   getResourcesM,
+  getResourcesBy_EverythingM,
+  getResourcesBy_UserIdM,
   getResourceM,
   insertResourceM,
   updateResourceM,
   deleteResourceM,
+  countResourcesM,
   getResourceStatsM,
   getResourceStatM
 ) where
@@ -19,14 +22,27 @@ import           Model.Resource.Function
 
 getResourcesM :: UserId -> Handler [Entity Resource]
 getResourcesM user_id = do
-  sp <- lookupStandardParams
-  getResourcesBy_EverythingM user_id sp
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case spUserId of
+
+    Just lookup_user_id -> getResourcesBy_UserIdM user_id lookup_user_id sp
+
+    _                   -> getResourcesBy_EverythingM user_id sp
+
+--    (_, Just resource_ids)   -> getResourceBy_ResourceIds user_id resource_ids sp
 
 
 
 getResourcesBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Resource]
 getResourcesBy_EverythingM _ sp = do
   selectListDb sp [] [] ResourceId
+
+
+
+getResourcesBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Resource]
+getResourcesBy_UserIdM user_id lookup_user_id sp = do
+  selectListDb sp [ ResourceUserId ==. lookup_user_id ] [] ResourceId
 
 
 
@@ -78,6 +94,19 @@ updateResourceM user_id resource_id resource_request = do
 deleteResourceM :: UserId -> ResourceId -> Handler ()
 deleteResourceM user_id resource_id = do
   deleteWhereDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
+
+
+
+countResourcesM :: UserId -> Handler CountResponses
+countResourcesM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case (spUserId, spUserIds) of
+
+    (_, _) -> do
+      n <- countDb [ ResourceActive ==. True ]
+      return $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 

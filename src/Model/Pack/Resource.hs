@@ -10,10 +10,6 @@ module Model.Pack.Resource (
 import           Model.Prelude
 import           Model.Resource.Function
 import           Model.Resource.Internal
-import           Model.ResourceLike.Function
-import           Model.ResourceLike.Internal
-import           Model.ResourceStar.Function
-import           Model.ResourceStar.Internal
 import           Model.User.Function
 import           Model.User.Internal2
 
@@ -49,13 +45,17 @@ getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) _
 
   resource_user <- getUserM user_id resourceUserId
   resource_stat <- getResourceStatM user_id resource_id
-  resource_like <- getResourceLike_ByResourceM user_id resource
-  resource_star <- getResourceStar_ByResourceM user_id resource
+--  resource_like <- getResourceLike_ByResourceM user_id resource
+--  resource_star <- getResourceStar_ByResourceM user_id resource
 
   return $ ResourcePackResponse {
-    resourcePackResponseResource = resourceToResponse resource,
-    resourcePackResponseUser     = userToSanitizedResponse resource_user,
-    resourcePackResponseStat     = resource_stat,
-    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
-    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
+    resourcePackResponseResource   = resourceToResponse resource,
+    resourcePackResponseResourceId = keyToInt64 resource_id,
+    resourcePackResponseUser       = userToSanitizedResponse resource_user,
+    resourcePackResponseUserId     = entityKeyToInt64 resource_user,
+    resourcePackResponseStat       = resource_stat,
+    resourcePackResponseLike       = Nothing,
+    resourcePackResponseStar       = Nothing
+--    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
+--    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
   }

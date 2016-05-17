@@ -5,6 +5,8 @@ module Handler.Resource (
   putResourceR,
   deleteResourceR,
 
+  getCountResourcesR,
+
   getResourceStatsR,
   getResourceStatR,
 
@@ -55,6 +57,13 @@ deleteResourceR resource_id = do
   user_id <- requireAuthId
   void $ deleteResourceM user_id resource_id
   sendResponseStatus status200 ("DELETED" :: Text)
+
+
+
+getCountResourcesR :: Handler Value
+getCountResourcesR = do
+  user_id <- requireAuthId
+  toJSON <$> countResourcesM user_id
 
 
 

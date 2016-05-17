@@ -70,30 +70,38 @@ getUsersSanitizedPacksBy_UserIdsM user_id user_ids sp = do
 
 
 getUserSanitizedPackBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler UserSanitizedPackResponse
-getUserSanitizedPackBy_UserIdM user_id lookup_user_id _ = do
+getUserSanitizedPackBy_UserIdM user_id lookup_user_id sp = do
 
   lookup_user <- getUserM user_id lookup_user_id
-  stats <- getUserStatM user_id lookup_user_id
-  profile <- getProfileBy_UserIdM user_id lookup_user_id
-
-  return $ UserSanitizedPackResponse {
-    userSanitizedPackResponseUser = userToSanitizedResponse lookup_user,
-    userSanitizedPackResponseUserStat = stats,
-    userSanitizedPackResponseUserProfile = profileToResponse profile
-  }
+  getUserSanitizedPackBy_UserM user_id lookup_user sp
 
 
 
 
 getUserSanitizedPackBy_UserNickM :: UserId -> Text -> StandardParams -> Handler UserSanitizedPackResponse
-getUserSanitizedPackBy_UserNickM user_id lookup_user_nick _ = do
+getUserSanitizedPackBy_UserNickM user_id lookup_user_nick sp = do
 
-  lookup_user@(Entity lookup_user_id _) <- getUserMH user_id lookup_user_nick
-  stats <- getUserStatM user_id lookup_user_id
-  profile <- getProfileBy_UserIdM user_id lookup_user_id
+  lookup_user <- getUserMH user_id lookup_user_nick
+  getUserSanitizedPackBy_UserM user_id lookup_user sp
+
+
+
+
+getUserSanitizedPackBy_UserM :: UserId -> Entity User -> StandardParams -> Handler UserSanitizedPackResponse
+getUserSanitizedPackBy_UserM user_id lookup_user _ = do
+
+  stats       <- getUserStatM user_id lookup_user_id
+  profile     <- getProfileBy_UserIdM user_id lookup_user_id
 
   return $ UserSanitizedPackResponse {
-    userSanitizedPackResponseUser = userToSanitizedResponse lookup_user,
-    userSanitizedPackResponseUserStat = stats,
-    userSanitizedPackResponseUserProfile = profileToResponse profile
+    userSanitizedPackResponseUser      = userToSanitizedResponse lookup_user,
+    userSanitizedPackResponseUserId    = keyToInt64 lookup_user_id,
+    userSanitizedPackResponseStat      = stats,
+    userSanitizedPackResponseLike      = Nothing,
+    userSanitizedPackResponseStar      = Nothing,
+    userSanitizedPackResponseProfile   = profileToResponse profile,
+    userSanitizedPackResponseProfileId = entityKeyToInt64 profile
   }
+
+  where
+  lookup_user_id  = entityKey lookup_user
