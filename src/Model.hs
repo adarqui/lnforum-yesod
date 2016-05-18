@@ -2,10 +2,11 @@ module Model where
 
 
 
-import ClassyPrelude.Yesod
-import Database.Persist.Quasi
-import Model.Like.DerivePersist
-import Model.Profile.DerivePersist
+import           ClassyPrelude.Yesod
+import           Database.Persist.Quasi
+import           Model.Like.DerivePersist
+import           Model.Profile.DerivePersist
+import           Model.Ent.DerivePersist
 
 
 

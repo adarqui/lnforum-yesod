@@ -566,3 +566,19 @@ PmOut
   UniquePmOut userId pmId
 
   deriving Eq Show Typeable
+
+
+
+Like
+  userId       UserId
+  ent          Ent
+  entId        Int64
+  opt          LikeOpt
+  score        Int
+  reason       Text Maybe
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueLike userId ent entId
+  deriving Eq Show Typeable

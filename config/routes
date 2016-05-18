@@ -43,6 +43,13 @@
 
 
 
+/api/likes LikesR GET
+/api/like LikeR0 POST
+/api/like/#LikeId LikeR GET PUT DELETE
+
+
+
+
 /api/me MeR GET
 /api/me_pack MePackR GET
 
@@ -101,15 +108,17 @@
 
 
 
-/api/resource_likes ResourceLikesR GET
-/api/resource_like ResourceLikeR0 POST
-/api/resource_like/#ResourceLikeId ResourceLikeR GET PUT DELETE
+-- TODO FIXME
+-- /api/resource_likes ResourceLikesR GET
+-- /api/resource_like ResourceLikeR0 POST
+-- /api/resource_like/#ResourceLikeId ResourceLikeR GET PUT DELETE
 
 
 
-/api/resource_stars ResourceStarsR GET
-/api/resource_star ResourceStarR0 POST
-/api/resource_star/#ResourceStarId ResourceStarR GET PUT DELETE
+-- TODO FIXME
+-- /api/resource_stars ResourceStarsR GET
+-- /api/resource_star ResourceStarR0 POST
+-- /api/resource_star/#ResourceStarId ResourceStarR GET PUT DELETE
 
 
 
@@ -142,15 +151,17 @@
 
 
 
-/api/thread_post_likes ThreadPostLikesR GET
-/api/thread_post_like ThreadPostLikeR0 POST
-/api/thread_post_like/#ThreadPostLikeId ThreadPostLikeR GET PUT DELETE
+-- TODO FIXME
+-- /api/thread_post_likes ThreadPostLikesR GET
+-- /api/thread_post_like ThreadPostLikeR0 POST
+-- /api/thread_post_like/#ThreadPostLikeId ThreadPostLikeR GET PUT DELETE
 
 
 
-/api/thread_post_stars ThreadPostStarsR GET
-/api/thread_post_star ThreadPostStarR0 POST
-/api/thread_post_star/#ThreadPostStarId ThreadPostStarR GET PUT DELETE
+-- TODO FIXME
+-- /api/thread_post_stars ThreadPostStarsR GET
+-- /api/thread_post_star ThreadPostStarR0 POST
+-- /api/thread_post_star/#ThreadPostStarId ThreadPostStarR GET PUT DELETE
 
 
 

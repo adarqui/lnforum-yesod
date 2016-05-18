@@ -18,6 +18,7 @@ module Model.ThreadPost.Internal (
 
 
 
+import qualified LN.T.Like                 as L
 import           Model.Prelude
 import           Model.ThreadPost.Function
 
@@ -164,9 +165,9 @@ getThreadPostStatM _ thread_post_id = do
     likes_flat = map (\(Entity _ ThreadPostLike{..}) -> threadPostLikeOpt) likes
   return $ ThreadPostStatResponse {
     threadPostStatResponseThreadPostId = keyToInt64 thread_post_id,
-    threadPostStatResponseLikes        = fromIntegral $ length $ filter (==Like) likes_flat,
-    threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==Neutral) likes_flat,
-    threadPostStatResponseDislikes     = fromIntegral $ length $ filter (==Dislike) likes_flat,
+    threadPostStatResponseLikes        = fromIntegral $ length $ filter (==L.Like) likes_flat,
+    threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==L.Neutral) likes_flat,
+    threadPostStatResponseDislikes     = fromIntegral $ length $ filter (==L.Dislike) likes_flat,
     threadPostStatResponseStars        = fromIntegral $ length stars,
     threadPostStatResponseViews        = 0
   }

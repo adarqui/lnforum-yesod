@@ -27,6 +27,7 @@ library
                      Handler.Empty
                      Handler.Forum
                      Handler.Leuron
+                     Handler.Like
                      Handler.Me
                      Handler.Organization
                      Handler.Pm
@@ -61,6 +62,7 @@ library
                      Model.Empty
                      Model.Empty.Function
                      Model.Empty.Internal
+                     Model.Ent.DerivePersist
                      Model.Forum
                      Model.Forum.Function
                      Model.Forum.Internal
@@ -71,6 +73,8 @@ library
                      Model.Leuron.Internal
                      Model.Like
                      Model.Like.DerivePersist
+                     Model.Like.Function
+                     Model.Like.Internal
                      Model.Me
                      Model.Me.Internal
                      Model.Misc

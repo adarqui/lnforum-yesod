@@ -6,9 +6,5 @@ module Model.Like (
 
 
 
-import           Database.Persist.TH
-import           LN.T.Like           as A
-
-
-
-derivePersistField "LikeOpt"
+import           Model.Like.Function as A
+import           Model.Like.Internal as A

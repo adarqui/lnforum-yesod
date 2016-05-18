@@ -52,6 +52,7 @@ import           Handler.Common
 import           Handler.Empty
 import           Handler.Forum
 import           Handler.Leuron
+import           Handler.Like
 import           Handler.Me
 import           Handler.Organization
 import           Handler.Pm

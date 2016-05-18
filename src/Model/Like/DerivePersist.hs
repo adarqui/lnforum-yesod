@@ -1,13 +1,13 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Model.Like.DerivePersist (
-  module A
+  LikeOpt
 ) where
 
 
 
 import           Database.Persist.TH
-import           LN.T.Like           as A
+import           LN.T.Like
 
 
 

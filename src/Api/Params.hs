@@ -1,6 +1,7 @@
 {-# LANGUAGE ExplicitForAll  #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators   #-}
+{-# LANGUAGE ViewPatterns    #-}
 
 module Api.Params (
   StandardParams (..),
@@ -10,6 +11,9 @@ module Api.Params (
   lookupGetParam401,
   lookupGetParam403,
   lookupGetParam404,
+  lookupEntity,
+  lookupLikeEntity,
+  lookupStarEntity,
   spToSelect,
   spToSelectE,
   selectListDb,
@@ -40,6 +44,7 @@ import           Misc.Codec
 import qualified Database.Esqueleto      as E
 -- import           Database.Esqueleto      ((^.))
 import           LN.T.Param
+import           LN.T.Entity (Ent(..))
 
 
 
@@ -257,6 +262,52 @@ lookupGetParamStatus status param = do
 -- , permissionDeniedI
 -- , invalidArgs
 -- , invalidArgsI
+
+
+
+
+lookupEntity :: StandardParams -> Maybe (Ent, Int64)
+lookupEntity (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
+lookupEntity (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
+lookupEntity (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
+lookupEntity (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
+lookupEntity (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
+lookupEntity (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
+lookupEntity (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
+lookupEntity (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
+lookupEntity (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
+-- lookupEntity (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
+-- lookupEntity (spLikeId -> Just v)         = Just (Ent_Like, keyToInt64 v)
+-- lookupEntity (spStarId -> Just v)         = Just (Ent_Star, keyToInt64 v)
+lookupEntity _                            = Nothing
+
+
+
+
+lookupLikeEntity :: StandardParams -> Maybe (Ent, Int64)
+lookupLikeEntity (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
+lookupLikeEntity (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
+lookupLikeEntity (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
+lookupLikeEntity (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
+-- lookupLikeEntity (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
+lookupLikeEntity _                            = Nothing
+
+
+
+
+lookupStarEntity :: StandardParams -> Maybe (Ent, Int64)
+lookupStarEntity (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
+lookupStarEntity (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
+lookupStarEntity (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
+lookupStarEntity (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
+lookupStarEntity (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
+lookupStarEntity (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
+lookupStarEntity (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
+lookupStarEntity (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
+lookupStarEntity (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
+-- lookupStarEntity (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
+lookupStarEntity _                            = Nothing
+
 
 
 

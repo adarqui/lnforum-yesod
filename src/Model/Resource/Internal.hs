@@ -15,6 +15,7 @@ module Model.Resource.Internal (
 
 
 
+import qualified LN.T.Like               as L
 import           Model.Prelude
 import           Model.Resource.Function
 
@@ -139,9 +140,9 @@ getResourceStatM _ resource_id = do
   return $ ResourceStatResponse {
     resourceStatResponseResourceId = keyToInt64 resource_id,
     resourceStatResponseLeurons    = fromIntegral leuron_count,
-    resourceStatResponseLikes      = fromIntegral $ length $ filter (==Like) likes_flat,
-    resourceStatResponseNeutral    = fromIntegral $ length $ filter (==Neutral) likes_flat,
-    resourceStatResponseDislikes   = fromIntegral $ length $ filter (==Dislike) likes_flat,
+    resourceStatResponseLikes      = fromIntegral $ length $ filter (==L.Like) likes_flat,
+    resourceStatResponseNeutral    = fromIntegral $ length $ filter (==L.Neutral) likes_flat,
+    resourceStatResponseDislikes   = fromIntegral $ length $ filter (==L.Dislike) likes_flat,
     resourceStatResponseStars      = fromIntegral $ length stars,
     resourceStatResponseViews      = 0
   }

@@ -6,4 +6,4 @@ module Handler.Prelude (
 
 import           Api.Params as A
 import           Import     as A
-import           LN.T       as A
+import           LN.T       as A hiding (LikeOpt(..))
