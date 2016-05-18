@@ -1,6 +1,7 @@
 module Model.Pack.Forum (
   getForumPacksM,
-  getForumPackM
+  getForumPackM,
+  getForumPackMH,
 ) where
 
 
@@ -24,6 +25,22 @@ getForumPacksM user_id = do
 
 
 
+getForumPackM :: UserId -> ForumId -> Handler ForumPackResponse
+getForumPackM user_id forum_id = do
+
+  forum         <- getForumM user_id forum_id
+  getForumPack_ByForumM user_id forum
+
+
+
+getForumPackMH :: UserId -> Text -> Handler ForumPackResponse
+getForumPackMH user_id forum_name = do
+
+  forum         <- getForumMH user_id forum_name
+  getForumPack_ByForumM user_id forum
+
+
+
 getForumPacksBy_OrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler ForumPackResponses
 getForumPacksBy_OrganizationIdM user_id org_id sp = do
 
@@ -43,14 +60,6 @@ getForumPacksBy_OrganizationNameM user_id org_name sp = do
   return $ ForumPackResponses {
     forumPackResponses = forums_packs
   }
-
-
-
-getForumPackM :: UserId -> ForumId -> Handler ForumPackResponse
-getForumPackM user_id forum_id = do
-
-  forum         <- getForumM user_id forum_id
-  getForumPack_ByForumM user_id forum
 
 
 

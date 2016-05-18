@@ -4,16 +4,23 @@ module Handler.Organization (
   getOrganizationR,
   getOrganizationH,
   putOrganizationR,
-  putOrganizationH,
   deleteOrganizationR,
-  deleteOrganizationH,
+
   getOrganizationCountR,
+
+  getOrganizationStatsR,
+  getOrganizationStatR,
+
+  getOrganizationPacksR,
+  getOrganizationPackR,
+  getOrganizationPackH,
 ) where
 
 
 
 import           Handler.Prelude
 import           Model.Organization
+import           Model.Pack.Organization
 
 
 
@@ -67,12 +74,6 @@ putOrganizationR organization_id = do
 
 
 
-putOrganizationH :: Text -> Handler Value
-putOrganizationH _ = do
-  sendResponseStatus status200 ("ok." :: Text)
-
-
-
 deleteOrganizationR :: OrganizationId -> Handler Value
 deleteOrganizationR organization_id = do
   user_id <- requireAuthId
@@ -80,13 +81,43 @@ deleteOrganizationR organization_id = do
   sendResponseStatus status200 ("DELETED" :: Text)
 
 
-deleteOrganizationH :: Text -> Handler Value
-deleteOrganizationH _ = do
-  sendResponseStatus status200 ("ok." :: Text)
-
-
 
 getOrganizationCountR :: Handler Value
 getOrganizationCountR = do
   user_id <- requireAuthId
   toJSON <$> countOrganizationsM user_id
+
+
+
+getOrganizationStatsR :: Handler Value
+getOrganizationStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationStatsM user_id
+
+
+
+getOrganizationStatR :: OrganizationId -> Handler Value
+getOrganizationStatR organization_id = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationStatM user_id organization_id
+
+
+
+getOrganizationPacksR :: Handler Value
+getOrganizationPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPacksM user_id
+
+
+
+getOrganizationPackR :: OrganizationId -> Handler Value
+getOrganizationPackR organization_id = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackM user_id organization_id
+
+
+
+getOrganizationPackH :: Text -> Handler Value
+getOrganizationPackH org_name = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackMH user_id org_name

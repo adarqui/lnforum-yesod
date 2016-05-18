@@ -13,6 +13,7 @@ module Handler.Forum (
 
   getForumPacksR,
   getForumPackR,
+  getForumPackH
 ) where
 
 
@@ -107,3 +108,10 @@ getForumPackR :: ForumId -> Handler Value
 getForumPackR forum_id = do
   user_id <- requireAuthId
   toJSON <$> getForumPackM user_id forum_id
+
+
+
+getForumPackH :: Text -> Handler Value
+getForumPackH forum_name = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPackMH user_id forum_name

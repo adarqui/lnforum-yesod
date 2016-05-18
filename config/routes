@@ -29,6 +29,7 @@
 
 /api/forum_packs ForumPacksR GET
 /api/forum_pack/#ForumId ForumPackR GET
+!/api/forum_pack/#Text ForumPackH GET
 
 
 
@@ -41,6 +42,7 @@
 
 /api/board_packs BoardPacksR GET
 /api/board_pack/#BoardId BoardPackR GET
+!/api/board_pack/#Text BoardPackH GET
 
 
 
@@ -62,7 +64,15 @@
 
 /api/organizations OrganizationsR GET POST
 /api/organization/#OrganizationId OrganizationR GET PUT DELETE
-!/api/organization/#Text OrganizationH GET PUT DELETE
+!/api/organization/#Text OrganizationH GET
+
+/api/organization_stats OrganizationStatsR GET
+/api/organization_stat/#OrganizationId OrganizationStatR GET
+
+/api/organization_packs OrganizationPacksR GET
+/api/organization_pack/#OrganizationId OrganizationPackR GET
+!/api/organization_pack/#Text OrganizationPackH GET
+
 
 
 /api/pms PmsR GET POST

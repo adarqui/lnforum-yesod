@@ -10,7 +10,8 @@ module Handler.Board (
   getBoardStatR,
 
   getBoardPacksR,
-  getBoardPackR
+  getBoardPackR,
+  getBoardPackH
 ) where
 
 
@@ -98,3 +99,10 @@ getBoardPackR :: BoardId -> Handler Value
 getBoardPackR board_id = do
   user_id <- requireAuthId
   toJSON <$> getBoardPackM user_id board_id
+
+
+
+getBoardPackH :: Text -> Handler Value
+getBoardPackH board_name = do
+  user_id <- requireAuthId
+  toJSON <$> getBoardPackMH user_id board_name

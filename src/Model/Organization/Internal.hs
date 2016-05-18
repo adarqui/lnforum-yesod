@@ -18,6 +18,9 @@ module Model.Organization.Internal (
   deleteOrganizationTeamsM,
 
   countOrganizationsM,
+
+  getOrganizationStatsM,
+  getOrganizationStatM,
 ) where
 
 
@@ -154,3 +157,32 @@ countOrganizationsM _ = do
     Nothing -> do
       n <- countDb [ OrganizationActive ==. True ]
       return $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+
+getOrganizationStatsM :: UserId -> Handler OrganizationStatResponses
+getOrganizationStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spBoardId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+
+getOrganizationStatM :: UserId -> OrganizationId -> Handler OrganizationStatResponse
+getOrganizationStatM _ organization_id = do
+
+  return $ OrganizationStatResponse {
+    organizationStatResponseOrganizationId = keyToInt64 organization_id,
+    organizationStatResponseTeams          = 0,
+    organizationStatResponseMembers        = 0,
+    organizationStatResponseForums         = 0,
+    organizationStatResponseBoards         = 0,
+    organizationStatResponseThreads        = 0,
+    organizationStatResponseThreadPosts    = 0,
+    organizationStatResponseViews          = 0
+  }
