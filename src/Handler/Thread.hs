@@ -13,6 +13,7 @@ module Handler.Thread (
 
   getThreadPacksR,
   getThreadPackR,
+  getThreadPackH,
 ) where
 
 
@@ -109,3 +110,10 @@ getThreadPackR :: ThreadId -> Handler Value
 getThreadPackR thread_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadPackM user_id thread_id
+
+
+
+getThreadPackH :: Text -> Handler Value
+getThreadPackH thread_name = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPackMH user_id thread_name

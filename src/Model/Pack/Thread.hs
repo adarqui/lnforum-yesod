@@ -1,6 +1,7 @@
 module Model.Pack.Thread (
   getThreadPacksM,
-  getThreadPackM
+  getThreadPackM,
+  getThreadPackMH,
 ) where
 
 
@@ -27,6 +28,27 @@ getThreadPacksM user_id = do
 
 
 
+getThreadPackM :: UserId -> ThreadId -> Handler ThreadPackResponse
+getThreadPackM user_id thread_id = do
+
+  sp <- lookupStandardParams
+
+  thread <- getThreadM user_id thread_id
+  getThreadPack_ByThreadM user_id thread (sp { spLimit = Just 1 })
+
+
+
+getThreadPackMH :: UserId -> Text -> Handler ThreadPackResponse
+getThreadPackMH user_id thread_name = do
+
+  sp <- lookupStandardParams
+
+  thread <- getThreadMH user_id thread_name
+  getThreadPack_ByThreadM user_id thread (sp { spLimit = Just 1 })
+
+
+
+
 getThreadPacksBy_BoardIdM :: UserId -> BoardId -> StandardParams -> Handler ThreadPackResponses
 getThreadPacksBy_BoardIdM user_id board_id sp = do
 
@@ -35,16 +57,6 @@ getThreadPacksBy_BoardIdM user_id board_id sp = do
   return $ ThreadPackResponses {
     threadPackResponses = threads_packs
   }
-
-
-
-getThreadPackM :: UserId -> ThreadId -> Handler ThreadPackResponse
-getThreadPackM user_id thread_id = do
-
-  sp <- lookupStandardParams
-
-  thread <- getThreadM user_id thread_id
-  getThreadPack_ByThreadM user_id thread (sp { spLimit = Just 1 })
 
 
 

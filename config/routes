@@ -151,6 +151,7 @@
 
 /api/thread_packs ThreadPacksR GET
 /api/thread_pack/#ThreadId ThreadPackR GET
+!/api/thread_pack/#Text ThreadPackH GET
 
 
 
