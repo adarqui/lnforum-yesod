@@ -4,12 +4,21 @@ module Handler.Forum (
   getForumR,
   getForumH,
   putForumR,
-  deleteForumR
+  deleteForumR,
+
+  getCountForumsR,
+
+  getForumStatsR,
+  getForumStatR,
+
+  getForumPacksR,
+  getForumPackR,
 ) where
 
 
 import           Handler.Prelude
 import           Model.Forum
+import           Model.Pack.Forum
 
 
 
@@ -58,10 +67,43 @@ putForumR forum_id = do
 
 
 
--- | /forums/<id> -----------------------------
---
 deleteForumR :: ForumId -> Handler Value
 deleteForumR forum_id = do
   user_id <- requireAuthId
   void $ deleteForumM user_id forum_id
   sendResponseStatus status200 ("DELETED" :: Text)
+
+
+
+getCountForumsR :: Handler Value
+getCountForumsR = do
+  user_id <- requireAuthId
+  toJSON <$> countForumsM user_id
+
+
+
+getForumStatsR :: Handler Value
+getForumStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getForumStatsM user_id
+
+
+
+getForumStatR :: ForumId -> Handler Value
+getForumStatR forum_id = do
+  user_id <- requireAuthId
+  toJSON <$> getForumStatM user_id forum_id
+
+
+
+getForumPacksR :: Handler Value
+getForumPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPacksM user_id
+
+
+
+getForumPackR :: ForumId -> Handler Value
+getForumPackR forum_id = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPackM user_id forum_id

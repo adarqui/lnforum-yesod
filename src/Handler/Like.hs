@@ -15,16 +15,6 @@ import           Model.Like
 
 
 
-{-
-getThreadPostLikes :: Handler Value
-getThreadPostLikes = getLikesR Ent_ThreadPost
-
-postThreadPostLikesR :: Handler Value
-postThreadPostLikesR = postLikesR Ent_ThreadPost
--}
-
-
-
 getLikesR :: Handler Value
 getLikesR = do
   user_id <- requireAuthId

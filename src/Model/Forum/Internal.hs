@@ -3,6 +3,7 @@
 module Model.Forum.Internal (
   getForumsM,
   getForumsBy_OrganizationIdM,
+  getForumsBy_OrganizationId_KeysM,
   getForumsBy_OrganizationNameM,
   getForumsBy_UserIdM,
   getForumsBy_UserNickM,
@@ -15,6 +16,11 @@ module Model.Forum.Internal (
   insertForumM,
   updateForumM,
   deleteForumM,
+
+  countForumsM,
+
+  getForumStatsM,
+  getForumStatM,
 ) where
 
 
@@ -49,6 +55,14 @@ getForumsBy_OrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Han
 getForumsBy_OrganizationIdM _ org_id sp = do
 
   selectListDb sp [ForumOrgId ==. org_id] [] ForumId
+
+
+
+getForumsBy_OrganizationId_KeysM :: UserId -> OrganizationId -> StandardParams -> Handler [Key Forum]
+getForumsBy_OrganizationId_KeysM _ org_id sp = do
+
+  selectKeysListDb sp [ForumOrgId ==. org_id] [] ForumId
+
 
 
 
@@ -143,3 +157,46 @@ updateForumM user_id forum_id forum_request = do
 deleteForumM :: UserId -> ForumId -> Handler ()
 deleteForumM user_id forum_id = do
   deleteWhereDb [ ForumUserId ==. user_id, ForumId ==. forum_id ]
+
+
+
+countForumsM :: UserId -> Handler CountResponses
+countForumsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spOrganizationId of
+
+    Nothing -> notFound
+
+    Just org_id -> do
+      n <- countDb [ ForumOrgId ==. org_id ]
+      return $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
+
+
+
+getForumStatsM :: UserId -> Handler ForumStatResponses
+getForumStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spBoardId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+
+getForumStatM :: UserId -> ForumId -> Handler ForumStatResponse
+getForumStatM _ forum_id = do
+
+  num_forum_boards <- countDb [ BoardForumId ==. forum_id ]
+
+  return $ ForumStatResponse {
+    forumStatResponseForumId     = keyToInt64 forum_id,
+    forumStatResponseBoards      = fromIntegral $ num_forum_boards,
+    forumStatResponseThreads     = 0, -- TODO FIXME
+    forumStatResponseThreadPosts = 0, -- TODO FIXME
+    forumStatResponseViews       = 0
+  }

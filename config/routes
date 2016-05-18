@@ -24,6 +24,12 @@
 /api/forum/#ForumId ForumR GET PUT DELETE
 !/api/forum/#Text ForumH GET
 
+/api/forum_stats ForumStatsR GET
+/api/forum_stat/#ForumId ForumStatR GET
+
+/api/forum_packs ForumPacksR GET
+/api/forum_pack/#ForumId ForumPackR GET
+
 
 
 /api/boards BoardsR GET POST
