@@ -67,12 +67,14 @@ getLeuronsBy_EverythingM _ sp = do
 
 getLeuronsIdsM :: UserId -> ResourceId -> Handler [LeuronId]
 getLeuronsIdsM _ resource_id = do
+
   selectKeysListDb' [ LeuronResourceId ==. resource_id ] [] LeuronId
 
 
 
 getLeuronM :: UserId -> LeuronId -> Handler (Entity Leuron)
 getLeuronM _ leuron_id = do
+
   notFoundMaybe =<< selectFirstDb [ LeuronId ==. leuron_id ] []
 
 
@@ -116,19 +118,19 @@ updateLeuronM user_id leuron_id leuron_request = do
 
   updateWhereDb
     [ LeuronUserId ==. user_id, LeuronId ==. leuron_id ]
-    [ LeuronModifiedAt =. leuronModifiedAt
-    , LeuronData =. leuronData
-    , LeuronTitle =. leuronTitle
-    , LeuronDescription =. leuronDescription
-    , LeuronSection =. leuronSection
-    , LeuronPage =. leuronPage
-    , LeuronExamples =. leuronExamples
-    , LeuronStrengths =. leuronStrengths
+    [ LeuronModifiedAt    =. leuronModifiedAt
+    , LeuronData          =. leuronData
+    , LeuronTitle         =. leuronTitle
+    , LeuronDescription   =. leuronDescription
+    , LeuronSection       =. leuronSection
+    , LeuronPage          =. leuronPage
+    , LeuronExamples      =. leuronExamples
+    , LeuronStrengths     =. leuronStrengths
 --    , LeuronCategories =.
-    , LeuronSplits =. leuronSplits
+    , LeuronSplits        =. leuronSplits
     , LeuronSubstitutions =. leuronSubstitutions
-    , LeuronTags =. leuronTags
-    , LeuronStyle =. leuronStyle
+    , LeuronTags          =. leuronTags
+    , LeuronStyle         =. leuronStyle
     ]
 
   notFoundMaybe =<< selectFirstDb [ LeuronUserId ==. user_id, LeuronId ==. leuron_id ] []
@@ -235,9 +237,6 @@ getLeuronStatsM _ = do
 
 getLeuronStatM :: UserId -> LeuronId -> Handler LeuronStatResponse
 getLeuronStatM _ leuron_id = do
-
--- likes <- selectListDb defaultStandardParams [
--- stars <-
 
   return $ LeuronStatResponse {
     leuronStatResponseLeuronId    = keyToInt64 leuron_id,

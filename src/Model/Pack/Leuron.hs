@@ -49,8 +49,8 @@ getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
 --  leuron_star <- getLeuronStar_ByLeuronM user_id leuron
 
   return $ LeuronPackResponse {
-    leuronPackResponseLeuron   = leuronToResponse leuron,
-    leuronPackResponseLeuronId = keyToInt64 leuron_id,
+    leuronPackResponseLeuron     = leuronToResponse leuron,
+    leuronPackResponseLeuronId   = keyToInt64 leuron_id,
     leuronPackResponseUser       = userToSanitizedResponse leuron_user,
     leuronPackResponseUserId     = entityKeyToInt64 leuron_user,
     leuronPackResponseStat       = leuron_stat,
