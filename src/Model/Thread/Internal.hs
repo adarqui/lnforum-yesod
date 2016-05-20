@@ -234,4 +234,3 @@ getThreadStatM _ thread_id = do
     threadStatResponseThreadPosts = fromIntegral $ num_thread_posts,
     threadStatResponseViews = 0
   }
-

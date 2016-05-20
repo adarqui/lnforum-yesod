@@ -13,19 +13,24 @@ module Model.Leuron.Internal (
   deleteLeuronM,
 
   countLeuronsM,
+
+  getLeuronStatsM,
+  getLeuronStatM
 ) where
 
 
 
-import           Model.Prelude
-import qualified Database.Redis         as R
+import qualified Database.Redis        as R
+import qualified LN.T.Like             as L
 import           Model.Leuron.Function
+import           Model.Prelude
 
 
 
 
-getLeuronsM :: UserId -> Maybe ResourceId -> Handler [Entity Leuron]
-getLeuronsM user_id _ = do
+
+getLeuronsM :: UserId -> Handler [Entity Leuron]
+getLeuronsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
@@ -212,3 +217,33 @@ countLeuronsM _ = do
     (_, _) -> do
       n <- countDb [ LeuronActive ==. True ]
       return $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+
+getLeuronStatsM :: UserId -> Handler LeuronStatResponses
+getLeuronStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spBoardId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+
+getLeuronStatM :: UserId -> LeuronId -> Handler LeuronStatResponse
+getLeuronStatM _ leuron_id = do
+
+-- likes <- selectListDb defaultStandardParams [
+-- stars <-
+
+  return $ LeuronStatResponse {
+    leuronStatResponseLeuronId    = keyToInt64 leuron_id,
+    leuronStatResponseLikes       = 0,
+    leuronStatResponseNeutral     = 0,
+    leuronStatResponseDislikes    = 0,
+    leuronStatResponseStars       = 0,
+    leuronStatResponseViews       = 0
+  }

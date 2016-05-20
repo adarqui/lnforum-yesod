@@ -36,7 +36,6 @@ library
                      Handler.Profile
                      Handler.Reminder
                      Handler.Resource
-                     Handler.ResourceLeuron
                      Handler.Root
                      Handler.SPA
                      Handler.Team
@@ -91,6 +90,7 @@ library
                      Model.Pack.Thread
                      Model.Pack.ThreadPost
                      Model.Pack.Resource
+                     Model.Pack.Leuron
                      Model.Pm
                      Model.Pm.Function
                      Model.Pm.Internal

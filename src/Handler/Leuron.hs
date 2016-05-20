@@ -6,6 +6,12 @@ module Handler.Leuron (
   deleteLeuronR,
 
   getCountLeuronsR,
+
+  getLeuronStatsR,
+  getLeuronStatR,
+
+  getLeuronPacksR,
+  getLeuronPackR,
 ) where
 
 
@@ -13,16 +19,16 @@ module Handler.Leuron (
 import           Import
 import           Api.Params
 import           Model.Leuron
+import           Model.Pack.Leuron
 
 
 
 getLeuronsR :: Handler Value
 getLeuronsR = do
+
   user_id <- requireAuthId
 
-  sp <- lookupStandardParams
-
-  (toJSON . leuronsToResponses) <$> getLeuronsM user_id (spResourceId sp)
+  (toJSON . leuronsToResponses) <$> getLeuronsM user_id
 
 
 
@@ -71,3 +77,31 @@ getCountLeuronsR :: Handler Value
 getCountLeuronsR = do
   user_id <- requireAuthId
   toJSON <$> countLeuronsM user_id
+
+
+
+getLeuronStatsR :: Handler Value
+getLeuronStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronStatsM user_id
+
+
+
+getLeuronStatR :: LeuronId -> Handler Value
+getLeuronStatR leuron_id = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronStatM user_id leuron_id
+
+
+
+getLeuronPacksR :: Handler Value
+getLeuronPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronPacksM user_id
+
+
+
+getLeuronPackR :: LeuronId -> Handler Value
+getLeuronPackR leuron_id = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronPackM user_id leuron_id

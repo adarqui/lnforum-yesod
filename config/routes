@@ -49,6 +49,12 @@
 /api/leurons LeuronsR GET POST
 /api/leuron/#LeuronId LeuronR GET PUT DELETE
 
+/api/leuron_stats LeuronStatsR GET
+/api/leuron_stat/#LeuronId LeuronStatR GET
+
+/api/leuron_packs LeuronPacksR GET
+/api/leuron_pack/#LeuronId LeuronPackR GET
+
 
 
 /api/likes LikesR GET
@@ -108,8 +114,8 @@
 
 
 /api/resources ResourcesR GET POST
-/api/resource/#ResourceId ResourceR GET PUT DELETE
-/api/resource/#ResourceId/leurons ResourceLeuronsR GET POST
+-- /api/resource/#ResourceId ResourceR GET PUT DELETE
+-- /api/resource/#ResourceId/leurons ResourceLeuronsR GET POST
 
 
 

@@ -61,7 +61,6 @@ import           Handler.PmOut
 import           Handler.Profile
 import           Handler.Reminder
 import           Handler.Resource
-import           Handler.ResourceLeuron
 import           Handler.SPA
 import           Handler.Team
 import           Handler.Thread
