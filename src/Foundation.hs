@@ -156,8 +156,10 @@ instance Yesod App where
 whenSSL :: (a -> a) -> (a -> a)
 whenSSL f = if (appForceSSL compileTimeAppSettings) then f else id
 
+-- | A session timeout of 1 week.. stop annoying me
+--
 sessionTimeout :: Int
-sessionTimeout = 120
+sessionTimeout = 10080
 
 -- How to run database actions.
 instance YesodPersist App where
