@@ -3,6 +3,7 @@
 module Model.Leuron.Internal (
   getLeuronsM,
   getLeuronsBy_ResourceIdM,
+  getLeuronsBy_ResourceId_RandomM,
   getLeuronsBy_UserIdM,
   getLeuronsBy_EverythingM,
 
@@ -20,6 +21,8 @@ module Model.Leuron.Internal (
 
 
 
+import           Database.Esqueleto    ((^.))
+import qualified Database.Esqueleto    as E
 import qualified Database.Redis        as R
 import qualified LN.T.Like             as L
 import           Model.Leuron.Function
@@ -34,13 +37,31 @@ getLeuronsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case (spResourceId, spUserId) of
+  case spSortOrder of
 
-    (Just resource_id, _)     -> getLeuronsBy_ResourceIdM user_id resource_id sp
+    Nothing    -> normal sp
+    Just order -> possibly_rand order sp
 
-    (_, Just lookup_user_id)  -> getLeuronsBy_UserIdM user_id lookup_user_id sp
 
-    (_, _)                    -> getLeuronsBy_EverythingM user_id sp
+  where
+  normal sp@StandardParams{..} = do
+    case (spResourceId, spUserId) of
+
+      (Just resource_id, _)     -> getLeuronsBy_ResourceIdM user_id resource_id sp
+
+      (_, Just lookup_user_id)  -> getLeuronsBy_UserIdM user_id lookup_user_id sp
+
+      (_, _)                    -> getLeuronsBy_EverythingM user_id sp
+
+  possibly_rand order sp = do
+    case order of
+      SortOrderBy_Rnd -> rand sp
+      _               -> normal sp
+
+  rand sp@StandardParams{..} = do
+    case spResourceId of
+      Just resource_id          -> getLeuronsBy_ResourceId_RandomM user_id resource_id sp
+      _                         -> getLeuronsBy_EverythingM user_id sp
 
 
 
@@ -48,6 +69,25 @@ getLeuronsBy_ResourceIdM :: UserId -> ResourceId -> StandardParams -> Handler [E
 getLeuronsBy_ResourceIdM _ resource_id sp = do
 
   selectListDb sp [LeuronResourceId ==. resource_id] [] LeuronId
+
+
+
+-- ESQUELETO-QUERY
+getLeuronsBy_ResourceId_RandomM :: UserId -> ResourceId -> StandardParams -> Handler [Entity Leuron]
+getLeuronsBy_ResourceId_RandomM _ resource_id _ = do
+
+-- SELECT * FROM leuron OFFSET floor(random() * (select count(*) from leuron)) LIMIT 1;
+-- TODO FIXME: the query below is not as efficient as the one above..
+
+  runDB
+    $ E.select
+    $ E.from $ \leuron -> do
+      E.where_ (leuron ^. LeuronResourceId E.==. E.val resource_id)
+      E.orderBy [E.rand]
+      E.offset 1
+      E.limit 1
+      return leuron
+
 
 
 
