@@ -156,19 +156,21 @@ getThreadPostStatM :: UserId -> ThreadPostId -> Handler ThreadPostStatResponse
 getThreadPostStatM _ thread_post_id = do
 
   -- get like counts
-  likes <- selectListDb defaultStandardParams [ ThreadPostLikeThreadPostId ==. thread_post_id ] [] ThreadPostLikeId
+  likes <- selectListDb defaultStandardParams [ LikeEntId ==. keyToInt64 thread_post_id ] [] LikeId
 
   -- get star counts
-  stars <- selectListDb defaultStandardParams [ ThreadPostStarThreadPostId ==. thread_post_id ] [] ThreadPostStarId
+-- TODO FIXME
+--  stars <- selectListDb defaultStandardParams [ StarEntityId ==. keyToInt64 thread_post_id ] [] StarId
 
   let
-    likes_flat = map (\(Entity _ ThreadPostLike{..}) -> threadPostLikeOpt) likes
+    likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes
+
   return $ ThreadPostStatResponse {
     threadPostStatResponseThreadPostId = keyToInt64 thread_post_id,
     threadPostStatResponseLikes        = fromIntegral $ length $ filter (==L.Like) likes_flat,
     threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==L.Neutral) likes_flat,
     threadPostStatResponseDislikes     = fromIntegral $ length $ filter (==L.Dislike) likes_flat,
-    threadPostStatResponseStars        = fromIntegral $ length stars,
+    threadPostStatResponseStars        = 0, -- TODO FIXME fromIntegral $ length stars,
     threadPostStatResponseViews        = 0
   }
 

@@ -93,17 +93,6 @@ Profile
 
 
 
-
-Test
-  userId     UserId
-  msg        Text
-  createdAt  UTCTime Maybe DEFAULT=now()
-  modifiedAt UTCTime Maybe
-
-  deriving Eq Show Typeable
-
-
-
 Api
   userId     UserId
   key        Text
@@ -138,34 +127,6 @@ Resource
 
 
 
-ResourceLike
-  userId       UserId
-  resourceId   ResourceId
-  opt          LikeOpt
-  score        Int
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueResourceLike userId resourceId
-  deriving Eq Show Typeable
-
-
-
-ResourceStar
-  userId       UserId
-  resourceId   ResourceId
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueResourceStar userId resourceId
-  deriving Eq Show Typeable
-
-
-
 ResourceSubscribers
   userId     UserId
   resourceId ResourceId
@@ -193,34 +154,6 @@ Leuron
   createdAt     UTCTime Maybe default=now()
   modifiedAt    UTCTime Maybe
 
-  deriving Eq Show Typeable
-
-
-
-LeuronLike
-  userId       UserId
-  leuronId     LeuronId
-  opt          LikeOpt
-  score        Int
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueLeuronLike userId leuronId
-  deriving Eq Show Typeable
-
-
-
-LeuronStar
-  userId       UserId
-  leuronId     LeuronId
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueLeuronStar userId leuronId
   deriving Eq Show Typeable
 
 
@@ -490,34 +423,6 @@ ThreadPost
   modifiedBy  UserId Maybe
   modifiedAt  UTCTime Maybe
 
-  deriving Eq Show Typeable
-
-
-
-ThreadPostLike
-  userId       UserId
-  threadPostId ThreadPostId
-  opt          LikeOpt
-  score        Int
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueThreadPostLike userId threadPostId
-  deriving Eq Show Typeable
-
-
-
-ThreadPostStar
-  userId       UserId
-  threadPostId ThreadPostId
-  reason       Text Maybe
-  active       Bool
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueThreadPostStar userId threadPostId
   deriving Eq Show Typeable
 
 
