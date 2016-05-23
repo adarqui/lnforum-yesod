@@ -487,3 +487,17 @@ Like
 
   UniqueLike userId ent entId
   deriving Eq Show Typeable
+
+
+
+Star
+  userId       UserId
+  ent          Ent
+  entId        Int64
+  reason       Text Maybe
+  active       Bool
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueStar userId ent entId
+  deriving Eq Show Typeable
