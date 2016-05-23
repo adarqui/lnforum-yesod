@@ -214,11 +214,11 @@ myMaybeAuthId :: (YesodAuthPersist master, Typeable (AuthEntity master))
   => HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
   req <- waiRequest
-  liftIO $ print req
+-- DEBUG:  liftIO $ print req
   case lookup "z-authorization" (W.requestHeaders req) of
     Nothing -> defaultMaybeAuthId
     Just authHeader -> do
-      liftIO $ print authHeader
+-- DEBUG:      liftIO $ print authHeader
       return $ fromPathPiece $ T.decodeUtf8 authHeader
 
 -- custom

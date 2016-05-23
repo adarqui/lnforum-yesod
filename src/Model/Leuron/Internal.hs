@@ -122,7 +122,7 @@ getLeuronM _ leuron_id = do
 insertLeuronM :: UserId -> ResourceId -> LeuronRequest -> Handler (Entity Leuron)
 insertLeuronM user_id resource_id leuron_request = do
 
-  liftIO $ print $ [show user_id, show resource_id]
+-- DEBUG:  liftIO $ print $ [show user_id, show resource_id]
 
   ts <- timestampH'
 
