@@ -229,6 +229,18 @@ BucketCategory
 LeuronTraining
   userId           UserId
   leuronId         LeuronId
+  summary          LeuronTrainingSummary
+  active           Bool
+  createdAt        UTCTime Maybe default=now()
+  modifiedAt       UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+LeuronTraining2
+  userId           UserId
+  leuronId         LeuronId
   score            Int
   skip             Int
   skipAt           UTCTime Maybe
