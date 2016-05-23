@@ -67,9 +67,12 @@ library
                      Model.Forum.Internal
                      Model.Keys
                      Model.Leuron
-                     Model.Leuron.Display
                      Model.Leuron.Function
                      Model.Leuron.Internal
+                     Model.LeuronTraining
+                     Model.LeuronTraining.DerivePersist
+                     Model.LeuronTraining.Function
+                     Model.LeuronTraining.Internal
                      Model.Like
                      Model.Like.DerivePersist
                      Model.Like.Function

@@ -10,6 +10,8 @@ module Model.Pack.Leuron (
 import           Model.Prelude
 import           Model.Leuron.Function
 import           Model.Leuron.Internal
+import           Model.LeuronTraining.Function
+import           Model.LeuronTraining.Internal
 import           Model.User.Function
 import           Model.User.Internal2
 
@@ -43,16 +45,21 @@ getLeuronPackM user_id leuron_id = do
 getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> StandardParams -> Handler LeuronPackResponse
 getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
 
-  leuron_user <- getUserM user_id leuronUserId
-  leuron_stat <- getLeuronStatM user_id leuron_id
+  leuron_user     <- getUserM user_id leuronUserId
+  leuron_stat     <- getLeuronStatM user_id leuron_id
 --  leuron_like <- getLeuronLike_ByLeuronM user_id leuron
 --  leuron_star <- getLeuronStar_ByLeuronM user_id leuron
+  leuron_training <- insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View
 
   return $ LeuronPackResponse {
     leuronPackResponseLeuron     = leuronToResponse leuron,
     leuronPackResponseLeuronId   = keyToInt64 leuron_id,
     leuronPackResponseUser       = userToSanitizedResponse leuron_user,
     leuronPackResponseUserId     = entityKeyToInt64 leuron_user,
+    -- TODO FIXME
+    leuronPackResponseTraining   = leuronTrainingToResponse leuron_training,
+    -- TODO FIXME
+    -- leuronPackResponseTrainingId
     leuronPackResponseStat       = leuron_stat,
     leuronPackResponseLike       = Nothing,
     leuronPackResponseStar       = Nothing

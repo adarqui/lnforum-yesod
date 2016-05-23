@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Leuron.Internal (
+module Model.LeuronTraining.Internal (
+{-
   getLeuronsM,
   getLeuronsBy_ResourceIdM,
   getLeuronsBy_ResourceId_RandomM,
@@ -9,7 +10,9 @@ module Model.Leuron.Internal (
 
   getLeuronsIdsM,
   getLeuronM,
-  insertLeuronM,
+  -}
+  insertLeuronTrainingM,
+  {-
   updateLeuronM,
   deleteLeuronM,
 
@@ -17,6 +20,7 @@ module Model.Leuron.Internal (
 
   getLeuronStatsM,
   getLeuronStatM
+  -}
 ) where
 
 
@@ -26,12 +30,14 @@ import qualified Database.Esqueleto    as E
 import qualified Database.Redis        as R
 import qualified LN.T.Like             as L
 import           Model.Leuron.Function
+import           Model.LeuronTraining.Function
 import           Model.Prelude
 
 
 
 
 
+{-
 getLeuronsM :: UserId -> Handler [Entity Leuron]
 getLeuronsM user_id = do
 
@@ -116,37 +122,25 @@ getLeuronM _ leuron_id = do
 
   notFoundMaybe =<< selectFirstDb [ LeuronId ==. leuron_id ] []
 
+-}
 
 
-insertLeuronM :: UserId -> ResourceId -> LeuronRequest -> Handler (Entity Leuron)
-insertLeuronM user_id resource_id leuron_request = do
 
--- DEBUG:  liftIO $ print $ [show user_id, show resource_id]
+insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> Handler (Entity LeuronTraining)
+insertLeuronTrainingM user_id leuron_id leuron_training_request = do
 
   ts <- timestampH'
 
   let
-    leuron = (leuronRequestToLeuron user_id resource_id leuron_request) { leuronCreatedAt = Just ts }
+    leuron_training = (leuronTrainingRequestToLeuronTraining user_id leuron_id leuron_training_request) { leuronTrainingCreatedAt = Just ts }
 
-  void $ notFoundMaybe =<< selectFirstDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ] []
+--  void $ notFoundMaybe =<< selectFirstDb [ LUserId ==. user_id, ResourceId ==. resource_id ] []
 
-  entity@(Entity leuron_id _) <- insertEntityDb leuron
-
-  -- background job
-  --
-  -- Add leuron categories to our redis keys
-  insertLeuronCategoriesM leuron_id resource_id leuron_request
-
-  -- Add leuron to our user's zsets etc
-  insertLeuronR user_id resource_id leuron_id
-
-  --
-  -- end background job
-
-  return entity
+  insertEntityDb leuron_training
 
 
 
+{-
 updateLeuronM :: UserId -> LeuronId -> LeuronRequest -> Handler (Entity Leuron)
 updateLeuronM user_id leuron_id leuron_request = do
 
@@ -285,3 +279,4 @@ getLeuronStatM _ leuron_id = do
     leuronStatResponseStars       = 0,
     leuronStatResponseViews       = 0
   }
+  -}
