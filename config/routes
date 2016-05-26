@@ -118,9 +118,9 @@
 
 
 
-/api/resources ResourcesR GET POST
--- /api/resource/#ResourceId ResourceR GET PUT DELETE
--- /api/resource/#ResourceId/leurons ResourceLeuronsR GET POST
+/api/resources ResourcesR GET
+/api/resource ResourceR POST
+/api/resource/#ResourceId ResourceR GET PUT DELETE
 
 
 
