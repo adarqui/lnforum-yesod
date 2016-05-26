@@ -1,6 +1,6 @@
 module Handler.Resource (
   getResourcesR,
-  postResourcesR0,
+  postResourceR0,
   getResourceR,
   putResourceR,
   deleteResourceR,
@@ -29,8 +29,8 @@ getResourcesR = do
 
 
 
-postResourcesR0 :: Handler Value
-postResourcesR0 = do
+postResourceR0 :: Handler Value
+postResourceR0 = do
   user_id <- requireAuthId
   resource_request <- requireJsonBody :: Handler ResourceRequest
   (toJSON . resourceToResponse) <$> insertResourceM user_id resource_request

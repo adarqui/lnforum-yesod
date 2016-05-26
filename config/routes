@@ -119,7 +119,7 @@
 
 
 /api/resources ResourcesR GET
-/api/resource ResourceR POST
+/api/resource ResourceR0 POST
 /api/resource/#ResourceId ResourceR GET PUT DELETE
 
 
