@@ -51,7 +51,8 @@
 
 
 
-/api/leurons LeuronsR GET POST
+/api/leurons LeuronsR GET
+/api/leuron LeuronR0 POST
 /api/leuron/#LeuronId LeuronR GET PUT DELETE
 
 /api/leuron_stats LeuronStatsR GET

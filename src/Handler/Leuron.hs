@@ -1,6 +1,6 @@
 module Handler.Leuron (
   getLeuronsR,
-  postLeuronsR,
+  postLeuronR0,
   getLeuronR,
   putLeuronR,
   deleteLeuronR,
@@ -32,8 +32,8 @@ getLeuronsR = do
 
 
 
-postLeuronsR :: Handler Value
-postLeuronsR = do
+postLeuronR0 :: Handler Value
+postLeuronR0 = do
 
   user_id <- requireAuthId
 
