@@ -36,6 +36,8 @@ import           System.Log.FastLogger                (defaultBufSize,
                                                        newStdoutLoggerSet,
                                                        toLogStr)
 
+import           Network.Wai.Middleware.Cors          (simpleCors)
+
 import qualified Database.Redis                       as R
 
 {-
@@ -194,7 +196,8 @@ appMain = do
     app <- makeApplication foundation
 
     -- Run the application with Warp
-    runSettings (warpSettings foundation) app
+    -- simpleCors so we can make cross domain ajax requests
+    runSettings (warpSettings foundation) $ simpleCors app
 
 
 --------------------------------------------------------------

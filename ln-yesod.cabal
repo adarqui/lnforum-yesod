@@ -184,6 +184,7 @@ library
                  , hjsmin                        >= 0.1        && < 0.2
                  , monad-control                 >= 0.3        && < 1.1
                  , wai-extra                     >= 3.0        && < 3.1
+                 , wai-cors                      >= 0.2.4      && < 0.3
                  , yaml                          >= 0.8        && < 0.9
                  , http-conduit                  >= 2.1        && < 2.2
                  , directory                     >= 1.1        && < 1.3

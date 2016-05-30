@@ -15,6 +15,7 @@ import Yesod.Auth.OAuth2.Github ()
 
 import Model.User (authenticateUser)
 import qualified Network.Wai as W
+import Network.Wai.Middleware.Cors
 import qualified Data.Text.Encoding as T (decodeUtf8)
 import qualified Data.Text as T
 import qualified Database.Redis as R
@@ -73,6 +74,7 @@ instance Yesod App where
 --    yesodMiddleware = (sslOnlyMiddleware 120) . defaultYesodMiddleware
     yesodMiddleware =
       whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
+--      simpleCors . whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
 
     defaultLayout widget = do
         master <- getYesod
