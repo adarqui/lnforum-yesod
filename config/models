@@ -22,6 +22,10 @@ Organization
   location     Text
   email        Text
   emailMD5     Text
+  membership   Membership
+  icon         Text Maybe
+  tags         [Text]
+  visibility   Visibility
 --  blog Text
 --  apiUrl Text
 --  htmlUrl Text
@@ -44,6 +48,10 @@ Team
   name        Text
 --  displayName Text
   description Text Maybe
+  membership  Membership
+  icon        Text Maybe
+  tags        [Text]
+  visibility  Visibility
   active      Bool
   createdAt   UTCTime Maybe default=now()
   modifiedBy  UserId Maybe
@@ -114,10 +122,12 @@ Resource
   author        [Text] Maybe
   prerequisites [Text]
   categories    [Text]
-  visibility    Text
+  visibility    Visibility
   counter       Int
   version       Text Maybe
   urls          [Text] Maybe
+  icon          Text Maybe
+  tags          [Text]
   active        Bool
   createdAt     UTCTime Maybe default=now()
   modifiedAt    UTCTime Maybe
@@ -148,7 +158,7 @@ Leuron
   categories    Text Maybe
   splits        Text Maybe
   substitutions Text Maybe
-  tags          Text Maybe
+  tags          [Text]
   style         Text Maybe
   active        Bool
   createdAt     UTCTime Maybe default=now()
@@ -375,6 +385,9 @@ Forum
   orgId       OrganizationId
   name        Text
   description Text Maybe
+  icon        Text Maybe
+  tags        [Text]
+  visibility  Visibility
   active      Bool
   createdAt   UTCTime Maybe default=now()
   modifiedBy  UserId Maybe
@@ -392,6 +405,8 @@ Board
   parentId    BoardId Maybe
   name        Text
   description Text Maybe
+  icon        Text Maybe
+  tags        [Text]
   active      Bool
   createdAt   UTCTime Maybe default=now()
   modifiedBy  UserId Maybe
@@ -411,6 +426,8 @@ Thread
   sticky       Bool
   locked       Bool
   poll         Text Maybe -- embed some poll crap here..
+  icon         Text Maybe
+  tags         [Text]
   active       Bool
   createdAt    UTCTime Maybe default=now()
   modifiedBy   UserId Maybe

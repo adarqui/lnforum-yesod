@@ -14,30 +14,34 @@ import           Model.Prelude
 
 boardRequestToBoard :: UserId -> ForumId -> BoardRequest -> Board
 boardRequestToBoard user_id forum_id BoardRequest{..} = Board {
-  boardUserId = user_id,
-  boardForumId = forum_id,
-  boardParentId = Nothing,
-  boardName = boardRequestName,
+  boardUserId      = user_id,
+  boardForumId     = forum_id,
+  boardParentId    = Nothing,
+  boardName        = boardRequestName,
   boardDescription = boardRequestDescription,
-  boardActive = True,
-  boardCreatedAt = Nothing,
-  boardModifiedBy = Nothing,
-  boardModifiedAt = Nothing
+  boardIcon        = boardRequestIcon,
+  boardTags        = boardRequestTags,
+  boardActive      = True,
+  boardCreatedAt   = Nothing,
+  boardModifiedBy  = Nothing,
+  boardModifiedAt  = Nothing
 }
 
 
 
 boardToResponse :: Entity Board -> BoardResponse
 boardToResponse (Entity board_id Board{..}) = BoardResponse {
-  boardResponseId = keyToInt64 board_id,
-  boardResponseUserId = keyToInt64 boardUserId,
-  boardResponseForumId = keyToInt64 boardForumId,
-  boardResponseParentId = fmap keyToInt64 boardParentId,
-  boardResponseName = boardName,
+  boardResponseId          = keyToInt64 board_id,
+  boardResponseUserId      = keyToInt64 boardUserId,
+  boardResponseForumId     = keyToInt64 boardForumId,
+  boardResponseParentId    = fmap keyToInt64 boardParentId,
+  boardResponseName        = boardName,
   boardResponseDescription = boardDescription,
-  boardResponseCreatedAt = boardCreatedAt,
-  boardResponseModifiedBy = fmap keyToInt64 boardModifiedBy,
-  boardResponseModifiedAt = boardModifiedAt
+  boardResponseIcon        = boardIcon,
+  boardResponseTags        = boardTags,
+  boardResponseCreatedAt   = boardCreatedAt,
+  boardResponseModifiedBy  = fmap keyToInt64 boardModifiedBy,
+  boardResponseModifiedAt  = boardModifiedAt
 }
 
 

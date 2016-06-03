@@ -58,6 +58,7 @@ library
                      Model.Board
                      Model.Board.Function
                      Model.Board.Internal
+                     Model.DerivePersist
                      Model.Empty
                      Model.Empty.Function
                      Model.Empty.Internal

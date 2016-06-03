@@ -10,7 +10,7 @@ import           Data.Maybe      as A (fromJust)
 import           Import          as A
 import           LN.Lib.Codec    as A
 import           LN.Lib.Validate as A
-import           LN.T            as A hiding (LikeOpt(..))
+import           LN.T            as A hiding (LikeOpt(..), Membership(..), Visibility(..))
 import           Misc.Codec      as A
 import           Misc.Magic      as A
 import           Model.Keys      as A

@@ -16,33 +16,41 @@ import           Model.Prelude
 
 organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
 organizationRequestToOrganization user_id OrganizationRequest{..} = Organization {
-  organizationUserId = user_id,
-  organizationName = organizationRequestName,
+  organizationUserId      = user_id,
+  organizationName        = organizationRequestName,
   organizationDescription = organizationRequestDescription,
-  organizationCompany = organizationRequestCompany,
-  organizationLocation = organizationRequestLocation,
-  organizationEmail = organizationRequestEmail,
-  organizationEmailMD5 = "md5",
-  organizationActive = True,
-  organizationCreatedAt = Nothing,
-  organizationModifiedBy = Nothing,
-  organizationModifiedAt = Nothing
+  organizationCompany     = organizationRequestCompany,
+  organizationLocation    = organizationRequestLocation,
+  organizationEmail       = organizationRequestEmail,
+  organizationEmailMD5    = "md5",
+  organizationMembership  = organizationRequestMembership,
+  organizationIcon        = organizationRequestIcon,
+  organizationTags        = organizationRequestTags,
+  organizationVisibility  = organizationRequestVisibility,
+  organizationActive      = True,
+  organizationCreatedAt   = Nothing,
+  organizationModifiedBy  = Nothing,
+  organizationModifiedAt  = Nothing
 }
 
 
 organizationToResponse :: Entity Organization -> OrganizationResponse
 organizationToResponse (Entity organization_id Organization{..}) = OrganizationResponse {
-  organizationResponseId = keyToInt64 organization_id,
-  organizationResponseUserId = keyToInt64 organizationUserId,
-  organizationResponseName = organizationName,
+  organizationResponseId          = keyToInt64 organization_id,
+  organizationResponseUserId      = keyToInt64 organizationUserId,
+  organizationResponseName        = organizationName,
   organizationResponseDescription = organizationDescription,
-  organizationResponseCompany = organizationCompany,
-  organizationResponseLocation = organizationLocation,
-  organizationResponseEmail = organizationEmail,
-  organizationResponseEmailMD5 = organizationEmailMD5,
-  organizationResponseCreatedAt = organizationCreatedAt,
-  organizationResponseModifiedBy = fmap keyToInt64 organizationModifiedBy,
-  organizationResponseModifiedAt = organizationModifiedAt
+  organizationResponseCompany     = organizationCompany,
+  organizationResponseLocation    = organizationLocation,
+  organizationResponseEmail       = organizationEmail,
+  organizationResponseEmailMD5    = organizationEmailMD5,
+  organizationResponseMembership  = organizationMembership,
+  organizationResponseIcon        = organizationIcon,
+  organizationResponseTags        = organizationTags,
+  organizationResponseVisibility  = organizationVisibility,
+  organizationResponseCreatedAt   = organizationCreatedAt,
+  organizationResponseModifiedBy  = fmap keyToInt64 organizationModifiedBy,
+  organizationResponseModifiedAt  = organizationModifiedAt
 }
 
 
