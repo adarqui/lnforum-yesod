@@ -155,12 +155,20 @@ insertBoardM user_id forum_id _ board_request = do
 
   ts <- timestampH'
 
-  -- TODO FIXME seems wrong?
-  let
-    -- TODO: FIXME: fromJut forum_id = wrong
-    board = (boardRequestToBoard user_id (fromJust forum_id) board_request) { boardCreatedAt = Just ts }
+  sp@StandardParams{..} <- lookupStandardParams
 
-  insertEntityDb board
+  case (spForumId, spBoardId) of
+
+    (Nothing, Nothing) -> permissionDenied "Must supply a forum_id or board_id"
+
+    (Just forum_id, _) -> do
+
+      insertEntityDb $ (boardRequestToBoard user_id forum_id Nothing board_request) { boardCreatedAt = Just ts }
+
+    (_, Just board_id) -> do
+
+      (Entity board_id Board{..}) <- notFoundMaybe =<< selectFirstDb [ BoardId ==. board_id ] []
+      insertEntityDb $ (boardRequestToBoard user_id boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -170,7 +178,7 @@ updateBoardM user_id board_id board_request = do
   ts <- timestampH'
 
   let
-    Board{..} = (boardRequestToBoard user_id dummyId board_request) { boardModifiedAt = Just ts }
+    Board{..} = (boardRequestToBoard user_id dummyId Nothing board_request) { boardModifiedAt = Just ts }
 
   updateWhereDb
     [ BoardUserId ==. user_id, BoardId ==. board_id ]

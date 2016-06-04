@@ -12,11 +12,11 @@ import           Model.Prelude
 
 
 
-boardRequestToBoard :: UserId -> ForumId -> BoardRequest -> Board
-boardRequestToBoard user_id forum_id BoardRequest{..} = Board {
+boardRequestToBoard :: UserId -> ForumId -> Maybe BoardId -> BoardRequest -> Board
+boardRequestToBoard user_id forum_id m_board_id BoardRequest{..} = Board {
   boardUserId      = user_id,
   boardForumId     = forum_id,
-  boardParentId    = Nothing,
+  boardParentId    = m_board_id,
   boardName        = boardRequestName,
   boardDescription = boardRequestDescription,
   boardIcon        = boardRequestIcon,
