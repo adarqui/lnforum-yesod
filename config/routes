@@ -25,7 +25,8 @@
 
 
 
-/api/forums ForumsR GET POST
+/api/forums ForumsR GET
+/api/forum ForumR0 POST
 /api/forum/#ForumId ForumR GET PUT DELETE
 !/api/forum/#Text ForumH GET
 
@@ -38,7 +39,8 @@
 
 
 
-/api/boards BoardsR GET POST
+/api/boards BoardsR GET
+/api/baard BoardR0 POST
 /api/board/#BoardId BoardR GET PUT DELETE
 !/api/board/#Text BoardH GET
 
@@ -74,7 +76,8 @@
 
 
 
-/api/organizations OrganizationsR GET POST
+/api/organizations OrganizationsR GET
+/api/organization OrganizationR0 POST
 /api/organization/#OrganizationId OrganizationR GET PUT DELETE
 !/api/organization/#Text OrganizationH GET
 
@@ -87,7 +90,8 @@
 
 
 
-/api/pms PmsR GET POST
+/api/pms PmsR GET
+/api/pm PmR0 POST
 /api/pm/#PmId PmR GET PUT DELETE
 
 
@@ -154,7 +158,8 @@
 
 
 
-/api/threads ThreadsR GET POST
+/api/threads ThreadsR GET
+/api/thread ThreadR0 POST
 /api/thread/#ThreadId ThreadR GET PUT DELETE
 !/api/thread/#Text ThreadH GET
 

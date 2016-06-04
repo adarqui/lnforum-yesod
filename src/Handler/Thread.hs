@@ -1,6 +1,6 @@
 module Handler.Thread (
   getThreadsR,
-  postThreadsR,
+  postThreadR0,
   getThreadR,
   getThreadH,
   putThreadR,
@@ -32,8 +32,8 @@ getThreadsR = do
 
 
 
-postThreadsR :: Handler Value
-postThreadsR = do
+postThreadR0 :: Handler Value
+postThreadR0 = do
 
   user_id <- requireAuthId
 

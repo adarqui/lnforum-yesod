@@ -1,6 +1,6 @@
 module Handler.Board (
   getBoardsR,
-  postBoardsR,
+  postBoardR0,
   getBoardR,
   getBoardH,
   putBoardR,
@@ -29,8 +29,8 @@ getBoardsR = do
 
 
 
-postBoardsR :: Handler Value
-postBoardsR = do
+postBoardR0 :: Handler Value
+postBoardR0 = do
 
   user_id <- requireAuthId
 

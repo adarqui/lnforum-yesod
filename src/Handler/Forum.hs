@@ -1,6 +1,6 @@
 module Handler.Forum (
   getForumsR,
-  postForumsR,
+  postForumR0,
   getForumR,
   getForumH,
   putForumR,
@@ -30,8 +30,8 @@ getForumsR = do
 
 
 
-postForumsR :: Handler Value
-postForumsR = do
+postForumR0 :: Handler Value
+postForumR0 = do
 
   user_id <- requireAuthId
 

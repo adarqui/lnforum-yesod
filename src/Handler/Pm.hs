@@ -1,6 +1,6 @@
 module Handler.Pm (
   getPmsR,
-  postPmsR,
+  postPmR0,
   getPmR,
   putPmR,
   deletePmR
@@ -20,8 +20,8 @@ getPmsR = do
 
 
 
-postPmsR :: Handler Value
-postPmsR = do
+postPmR0 :: Handler Value
+postPmR0 = do
   user_id <- requireAuthId
   sp <- lookupStandardParams
   -- can handle groups, users, user .. if we want

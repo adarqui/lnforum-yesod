@@ -1,6 +1,6 @@
 module Handler.Organization (
   getOrganizationsR,
-  postOrganizationsR,
+  postOrganizationR0,
   getOrganizationR,
   getOrganizationH,
   putOrganizationR,
@@ -31,8 +31,8 @@ getOrganizationsR = do
 
 
 
-postOrganizationsR :: Handler Value
-postOrganizationsR = do
+postOrganizationR0 :: Handler Value
+postOrganizationR0 = do
 
   user_id <- requireAuthId
 
