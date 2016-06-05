@@ -1,6 +1,6 @@
 module Handler.User (
   getUsersR,
-  postUsersR,
+  postUserR0,
   getUserR,
   getUserH,
   putUserR,
@@ -32,8 +32,8 @@ getUsersR = do
 
 
 
-postUsersR :: Handler Value
-postUsersR = do
+postUserR0 :: Handler Value
+postUserR0 = do
   user_id <- requireAuthId
   user_request <- requireJsonBody :: Handler UserRequest
   (toJSON . userToResponse) <$> insertUsersM user_id user_request
