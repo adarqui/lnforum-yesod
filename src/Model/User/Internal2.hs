@@ -70,8 +70,9 @@ insertUsersM user_id user_request = do
       let
         email_md5 = md5Text (userRequestEmail user_request)
         user = (userRequestToUser user_request) {
-            userEmailMD5 = email_md5
+            userEmailMD5  = email_md5
           , userCreatedAt = Just ts
+          , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
         }
       new_user <- insertEntityDb user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
