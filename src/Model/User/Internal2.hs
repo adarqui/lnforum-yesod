@@ -75,7 +75,7 @@ insertUsersM user_id user_request = do
         }
       new_user <- insertEntityDb user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
---      insertUsers_TasksM user_id new_user
+      insertUsers_TasksM user_id new_user
       return new_user
 
     else permissionDenied "perms"
