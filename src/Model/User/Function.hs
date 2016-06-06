@@ -28,34 +28,38 @@ profileNameToNick = T.toLower . T.filter isAlphaNum
 
 userRequestToUser :: UserRequest -> User
 userRequestToUser UserRequest{..} = User {
-  userNick = userRequestNick,
+  userNick        = userRequestDisplayNick,
   userDisplayNick = userRequestDisplayNick,
-  userName = userRequestName,
-  userEmail = userRequestEmail,
-  userEmailMD5 = "md5",
-  userPlugin = userRequestPlugin,
-  userIdent = userRequestIdent,
-  userActive = False,
-  userCreatedAt = Nothing,
-  userModifiedAt = Nothing
+  userName        = userRequestName,
+  userEmail       = userRequestEmail,
+  userEmailMD5    = "md5",
+  userPlugin      = userRequestPlugin,
+  userIdent       = userRequestIdent,
+  userActive      = False,
+  userGuard       = 0,
+  userCreatedAt   = Nothing,
+  userModifiedAt  = Nothing,
+  userActivityAt  = Nothing
 }
 
 
 
 userToResponse :: Entity User -> UserResponse
 userToResponse (Entity user_id User{..}) = UserResponse {
-  userResponseId = keyToInt64 user_id,
-  userResponseNick = userNick,
-  userResponseDisplayNick = userDisplayNick,
-  userResponseName = userName,
-  userResponseEmail = userEmail,
-  userResponseEmailMD5 = userEmailMD5,
-  userResponsePlugin = userPlugin,
-  userResponseIdent = userIdent,
-  userResponseActive = userActive,
-  userResponseCreatedAt = userCreatedAt,
-  userResponseModifiedAt = userModifiedAt,
-  userResponseDeactivatedAt = Nothing
+  userResponseId            = keyToInt64 user_id,
+  userResponseNick          = userNick,
+  userResponseDisplayNick   = userDisplayNick,
+  userResponseName          = userName,
+  userResponseEmail         = userEmail,
+  userResponseEmailMD5      = userEmailMD5,
+  userResponsePlugin        = userPlugin,
+  userResponseIdent         = userIdent,
+  userResponseActive        = userActive,
+  userResponseGuard         = userGuard,
+  userResponseCreatedAt     = userCreatedAt,
+  userResponseModifiedAt    = userModifiedAt,
+  userResponseDeactivatedAt = Nothing,
+  userResponseActivityAt    = Nothing
 }
 
 
@@ -69,12 +73,14 @@ usersToResponses users = UserResponses {
 
 userToSanitizedResponse :: Entity User -> UserSanitizedResponse
 userToSanitizedResponse (Entity user_id User{..}) = UserSanitizedResponse {
-  userSanitizedResponseId = keyToInt64 user_id,
-  userSanitizedResponseNick = userNick,
+  userSanitizedResponseId          = keyToInt64 user_id,
+  userSanitizedResponseNick        = userNick,
   userSanitizedResponseDisplayNick = userDisplayNick,
-  userSanitizedResponseEmailMD5 = userEmailMD5,
-  userSanitizedResponseActive = userActive,
-  userSanitizedResponseCreatedAt = userCreatedAt
+  userSanitizedResponseEmailMD5    = userEmailMD5,
+  userSanitizedResponseActive      = userActive,
+  userSanitizedResponseGuard       = userGuard,
+  userSanitizedResponseCreatedAt   = userCreatedAt,
+  userSanitizedResponseActivityAt  = userActivityAt
 }
 
 
@@ -88,7 +94,7 @@ usersToSanitizedResponses users = UserSanitizedResponses {
 
 validateUserRequest :: UserRequest -> Either Text UserRequest
 validateUserRequest z@UserRequest{..} = do
-  _ <- isValidNick userRequestNick
+--  _ <- isValidNick userRequestNick
   _ <- isValidName userRequestDisplayNick
   _ <- isValidName userRequestName
   _ <- isValidEmail userRequestEmail

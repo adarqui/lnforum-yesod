@@ -42,7 +42,7 @@ getResourcesBy_EverythingM _ sp = do
 
 
 getResourcesBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Resource]
-getResourcesBy_UserIdM user_id lookup_user_id sp = do
+getResourcesBy_UserIdM _ lookup_user_id sp = do
   selectListDb sp [ ResourceUserId ==. lookup_user_id ] [] ResourceId
 
 
@@ -75,17 +75,18 @@ updateResourceM user_id resource_id resource_request = do
 
   updateWhereDb
     [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
-    [ ResourceModifiedAt =. resourceModifiedAt
-    , ResourceTitle =. resourceTitle
-    , ResourceDescription =. resourceDescription
-    , ResourceSource =. resourceSource
-    , ResourceAuthor =. resourceAuthor
+    [ ResourceModifiedAt    =. resourceModifiedAt
+    , ResourceName          =. prettyName resourceDisplayName
+    , ResourceDisplayName   =. resourceDisplayName
+    , ResourceDescription   =. resourceDescription
+    , ResourceSource        =. resourceSource
+    , ResourceAuthor        =. resourceAuthor
     , ResourcePrerequisites =. resourcePrerequisites
-    , ResourceCategories =. resourceCategories
-    , ResourceVisibility =. resourceVisibility
-    , ResourceCounter =. resourceCounter
-    , ResourceVersion =. resourceVersion
-    , ResourceUrls =. resourceUrls
+    , ResourceCategories    =. resourceCategories
+    , ResourceVisibility    =. resourceVisibility
+    , ResourceCounter       =. resourceCounter
+    , ResourceVersion       =. resourceVersion
+    , ResourceUrls          =. resourceUrls
     ]
 
   notFoundMaybe =<< selectFirstDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ] []

@@ -9,6 +9,7 @@ module Model.Resource.Function (
 
 
 import           Import
+import           LN.Lib.Url (prettyName)
 import           LN.T
 import           Misc.Codec (decodeText, encodeText, keyToInt64)
 
@@ -17,21 +18,24 @@ import           Misc.Codec (decodeText, encodeText, keyToInt64)
 resourceRequestToResource :: UserId -> ResourceRequest -> Resource
 resourceRequestToResource user_id ResourceRequest{..} = Resource {
   resourceUserId         = user_id,
-  resourceTitle          = resourceRequestTitle,
+  resourceName           = prettyName resourceRequestDisplayName,
+  resourceDisplayName    = resourceRequestDisplayName,
   resourceDescription    = resourceRequestDescription,
   resourceSource         = encodeText resourceRequestSource,
   resourceAuthor         = resourceRequestAuthor,
   resourcePrerequisites  = [], -- resourceRequestPrerequisites,
   resourceCategories     = [], -- resourceRequestCategories,
-  resourceVisibility     = Public,
+  resourceVisibility     = resourceRequestVisibility,
   resourceCounter        = resourceRequestCounter,
   resourceVersion        = resourceRequestVersion,
   resourceUrls           = resourceRequestUrls,
   resourceIcon           = resourceRequestIcon,
   resourceTags           = resourceRequestTags,
   resourceActive         = True,
+  resourceGuard          = resourceRequestGuard,
   resourceCreatedAt      = Nothing,
-  resourceModifiedAt     = Nothing
+  resourceModifiedAt     = Nothing,
+  resourceActivityAt     = Nothing
 }
 
 
@@ -40,7 +44,8 @@ resourceToResponse :: Entity Resource -> ResourceResponse
 resourceToResponse (Entity resource_id Resource{..}) = ResourceResponse {
   resourceResponseId            = keyToInt64 resource_id,
   resourceResponseUserId        = keyToInt64 resourceUserId,
-  resourceResponseTitle         = resourceTitle,
+  resourceResponseName          = resourceName,
+  resourceResponseDisplayName   = resourceDisplayName,
   resourceResponseDescription   = resourceDescription,
   resourceResponseSource        = maybe SourceNone id (decodeText resourceSource),
   resourceResponseAuthor        = resourceAuthor,
@@ -52,8 +57,11 @@ resourceToResponse (Entity resource_id Resource{..}) = ResourceResponse {
   resourceResponseUrls          = resourceUrls,
   resourceResponseIcon          = resourceIcon,
   resourceResponseTags          = resourceTags,
+  resourceResponseActive        = resourceActive,
+  resourceResponseGuard         = resourceGuard,
   resourceResponseCreatedAt     = resourceCreatedAt,
-  resourceResponseModifiedAt    = resourceModifiedAt
+  resourceResponseModifiedAt    = resourceModifiedAt,
+  resourceResponseActivityAt    = resourceActivityAt
 }
 
 

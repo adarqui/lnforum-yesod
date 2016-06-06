@@ -11,6 +11,7 @@ module Model.Reminder.Function (
 
 
 
+import           LN.Lib.Url (prettyName)
 import           LN.T
 import           Import
 import           Misc.Codec (keyToInt64)
@@ -23,20 +24,25 @@ reminderRequestToReminder user_id reminder_folder_id ReminderRequest{..} = Remin
   reminderParentFolderId = reminder_folder_id,
   reminderData           = reminderRequestData,
   reminderActive         = True,
+  reminderGuard          = reminderRequestGuard,
   reminderCreatedAt      = Nothing,
-  reminderModifiedAt     = Nothing
+  reminderModifiedAt     = Nothing,
+  reminderActivityAt     = Nothing
 }
 
 
 
 reminderToResponse :: Entity Reminder -> ReminderResponse
 reminderToResponse (Entity reminder_id Reminder{..}) = ReminderResponse {
-  reminderResponseId = keyToInt64 reminder_id,
-  reminderResponseUserId = keyToInt64 reminderUserId,
+  reminderResponseId             = keyToInt64 reminder_id,
+  reminderResponseUserId         = keyToInt64 reminderUserId,
   reminderResponseParentFolderId = keyToInt64 reminderParentFolderId,
-  reminderResponseData = reminderData,
-  reminderResponseCreatedAt = reminderCreatedAt,
-  reminderResponseModifiedAt = reminderModifiedAt
+  reminderResponseData           = reminderData,
+  reminderResponseActive         = reminderActive,
+  reminderResponseGuard          = reminderGuard,
+  reminderResponseCreatedAt      = reminderCreatedAt,
+  reminderResponseModifiedAt     = reminderModifiedAt,
+  reminderResponseActivityAt     = reminderActivityAt
 }
 
 
@@ -52,26 +58,34 @@ reminderFolderRequestToReminderFolder :: UserId -> Maybe ReminderFolderId -> Rem
 reminderFolderRequestToReminderFolder user_id reminder_folder_id ReminderFolderRequest{..} = ReminderFolder {
   reminderFolderUserId      = user_id,
   reminderFolderParentId    = reminder_folder_id,
-  reminderFolderName        = reminderFolderRequestName,
+  reminderFolderName        = prettyName reminderFolderRequestDisplayName,
+  reminderFolderDisplayName = reminderFolderRequestDisplayName,
   reminderFolderDescription = reminderFolderRequestDescription,
+  reminderFolderVisibility  = reminderFolderRequestVisibility,
   reminderFolderActive      = True,
+  reminderFolderGuard       = reminderFolderRequestGuard,
   reminderFolderCreatedAt   = Nothing,
-  reminderFolderModifiedAt  = Nothing
+  reminderFolderModifiedAt  = Nothing,
+  reminderFolderActivityAt  = Nothing
 }
 
 
 
 reminderFolderToResponse :: Entity ReminderFolder -> ReminderFolderResponse
 reminderFolderToResponse (Entity reminderFolder_id ReminderFolder{..}) = ReminderFolderResponse {
-  reminderFolderResponseId = keyToInt64 reminderFolder_id,
-  reminderFolderResponseUserId = keyToInt64 reminderFolderUserId,
+  reminderFolderResponseId             = keyToInt64 reminderFolder_id,
+  reminderFolderResponseUserId         = keyToInt64 reminderFolderUserId,
   reminderFolderResponseParentFolderId = fmap keyToInt64 reminderFolderParentId,
-  reminderFolderResponseName = reminderFolderName,
-  reminderFolderResponseDescription = reminderFolderDescription,
-  -- TODO FIXME
-  reminderFolderResponseVisibility = Public, -- reminderFolderVisibility,
-  reminderFolderResponseCreatedAt = reminderFolderCreatedAt,
-  reminderFolderResponseModifiedAt = reminderFolderModifiedAt
+  reminderFolderResponseName           = reminderFolderName,
+  reminderFolderResponseDisplayName    = reminderFolderDisplayName,
+  reminderFolderResponseDescription    = reminderFolderDescription,
+  reminderFolderResponseVisibility     = reminderFolderVisibility,
+  reminderFolderResponseActive         = reminderFolderActive,
+  reminderFolderResponseGuard          = reminderFolderGuard,
+  reminderFolderResponseCreatedAt      = reminderFolderCreatedAt,
+  reminderFolderResponseModifiedAt     = reminderFolderModifiedAt,
+  reminderFolderResponseActivityAt     = reminderFolderActivityAt
+
 }
 
 

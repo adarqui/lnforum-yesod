@@ -16,16 +16,19 @@ teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
 teamRequestToTeam user_id org_id TeamRequest{..} = Team {
   teamUserId      = user_id,
   teamOrgId       = org_id,
-  teamName        = teamRequestName,
+  teamName        = prettyName teamRequestDisplayName,
+  teamDisplayName = teamRequestDisplayName,
   teamDescription = teamRequestDescription,
   teamMembership  = teamRequestMembership,
   teamIcon        = teamRequestIcon,
   teamTags        = teamRequestTags,
   teamVisibility  = teamRequestVisibility,
   teamActive      = True,
+  teamGuard       = teamRequestGuard,
   teamCreatedAt   = Nothing,
   teamModifiedBy  = Nothing,
-  teamModifiedAt  = Nothing
+  teamModifiedAt  = Nothing,
+  teamActivityAt  = Nothing
 }
 
 
@@ -36,14 +39,18 @@ teamToResponse (Entity team_id Team{..}) = TeamResponse {
   teamResponseUserId      = keyToInt64 teamUserId,
   teamResponseOrgId       = keyToInt64 teamOrgId,
   teamResponseName        = teamName,
+  teamResponseDisplayName = teamDisplayName,
   teamResponseDescription = teamDescription,
   teamResponseMembership  = teamMembership,
   teamResponseIcon        = teamIcon,
   teamResponseTags        = teamTags,
   teamResponseVisibility  = teamVisibility,
+  teamResponseActive      = teamActive,
+  teamResponseGuard       = teamGuard,
   teamResponseCreatedAt   = teamCreatedAt,
   teamResponseModifiedBy  = fmap keyToInt64 teamModifiedBy,
-  teamResponseModifiedAt  = teamModifiedAt
+  teamResponseModifiedAt  = teamModifiedAt,
+  teamResponseActivityAt  = teamActivityAt
 }
 
 

@@ -107,7 +107,9 @@ credsToUser now Creds{..} = User
   <*> pure credsPlugin
   <*> pure credsIdent
   <*> pure False
+  <*> pure 0
   <*> pure (Just now)
+  <*> pure Nothing
   <*> pure Nothing
   where
   eprofile = extraToProfileX credsPlugin credsExtra
