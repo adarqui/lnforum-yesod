@@ -15,15 +15,16 @@ import           Model.Prelude
 
 pmInRequestToPmIn :: UserId -> PmId -> PmInRequest -> PmIn
 pmInRequestToPmIn user_id pm_id PmInRequest{..} = PmIn {
-  pmInPmId = pm_id,
-  pmInUserId = user_id,
-  pmInLabel = pmInRequestLabel,
-  pmInIsRead = pmInRequestIsRead,
-  pmInIsStarred = pmInRequestIsStarred,
-  pmInIsNew = True,
-  pmInIsSaved = True,
-  pmInActive = True,
-  pmInCreatedAt = Nothing,
+  pmInPmId       = pm_id,
+  pmInUserId     = user_id,
+  pmInLabel      = pmInRequestLabel,
+  pmInIsRead     = pmInRequestIsRead,
+  pmInIsStarred  = pmInRequestIsStarred,
+  pmInIsNew      = True,
+  pmInIsSaved    = True,
+  pmInActive     = True,
+  pmInGuard      = pmInRequestGuard,
+  pmInCreatedAt  = Nothing,
   pmInModifiedAt = Nothing
 }
 
@@ -31,15 +32,17 @@ pmInRequestToPmIn user_id pm_id PmInRequest{..} = PmIn {
 
 pmInToResponse :: Entity PmIn -> PmInResponse
 pmInToResponse (Entity pm_in_id PmIn{..}) = PmInResponse {
-  pmInResponseId = keyToInt64 pm_in_id,
-  pmInResponsePmId = keyToInt64 pmInPmId,
-  pmInResponseUserId = keyToInt64 pmInUserId,
-  pmInResponseLabel = pmInLabel,
-  pmInResponseIsRead = pmInIsRead,
-  pmInResponseIsStarred = pmInIsStarred,
-  pmInResponseIsNew = pmInIsNew,
-  pmInResponseIsSaved = pmInIsSaved,
-  pmInResponseCreatedAt = pmInCreatedAt,
+  pmInResponseId         = keyToInt64 pm_in_id,
+  pmInResponsePmId       = keyToInt64 pmInPmId,
+  pmInResponseUserId     = keyToInt64 pmInUserId,
+  pmInResponseLabel      = pmInLabel,
+  pmInResponseIsRead     = pmInIsRead,
+  pmInResponseIsStarred  = pmInIsStarred,
+  pmInResponseIsNew      = pmInIsNew,
+  pmInResponseIsSaved    = pmInIsSaved,
+  pmInResponseActive     = pmInActive,
+  pmInResponseGuard      = pmInGuard,
+  pmInResponseCreatedAt  = pmInCreatedAt,
   pmInResponseModifiedAt = pmInModifiedAt
 }
 

@@ -15,12 +15,13 @@ import           Model.Prelude
 
 pmOutRequestToPmOut :: UserId -> PmId -> PmOutRequest -> PmOut
 pmOutRequestToPmOut user_id pm_id PmOutRequest{..} = PmOut {
-  pmOutPmId = pm_id,
-  pmOutUserId = user_id,
-  pmOutLabel = pmOutRequestLabel,
-  pmOutIsSaved = True,
-  pmOutActive = True,
-  pmOutCreatedAt = Nothing,
+  pmOutPmId       = pm_id,
+  pmOutUserId     = user_id,
+  pmOutLabel      = pmOutRequestLabel,
+  pmOutIsSaved    = True,
+  pmOutActive     = True,
+  pmOutGuard      = pmOutRequestGuard,
+  pmOutCreatedAt  = Nothing,
   pmOutModifiedAt = Nothing
 }
 
@@ -28,12 +29,14 @@ pmOutRequestToPmOut user_id pm_id PmOutRequest{..} = PmOut {
 
 pmOutToResponse :: Entity PmOut -> PmOutResponse
 pmOutToResponse (Entity pm_out_id PmOut{..}) = PmOutResponse {
-  pmOutResponseId = keyToInt64 pm_out_id,
-  pmOutResponsePmId = keyToInt64 pmOutPmId,
-  pmOutResponseUserId = keyToInt64 pmOutUserId,
-  pmOutResponseLabel = pmOutLabel,
-  pmOutResponseIsSaved = pmOutIsSaved,
-  pmOutResponseCreatedAt = pmOutCreatedAt,
+  pmOutResponseId         = keyToInt64 pm_out_id,
+  pmOutResponsePmId       = keyToInt64 pmOutPmId,
+  pmOutResponseUserId     = keyToInt64 pmOutUserId,
+  pmOutResponseLabel      = pmOutLabel,
+  pmOutResponseIsSaved    = pmOutIsSaved,
+  pmOutResponseActive     = pmOutActive,
+  pmOutResponseGuard      = pmOutGuard,
+  pmOutResponseCreatedAt  = pmOutCreatedAt,
   pmOutResponseModifiedAt = pmOutModifiedAt
 }
 
