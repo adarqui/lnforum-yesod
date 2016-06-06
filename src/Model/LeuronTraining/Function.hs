@@ -18,6 +18,7 @@ leuronTrainingRequestToLeuronTraining user_id leuron_id LeuronTrainingRequest{..
   leuronTrainingLeuronId      = leuron_id,
   leuronTrainingSummary       = leuronTrainingRequestSummary,
   leuronTrainingActive        = True,
+  leuronTrainingGuard         = leuronTrainingRequestGuard,
   leuronTrainingCreatedAt     = Nothing,
   leuronTrainingModifiedAt    = Nothing
 }
@@ -30,6 +31,7 @@ leuronTrainingToResponse (Entity leuronTraining_id LeuronTraining{..}) = LeuronT
   leuronTrainingResponseUserId        = keyToInt64 leuronTrainingUserId,
   leuronTrainingResponseLeuronId      = keyToInt64 leuronTrainingLeuronId,
   leuronTrainingResponseSummary       = leuronTrainingSummary,
+  leuronTrainingResponseGuard         = leuronTrainingGuard,
   leuronTrainingResponseCreatedAt     = leuronTrainingCreatedAt,
   leuronTrainingResponseModifiedAt    = leuronTrainingModifiedAt
 }
