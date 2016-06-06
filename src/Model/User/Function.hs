@@ -15,9 +15,10 @@ module Model.User.Function (
 import           Data.Char           (isAlphaNum)
 import qualified Data.Text           as T (filter, toLower)
 import           Import.NoFoundation
+import           LN.Lib.Url          (toPrettyName)
+import           LN.Lib.Validate
 import           LN.T
 import           Misc.Codec          (keyToInt64)
-import           LN.Lib.Validate
 
 
 
@@ -28,7 +29,7 @@ profileNameToNick = T.toLower . T.filter isAlphaNum
 
 userRequestToUser :: UserRequest -> User
 userRequestToUser UserRequest{..} = User {
-  userNick        = userRequestDisplayNick,
+  userNick        = toPrettyName userRequestDisplayNick,
   userDisplayNick = userRequestDisplayNick,
   userName        = userRequestName,
   userEmail       = userRequestEmail,
