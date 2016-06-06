@@ -31,7 +31,6 @@ apiToResponse (Entity api_id Api{..}) = ApiResponse {
   apiResponseUserId     = keyToInt64 apiUserId,
   apiResponseComment    = apiComment,
   apiResponseKey        = apiKey,
-  apiResponseActive     = apiActive,
   apiResponseGuard      = apiGuard,
   apiResponseCreatedAt  = apiCreatedAt,
   apiResponseModifiedAt = apiModifiedAt
