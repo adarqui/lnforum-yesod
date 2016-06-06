@@ -18,6 +18,7 @@ apiRequestToApi user_id ApiRequest{..} = Api {
   apiComment    = apiRequestComment,
   apiKey        = "",
   apiActive     = True,
+  apiGuard      = apiRequestGuard,
   apiCreatedAt  = Nothing,
   apiModifiedAt = Nothing
 }
@@ -26,11 +27,13 @@ apiRequestToApi user_id ApiRequest{..} = Api {
 
 apiToResponse :: Entity Api -> ApiResponse
 apiToResponse (Entity api_id Api{..}) = ApiResponse {
-  apiResponseId = keyToInt64 api_id,
-  apiResponseUserId = keyToInt64 apiUserId,
-  apiResponseComment = apiComment,
-  apiResponseKey = apiKey,
-  apiResponseCreatedAt = apiCreatedAt,
+  apiResponseId         = keyToInt64 api_id,
+  apiResponseUserId     = keyToInt64 apiUserId,
+  apiResponseComment    = apiComment,
+  apiResponseKey        = apiKey,
+  apiResponseActive     = apiActive,
+  apiResponseGuard      = apiGuard,
+  apiResponseCreatedAt  = apiCreatedAt,
   apiResponseModifiedAt = apiModifiedAt
 }
 

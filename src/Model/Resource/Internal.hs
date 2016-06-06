@@ -76,7 +76,7 @@ updateResourceM user_id resource_id resource_request = do
   updateWhereDb
     [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
     [ ResourceModifiedAt    =. resourceModifiedAt
-    , ResourceName          =. prettyName resourceDisplayName
+    , ResourceName          =. toPrettyUrl resourceDisplayName
     , ResourceDisplayName   =. resourceDisplayName
     , ResourceDescription   =. resourceDescription
     , ResourceSource        =. resourceSource

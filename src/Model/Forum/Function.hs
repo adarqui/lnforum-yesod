@@ -17,15 +17,18 @@ forumRequestToForum :: UserId -> OrganizationId -> ForumRequest -> Forum
 forumRequestToForum user_id org_id ForumRequest{..} = Forum {
   forumUserId      = user_id,
   forumOrgId       = org_id,
-  forumName        = forumRequestName,
+  forumName        = toPrettyUrl forumRequestDisplayName,
+  forumDisplayName = forumRequestDisplayName,
   forumDescription = forumRequestDescription,
   forumIcon        = forumRequestIcon,
   forumTags        = forumRequestTags,
   forumVisibility  = forumRequestVisibility,
   forumActive      = True,
+  forumGuard       = forumRequestGuard,
   forumCreatedAt   = Nothing,
   forumModifiedBy  = Nothing,
-  forumModifiedAt  = Nothing
+  forumModifiedAt  = Nothing,
+  forumActivityAt  = Nothing
 }
 
 
@@ -36,13 +39,17 @@ forumToResponse (Entity forum_id Forum{..}) = ForumResponse {
   forumResponseId          = keyToInt64 forum_id,
   forumResponseOrgId       = keyToInt64 forumOrgId,
   forumResponseName        = forumName,
+  forumResponseDisplayName = forumDisplayName,
   forumResponseDescription = forumDescription,
   forumResponseIcon        = forumIcon,
   forumResponseTags        = forumTags,
   forumResponseVisibility  = forumVisibility,
+  forumResponseActive      = forumActive,
+  forumResponseGuard       = forumGuard,
   forumResponseCreatedAt   = forumCreatedAt,
   forumResponseModifiedBy  = fmap keyToInt64 forumModifiedBy,
-  forumResponseModifiedAt  = forumModifiedAt
+  forumResponseModifiedAt  = forumModifiedAt,
+  forumResponseActivityAt  = forumActivityAt
 }
 
 

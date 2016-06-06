@@ -16,7 +16,7 @@ teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
 teamRequestToTeam user_id org_id TeamRequest{..} = Team {
   teamUserId      = user_id,
   teamOrgId       = org_id,
-  teamName        = prettyName teamRequestDisplayName,
+  teamName        = toPrettyUrl teamRequestDisplayName,
   teamDisplayName = teamRequestDisplayName,
   teamDescription = teamRequestDescription,
   teamMembership  = teamRequestMembership,

@@ -15,15 +15,16 @@ import           Model.Prelude
 
 profileRequestToProfile :: UserId -> ProfileRequest -> Profile
 profileRequestToProfile user_id ProfileRequest{..} = Profile {
-  profileUserId  = user_id,
-  profileGender  = profileRequestGender,
-  profileBirthdate = profileRequestBirthdate,
-  profileWebsite = profileRequestWebsite,
-  profileLocation = profileRequestLocation,
-  profileSignature = profileRequestSignature,
-  profileKarmaGood = 0,
-  profileKarmaBad = 0,
-  profileCreatedAt = Nothing,
+  profileUserId     = user_id,
+  profileGender     = profileRequestGender,
+  profileBirthdate  = profileRequestBirthdate,
+  profileWebsite    = profileRequestWebsite,
+  profileLocation   = profileRequestLocation,
+  profileSignature  = profileRequestSignature,
+  profileKarmaGood  = 0,
+  profileKarmaBad   = 0,
+  profileGuard      = profileRequestGuard,
+  profileCreatedAt  = Nothing,
   profileModifiedAt = Nothing
 }
 
@@ -32,15 +33,16 @@ profileRequestToProfile user_id ProfileRequest{..} = Profile {
 profileToResponse :: Entity Profile -> ProfileResponse
 profileToResponse (Entity profile_id Profile{..}) = ProfileResponse {
   profileResponseId = keyToInt64 profile_id,
-  profileResponseEntityId = keyToInt64 profileUserId,
-  profileResponseGender = profileGender,
-  profileResponseBirthdate = profileBirthdate,
-  profileResponseWebsite = profileWebsite,
-  profileResponseLocation = profileLocation,
-  profileResponseSignature = profileSignature,
-  profileResponseKarmaGood = profileKarmaGood,
-  profileResponseKarmaBad = profileKarmaBad,
-  profileResponseCreatedAt = profileCreatedAt,
+  profileResponseEntityId   = keyToInt64 profileUserId,
+  profileResponseGender     = profileGender,
+  profileResponseBirthdate  = profileBirthdate,
+  profileResponseWebsite    = profileWebsite,
+  profileResponseLocation   = profileLocation,
+  profileResponseSignature  = profileSignature,
+  profileResponseKarmaGood  = profileKarmaGood,
+  profileResponseKarmaBad   = profileKarmaBad,
+  profileResponseGuard      = profileGuard,
+  profileResponseCreatedAt  = profileCreatedAt,
   profileResponseModifiedAt = profileModifiedAt
 }
 

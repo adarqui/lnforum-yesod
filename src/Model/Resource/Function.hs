@@ -9,7 +9,7 @@ module Model.Resource.Function (
 
 
 import           Import
-import           LN.Lib.Url (prettyName)
+import           LN.Lib.Url (toPrettyUrl)
 import           LN.T
 import           Misc.Codec (decodeText, encodeText, keyToInt64)
 
@@ -18,7 +18,7 @@ import           Misc.Codec (decodeText, encodeText, keyToInt64)
 resourceRequestToResource :: UserId -> ResourceRequest -> Resource
 resourceRequestToResource user_id ResourceRequest{..} = Resource {
   resourceUserId         = user_id,
-  resourceName           = prettyName resourceRequestDisplayName,
+  resourceName           = toPrettyUrl resourceRequestDisplayName,
   resourceDisplayName    = resourceRequestDisplayName,
   resourceDescription    = resourceRequestDescription,
   resourceSource         = encodeText resourceRequestSource,

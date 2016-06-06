@@ -29,8 +29,10 @@ leuronRequestToLeuron user_id resource_id LeuronRequest{..} = Leuron {
   leuronTags          = leuronRequestTags,
   leuronStyle         = encodeTextMaybe leuronRequestStyle,
   leuronActive        = True,
+  leuronGuard         = leuronRequestGuard,
   leuronCreatedAt     = Nothing,
-  leuronModifiedAt    = Nothing
+  leuronModifiedAt    = Nothing,
+  leuronActivityAt    = Nothing
 }
 
 
@@ -52,8 +54,11 @@ leuronToResponse (Entity leuron_id Leuron{..}) = LeuronResponse {
   leuronResponseSubstitutions = maybe Nothing decodeText leuronSubstitutions,
   leuronResponseTags          = leuronTags,
   leuronResponseStyle         = maybe Nothing decodeText leuronStyle,
+  leuronResponseActive        = leuronActive,
+  leuronResponseGuard         = leuronGuard,
   leuronResponseCreatedAt     = leuronCreatedAt,
-  leuronResponseModifiedAt    = leuronModifiedAt
+  leuronResponseModifiedAt    = leuronModifiedAt,
+  leuronResponseActivityAt    = leuronActivityAt
 }
 
 

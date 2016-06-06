@@ -96,7 +96,7 @@ insertOrganizationM user_id organization_request = do
   org@(Entity organization_id _) <- insertEntityDb organization
 
   -- bg job: Insert owners team
-  void $ insertTeamM user_id organization_id (TeamRequest "owners" (Just "owners") Membership_Join Nothing [] Public)
+  void $ insertTeamM user_id organization_id (TeamRequest "owners" (Just "owners") Membership_Join Nothing [] Public 0)
   return org
 
 

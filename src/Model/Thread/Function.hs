@@ -17,7 +17,7 @@ threadRequestToThread :: UserId -> BoardId -> ThreadRequest -> Thread
 threadRequestToThread user_id board_id ThreadRequest{..} = Thread {
   threadUserId      = user_id,
   threadBoardId     = board_id,
-  threadName        = prettyName threadRequestDisplayName,
+  threadName        = toPrettyUrl threadRequestDisplayName,
   threadDisplayName = threadRequestDisplayName,
   threadDescription = threadRequestDescription,
   threadSticky      = threadRequestSticky,

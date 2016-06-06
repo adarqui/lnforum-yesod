@@ -17,7 +17,8 @@ import           Model.Prelude
 organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
 organizationRequestToOrganization user_id OrganizationRequest{..} = Organization {
   organizationUserId      = user_id,
-  organizationName        = organizationRequestName,
+  organizationName        = toPrettyName organizationRequestDisplayName,
+  organizationDisplayName = organizationRequestDisplayName,
   organizationDescription = organizationRequestDescription,
   organizationCompany     = organizationRequestCompany,
   organizationLocation    = organizationRequestLocation,
@@ -28,9 +29,11 @@ organizationRequestToOrganization user_id OrganizationRequest{..} = Organization
   organizationTags        = organizationRequestTags,
   organizationVisibility  = organizationRequestVisibility,
   organizationActive      = True,
+  organizationGuard       = organizationRequestGuard,
   organizationCreatedAt   = Nothing,
   organizationModifiedBy  = Nothing,
-  organizationModifiedAt  = Nothing
+  organizationModifiedAt  = Nothing,
+  organizationActivityAt  = Nothing
 }
 
 
@@ -39,6 +42,7 @@ organizationToResponse (Entity organization_id Organization{..}) = OrganizationR
   organizationResponseId          = keyToInt64 organization_id,
   organizationResponseUserId      = keyToInt64 organizationUserId,
   organizationResponseName        = organizationName,
+  organizationResponseDisplayName = organizationDisplayName,
   organizationResponseDescription = organizationDescription,
   organizationResponseCompany     = organizationCompany,
   organizationResponseLocation    = organizationLocation,
@@ -48,9 +52,12 @@ organizationToResponse (Entity organization_id Organization{..}) = OrganizationR
   organizationResponseIcon        = organizationIcon,
   organizationResponseTags        = organizationTags,
   organizationResponseVisibility  = organizationVisibility,
+  organizationResponseActive      = organizationActive,
+  organizationResponseGuard       = organizationGuard,
   organizationResponseCreatedAt   = organizationCreatedAt,
   organizationResponseModifiedBy  = fmap keyToInt64 organizationModifiedBy,
-  organizationResponseModifiedAt  = organizationModifiedAt
+  organizationResponseModifiedAt  = organizationModifiedAt,
+  organizationResponseActivityAt  = organizationActivityAt
 }
 
 
@@ -64,7 +71,8 @@ organizationsToResponses orgs = OrganizationResponses {
 
 validateOrganizationRequest :: OrganizationRequest -> Either Text OrganizationRequest
 validateOrganizationRequest z@OrganizationRequest{..} = do
-  _ <- isValidNick organizationRequestName
+--  _ <- isValidNick organizationRequestName
+  _ <- isValidName organizationRequestDisplayName
   _ <- isValidEmail organizationRequestEmail
   _ <- isValidNonEmptyString organizationRequestCompany
   _ <- isValidNonEmptyString organizationRequestLocation

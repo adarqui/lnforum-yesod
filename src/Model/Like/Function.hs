@@ -21,6 +21,7 @@ likeRequestToLike user_id ent ent_id LikeRequest{..} = Like {
   likeScore          = likeOptToScore likeRequestOpt,
   likeReason         = likeRequestReason,
   likeActive         = True,
+  likeGuard          = likeRequestGuard,
   likeCreatedAt      = Nothing,
   likeModifiedAt     = Nothing
 }
@@ -36,6 +37,8 @@ likeToResponse (Entity like_id Like{..}) = LikeResponse {
   likeResponseOpt        = likeOpt,
   likeResponseScore      = likeScore,
   likeResponseReason     = likeReason,
+  likeResponseActive     = likeActive,
+  likeResponseGuard      = likeGuard,
   likeResponseCreatedAt  = likeCreatedAt,
   likeResponseModifiedAt = likeModifiedAt
 }

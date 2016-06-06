@@ -11,7 +11,7 @@ module Model.Reminder.Function (
 
 
 
-import           LN.Lib.Url (prettyName)
+import           LN.Lib.Url (toPrettyUrl)
 import           LN.T
 import           Import
 import           Misc.Codec (keyToInt64)
@@ -58,7 +58,7 @@ reminderFolderRequestToReminderFolder :: UserId -> Maybe ReminderFolderId -> Rem
 reminderFolderRequestToReminderFolder user_id reminder_folder_id ReminderFolderRequest{..} = ReminderFolder {
   reminderFolderUserId      = user_id,
   reminderFolderParentId    = reminder_folder_id,
-  reminderFolderName        = prettyName reminderFolderRequestDisplayName,
+  reminderFolderName        = toPrettyUrl reminderFolderRequestDisplayName,
   reminderFolderDisplayName = reminderFolderRequestDisplayName,
   reminderFolderDescription = reminderFolderRequestDescription,
   reminderFolderVisibility  = reminderFolderRequestVisibility,
