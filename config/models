@@ -134,7 +134,7 @@ Api
 
 Resource
   userId        UserId
-  name          Text
+  name          Text default='null'
   displayName   Text default='null'
   description   Text
   source        Text
@@ -155,7 +155,7 @@ Resource
   modifiedAt    UTCTime Maybe
   activityAt    UTCTime Maybe
 
-  UniqueResourceName        userId name
+--  UniqueResourceName        userId name
 --  UniqueResourceDisplayName userId displayName
   deriving Show Generic
 
@@ -413,7 +413,7 @@ ReminderFolder
   name        Text
   displayName Text default='null'
   description Text Maybe
-  visibility  Visibility
+  visibility  Visibility default='Public'
 
   active      Bool default=True
   guard       Int  default=0

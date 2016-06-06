@@ -49,7 +49,7 @@ getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
   leuron_stat     <- getLeuronStatM user_id leuron_id
 --  leuron_like <- getLeuronLike_ByLeuronM user_id leuron
 --  leuron_star <- getLeuronStar_ByLeuronM user_id leuron
-  leuron_training <- insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View
+  leuron_training <- insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View 0
 
   return $ LeuronPackResponse {
     leuronPackResponseLeuron     = leuronToResponse leuron,
