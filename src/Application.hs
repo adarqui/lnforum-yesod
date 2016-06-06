@@ -149,11 +149,11 @@ makeApplication foundation = do
     return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
 -- | just prints bleh.. can be added like so: return $ bleh $ logWare $ ...
-bleh :: Middleware
-bleh app req sendResponse = do
-  app req $ \rsp -> do
-      putStrLn "bleh!"
-      sendResponse rsp
+-- bleh :: Middleware
+-- bleh app req sendResponse = do
+--  app req $ \rsp -> do
+--      putStrLn "bleh!"
+--      sendResponse rsp
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
