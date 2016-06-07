@@ -36,7 +36,7 @@ Organization
   activityAt   UTCTime Maybe
 
   UniqueOrgName        name
---  UniqueOrgDisplayName displayName
+  UniqueOrgDisplayName displayName
   UniqueOrgEmail       email
 
   deriving Eq Show Typeable
@@ -63,7 +63,7 @@ Team
   activityAt  UTCTime Maybe
 
   UniqueTeam            orgId name
---  UniqueTeamDisplayName orgId displayName
+  UniqueTeamDisplayName orgId displayName
 
   deriving Eq Show Typeable
 
@@ -155,8 +155,8 @@ Resource
   modifiedAt    UTCTime Maybe
   activityAt    UTCTime Maybe
 
---  UniqueResourceName        userId name
---  UniqueResourceDisplayName userId displayName
+  UniqueResourceName        userId name
+  UniqueResourceDisplayName userId displayName
   deriving Show Generic
 
 
@@ -227,7 +227,7 @@ Bucket
   activityAt  UTCTime Maybe
 
   UniqueBucketName        userId name
---  UniqueBucketDisplayName userId displayName
+  UniqueBucketDisplayName userId displayName
 
   deriving Eq Show Typeable
 
@@ -340,7 +340,7 @@ Blog
   activityAt  UTCTime Maybe
 
   UniqueBlog            userId name
---  UniqueBlogDisplayName userId displayName
+  UniqueBlogDisplayName userId displayName
 
   deriving Eq Show Typeable
 
@@ -363,7 +363,7 @@ BlogEntry
   activityAt  UTCTime Maybe
 
   UniqueBlogEntry            userId name
---  UniqueBlogEntryDisplayName userId displayName
+  UniqueBlogEntryDisplayName userId displayName
 
   deriving Eq Show Typeable
 
@@ -423,7 +423,7 @@ ReminderFolder
   activityAt  UTCTime Maybe
 
   UniqueReminderFolder            userId name
---  UniqueReminderFolderDisplayName userId displayName
+  UniqueReminderFolderDisplayName userId displayName
 
   deriving Eq Show Typeable
 
@@ -468,7 +468,7 @@ Forum
   activityAt  UTCTime Maybe
 
   UniqueForum            orgId name
---  UniqueForumDisplayName orgId displayName
+  UniqueForumDisplayName orgId displayName
 
   deriving Eq Show Typeable
 
@@ -493,7 +493,7 @@ Board
   activityAt  UTCTime Maybe
 
   UniqueBoard            forumId name
---  UniqueBoardDisplayName forumId displayName
+  UniqueBoardDisplayName forumId displayName
 
   deriving Eq Show Typeable
 
@@ -520,7 +520,7 @@ Thread
   activityAt   UTCTime Maybe
 
   UniqueThread userId boardId name
---  UniqueThreadDisplayName userId boardId displayName
+  UniqueThreadDisplayName userId boardId displayName
 
   deriving Eq Show Typeable
 
