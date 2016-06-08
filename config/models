@@ -37,7 +37,6 @@ Organization
 
   UniqueOrgName        name
   UniqueOrgDisplayName displayName
-  UniqueOrgEmail       email
 
   deriving Eq Show Typeable
 
