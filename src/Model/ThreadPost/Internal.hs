@@ -89,7 +89,9 @@ insertThreadPostM user_id mthread_id mthread_post_id threadPost_request = do
 
   v <- insertEntityDb thread_post
 
-  updateWhereDb [ThreadId ==. (fromJust mthread_id)] [ThreadActivityAt =. Just ts]
+  updateWhereDb
+    [ ThreadId ==. (fromJust mthread_id) ]
+    [ ThreadActivityAt =. Just ts ]
 
   return v
 
@@ -108,9 +110,12 @@ updateThreadPostM user_id thread_post_id threadPost_request = do
     ThreadPost{..} = (threadPostRequestToThreadPost user_id dummyId Nothing threadPost_request) { threadPostModifiedAt = Just ts }
   updateWhereDb
     [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ]
-    [ ThreadPostModifiedAt =. threadPostModifiedAt
-    , ThreadPostTitle =. threadPostTitle
-    , ThreadPostBody =. threadPostBody
+    [ ThreadPostModifiedAt  =. threadPostModifiedAt
+    , ThreadPostTitle       =. threadPostTitle
+    , ThreadPostBody        =. threadPostBody
+    , ThreadPostTags        =. threadPostTags
+    , ThreadPostPrivateTags =. threadPostPrivateTags
+    , ThreadPostGuard      +=. 1
     ]
   notFoundMaybe =<< selectFirstDb [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ] []
 

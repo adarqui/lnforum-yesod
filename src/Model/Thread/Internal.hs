@@ -178,10 +178,17 @@ updateThreadM user_id thread_id thread_request = do
 
   updateWhereDb
     [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
-    [ ThreadModifiedAt =. threadModifiedAt
-    , ThreadActivityAt =. threadActivityAt
-    , ThreadName =. threadName
+    [ ThreadModifiedAt  =. threadModifiedAt
+    , ThreadActivityAt  =. threadActivityAt
+    , ThreadName        =. threadName
+    , ThreadDisplayName =. threadDisplayName
     , ThreadDescription =. threadDescription
+    , ThreadSticky      =. threadSticky
+    , ThreadLocked      =. threadLocked
+    , ThreadPoll        =. threadPoll
+    , ThreadIcon        =. threadIcon
+    , ThreadTags        =. threadTags
+    , ThreadGuard      +=. 1
     ]
 
   notFoundMaybe =<< selectFirstDb [ ThreadUserId ==. user_id, ThreadId ==. thread_id ] []

@@ -76,7 +76,7 @@ updateResourceM user_id resource_id resource_request = do
   updateWhereDb
     [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
     [ ResourceModifiedAt    =. resourceModifiedAt
-    , ResourceName          =. toPrettyUrl resourceDisplayName
+    , ResourceName          =. resourceName
     , ResourceDisplayName   =. resourceDisplayName
     , ResourceDescription   =. resourceDescription
     , ResourceSource        =. resourceSource
@@ -87,6 +87,9 @@ updateResourceM user_id resource_id resource_request = do
     , ResourceCounter       =. resourceCounter
     , ResourceVersion       =. resourceVersion
     , ResourceUrls          =. resourceUrls
+    , ResourceIcon          =. resourceIcon
+    , ResourceTags          =. resourceTags
+    , ResourceGuard        +=. 1
     ]
 
   notFoundMaybe =<< selectFirstDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ] []

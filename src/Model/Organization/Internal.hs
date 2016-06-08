@@ -111,15 +111,23 @@ updateOrganizationM user_id organization_id organization_request = do
   let
     email_md5 = md5Text (organizationRequestEmail organization_request)
     Organization{..} = (organizationRequestToOrganization user_id organization_request) { organizationModifiedAt = Just ts }
+
   updateWhereDb
     [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
-    [ OrganizationModifiedAt =. organizationModifiedAt
-    , OrganizationName =. organizationName
+    [ OrganizationModifiedAt  =. organizationModifiedAt
+    , OrganizationActivityAt  =. Just ts
+    , OrganizationName        =. organizationName
+    , OrganizationDisplayName =. organizationDisplayName
     , OrganizationDescription =. organizationDescription
-    , OrganizationCompany =. organizationCompany
-    , OrganizationLocation =. organizationLocation
-    , OrganizationEmail =. organizationEmail
-    , OrganizationEmailMD5 =. email_md5
+    , OrganizationCompany     =. organizationCompany
+    , OrganizationLocation    =. organizationLocation
+    , OrganizationEmail       =. organizationEmail
+    , OrganizationEmailMD5    =. email_md5
+    , OrganizationMembership  =. organizationMembership
+    , OrganizationIcon        =. organizationIcon
+    , OrganizationTags        =. organizationTags
+    , OrganizationVisibility  =. organizationVisibility
+    , OrganizationGuard      +=. 1
     ]
   notFoundMaybe =<< selectFirstDb [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ] []
 

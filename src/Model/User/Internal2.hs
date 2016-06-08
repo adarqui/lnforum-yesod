@@ -134,10 +134,12 @@ updateUserM _ lookup_user_id user_request = do
     [ UserId ==. lookup_user_id ]
 
     [ UserModifiedAt =. userModifiedAt
-    , UserNick =. userNick
+    , UserNick        =. userNick
     , UserDisplayNick =. userDisplayNick
-    , UserEmail =. userEmail
-    , UserEmailMD5 =. userEmailMD5
+    , UserName        =. userName
+    , UserEmail       =. userEmail
+    , UserEmailMD5    =. userEmailMD5
+    , UserGuard      +=. 1
     ]
 
   notFoundMaybe =<< selectFirstDb [ UserId ==. lookup_user_id ] []

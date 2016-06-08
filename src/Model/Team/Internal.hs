@@ -81,9 +81,15 @@ updateTeamM user_id team_id team_request = do
 
   updateWhereDb
     [ TeamUserId ==. user_id, TeamId ==. team_id ]
-    [ TeamModifiedAt =. teamModifiedAt
-    , TeamName =. teamName
+    [ TeamModifiedAt  =. teamModifiedAt
+    , TeamName        =. teamName
+    , TeamDisplayName =. teamDisplayName
     , TeamDescription =. teamDescription
+    , TeamMembership  =. teamMembership
+    , TeamIcon        =. teamIcon
+    , TeamTags        =. teamTags
+    , TeamVisibility  =. teamVisibility
+    , TeamGuard      +=. teamGuard
     ]
 
   notFoundMaybe =<< selectFirstDb [ TeamUserId ==. user_id, TeamId ==. team_id ] []
