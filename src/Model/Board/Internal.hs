@@ -8,9 +8,7 @@ module Model.Board.Internal (
   getBoardsBy_ForumIdM,
   getBoardsBy_ForumId_KeysM,
   getBoardsBy_ForumNameM,
-  getBoardsBy_OrganizationName_ForumNameM,
   getBoardsBy_BoardParentIdM,
-  getBoardsBy_OrganizationName_ForumName_BoardParentNameM,
   getBoardsBy_EverythingM,
 
   getBoardM,
@@ -47,11 +45,11 @@ getBoardsM user_id = do
 
     (N, N, Just forum_id, N, N, N)         -> getBoardsBy_ForumIdM user_id forum_id sp
 
-    (N, J org_name, N, J forum_name, N, N) -> getBoardsBy_OrganizationName_ForumNameM user_id org_name forum_name sp
+--    (N, J org_name, N, J forum_name, N, N) -> getBoardsBy_OrganizationName_ForumNameM user_id org_name forum_name sp
 
     (N, N, N, N, J board_parent_id, N)     -> getBoardsBy_BoardParentIdM user_id (int64ToKey' board_parent_id) sp
 
-    (N, J org_name, N, J forum_name, N, J board_name) -> getBoardsBy_OrganizationName_ForumName_BoardParentNameM user_id org_name forum_name board_name sp
+--    (N, J org_name, N, J forum_name, N, J board_name) -> getBoardsBy_OrganizationName_ForumName_BoardParentNameM user_id org_name forum_name board_name sp
 
     (_, _, _, _, _, _)                     -> getBoardsBy_EverythingM user_id sp
 
@@ -100,11 +98,11 @@ getBoardsBy_ForumNameM user_id forum_name sp = do
 
 
 
-getBoardsBy_OrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler [Entity Board]
-getBoardsBy_OrganizationName_ForumNameM user_id org_name forum_name sp = do
+-- getBoardsBy_OrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler [Entity Board]
+-- getBoardsBy_OrganizationName_ForumNameM user_id org_name forum_name sp = do
 
-  (Entity forum_id _) <- getForumBy_OrganizationName_ForumNameM user_id org_name forum_name sp
-  selectListDb sp [BoardForumId ==. forum_id] [] BoardId
+--   (Entity forum_id _) <- getForumBy_OrganizationName_ForumNameM user_id org_name forum_name sp
+--   selectListDb sp [BoardForumId ==. forum_id] [] BoardId
 
 
 
@@ -115,11 +113,11 @@ getBoardsBy_BoardParentIdM _ board_parent_id sp = do
 
 
 
-getBoardsBy_OrganizationName_ForumName_BoardParentNameM :: UserId -> Text -> Text -> Text -> StandardParams -> Handler [Entity Board]
-getBoardsBy_OrganizationName_ForumName_BoardParentNameM user_id org_name forum_name parent_name sp = do
+-- getBoardsBy_OrganizationName_ForumName_BoardParentNameM :: UserId -> Text -> Text -> Text -> StandardParams -> Handler [Entity Board]
+-- getBoardsBy_OrganizationName_ForumName_BoardParentNameM user_id org_name forum_name parent_name sp = do
 
-  (Entity forum_id _) <- getForumBy_OrganizationName_ForumNameM user_id org_name forum_name sp
-  selectListDb sp [BoardName ==. parent_name, BoardForumId ==. forum_id] [] BoardId
+--   (Entity forum_id _) <- getForumBy_OrganizationName_ForumNameM user_id org_name forum_name sp
+--   selectListDb sp [BoardName ==. parent_name, BoardForumId ==. forum_id] [] BoardId
 
 
 

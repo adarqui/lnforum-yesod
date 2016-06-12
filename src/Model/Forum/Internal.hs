@@ -11,7 +11,8 @@ module Model.Forum.Internal (
 
   getForumM,
   getForumMH,
-  getForumBy_OrganizationName_ForumNameM,
+
+  getForum_ByOrganizationIdMH,
 
   insertForumM,
   updateForumM,
@@ -96,6 +97,13 @@ getForumsBy_EverythingM _ sp = do
 
 
 
+getForum_ByOrganizationIdMH :: UserId -> Text -> OrganizationId -> StandardParams -> Handler (Entity Forum)
+getForum_ByOrganizationIdMH user_id forum_name org_id sp = do
+
+  notFoundMaybe =<< selectFirstDb [ ForumOrgId ==. org_id, ForumName ==. forum_name ] []
+
+
+
 getForumM :: UserId -> ForumId -> Handler (Entity Forum)
 getForumM _ forum_id = do
   notFoundMaybe =<< selectFirstDb [ ForumId ==. forum_id ] []
@@ -107,18 +115,18 @@ getForumMH user_id forum_name = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case spOrganizationName of
+  case spOrganizationId of
 
-    Just org_name -> getForumBy_OrganizationName_ForumNameM user_id org_name forum_name sp
-    Nothing       -> notFound
+    Just org_id -> getForum_ByOrganizationIdMH user_id forum_name org_id sp
+    _           -> notFound
 
 
 
-getForumBy_OrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler (Entity Forum)
-getForumBy_OrganizationName_ForumNameM user_id org_name forum_name _ = do
+-- getForumBy_OrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler (Entity Forum)
+-- getForumBy_OrganizationName_ForumNameM user_id org_name forum_name _ = do
 
-  (Entity org_id _) <- getOrganizationBy_OrganizationNameM user_id org_name
-  notFoundMaybe =<< selectFirstDb [ForumOrgId ==. org_id, ForumName ==. forum_name] []
+--   (Entity org_id _) <- getOrganizationBy_OrganizationNameM user_id org_name
+--   notFoundMaybe =<< selectFirstDb [ForumOrgId ==. org_id, ForumName ==. forum_name] []
 
 
 
