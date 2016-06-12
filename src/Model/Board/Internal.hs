@@ -182,14 +182,17 @@ updateBoardM user_id board_id board_request = do
 
   updateWhereDb
     [ BoardUserId ==. user_id, BoardId ==. board_id ]
-    [ BoardModifiedAt  =. boardModifiedAt
-    , BoardActivityAt  =. Just ts
-    , BoardName        =. boardName
-    , BoardDisplayName =. boardDisplayName
-    , BoardDescription =. boardDescription
-    , BoardIcon        =. boardIcon
-    , BoardTags        =. boardTags
-    , BoardGuard      +=. 1
+    [ BoardModifiedAt         =. boardModifiedAt
+    , BoardActivityAt         =. Just ts
+    , BoardName               =. boardName
+    , BoardDisplayName        =. boardDisplayName
+    , BoardDescription        =. boardDescription
+    , BoardIsAnonymous        =. boardIsAnonymous
+    , BoardCanCreateSubBoards =. boardCanCreateSubBoards
+    , BoardCanCreateThreads   =. boardCanCreateThreads
+    , BoardIcon               =. boardIcon
+    , BoardTags               =. boardTags
+    , BoardGuard             +=. 1
     ]
 
   notFoundMaybe =<< selectFirstDb [ BoardUserId ==. user_id, BoardId ==. board_id ] []

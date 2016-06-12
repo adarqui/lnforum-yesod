@@ -43,15 +43,15 @@ Organization
 
 
 Team
-  userId      UserId
-  orgId       OrganizationId
-  name        Text
-  displayName Text default='null'
-  description Text Maybe
-  membership  Membership
-  icon        Text Maybe
-  tags        [Text]
-  visibility  Visibility
+  userId       UserId
+  orgId        OrganizationId
+  name         Text
+  displayName  Text default='null'
+  description  Text Maybe
+  membership   Membership
+  icon         Text Maybe
+  tags         [Text]
+  visibility   Visibility
 
   active      Bool default=True
   guard       Int  default=0
@@ -474,17 +474,20 @@ Forum
 
 
 Board
-  userId      UserId
-  forumId     ForumId
-  parentId    BoardId Maybe
-  name        Text
-  displayName Text default='null'
-  description Text Maybe
-  icon        Text Maybe
-  tags        [Text]
+  userId             UserId
+  forumId            ForumId
+  parentId           BoardId Maybe
+  name               Text
+  displayName        Text default='null'
+  description        Text Maybe
+  isAnonymous        Bool default=False
+  canCreateSubBoards Bool default=True
+  canCreateThreads   Bool default=True
+  icon               Text Maybe
+  tags               [Text]
 
-  active      Bool default=True
-  guard       Int  default=0
+  active             Bool default=True
+  guard              Int  default=0
 
   createdAt   UTCTime Maybe default=now()
   modifiedBy  UserId Maybe
