@@ -11,7 +11,7 @@ exec_prod_sudo:
 	sudo ./bin/ln-yesod config/settings.yml
 
 exec_dev_sudo:
-	sudo stack exec -- yesod devel -p 80 --tls-port 443
+	sudo stack exec --allow-different-user -- yesod devel -p 80 --tls-port 443
 
 ghci:
 	stack ghci ln-yesod

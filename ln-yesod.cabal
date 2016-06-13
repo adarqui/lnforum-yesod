@@ -19,6 +19,7 @@ library
                      Api.Auth
                      Api.Params
                      Api.Response
+                     All.GlobalGroup
                      Foundation
                      Handler.Prelude
                      Handler.Api
