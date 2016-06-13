@@ -86,7 +86,7 @@ TeamMember
 
 
 
-GlobalGroup
+GGroup
   userId       UserId
   name         Text
   displayName  Text default='null'
