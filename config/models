@@ -68,6 +68,85 @@ Team
 
 
 
+TeamMember
+  userId      UserId
+  teamId      TeamId
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueTeamMember            teamId userId
+
+  deriving Eq Show Typeable
+
+
+
+GlobalGroup
+  userId       UserId
+  name         Text
+  displayName  Text default='null'
+  description  Text Maybe
+  membership   Membership
+  icon         Text Maybe
+  tags         [Text]
+  visibility   Visibility
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueGlobalGroup            name
+  UniqueGlobalGroupDisplayName displayName
+
+  deriving Eq Show Typeable
+
+
+
+Group
+  userId      UserId
+  groupId     GlobalGroupId
+  orgId       OrganizationId
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueGroup            orgId groupId
+
+  deriving Eq Show Typeable
+
+
+
+GroupMember
+  userId      UserId
+  groupId     GroupId
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueGroupMember            groupId userId
+
+  deriving Eq Show Typeable
+
+
+
 User
   nick        Text
   displayNick Text
