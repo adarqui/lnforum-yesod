@@ -86,7 +86,7 @@ TeamMember
 
 
 
-GGroup
+GlobalGroup
   userId       UserId
   name         Text
   displayName  Text default='null'
@@ -112,18 +112,18 @@ GGroup
 
 
 Group
-  userId      UserId
-  groupId     GlobalGroupId
-  orgId       OrganizationId
+  userId        UserId
+  globalGroupId GlobalGroupId
+  orgId         OrganizationId
 
-  active      Bool default=True
-  guard       Int  default=0
+  active        Bool default=True
+  guard         Int  default=0
 
-  createdAt   UTCTime Maybe default=now()
-  modifiedAt  UTCTime Maybe
-  activityAt  UTCTime Maybe
+  createdAt     UTCTime Maybe default=now()
+  modifiedAt    UTCTime Maybe
+  activityAt    UTCTime Maybe
 
-  UniqueGroup            orgId groupId
+  UniqueGroup orgId globalGroupId
 
   deriving Eq Show Typeable
 
@@ -141,7 +141,7 @@ GroupMember
   modifiedAt  UTCTime Maybe
   activityAt  UTCTime Maybe
 
-  UniqueGroupMember            groupId userId
+  UniqueGroupMember groupId userId
 
   deriving Eq Show Typeable
 
