@@ -20,6 +20,20 @@
 
 
 
+/api/boards BoardsR GET
+/api/board BoardR0 POST
+/api/board/#BoardId BoardR GET PUT DELETE
+!/api/board/#Text BoardH GET
+
+/api/board_stats BoardStatsR GET
+/api/board_stat/#BoardId BoardStatR GET
+
+/api/board_packs BoardPacksR GET
+/api/board_pack/#BoardId BoardPackR GET
+!/api/board_pack/#Text BoardPackH GET
+
+
+
 /api/emptys EmptysR GET POST
 /api/empty/#EmptyId EmptyR GET PUT DELETE
 
@@ -39,17 +53,17 @@
 
 
 
-/api/boards BoardsR GET
-/api/board BoardR0 POST
-/api/board/#BoardId BoardR GET PUT DELETE
-!/api/board/#Text BoardH GET
+/api/global_groups GlobalGroupsR GET
+/api/global_group GlobalGroupR0 POST
+/api/global_group/#GlobalGroupId GlobalGroupR GET PUT DELETE
+!/api/global_group/#Text GlobalGroupH GET
 
-/api/board_stats BoardStatsR GET
-/api/board_stat/#BoardId BoardStatR GET
+/api/global_group_stats GlobalGroupStatsR GET
+/api/global_group_stat/#GlobalGroupId GlobalGroupStatR GET
 
-/api/board_packs BoardPacksR GET
-/api/board_pack/#BoardId BoardPackR GET
-!/api/board_pack/#Text BoardPackH GET
+/api/global_group_packs GlobalGroupPacksR GET
+/api/global_group_pack/#GlobalGroupId GlobalGroupPackR GET
+!/api/global_group_pack/#Text GlobalGroupPackH GET
 
 
 

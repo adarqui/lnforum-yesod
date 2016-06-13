@@ -1,10 +1,21 @@
 module All.GlobalGroup (
   -- handler
   getGlobalGroupsR,
-  postGlobalGroupsR,
+  postGlobalGroupR0,
   getGlobalGroupR,
+  getGlobalGroupH,
   putGlobalGroupR,
   deleteGlobalGroupR,
+
+  getCountGlobalGroupsR,
+
+  getGlobalGroupStatsR,
+  getGlobalGroupStatR,
+
+  getGlobalGroupPacksR,
+  getGlobalGroupPackR,
+  getGlobalGroupPackH,
+
 
 
   -- model/functions
@@ -13,19 +24,19 @@ module All.GlobalGroup (
   globalGroupsToResponses,
 
 
+
   -- model/internal
   getGlobalGroupsM,
-  getGlobalGroupsBy_UserIdM,
-  getGlobalGroupsBy_EverythingM,
+  getGlobalGroups_ByUserIdM,
+  getGlobalGroups_ByEverythingM,
 
   getGlobalGroupM,
   insertGlobalGroupM,
   updateGlobalGroupM,
   deleteGlobalGroupM,
 
-  getGlobalGroupCountM
 
-  -- pack
+  -- model/pack
 
 ) where
 
@@ -43,8 +54,8 @@ getGlobalGroupsR = do
 
 
 
-postGlobalGroupsR :: Handler Value
-postGlobalGroupsR = do
+postGlobalGroupR0 :: Handler Value
+postGlobalGroupR0 = do
 
   user_id <- requireAuthId
 
@@ -57,6 +68,13 @@ getGlobalGroupR :: GlobalGroupId -> Handler Value
 getGlobalGroupR global_group_id = do
   user_id <- requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupM user_id global_group_id
+
+
+
+getGlobalGroupH :: Text -> Handler Value
+getGlobalGroupH group_name = do
+  user_id <- requireAuthId
+  (toJSON . globalGroupToResponse) <$> getGlobalGroupMH user_id group_name
 
 
 
@@ -73,6 +91,48 @@ deleteGlobalGroupR global_group_id = do
   user_id <- requireAuthId
   void $ deleteGlobalGroupM user_id global_group_id
   sendResponseStatus status200 ("DELETED" :: Text)
+
+
+
+getCountGlobalGroupsR :: Handler Value
+getCountGlobalGroupsR = do
+  user_id <- requireAuthId
+  toJSON <$> countGlobalGroupsM user_id
+
+
+
+getGlobalGroupStatsR :: Handler Value
+getGlobalGroupStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getGlobalGroupStatsM user_id
+
+
+
+getGlobalGroupStatR :: GlobalGroupId -> Handler Value
+getGlobalGroupStatR global_group_id = do
+  user_id <- requireAuthId
+  toJSON <$> getGlobalGroupStatM user_id global_group_id
+
+
+
+getGlobalGroupPacksR :: Handler Value
+getGlobalGroupPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getGlobalGroupPacksM user_id
+
+
+
+getGlobalGroupPackR :: GlobalGroupId -> Handler Value
+getGlobalGroupPackR global_group_id = do
+  user_id <- requireAuthId
+  toJSON <$> getGlobalGroupPackM user_id global_group_id
+
+
+
+getGlobalGroupPackH :: Text -> Handler Value
+getGlobalGroupPackH global_group_name = do
+  user_id <- requireAuthId
+  toJSON <$> getGlobalGroupPackMH user_id global_group_name
 
 
 
@@ -136,19 +196,19 @@ getGlobalGroupsM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case spUserId of
-    Just lookup_user_id -> getGlobalGroupsBy_UserIdM user_id lookup_user_id sp
+    Just lookup_user_id -> getGlobalGroups_ByUserIdM user_id lookup_user_id sp
     _                   -> notFound
 
 
 
-getGlobalGroupsBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity GlobalGroup]
-getGlobalGroupsBy_UserIdM _ lookup_user_id sp = do
+getGlobalGroups_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity GlobalGroup]
+getGlobalGroups_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [GlobalGroupUserId ==. lookup_user_id] [] GlobalGroupId
 
 
 
-getGlobalGroupsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity GlobalGroup]
-getGlobalGroupsBy_EverythingM _ sp = do
+getGlobalGroups_ByEverythingM :: UserId -> StandardParams -> Handler [Entity GlobalGroup]
+getGlobalGroups_ByEverythingM _ sp = do
   selectListDb sp [] [] GlobalGroupId
 
 
@@ -156,6 +216,28 @@ getGlobalGroupsBy_EverythingM _ sp = do
 getGlobalGroupM :: UserId -> GlobalGroupId -> Handler (Entity GlobalGroup)
 getGlobalGroupM _ global_groupid = do
   notFoundMaybe =<< selectFirstDb [ GlobalGroupId ==. global_groupid ] []
+
+
+
+getGlobalGroupMH :: UserId -> Text -> Handler (Entity GlobalGroup)
+getGlobalGroupMH user_id global_group_name = do
+
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case spUserId of
+
+    Just lookup_user_id -> getGlobalGroup_ByUserIdMH user_id global_group_name user_id sp
+    _                   -> getGlobalGroupMH' user_id global_group_name sp
+
+
+
+getGlobalGroup_ByUserIdMH :: UserId -> Text -> UserId -> StandardParams -> Handler (Entity GlobalGroup)
+getGlobalGroup_ByUserIdMH user_id global_group_name lookup_user_id _ = notFound
+
+
+
+getGlobalGroupMH' :: UserId -> Text -> StandardParams -> Handler (Entity GlobalGroup)
+getGlobalGroupMH' user_id global_group_name _ = notFound
 
 
 
@@ -204,6 +286,112 @@ deleteGlobalGroupM user_id global_groupid = do
 
 
 
-getGlobalGroupCountM :: Handler Int
-getGlobalGroupCountM = do
-  runDB $ count [ GlobalGroupName !=. "" ]
+countGlobalGroupsM :: UserId -> Handler CountResponses
+countGlobalGroupsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spUserId of
+
+    Nothing             -> do
+      notFound
+--      n <- countDb [ GlobalGroupId /=. 0 ]
+--      return $ CountResponses [CountResponse (fromIntegral 0) (fromIntegral n)]
+
+    Just lookup_user_id -> do
+      n <- countDb [ GlobalGroupUserId ==. lookup_user_id ]
+      return $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
+
+
+
+getGlobalGroupStatsM :: UserId -> Handler GlobalGroupStatResponses
+getGlobalGroupStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spBoardId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+getGlobalGroupStatM :: UserId -> GlobalGroupId -> Handler GlobalGroupStatResponse
+getGlobalGroupStatM _ global_group_id = do
+
+  return $ GlobalGroupStatResponse {
+    globalGroupStatResponseGroups = 0 -- TODO FIXME
+  }
+
+
+
+-- model/pack
+
+
+getGlobalGroupPacksM :: UserId -> Handler GlobalGroupPackResponses
+getGlobalGroupPacksM user_id = do
+
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case spUserId of
+
+    Just lookup_user_id -> getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp
+    _                   -> getGlobalGroupPacks_ByEverythingM user_id sp
+
+
+
+getGlobalGroupPackM :: UserId -> GlobalGroupId -> Handler GlobalGroupPackResponse
+getGlobalGroupPackM user_id global_group_id = do
+
+  globalGroup         <- getGlobalGroupM user_id global_group_id
+  getGlobalGroupPack_ByGlobalGroupM user_id globalGroup
+
+
+
+getGlobalGroupPackMH :: UserId -> Text -> Handler GlobalGroupPackResponse
+getGlobalGroupPackMH user_id global_group_name = do
+
+  globalGroup         <- getGlobalGroupMH user_id global_group_name
+  getGlobalGroupPack_ByGlobalGroupM user_id globalGroup
+
+
+
+getGlobalGroupPacks_ByEverythingM :: UserId -> StandardParams -> Handler GlobalGroupPackResponses
+getGlobalGroupPacks_ByEverythingM user_id sp = do
+  globalGroups       <- getGlobalGroups_ByEverythingM user_id sp
+  globalGroups_packs <- mapM (\globalGroup -> getGlobalGroupPack_ByGlobalGroupM user_id globalGroup) globalGroups
+  return $ GlobalGroupPackResponses {
+    globalGroupPackResponses = globalGroups_packs
+  }
+
+
+
+getGlobalGroupPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler GlobalGroupPackResponses
+getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp = do
+
+  globalGroups       <- getGlobalGroups_ByUserIdM user_id lookup_user_id sp
+  globalGroups_packs <- mapM (\globalGroup -> getGlobalGroupPack_ByGlobalGroupM user_id globalGroup) globalGroups
+  return $ GlobalGroupPackResponses {
+    globalGroupPackResponses = globalGroups_packs
+  }
+
+
+
+getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> Handler GlobalGroupPackResponse
+getGlobalGroupPack_ByGlobalGroupM user_id globalGroup = do
+
+  -- let sp = defaultStandardParams {
+  --     spSortOrder = Just SortOrder_ByDsc,
+  --     spOrder     = Just Order_ByActivityAt,
+  --     spLimit     = Just 1
+  --   }
+
+  global_group_stats   <- getGlobalGroupStatM user_id (entityKey globalGroup)
+
+  return $ GlobalGroupPackResponse {
+    globalGroupPackResponseGlobalGroup   = globalGroupToResponse globalGroup,
+    globalGroupPackResponseGlobalGroupId = global_group_id,
+    globalGroupPackResponseStat    = global_group_stats
+  }
+  where
+  global_group_id = entityKeyToInt64 globalGroup
