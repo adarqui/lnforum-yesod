@@ -80,7 +80,7 @@ TeamMember
   modifiedAt  UTCTime Maybe
   activityAt  UTCTime Maybe
 
-  UniqueTeamMember            teamId userId
+  UniqueTeamMember teamId userId
 
   deriving Eq Show Typeable
 
@@ -130,18 +130,18 @@ Group
 
 
 GroupMember
-  userId      UserId
-  groupId     GroupId
+  userId        UserId
+  globalGroupId GlobalGroupId
 
-  active      Bool default=True
-  guard       Int  default=0
+  active        Bool default=True
+  guard         Int  default=0
 
-  createdAt   UTCTime Maybe default=now()
-  modifiedBy  UserId Maybe
-  modifiedAt  UTCTime Maybe
-  activityAt  UTCTime Maybe
+  createdAt     UTCTime Maybe default=now()
+  modifiedBy    UserId Maybe
+  modifiedAt    UTCTime Maybe
+  activityAt    UTCTime Maybe
 
-  UniqueGroupMember groupId userId
+  UniqueGroupMember globalGroupId userId
 
   deriving Eq Show Typeable
 
