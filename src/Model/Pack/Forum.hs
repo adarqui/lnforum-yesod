@@ -19,8 +19,8 @@ getForumPacksM user_id = do
 
   case (spOrganizationId, spOrganizationName) of
 
-    (Just org_id, _)             -> getForumPacksBy_OrganizationIdM user_id org_id sp
-    (_          , Just org_name) -> getForumPacksBy_OrganizationNameM user_id org_name sp
+    (Just org_id, _)             -> getForumPacks_ByOrganizationIdM user_id org_id sp
+    (_          , Just org_name) -> getForumPacks_ByOrganizationNameM user_id org_name sp
     (_          , _)             -> notFound
 
 
@@ -41,10 +41,10 @@ getForumPackMH user_id forum_name = do
 
 
 
-getForumPacksBy_OrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler ForumPackResponses
-getForumPacksBy_OrganizationIdM user_id org_id sp = do
+getForumPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler ForumPackResponses
+getForumPacks_ByOrganizationIdM user_id org_id sp = do
 
-  forums       <- getForumsBy_OrganizationIdM user_id org_id sp
+  forums       <- getForums_ByOrganizationIdM user_id org_id sp
   forums_packs <- mapM (\forum -> getForumPack_ByForumM user_id forum) forums
   return $ ForumPackResponses {
     forumPackResponses = forums_packs
@@ -52,10 +52,10 @@ getForumPacksBy_OrganizationIdM user_id org_id sp = do
 
 
 
-getForumPacksBy_OrganizationNameM :: UserId -> Text -> StandardParams -> Handler ForumPackResponses
-getForumPacksBy_OrganizationNameM user_id org_name sp = do
+getForumPacks_ByOrganizationNameM :: UserId -> Text -> StandardParams -> Handler ForumPackResponses
+getForumPacks_ByOrganizationNameM user_id org_name sp = do
 
-  forums       <- getForumsBy_OrganizationNameM user_id org_name sp
+  forums       <- getForums_ByOrganizationNameM user_id org_name sp
   forums_packs <- mapM (\forum -> getForumPack_ByForumM user_id forum) forums
   return $ ForumPackResponses {
     forumPackResponses = forums_packs

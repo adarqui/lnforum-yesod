@@ -6,12 +6,12 @@
 
 module Model.Organization.Internal (
   getOrganizationsM,
-  getOrganizationsBy_UserIdM,
-  getOrganizationsBy_EverythingM,
+  getOrganizations_ByUserIdM,
+  getOrganizations_ByEverythingM,
 
   getOrganizationM,
   getOrganizationMH,
-  getOrganizationBy_OrganizationNameM,
+  getOrganization_ByOrganizationNameM,
   insertOrganizationM,
   updateOrganizationM,
   deleteOrganizationM,
@@ -37,19 +37,19 @@ getOrganizationsM :: UserId -> Handler [Entity Organization]
 getOrganizationsM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
   case spUserId of
-    Just lookup_user_id -> getOrganizationsBy_UserIdM user_id lookup_user_id sp
-    Nothing             -> getOrganizationsBy_EverythingM user_id sp
+    Just lookup_user_id -> getOrganizations_ByUserIdM user_id lookup_user_id sp
+    Nothing             -> getOrganizations_ByEverythingM user_id sp
 
 
 
-getOrganizationsBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Organization]
-getOrganizationsBy_UserIdM _ lookup_user_id sp = do
+getOrganizations_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Organization]
+getOrganizations_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
-getOrganizationsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Organization]
-getOrganizationsBy_EverythingM _ sp = do
+getOrganizations_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Organization]
+getOrganizations_ByEverythingM _ sp = do
   selectListDb sp [] [] OrganizationId
 
 
@@ -64,8 +64,8 @@ getOrganizationMH user_id org_name = getOrganizationM' user_id (OrganizationName
 
 
 
-getOrganizationBy_OrganizationNameM :: UserId -> Text -> Handler (Entity Organization)
-getOrganizationBy_OrganizationNameM _ org_name = do
+getOrganization_ByOrganizationNameM :: UserId -> Text -> Handler (Entity Organization)
+getOrganization_ByOrganizationNameM _ org_name = do
   notFoundMaybe =<< selectFirstDb [OrganizationName ==. org_name] []
 
 

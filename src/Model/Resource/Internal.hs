@@ -2,8 +2,8 @@
 
 module Model.Resource.Internal (
   getResourcesM,
-  getResourcesBy_EverythingM,
-  getResourcesBy_UserIdM,
+  getResources_ByEverythingM,
+  getResources_ByUserIdM,
   getResourceM,
   insertResourceM,
   updateResourceM,
@@ -27,22 +27,22 @@ getResourcesM user_id = do
 
   case spUserId of
 
-    Just lookup_user_id -> getResourcesBy_UserIdM user_id lookup_user_id sp
+    Just lookup_user_id -> getResources_ByUserIdM user_id lookup_user_id sp
 
-    _                   -> getResourcesBy_EverythingM user_id sp
+    _                   -> getResources_ByEverythingM user_id sp
 
---    (_, Just resource_ids)   -> getResourceBy_ResourceIds user_id resource_ids sp
+--    (_, Just resource_ids)   -> getResource_ByResourceIds user_id resource_ids sp
 
 
 
-getResourcesBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Resource]
-getResourcesBy_EverythingM _ sp = do
+getResources_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Resource]
+getResources_ByEverythingM _ sp = do
   selectListDb sp [] [] ResourceId
 
 
 
-getResourcesBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Resource]
-getResourcesBy_UserIdM _ lookup_user_id sp = do
+getResources_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Resource]
+getResources_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [ ResourceUserId ==. lookup_user_id ] [] ResourceId
 
 

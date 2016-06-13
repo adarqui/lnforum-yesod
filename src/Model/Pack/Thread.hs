@@ -23,7 +23,7 @@ getThreadPacksM user_id = do
 
   case spBoardId of
 
-    Just board_id -> getThreadPacksBy_BoardIdM user_id board_id sp
+    Just board_id -> getThreadPacks_ByBoardIdM user_id board_id sp
     _             -> notFound
 
 
@@ -49,10 +49,10 @@ getThreadPackMH user_id thread_name = do
 
 
 
-getThreadPacksBy_BoardIdM :: UserId -> BoardId -> StandardParams -> Handler ThreadPackResponses
-getThreadPacksBy_BoardIdM user_id board_id sp = do
+getThreadPacks_ByBoardIdM :: UserId -> BoardId -> StandardParams -> Handler ThreadPackResponses
+getThreadPacks_ByBoardIdM user_id board_id sp = do
 
-  threads_keys <- getThreadsBy_BoardId_KeysM user_id board_id sp
+  threads_keys <- getThreads_ByBoardId_KeysM user_id board_id sp
   threads_packs <- mapM (\key -> getThreadPackM user_id key) threads_keys
   return $ ThreadPackResponses {
     threadPackResponses = threads_packs
@@ -65,7 +65,7 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
 
   thread_user   <- getUserM user_id threadUserId
   thread_stats  <- getThreadStatM user_id thread_id
-  mthread_posts <- getThreadPostsBy_ThreadIdM user_id thread_id sp
+  mthread_posts <- getThreadPosts_ByThreadIdM user_id thread_id sp
   muser         <- case (headMay mthread_posts) of
     Nothing -> pure Nothing
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId

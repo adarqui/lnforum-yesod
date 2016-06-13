@@ -2,9 +2,9 @@
 
 module Model.Team.Internal (
   getTeamsM,
-  getTeamsBy_OrganizationIdM,
-  getTeamsBy_UserIdM,
-  getTeamsBy_EverythingM,
+  getTeams_ByOrganizationIdM,
+  getTeams_ByUserIdM,
+  getTeams_ByEverythingM,
 
   getTeamM,
   insertTeamM,
@@ -27,26 +27,26 @@ getTeamsM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case (spOrganizationId, spUserId) of
-    (Just org_id, Nothing)         -> getTeamsBy_OrganizationIdM user_id org_id sp
-    (Nothing, Just lookup_user_id) -> getTeamsBy_UserIdM user_id lookup_user_id sp
+    (Just org_id, Nothing)         -> getTeams_ByOrganizationIdM user_id org_id sp
+    (Nothing, Just lookup_user_id) -> getTeams_ByUserIdM user_id lookup_user_id sp
     (_, _)                         -> notFound
 
 
 
-getTeamsBy_OrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Team]
-getTeamsBy_OrganizationIdM _ org_id sp = do
+getTeams_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Team]
+getTeams_ByOrganizationIdM _ org_id sp = do
   selectListDb sp [TeamOrgId ==. org_id] [] TeamId
 
 
 
-getTeamsBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Team]
-getTeamsBy_UserIdM _ lookup_user_id sp = do
+getTeams_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Team]
+getTeams_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [TeamUserId ==. lookup_user_id] [] TeamId
 
 
 
-getTeamsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Team]
-getTeamsBy_EverythingM _ sp = do
+getTeams_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Team]
+getTeams_ByEverythingM _ sp = do
   selectListDb sp [] [] TeamId
 
 

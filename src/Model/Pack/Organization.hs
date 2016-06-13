@@ -19,7 +19,7 @@ getOrganizationPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  getOrganizationPacksBy_EverythingM user_id sp
+  getOrganizationPacks_ByEverythingM user_id sp
 
 
 
@@ -32,14 +32,14 @@ getOrganizationPackM user_id organization_id = do
 
 
 getOrganizationPackMH :: UserId -> Text -> Handler OrganizationPackResponse
-getOrganizationPackMH = getOrganizationPackBy_OrganizationName
+getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
 
-getOrganizationPacksBy_EverythingM :: UserId -> StandardParams -> Handler OrganizationPackResponses
-getOrganizationPacksBy_EverythingM user_id sp = do
+getOrganizationPacks_ByEverythingM :: UserId -> StandardParams -> Handler OrganizationPackResponses
+getOrganizationPacks_ByEverythingM user_id sp = do
 
-  organizations       <- getOrganizationsBy_EverythingM user_id sp
+  organizations       <- getOrganizations_ByEverythingM user_id sp
   organizations_packs <- mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
   return $ OrganizationPackResponses {
     organizationPackResponses = organizations_packs
@@ -47,10 +47,10 @@ getOrganizationPacksBy_EverythingM user_id sp = do
 
 
 
-getOrganizationPackBy_OrganizationName :: UserId -> Text -> Handler OrganizationPackResponse
-getOrganizationPackBy_OrganizationName user_id organization_name = do
+getOrganizationPack_ByOrganizationName :: UserId -> Text -> Handler OrganizationPackResponse
+getOrganizationPack_ByOrganizationName user_id organization_name = do
 
-  organization         <- getOrganizationBy_OrganizationNameM user_id organization_name
+  organization         <- getOrganization_ByOrganizationNameM user_id organization_name
   getOrganizationPack_ByOrganizationM user_id organization
 
 

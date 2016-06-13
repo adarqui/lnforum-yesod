@@ -7,8 +7,8 @@
 
 module Model.User.Internal2 (
   getUsersM,
-  getUsersBy_UserIdsM,
-  getUsersBy_EverythingM,
+  getUsers_ByUserIdsM,
+  getUsers_ByEverythingM,
 
   insertUsersM,
   insertUsers_TasksM,
@@ -40,20 +40,20 @@ getUsersM user_id = do
 
   case spUserIds of
 
-    Just user_ids -> getUsersBy_UserIdsM user_id user_ids sp
-    _             -> getUsersBy_EverythingM user_id sp
+    Just user_ids -> getUsers_ByUserIdsM user_id user_ids sp
+    _             -> getUsers_ByEverythingM user_id sp
 
 
 
-getUsersBy_UserIdsM :: UserId -> [UserId] -> StandardParams -> Handler [Entity User]
-getUsersBy_UserIdsM _ user_ids sp = do
+getUsers_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> Handler [Entity User]
+getUsers_ByUserIdsM _ user_ids sp = do
 
   selectListDb sp [UserId <-. user_ids] [] UserId
 
 
 
-getUsersBy_EverythingM :: UserId -> StandardParams -> Handler [Entity User]
-getUsersBy_EverythingM _ sp = do
+getUsers_ByEverythingM :: UserId -> StandardParams -> Handler [Entity User]
+getUsers_ByEverythingM _ sp = do
 
   selectListDb sp [] [] UserId
 

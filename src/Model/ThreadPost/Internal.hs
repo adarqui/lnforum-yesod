@@ -3,9 +3,9 @@
 
 module Model.ThreadPost.Internal (
   getThreadPostsM,
-  getThreadPostsBy_ThreadIdM,
-  getThreadPostsBy_ThreadPostIdM,
-  getThreadPostsBy_EverythingM,
+  getThreadPosts_ByThreadIdM,
+  getThreadPosts_ByThreadPostIdM,
+  getThreadPosts_ByEverythingM,
 
   getThreadPostM,
   insertThreadPostM,
@@ -47,28 +47,28 @@ getThreadPostsM user_id = do
 
   case (spOrganizationId, spUserId, spForumId, spBoardId, spThreadId, spThreadPostId) of
 
-    (_, _, _, _, Just thread_id, _)      -> getThreadPostsBy_ThreadIdM user_id thread_id sp
+    (_, _, _, _, Just thread_id, _)      -> getThreadPosts_ByThreadIdM user_id thread_id sp
 
-    (_, _, _, _, _, Just thread_post_id) -> getThreadPostsBy_ThreadPostIdM user_id thread_post_id sp
+    (_, _, _, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
 
-    (_, _, _, _, _, _)                   -> getThreadPostsBy_EverythingM user_id sp
+    (_, _, _, _, _, _)                   -> getThreadPosts_ByEverythingM user_id sp
 
 
 
-getThreadPostsBy_ThreadIdM :: UserId -> ThreadId -> StandardParams -> Handler [Entity ThreadPost]
-getThreadPostsBy_ThreadIdM _ thread_id sp = do
+getThreadPosts_ByThreadIdM :: UserId -> ThreadId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByThreadIdM _ thread_id sp = do
   selectListDb sp [ThreadPostThreadId ==. thread_id] [] ThreadPostId
 
 
 
-getThreadPostsBy_ThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> Handler [Entity ThreadPost]
-getThreadPostsBy_ThreadPostIdM _ parent_id sp = do
+getThreadPosts_ByThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByThreadPostIdM _ parent_id sp = do
   selectListDb sp [ThreadPostParentId ==. Just parent_id] [] ThreadPostId
 
 
 
-getThreadPostsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity ThreadPost]
-getThreadPostsBy_EverythingM _ sp = do
+getThreadPosts_ByEverythingM :: UserId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByEverythingM _ sp = do
   selectListDb sp [] [] ThreadPostId
 
 

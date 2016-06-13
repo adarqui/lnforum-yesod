@@ -22,4 +22,4 @@ getMeR = do
 getMePackR :: Handler Value
 getMePackR = do
   user_id <- requireAuthId
-  toJSON <$> getUserPackBy_UserIdM user_id user_id defaultStandardParams
+  toJSON <$> getUserPack_ByUserIdM user_id user_id defaultStandardParams

@@ -3,7 +3,7 @@
 module Model.Profile.Internal (
   getProfilesM,
   getProfileM,
-  getProfileBy_UserIdM,
+  getProfile_ByUserIdM,
   updateProfileM,
 ) where
 
@@ -26,8 +26,8 @@ getProfileM _ profile_id = do
 
 
 
-getProfileBy_UserIdM :: UserId -> UserId -> Handler (Entity Profile)
-getProfileBy_UserIdM _ lookup_user_id = do
+getProfile_ByUserIdM :: UserId -> UserId -> Handler (Entity Profile)
+getProfile_ByUserIdM _ lookup_user_id = do
   notFoundMaybe =<< selectFirstDb [ProfileUserId ==. lookup_user_id] []
 
 

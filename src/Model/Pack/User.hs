@@ -4,7 +4,7 @@ module Model.Pack.User (
   getUserPacksM,
   getUserPackM,
 
-  getUserPackBy_UserIdM
+  getUserPack_ByUserIdM
 ) where
 
 
@@ -24,7 +24,7 @@ getUserPacksM user_id = do
 
   case spUserIds of
 
-    Just user_ids  -> getUserPacksBy_UserIdsM user_id user_ids sp
+    Just user_ids  -> getUserPacks_ByUserIdsM user_id user_ids sp
     _              -> notFound
 
 
@@ -34,13 +34,13 @@ getUserPackM user_id lookup_user_id = do
 
   sp <- lookupStandardParams
 
-  getUserPackBy_UserIdM user_id lookup_user_id (sp { spLimit = Just 1 })
+  getUserPack_ByUserIdM user_id lookup_user_id (sp { spLimit = Just 1 })
 
 
 
-getUserPacksBy_UserIdsM :: UserId -> [UserId] -> StandardParams -> Handler UserPackResponses
-getUserPacksBy_UserIdsM user_id user_ids sp = do
-  users_packs <- mapM (\key -> getUserPackBy_UserIdM user_id key sp) user_ids
+getUserPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> Handler UserPackResponses
+getUserPacks_ByUserIdsM user_id user_ids sp = do
+  users_packs <- mapM (\key -> getUserPack_ByUserIdM user_id key sp) user_ids
   return $ UserPackResponses {
     userPackResponses = users_packs
   }
@@ -48,12 +48,12 @@ getUserPacksBy_UserIdsM user_id user_ids sp = do
 
 
 
-getUserPackBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler UserPackResponse
-getUserPackBy_UserIdM user_id lookup_user_id _ = do
+getUserPack_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler UserPackResponse
+getUserPack_ByUserIdM user_id lookup_user_id _ = do
 
   lookup_user <- getUserM user_id lookup_user_id
   stats       <- getUserStatM user_id lookup_user_id
-  profile     <- getProfileBy_UserIdM user_id lookup_user_id
+  profile     <- getProfile_ByUserIdM user_id lookup_user_id
 
   return $ UserPackResponse {
     userPackResponseUser       = userToResponse lookup_user,

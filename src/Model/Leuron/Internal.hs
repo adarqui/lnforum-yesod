@@ -2,10 +2,10 @@
 
 module Model.Leuron.Internal (
   getLeuronsM,
-  getLeuronsBy_ResourceIdM,
-  getLeuronsBy_ResourceId_RandomM,
-  getLeuronsBy_UserIdM,
-  getLeuronsBy_EverythingM,
+  getLeurons_ByResourceIdM,
+  getLeurons_ByResourceId_RandomM,
+  getLeurons_ByUserIdM,
+  getLeurons_ByEverythingM,
 
   getLeuronsIdsM,
   getLeuronM,
@@ -47,11 +47,11 @@ getLeuronsM user_id = do
   normal sp@StandardParams{..} = do
     case (spResourceId, spUserId) of
 
-      (Just resource_id, _)     -> getLeuronsBy_ResourceIdM user_id resource_id sp
+      (Just resource_id, _)     -> getLeurons_ByResourceIdM user_id resource_id sp
 
-      (_, Just lookup_user_id)  -> getLeuronsBy_UserIdM user_id lookup_user_id sp
+      (_, Just lookup_user_id)  -> getLeurons_ByUserIdM user_id lookup_user_id sp
 
-      (_, _)                    -> getLeuronsBy_EverythingM user_id sp
+      (_, _)                    -> getLeurons_ByEverythingM user_id sp
 
   possibly_rand order sp = do
     case order of
@@ -60,21 +60,21 @@ getLeuronsM user_id = do
 
   rand sp@StandardParams{..} = do
     case spResourceId of
-      Just resource_id          -> getLeuronsBy_ResourceId_RandomM user_id resource_id sp
-      _                         -> getLeuronsBy_EverythingM user_id sp
+      Just resource_id          -> getLeurons_ByResourceId_RandomM user_id resource_id sp
+      _                         -> getLeurons_ByEverythingM user_id sp
 
 
 
-getLeuronsBy_ResourceIdM :: UserId -> ResourceId -> StandardParams -> Handler [Entity Leuron]
-getLeuronsBy_ResourceIdM _ resource_id sp = do
+getLeurons_ByResourceIdM :: UserId -> ResourceId -> StandardParams -> Handler [Entity Leuron]
+getLeurons_ByResourceIdM _ resource_id sp = do
 
   selectListDb sp [LeuronResourceId ==. resource_id] [] LeuronId
 
 
 
 -- ESQUELETO-QUERY
-getLeuronsBy_ResourceId_RandomM :: UserId -> ResourceId -> StandardParams -> Handler [Entity Leuron]
-getLeuronsBy_ResourceId_RandomM _ resource_id _ = do
+getLeurons_ByResourceId_RandomM :: UserId -> ResourceId -> StandardParams -> Handler [Entity Leuron]
+getLeurons_ByResourceId_RandomM _ resource_id _ = do
 
 -- SELECT * FROM leuron OFFSET floor(random() * (select count(*) from leuron)) LIMIT 1;
 -- TODO FIXME: the query below is not as efficient as the one above..
@@ -90,15 +90,15 @@ getLeuronsBy_ResourceId_RandomM _ resource_id _ = do
 
 
 
-getLeuronsBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Leuron]
-getLeuronsBy_UserIdM _ lookup_user_id sp = do
+getLeurons_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Leuron]
+getLeurons_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [LeuronUserId ==. lookup_user_id] [] LeuronId
 
 
 
-getLeuronsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Leuron]
-getLeuronsBy_EverythingM _ sp = do
+getLeurons_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Leuron]
+getLeurons_ByEverythingM _ sp = do
 
   selectListDb sp [] [] LeuronId
 

@@ -381,8 +381,8 @@ getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> Handler Glo
 getGlobalGroupPack_ByGlobalGroupM user_id globalGroup = do
 
   -- let sp = defaultStandardParams {
-  --     spSortOrder = Just SortOrder_ByDsc,
-  --     spOrder     = Just Order_ByActivityAt,
+  --     spSortOrder = Just SortOrderBy_Dsc,
+  --     spOrder     = Just OrderBy_ActivityAt,
   --     spLimit     = Just 1
   --   }
 

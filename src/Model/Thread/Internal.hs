@@ -5,11 +5,11 @@ module Model.Thread.Internal (
 
   getThreadM,
   getThreadMH,
-  getThreadsBy_OrganizationIdM,
-  getThreadsBy_BoardIdM,
-  getThreadsBy_BoardId_KeysM,
-  getThreadsBy_UserIdM,
-  getThreadsBy_EverythingM,
+  getThreads_ByOrganizationIdM,
+  getThreads_ByBoardIdM,
+  getThreads_ByBoardId_KeysM,
+  getThreads_ByUserIdM,
+  getThreads_ByEverythingM,
 
   insertThreadM,
   updateThreadM,
@@ -85,15 +85,15 @@ getThreadsM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case (spOrganizationId, spBoardId, spUserId) of
-    (Just org_id, _, _)         -> getThreadsBy_OrganizationIdM user_id org_id sp
-    (_, Just board_id, _)       -> getThreadsBy_BoardIdM user_id board_id sp
-    (_, _, Just lookup_user_id) -> getThreadsBy_UserIdM user_id lookup_user_id sp
-    (_, _, _)                   -> getThreadsBy_EverythingM user_id sp
+    (Just org_id, _, _)         -> getThreads_ByOrganizationIdM user_id org_id sp
+    (_, Just board_id, _)       -> getThreads_ByBoardIdM user_id board_id sp
+    (_, _, Just lookup_user_id) -> getThreads_ByUserIdM user_id lookup_user_id sp
+    (_, _, _)                   -> getThreads_ByEverythingM user_id sp
 
 
 
-getThreadsBy_OrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Thread]
-getThreadsBy_OrganizationIdM _ org_id sp = do
+getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByOrganizationIdM _ org_id sp = do
 
   runDB
     $ E.select
@@ -107,29 +107,29 @@ getThreadsBy_OrganizationIdM _ org_id sp = do
 
 
 
-getThreadsBy_BoardIdM :: UserId -> BoardId -> StandardParams -> Handler [Entity Thread]
-getThreadsBy_BoardIdM _ board_id sp@StandardParams{..} = do
+getThreads_ByBoardIdM :: UserId -> BoardId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByBoardIdM _ board_id sp@StandardParams{..} = do
 
   selectListDb sp [ThreadBoardId ==. board_id] [] (orderByToField spOrder)
 
 
 
-getThreadsBy_BoardId_KeysM :: UserId -> BoardId -> StandardParams -> Handler [Key Thread]
-getThreadsBy_BoardId_KeysM _ board_id sp@StandardParams{..} = do
+getThreads_ByBoardId_KeysM :: UserId -> BoardId -> StandardParams -> Handler [Key Thread]
+getThreads_ByBoardId_KeysM _ board_id sp@StandardParams{..} = do
 
   selectKeysListDb sp [ThreadBoardId ==. board_id] [] (orderByToField spOrder)
 
 
 
-getThreadsBy_UserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Thread]
-getThreadsBy_UserIdM _ lookup_user_id sp = do
+getThreads_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ThreadUserId ==. lookup_user_id ] [] ThreadId
 
 
 
-getThreadsBy_EverythingM :: UserId -> StandardParams -> Handler [Entity Thread]
-getThreadsBy_EverythingM _ sp = do
+getThreads_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByEverythingM _ sp = do
 
   selectListDb sp [] [] ThreadId
 
