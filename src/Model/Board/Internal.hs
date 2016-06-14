@@ -188,6 +188,7 @@ updateBoardM user_id board_id board_request = do
     , BoardIsAnonymous        =. boardIsAnonymous
     , BoardCanCreateSubBoards =. boardCanCreateSubBoards
     , BoardCanCreateThreads   =. boardCanCreateThreads
+    , BoardSuggestedTags      =. boardSuggestedTags
     , BoardIcon               =. boardIcon
     , BoardTags               =. boardTags
     , BoardGuard             +=. 1
