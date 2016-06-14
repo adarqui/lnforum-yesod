@@ -564,7 +564,7 @@ Board
   isAnonymous        Bool default=False
   canCreateSubBoards Bool default=True
   canCreateThreads   Bool default=True
-  suggestedTags      [Text]
+  suggestedTags      [Text] default=[]
   icon               Text Maybe
   tags               [Text]
 
