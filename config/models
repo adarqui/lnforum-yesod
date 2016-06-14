@@ -533,8 +533,8 @@ Forum
   name                 Text
   displayName          Text default='null'
   description          Text Maybe
-  threadsPerBoard      Int
-  threadPostsPerThread Int
+  threadsPerBoard      Int default=20
+  threadPostsPerThread Int default=20
   icon                 Text Maybe
   tags                 [Text]
   visibility           Visibility
