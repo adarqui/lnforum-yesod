@@ -528,14 +528,16 @@ Reminder
 
 
 Forum
-  userId      UserId
-  orgId       OrganizationId
-  name        Text
-  displayName Text default='null'
-  description Text Maybe
-  icon        Text Maybe
-  tags        [Text]
-  visibility  Visibility
+  userId               UserId
+  orgId                OrganizationId
+  name                 Text
+  displayName          Text default='null'
+  description          Text Maybe
+  threadsPerBoard      Int
+  threadPostsPerThread Int
+  icon                 Text Maybe
+  tags                 [Text]
+  visibility           Visibility
 
   active      Bool default=True
   guard       Int  default=0

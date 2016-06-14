@@ -153,15 +153,17 @@ updateForumM user_id forum_id forum_request = do
 
   updateWhereDb
     [ ForumUserId ==. user_id, ForumId ==. forum_id ]
-    [ ForumModifiedAt  =. forumModifiedAt
-    , ForumActivityAt  =. Just ts
-    , ForumName        =. forumName
-    , ForumDisplayName =. forumDisplayName
-    , ForumDescription =. forumDescription
-    , ForumIcon        =. forumIcon
-    , ForumTags        =. forumTags
-    , ForumVisibility  =. forumVisibility
-    , ForumGuard      +=. 1
+    [ ForumModifiedAt           =. forumModifiedAt
+    , ForumActivityAt           =. Just ts
+    , ForumName                 =. forumName
+    , ForumDisplayName          =. forumDisplayName
+    , ForumDescription          =. forumDescription
+    , ForumThreadsPerBoard      =. forumThreadsPerBoard
+    , ForumThreadPostsPerThread =. forumThreadPostsPerThread
+    , ForumIcon                 =. forumIcon
+    , ForumTags                 =. forumTags
+    , ForumVisibility           =. forumVisibility
+    , ForumGuard               +=. 1
     ]
 
   notFoundMaybe =<< selectFirstDb [ ForumUserId ==. user_id, ForumId ==. forum_id ] []
