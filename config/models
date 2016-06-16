@@ -559,12 +559,12 @@ Board
   forumId            ForumId
   parentId           BoardId Maybe
   name               Text
-  displayName        Text default='null'
-  description        Text Maybe
-  isAnonymous        Bool default=False
-  canCreateSubBoards Bool default=True
-  canCreateThreads   Bool default=True
-  suggestedTags      [Text] default=''
+  displayName        Text         default='null'
+  description        Text         Maybe
+  isAnonymous        Bool         default=False
+  canCreateSubBoards Bool         default=True
+  canCreateThreads   Bool         default=True
+  suggestedTags      [Text]       default='[]'
   icon               Text Maybe
   tags               [Text]
 
