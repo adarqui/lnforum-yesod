@@ -56,10 +56,11 @@ getOrganizationPack_ByOrganizationName user_id organization_name = do
 
 
 getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> Handler OrganizationPackResponse
-getOrganizationPack_ByOrganizationM user_id organization@(Entity _ Organization{..}) = do
+getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   organization_user    <- getUserM user_id organizationUserId
   organization_stats   <- getOrganizationStatM user_id (entityKey organization)
+  org_access           <- isOwnerOf_OrganizationIdM user_id org_id
 
   return $ OrganizationPackResponse {
     organizationPackResponseOrganization   = organizationToResponse organization,
@@ -68,7 +69,8 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity _ Organization{
     organizationPackResponseUserId         = entityKeyToInt64 organization_user,
     organizationPackResponseStat           = organization_stats,
     organizationPackResponseLike           = Nothing,
-    organizationPackResponseStar           = Nothing
+    organizationPackResponseStar           = Nothing,
+    organizationPackResponseIsOwner        = org_access
   }
   where
   organization_id = entityKeyToInt64 organization

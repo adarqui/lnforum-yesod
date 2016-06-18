@@ -20,7 +20,7 @@ module Model.Organization.Internal (
   countOrganizationsM,
 
   getOrganizationStatsM,
-  getOrganizationStatM,
+  getOrganizationStatM
 ) where
 
 
