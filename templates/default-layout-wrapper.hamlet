@@ -21,4 +21,3 @@ $#    ^{pageBody nav}
     <footer .footer>
       <div .container.clearfix>
         <p .footer-copy>
-          © #{appCopyright $ appSettings master}
