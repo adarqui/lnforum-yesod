@@ -62,7 +62,8 @@ getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
     -- leuronPackResponseTrainingId
     leuronPackResponseStat       = leuron_stat,
     leuronPackResponseLike       = Nothing,
-    leuronPackResponseStar       = Nothing
+    leuronPackResponseStar       = Nothing,
+    leuronPackResponseIsOwner    = False
 --    leuronPackResponseLike     = fmap leuronLikeToResponse leuron_like,
 --    leuronPackResponseStar     = fmap leuronStarToResponse leuron_star
   }

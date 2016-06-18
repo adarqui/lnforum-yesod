@@ -79,5 +79,6 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
     threadPackResponseLike                 = Nothing,
     threadPackResponseStar                 = Nothing,
     threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay mthread_posts,
-    threadPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser
+    threadPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
+    threadPackResponseIsOwner              = False
   }

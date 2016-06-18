@@ -79,7 +79,8 @@ getForumPack_ByForumM user_id forum = do
     forumPackResponseForumId = forum_id,
     forumPackResponseStat    = forum_stats,
     forumPackResponseLike    = Nothing,
-    forumPackResponseStar    = Nothing
+    forumPackResponseStar    = Nothing,
+    forumPackResponseIsOwner = False
   }
   where
   forum_id = entityKeyToInt64 forum

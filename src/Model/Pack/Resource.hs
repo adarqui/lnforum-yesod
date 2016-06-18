@@ -55,7 +55,8 @@ getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) _
     resourcePackResponseUserId     = entityKeyToInt64 resource_user,
     resourcePackResponseStat       = resource_stat,
     resourcePackResponseLike       = Nothing,
-    resourcePackResponseStar       = Nothing
+    resourcePackResponseStar       = Nothing,
+    resourcePackResponseIsOwner    = False
 --    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
 --    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
   }

@@ -65,14 +65,15 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
 
   return $ BoardPackResponse {
-    boardPackResponseBoard = boardToResponse board,
-    boardPackResponseBoardId = keyToInt64 board_id,
-    boardPackResponseStat = board_stats,
-    boardPackResponseLatestThread = fmap threadToResponse $ headMay mthreads,
-    boardPackResponseLatestThreadPost = fmap threadPostToResponse $ headMay mthread_posts,
+    boardPackResponseBoard                = boardToResponse board,
+    boardPackResponseBoardId              = keyToInt64 board_id,
+    boardPackResponseStat                 = board_stats,
+    boardPackResponseLatestThread         = fmap threadToResponse $ headMay mthreads,
+    boardPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay mthread_posts,
     boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
-    boardPackResponseLike = Nothing,
-    boardPackResponseStar = Nothing
+    boardPackResponseLike                 = Nothing,
+    boardPackResponseStar                 = Nothing,
+    boardPackResponseIsOwner              = False
   }
 
 

@@ -54,7 +54,8 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseUserId       = entityKeyToInt64 thread_post_user,
     threadPostPackResponseStat         = thread_post_stat,
     threadPostPackResponseLike         = Nothing,
-    threadPostPackResponseStar         = Nothing
+    threadPostPackResponseStar         = Nothing,
+    threadPostPackResponseIsOwner      = False
 --    threadPostPackResponseLike       = fmap threadPostLikeToResponse thread_post_like,
 --    threadPostPackResponseStar       = fmap threadPostStarToResponse thread_post_star
   }
