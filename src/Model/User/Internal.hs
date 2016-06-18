@@ -106,6 +106,7 @@ credsToUser now Creds{..} = User
   <*> pure email_md5
   <*> pure credsPlugin
   <*> pure credsIdent
+  <*> pure Nothing
   <*> pure False
   <*> pure 0
   <*> pure (Just now)

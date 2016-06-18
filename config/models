@@ -155,6 +155,7 @@ User
   emailMD5    Text
   plugin      Text
   ident       Text
+  acceptTOS   UTCTime Maybe default=now()
 
   active      Bool default=True
   guard       Int  default=0
