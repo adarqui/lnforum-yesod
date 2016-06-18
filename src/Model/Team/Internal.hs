@@ -8,6 +8,7 @@ module Model.Team.Internal (
 
   getTeamM,
   insertTeamM,
+  insertTeam_BypassM,
   updateTeamM,
   deleteTeamM,
 
@@ -61,6 +62,18 @@ insertTeamM :: UserId -> OrganizationId -> TeamRequest -> Handler (Entity Team)
 insertTeamM user_id org_id team_request = do
 
 --  sp <- lookupStandardParams
+
+  ts <- timestampH'
+
+  let
+    team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
+
+  insertEntityDb team
+
+
+
+insertTeam_BypassM :: UserId -> OrganizationId -> TeamRequest -> Handler (Entity Team)
+insertTeam_BypassM user_id org_id team_request = do
 
   ts <- timestampH'
 

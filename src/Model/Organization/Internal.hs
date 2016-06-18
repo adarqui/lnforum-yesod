@@ -25,6 +25,7 @@ module Model.Organization.Internal (
 
 
 
+import           All.TeamMember
 import           Model.Prelude
 import           Model.Organization.Function
 import           Model.Team.Internal
@@ -96,7 +97,8 @@ insertOrganizationM user_id organization_request = do
   org@(Entity organization_id _) <- insertEntityDb organization
 
   -- bg job: Insert owners team
-  void $ insertTeamM user_id organization_id (TeamRequest "owners" (Just "owners") Membership_Join Nothing [] Public 0)
+  (Entity team_id team) <- insertTeam_BypassM user_id organization_id (TeamRequest "owners" (Just "owners") Membership_InviteOnly Nothing [] Public 0)
+  void $ insertTeamMember_BypassM user_id team_id (TeamMemberRequest 0)
   return org
 
 

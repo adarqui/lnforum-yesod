@@ -167,8 +167,15 @@
 
 
 
-/api/teams TeamsR GET POST
+/api/teams TeamsR GET
+/api/team TeamR0 POST
 /api/team/#TeamId TeamR GET PUT DELETE
+
+
+
+/api/team_members TeamMembersR GET
+/api/team_member TeamMemberR0 POST
+/api/team_member/#TeamMemberId TeamMemberR GET PUT DELETE
 
 
 

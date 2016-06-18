@@ -1,6 +1,6 @@
 module Handler.Team (
   getTeamsR,
-  postTeamsR,
+  postTeamR0,
   getTeamR,
   putTeamR,
   deleteTeamR
@@ -20,8 +20,8 @@ getTeamsR = do
 
 
 
-postTeamsR :: Handler Value
-postTeamsR = do
+postTeamR0 :: Handler Value
+postTeamR0 = do
 
   user_id <- requireAuthId
 

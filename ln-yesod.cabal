@@ -20,6 +20,7 @@ library
                      Api.Params
                      Api.Response
                      All.GlobalGroup
+                     All.TeamMember
                      Foundation
                      Handler.Prelude
                      Handler.Api
