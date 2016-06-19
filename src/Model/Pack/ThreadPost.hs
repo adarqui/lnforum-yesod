@@ -8,6 +8,8 @@ module Model.Pack.ThreadPost (
 
 
 import           Model.Prelude
+import           Model.Like.Function
+import           Model.Like.Internal
 import           Model.ThreadPost.Function
 import           Model.ThreadPost.Internal
 import           Model.User.Function
@@ -44,6 +46,8 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
 
   thread_post_user <- getUserM user_id threadPostUserId
   thread_post_stat <- getThreadPostStatM user_id thread_post_id
+  thread_post_like <- getLike_ByThreadPostIdM user_id thread_post_id
+
 --  thread_post_like <- getThreadPostLike_ByThreadPostM user_id thread_post
 --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
@@ -53,9 +57,7 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseUser         = userToSanitizedResponse thread_post_user,
     threadPostPackResponseUserId       = entityKeyToInt64 thread_post_user,
     threadPostPackResponseStat         = thread_post_stat,
-    threadPostPackResponseLike         = Nothing,
+    threadPostPackResponseLike         = fmap likeToResponse thread_post_like,
     threadPostPackResponseStar         = Nothing,
     threadPostPackResponseIsOwner      = False
---    threadPostPackResponseLike       = fmap threadPostLikeToResponse thread_post_like,
---    threadPostPackResponseStar       = fmap threadPostStarToResponse thread_post_star
   }

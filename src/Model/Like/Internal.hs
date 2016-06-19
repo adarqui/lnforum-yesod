@@ -9,13 +9,17 @@ module Model.Like.Internal (
   getLike_ByThreadPostM,
   getLike_ByThreadPostIdM,
   updateLikeM,
-  deleteLikeM
+  deleteLikeM,
+
+  getLikeStatsM,
+  getLikeStatM
 ) where
 
 
 
 import           Model.Prelude
 import           Model.Like.Function
+import qualified LN.T.Like as L
 
 
 
@@ -79,3 +83,48 @@ updateLikeM user_id like_id LikeRequest{..} = do
 deleteLikeM :: UserId -> LikeId -> Handler ()
 deleteLikeM user_id like_id = do
   deleteWhereDb [ LikeUserId ==. user_id, LikeId ==. like_id ]
+
+
+
+getLikeStatsM :: UserId -> Handler LikeStatResponses
+getLikeStatsM _ = do
+
+  StandardParams{..} <- lookupStandardParams
+
+  case spBoardId of
+
+    Just _  -> notFound
+    Nothing -> notFound
+
+
+
+
+getLikeStatM :: UserId -> LikeId -> Handler LikeStatResponse
+getLikeStatM user_id _ = do
+
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case spThreadPostId of
+    Just thread_post_id -> getLikeStat_ByThreadPostIdM user_id thread_post_id
+    _                   -> notFound
+
+
+
+getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler LikeStatResponse
+getLikeStat_ByThreadPostIdM user_id thread_post_id = do
+--  <- countDb [ LikePostLikeId ==. like_id ]
+  likes <- selectListDb' [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64] [] LikeId
+  let
+    opts   = map (\(Entity _ Like{..}) -> likeOpt) likes
+    scores = map (\(Entity _ Like{..}) -> likeScore) likes
+
+  return $ LikeStatResponse {
+    likeStatResponseId      = i64,
+    likeStatResponseEntity  = Ent_ThreadPost,
+    likeStatResponseScore   = fromIntegral $ sum scores,
+    likeStatResponseLike    = fromIntegral $ length $ filter (==L.Like) opts,
+    likeStatResponseDislike = fromIntegral $ length $ filter (==L.Dislike) opts
+--    likeStatResponseDislike = fromIntegral $ sum $ length opts
+  }
+  where
+  i64 = keyToInt64 thread_post_id

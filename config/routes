@@ -83,6 +83,9 @@
 /api/like LikeR0 POST
 /api/like/#LikeId LikeR GET PUT DELETE
 
+/api/like_stats LikeStatsR GET
+/api/like_stat/#LikeId LikeStatR GET
+
 
 
 /api/me MeR GET

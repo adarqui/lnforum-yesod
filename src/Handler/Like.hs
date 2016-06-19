@@ -5,7 +5,10 @@ module Handler.Like (
   postLikeR0,
   getLikeR,
   putLikeR,
-  deleteLikeR
+  deleteLikeR,
+
+  getLikeStatsR,
+  getLikeStatR
 ) where
 
 
@@ -59,3 +62,17 @@ deleteLikeR like_id = do
   user_id <- requireAuthId
   void $ deleteLikeM user_id like_id
   sendResponseStatus status200 ("DELETED" :: Text)
+
+
+
+getLikeStatsR :: Handler Value
+getLikeStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getLikeStatsM user_id
+
+
+
+getLikeStatR :: LikeId -> Handler Value
+getLikeStatR like_id = do
+  user_id <- requireAuthId
+  toJSON <$> getLikeStatM user_id like_id
