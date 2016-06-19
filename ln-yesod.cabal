@@ -20,6 +20,8 @@ library
                      Api.Params
                      Api.Response
                      All.GlobalGroup
+                     All.Like
+                     All.Star
                      All.TeamMember
                      Foundation
                      Handler.Prelude
@@ -29,7 +31,6 @@ library
                      Handler.Empty
                      Handler.Forum
                      Handler.Leuron
-                     Handler.Like
                      Handler.Me
                      Handler.Organization
                      Handler.Pm
@@ -77,10 +78,7 @@ library
                      Model.LeuronTraining.DerivePersist
                      Model.LeuronTraining.Function
                      Model.LeuronTraining.Internal
-                     Model.Like
                      Model.Like.DerivePersist
-                     Model.Like.Function
-                     Model.Like.Internal
                      Model.Me
                      Model.Me.Internal
                      Model.Misc

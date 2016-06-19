@@ -7,9 +7,9 @@ module Model.Pack.ThreadPost (
 
 
 
+import           All.Like
+import           All.Star
 import           Model.Prelude
-import           Model.Like.Function
-import           Model.Like.Internal
 import           Model.ThreadPost.Function
 import           Model.ThreadPost.Internal
 import           Model.User.Function

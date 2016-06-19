@@ -51,13 +51,14 @@ addDependentFile "config/routes"
 -- Don't forget to add new modules to your cabal file!
 import           All.GlobalGroup
 import           All.TeamMember
+import           All.Like
+import           All.Star
 import           Handler.Api
 import           Handler.Board
 import           Handler.Common
 import           Handler.Empty
 import           Handler.Forum
 import           Handler.Leuron
-import           Handler.Like
 import           Handler.Me
 import           Handler.Organization
 import           Handler.Pm

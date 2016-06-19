@@ -1,8 +1,22 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# LANGUAGE RecordWildCards #-}
 
-module Model.Like.Internal (
+module All.Like (
+  -- handler
+  getLikesR,
+  postLikeR0,
+  getLikeR,
+  putLikeR,
+  deleteLikeR,
+
+  getLikeStatsR,
+  getLikeStatR,
+
+  -- model/functions
+  likeRequestToLike,
+  likeToResponse,
+  likesToResponses,
+
+  -- model/internal
   getLikesM,
   insertLikeM,
   getLikeM,
@@ -17,11 +31,126 @@ module Model.Like.Internal (
 
 
 
+import           Handler.Prelude
 import           Model.Prelude
-import           Model.Like.Function
 import qualified LN.T.Like as L
 
 
+
+--
+-- Handler
+--
+
+getLikesR :: Handler Value
+getLikesR = do
+  user_id <- requireAuthId
+  (toJSON . likesToResponses) <$> getLikesM user_id
+
+
+
+postLikeR0 :: Handler Value
+postLikeR0 = do
+
+  sp <- lookupStandardParams
+
+  case (lookupLikeEntity sp) of
+
+    Nothing            -> permissionDenied "Must supply a entity information"
+
+    Just (ent, ent_id) -> do
+
+      user_id <- requireAuthId
+      like_request <- requireJsonBody
+      (toJSON . likeToResponse) <$> insertLikeM user_id ent ent_id like_request
+
+
+
+getLikeR :: LikeId -> Handler Value
+getLikeR like_id = do
+  user_id <- requireAuthId
+  (toJSON . likeToResponse) <$> getLikeM user_id like_id
+
+
+
+putLikeR :: LikeId -> Handler Value
+putLikeR like_id = do
+  user_id <- requireAuthId
+  like_request <- requireJsonBody
+  (toJSON . likeToResponse) <$> updateLikeM user_id like_id like_request
+
+
+
+deleteLikeR :: LikeId -> Handler Value
+deleteLikeR like_id = do
+  user_id <- requireAuthId
+  void $ deleteLikeM user_id like_id
+  pure $ toJSON ()
+
+
+
+getLikeStatsR :: Handler Value
+getLikeStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getLikeStatsM user_id
+
+
+
+getLikeStatR :: LikeId -> Handler Value
+getLikeStatR like_id = do
+  user_id <- requireAuthId
+  toJSON <$> getLikeStatM user_id like_id
+
+
+
+
+
+--
+-- Model/Function
+--
+
+likeRequestToLike :: UserId -> Ent -> Int64 -> LikeRequest -> Like
+likeRequestToLike user_id ent ent_id LikeRequest{..} = Like {
+  likeUserId         = user_id,
+  likeEnt            = ent,
+  likeEntId          = ent_id,
+  likeOpt            = likeRequestOpt,
+  likeScore          = likeOptToScore likeRequestOpt,
+  likeReason         = likeRequestReason,
+  likeActive         = True,
+  likeGuard          = likeRequestGuard,
+  likeCreatedAt      = Nothing,
+  likeModifiedAt     = Nothing
+}
+
+
+
+likeToResponse :: Entity Like -> LikeResponse
+likeToResponse (Entity like_id Like{..}) = LikeResponse {
+  likeResponseId         = keyToInt64 like_id,
+  likeResponseUserId     = keyToInt64 likeUserId,
+  likeResponseEnt        = likeEnt,
+  likeResponseEntId      = likeEntId,
+  likeResponseOpt        = likeOpt,
+  likeResponseScore      = likeScore,
+  likeResponseReason     = likeReason,
+  likeResponseActive     = likeActive,
+  likeResponseGuard      = likeGuard,
+  likeResponseCreatedAt  = likeCreatedAt,
+  likeResponseModifiedAt = likeModifiedAt
+}
+
+
+
+likesToResponses :: [Entity Like] -> LikeResponses
+likesToResponses likes = LikeResponses {
+  likeResponses = map likeToResponse likes
+}
+
+
+
+--
+-- Model/Internal
+--
 
 getLikesM :: UserId -> Handler [Entity Like]
 getLikesM user_id = do

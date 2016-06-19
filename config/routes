@@ -88,6 +88,15 @@
 
 
 
+/api/stars StarsR GET
+/api/star StarR0 POST
+/api/star/#StarId StarR GET PUT DELETE
+
+/api/star_stats StarStatsR GET
+/api/star_stat/#StarId StarStatR GET
+
+
+
 /api/me MeR GET
 /api/me_pack MePackR GET
 

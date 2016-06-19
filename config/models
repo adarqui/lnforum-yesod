@@ -71,6 +71,10 @@ Team
 TeamMember
   userId      UserId
   teamId      TeamId
+  isAccepted  Bool default=False
+  acceptedAt  UTCTime Maybe
+  isBlocked   Bool default=False
+  blockedAt   UTCTime Maybe
 
   active      Bool default=True
   guard       Int  default=0
