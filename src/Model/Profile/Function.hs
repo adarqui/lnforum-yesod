@@ -32,7 +32,7 @@ profileRequestToProfile user_id ProfileRequest{..} = Profile {
 
 profileToResponse :: Entity Profile -> ProfileResponse
 profileToResponse (Entity profile_id Profile{..}) = ProfileResponse {
-  profileResponseId = keyToInt64 profile_id,
+  profileResponseId         = keyToInt64 profile_id,
   profileResponseEnt        = Ent_None,
   profileResponseEntId      = keyToInt64 profileUserId,
   profileResponseGender     = profileGender,
