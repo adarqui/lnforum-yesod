@@ -65,7 +65,7 @@ deleteThreadPostR :: ThreadPostId -> Handler Value
 deleteThreadPostR threadPost_id = do
   user_id <- requireAuthId
   void $ deleteThreadPostM user_id threadPost_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

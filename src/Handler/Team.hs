@@ -55,4 +55,4 @@ deleteTeamR :: TeamId -> Handler Value
 deleteTeamR team_id = do
   user_id <- requireAuthId
   void $ deleteTeamM user_id team_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()

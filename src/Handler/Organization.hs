@@ -78,7 +78,7 @@ deleteOrganizationR :: OrganizationId -> Handler Value
 deleteOrganizationR organization_id = do
   user_id <- requireAuthId
   void $ deleteOrganizationM user_id organization_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

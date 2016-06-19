@@ -72,7 +72,7 @@ deleteForumR :: ForumId -> Handler Value
 deleteForumR forum_id = do
   user_id <- requireAuthId
   void $ deleteForumM user_id forum_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

@@ -49,4 +49,4 @@ deleteApiR :: ApiId -> Handler Value
 deleteApiR api_id = do
   user_id <- requireAuthId
   void $ deleteApiM user_id api_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()

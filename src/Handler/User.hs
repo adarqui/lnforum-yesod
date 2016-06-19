@@ -71,7 +71,7 @@ deleteUserR lookup_user_id = do
   user_id <- requireAuthId
 
   void $ deleteUserM user_id lookup_user_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

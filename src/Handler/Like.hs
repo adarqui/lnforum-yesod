@@ -61,7 +61,7 @@ deleteLikeR :: LikeId -> Handler Value
 deleteLikeR like_id = do
   user_id <- requireAuthId
   void $ deleteLikeM user_id like_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

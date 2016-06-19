@@ -48,4 +48,4 @@ deleteEmptyR :: EmptyId -> Handler Value
 deleteEmptyR empty_id = do
   user_id <- requireAuthId
   void $ deleteEmptyM user_id empty_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()

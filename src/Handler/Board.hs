@@ -72,7 +72,7 @@ deleteBoardR :: BoardId -> Handler Value
 deleteBoardR board_id = do
   user_id <- requireAuthId
   void $ deleteBoardM user_id board_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

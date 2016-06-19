@@ -124,7 +124,6 @@ getLikeStat_ByThreadPostIdM user_id thread_post_id = do
     likeStatResponseScore   = fromIntegral $ sum scores,
     likeStatResponseLike    = fromIntegral $ length $ filter (==L.Like) opts,
     likeStatResponseDislike = fromIntegral $ length $ filter (==L.Dislike) opts
---    likeStatResponseDislike = fromIntegral $ sum $ length opts
   }
   where
   i64 = keyToInt64 thread_post_id

@@ -51,4 +51,4 @@ deletePmInR :: PmInId -> Handler Value
 deletePmInR pmIn_id = do
   user_id <- requireAuthId
   void $ deletePmInM user_id pmIn_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()

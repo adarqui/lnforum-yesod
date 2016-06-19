@@ -69,7 +69,7 @@ deleteLeuronR :: LeuronId -> Handler Value
 deleteLeuronR leuron_id = do
   user_id <- requireAuthId
   void $ deleteLeuronM user_id leuron_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 

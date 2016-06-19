@@ -60,7 +60,7 @@ deleteReminderR :: ReminderId -> Handler Value
 deleteReminderR reminder_id = do
   user_id <- requireAuthId
   void $ deleteReminderM user_id reminder_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 
@@ -116,4 +116,4 @@ deleteReminderFolderR :: ReminderFolderId -> Handler Value
 deleteReminderFolderR reminder_folder_id = do
   user_id <- requireAuthId
   void $ deleteReminderFolderM user_id reminder_folder_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
