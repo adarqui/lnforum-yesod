@@ -121,23 +121,25 @@ credsToUser now Creds{..} = User
 
 
 extraToProfileX :: Text -> [(Text, Text)] -> Either Text ProfileX
-extraToProfileX "dummy" extra = githubProfileX extra
-extraToProfileX "github" extra = githubProfileX extra
+extraToProfileX "dummy" extra        = githubProfileX extra
+extraToProfileX "github" extra       = githubProfileX extra
 extraToProfileX "googleemail2" extra = googleProfileX extra
-extraToProfileX plugin _ = Left $ "Invalid plugin: " ++ plugin
+extraToProfileX plugin _             = Left $ "Invalid plugin: " ++ plugin
 
 
 
 githubProfileX :: [(Text, Text)] -> Either Text ProfileX
 githubProfileX extra = ProfileX
-  <$> lookupExtra "name" extra
+  <$> lookupExtra "login" extra
+  <*> lookupExtra "name" extra
   <*> lookupExtra "email" extra
 
 
 
 googleProfileX :: [(Text, Text)] -> Either Text ProfileX
 googleProfileX extra = ProfileX
-  <$> (handleName =<< decodeEitherText =<< lookupExtra "name" extra)
+  <$> (handleLogin =<< decodeEitherText =<< lookupExtra "login" extra)
+  <*> (handleName =<< decodeEitherText =<< lookupExtra "name" extra)
   <*> (handleEmails =<< decodeEitherText =<< lookupExtra "emails" extra)
 
   where
@@ -149,6 +151,9 @@ googleProfileX extra = ProfileX
             (_, Just given, _) -> Right given
             (_, _, Just family) -> Right family
             _ -> Left "user has no name"
+
+    handleLogin :: Text -> Either Text Text
+    handleLogin login = Left "TODO FIXME"
 
     handleEmails :: [Email] -> Either Text Text
     handleEmails [] = Left "user has no emails"
