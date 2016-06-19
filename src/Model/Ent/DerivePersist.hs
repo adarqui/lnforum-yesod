@@ -7,7 +7,7 @@ module Model.Ent.DerivePersist (
 
 
 import           Database.Persist.TH
-import           LN.T.Entity         as A
+import           LN.T.Ent            as A
 
 
 

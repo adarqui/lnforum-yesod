@@ -53,7 +53,7 @@ postLikeR0 = do
 
   sp <- lookupStandardParams
 
-  case (lookupLikeEntity sp) of
+  case (lookupLikeEnt sp) of
 
     Nothing            -> permissionDenied "Must supply a entity information"
 
@@ -248,8 +248,8 @@ getLikeStat_ByThreadPostIdM user_id thread_post_id = do
     scores = map (\(Entity _ Like{..}) -> likeScore) likes
 
   return $ LikeStatResponse {
-    likeStatResponseId      = i64,
-    likeStatResponseEntity  = Ent_ThreadPost,
+    likeStatResponseEnt     = Ent_ThreadPost,
+    likeStatResponseEntId   = i64,
     likeStatResponseScore   = fromIntegral $ sum scores,
     likeStatResponseLike    = fromIntegral $ length $ filter (==L.Like) opts,
     likeStatResponseDislike = fromIntegral $ length $ filter (==L.Dislike) opts

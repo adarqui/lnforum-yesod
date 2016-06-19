@@ -53,7 +53,7 @@ postStarR0 = do
 
   sp <- lookupStandardParams
 
-  case (lookupStarEntity sp) of
+  case (lookupStarEnt sp) of
 
     Nothing            -> permissionDenied "Must supply a entity information"
 
@@ -239,9 +239,9 @@ getStarStat_ByThreadPostIdM user_id thread_post_id = do
   stars <- selectListDb' [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64] [] StarId
 
   return $ StarStatResponse {
-    starStatResponseId      = i64,
-    starStatResponseEntity  = Ent_ThreadPost,
-    starStatResponseStars   = fromIntegral $ length stars
+    starStatResponseEnt   = Ent_ThreadPost,
+    starStatResponseEntId = i64,
+    starStatResponseStars = fromIntegral $ length stars
   }
   where
   i64 = keyToInt64 thread_post_id
