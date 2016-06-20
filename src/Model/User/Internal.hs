@@ -55,6 +55,14 @@ findUsers' = fmap (map entityVal) . findUsers
 
 
 
+-- data Creds
+--
+-- User credentials
+--
+-- credsPlugin :: Text -- How the user was authenticated
+-- credsIdent :: Text -- Identifier. Exact meaning depends on plugin.
+-- credsExtra :: [(Text, Text)]
+--
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
 
