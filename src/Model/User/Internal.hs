@@ -115,7 +115,7 @@ credsToUser now Creds{..} = User
   <*> pure credsPlugin
   <*> pure credsIdent
   <*> pure Nothing
-  <*> pure False
+  <*> pure True
   <*> pure 0
   <*> pure (Just now)
   <*> pure Nothing

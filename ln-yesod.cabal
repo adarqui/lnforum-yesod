@@ -168,7 +168,7 @@ library
                  , yesod-core
                  , yesod-auth
                  , yesod-auth-account
-                 , yesod-auth-oauth2
+                 , yesod-auth-oauth2 == 0.1.9.99
                  , yesod-static
                  , yesod-form
 --                 , yesod-bootstrap
