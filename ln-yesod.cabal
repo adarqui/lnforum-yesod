@@ -233,6 +233,7 @@ library
 --                 , cryptonite
                  , pureMD5
                  , safe
+                 , hoauth2
 
 executable         ln-yesod
     default-language:  Haskell2010
