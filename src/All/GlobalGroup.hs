@@ -20,6 +20,8 @@ module All.GlobalGroup (
   getGlobalGroups_ByUserIdM,
   getGlobalGroups_ByEverythingM,
   getGlobalGroupM,
+  getGlobalGroupMH,
+  getGlobalGroupMH',
   insertGlobalGroupM,
   updateGlobalGroupM,
   deleteGlobalGroupM,
