@@ -1,17 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Resource (
+  -- Handler
   getResourcesR,
   postResourceR0,
   getResourceR,
   putResourceR,
   deleteResourceR,
-
   getCountResourcesR,
-
   getResourceStatsR,
   getResourceStatR,
-
   getResourcePacksR,
   getResourcePackR,
 
@@ -35,16 +33,19 @@ module All.Resource (
 
 
 
-import           Handler.Prelude
-import           Model.Resource
-import           Model.Pack.Resource
+import           All.Pack.Resource
+import           All.Prelude
 import           Import
-import           LN.Lib.Url (toPrettyUrl)
+import           LN.Lib.Url        (toPrettyUrl)
 import           LN.T
-import           Misc.Codec (decodeText, encodeText, keyToInt64)
-import qualified LN.T.Like               as L
+import qualified LN.T.Like         as L
+import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 
 
+
+--
+-- Handler
+--
 
 getResourcesR :: Handler Value
 getResourcesR = do
