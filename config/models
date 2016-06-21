@@ -3,16 +3,6 @@
 
 
 
-Empty
-  userId      UserId
-  value       Bool
-  createdAt   UTCTime Maybe default=now()
-  modifiedAt  UTCTime Maybe
-
-  deriving Eq Show Typeable
-
-
-
 Organization
   userId UserId
   name         Text

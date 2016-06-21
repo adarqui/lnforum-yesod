@@ -34,11 +34,6 @@
 
 
 
-/api/emptys EmptysR GET POST
-/api/empty/#EmptyId EmptyR GET PUT DELETE
-
-
-
 /api/forums ForumsR GET
 /api/forum ForumR0 POST
 /api/forum/#ForumId ForumR GET PUT DELETE

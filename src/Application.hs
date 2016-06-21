@@ -52,7 +52,6 @@ import           All.TeamMember
 import           All.Api
 import           All.Board
 import           All.Common
-import           All.Empty
 import           All.Forum
 import           All.Leuron
 import           All.Me
