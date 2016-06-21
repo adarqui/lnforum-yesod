@@ -37,7 +37,6 @@ module All.Organization (
 
 
 import           All.Prelude
-import           All.Organization
 import           All.TeamMember
 import           All.Team
 import           LN.T.Membership

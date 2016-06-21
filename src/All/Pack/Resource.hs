@@ -1,6 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Resource (
+  -- Handler
+  getResourcePacksR,
+  getResourcePackR,
+
   -- Model
   getResourcePacksM,
   getResourcePackM
@@ -12,6 +16,27 @@ import           All.Prelude
 import           All.Resource
 import           Model.User.Function
 import           Model.User.Internal2
+
+
+
+--
+-- Handler
+--
+
+getResourcePacksR :: Handler Value
+getResourcePacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getResourcePacksM user_id
+
+
+
+getResourcePackR :: ResourceId -> Handler Value
+getResourcePackR thread_post_id = do
+  user_id <- requireAuthId
+  toJSON <$> getResourcePackM user_id thread_post_id
+
+
+
 
 
 
