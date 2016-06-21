@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module All.Profile (
+  -- Handler
   getProfilesR,
   getProfileR,
   putProfileR,
@@ -20,10 +21,13 @@ module All.Profile (
 
 
 
-import           Handler.Prelude
-import           Model.Profile
+import           All.Prelude
 
 
+
+--
+-- Handler
+--
 
 getProfilesR :: Handler Value
 getProfilesR = do
