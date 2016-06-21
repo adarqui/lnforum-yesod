@@ -54,7 +54,6 @@ library
                      Handler.Prelude
                      Handler.Common
                      Handler.Root
-                     Handler.Star
                      Helper.Request
                      Import
                      Import.NoFoundation
