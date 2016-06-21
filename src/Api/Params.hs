@@ -87,7 +87,12 @@ data StandardParams = StandardParams {
   spThreadName       :: Maybe Text,
   spThreadPostName   :: Maybe Text,
   spResourceName     :: Maybe Text,
-  spParentName       :: Maybe Text
+  spParentName       :: Maybe Text,
+  spWithOrganization :: Bool,
+  spWithForum        :: Bool,
+  spWithBoard        :: Bool,
+  spWithThread       :: Bool,
+  spWithResource     :: Bool
 } deriving (Eq, Ord, Show)
 
 
@@ -133,7 +138,12 @@ defaultStandardParams = StandardParams {
   spThreadName       = Nothing,
   spThreadPostName   = Nothing,
   spResourceName     = Nothing,
-  spParentName       = Nothing
+  spParentName       = Nothing,
+  spWithOrganization = False,
+  spWithForum        = False,
+  spWithBoard        = False,
+  spWithThread       = False,
+  spWithResource     = False
 }
 
 
@@ -180,6 +190,11 @@ lookupStandardParams = do
   thread_post_name   <- lookupGetParam $ tshow ParamTag_ByThreadPostName
   resource_name      <- lookupGetParam $ tshow ParamTag_ByResourceName
   parent_name        <- lookupGetParam $ tshow ParamTag_ByParentName
+  with_organization  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithOrganization)
+  with_forum         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithForum)
+  with_board         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithBoard)
+  with_thread        <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThread)
+  with_resource      <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithResource)
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
   return StandardParams {
@@ -221,7 +236,12 @@ lookupStandardParams = do
     spThreadName       = thread_name,
     spThreadPostName   = thread_post_name,
     spResourceName     = resource_name,
-    spParentName       = parent_name
+    spParentName       = parent_name,
+    spWithOrganization = with_organization,
+    spWithForum        = with_forum,
+    spWithBoard        = with_board,
+    spWithThread       = with_thread,
+    spWithResource     = with_resource
   }
 
 
