@@ -1,4 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.Pack.Organization (
+  -- Model
   getOrganizationPacksM,
   getOrganizationPackM,
   getOrganizationPackMH,
@@ -6,11 +9,10 @@ module All.Pack.Organization (
 
 
 
-import           Model.Prelude
+import           All.Organization
+import           All.Prelude
 import           Model.User.Function
 import           Model.User.Internal2
-import           Model.Organization.Function
-import           Model.Organization.Internal
 
 
 
