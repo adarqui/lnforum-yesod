@@ -51,7 +51,6 @@ import           All.Star
 import           All.TeamMember
 import           All.Api
 import           All.Board
-import           All.Common
 import           All.Forum
 import           All.Leuron
 import           All.Me
@@ -68,6 +67,8 @@ import           All.Thread
 import           All.ThreadPost
 import           All.User
 
+import           Handler.Common
+import           Handler.Root
 
 
 -- This line actually creates our YesodDispatch instance. It is the second half
