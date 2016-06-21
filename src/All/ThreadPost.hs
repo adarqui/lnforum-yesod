@@ -1,7 +1,26 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
 
-module Model.ThreadPost.Internal (
+module Handler.ThreadPost (
+  getThreadPostsR,
+  postThreadPostR0,
+  getThreadPostR,
+  putThreadPostR,
+  deleteThreadPostR,
+
+  getCountThreadPostsR,
+
+  getThreadPostStatsR,
+  getThreadPostStatR,
+
+  getThreadPostPacksR,
+  getThreadPostPackR,
+
+  -- Model/Function
+  threadPostRequestToThreadPost,
+  threadPostToResponse,
+  threadPostsToResponses,
+
+  -- Model/Internal
   getThreadPostsM,
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
@@ -18,11 +37,160 @@ module Model.ThreadPost.Internal (
 
 
 
+import           Handler.Prelude
+import           Model.ThreadPost
+import           Model.Pack.ThreadPost
 import qualified LN.T.Like                 as L
 import           Model.Prelude
 import           Model.ThreadPost.Function
 
 
+
+getThreadPostsR :: Handler Value
+getThreadPostsR = do
+  user_id <- requireAuthId
+  (toJSON . threadPostsToResponses) <$> getThreadPostsM user_id
+
+
+
+postThreadPostR0 :: Handler Value
+postThreadPostR0 = do
+
+  user_id <- requireAuthId
+
+  sp <- lookupStandardParams
+
+  case (spThreadId sp, spThreadPostId sp) of
+
+    (Nothing, Nothing) -> permissionDenied "Must supply a thread_id or parent_id"
+
+    _ -> do
+      threadPost_request <- requireJsonBody :: Handler ThreadPostRequest
+      (toJSON . threadPostToResponse) <$> insertThreadPostM user_id (spThreadId sp) (spThreadPostId sp) threadPost_request
+
+
+
+getThreadPostR :: ThreadPostId -> Handler Value
+getThreadPostR threadPost_id = do
+  user_id <- requireAuthId
+  (toJSON . threadPostToResponse) <$> getThreadPostM user_id threadPost_id
+
+
+
+putThreadPostR :: ThreadPostId -> Handler Value
+putThreadPostR threadPost_id = do
+  user_id <- requireAuthId
+  threadPost_request <- requireJsonBody
+  (toJSON . threadPostToResponse) <$> updateThreadPostM user_id threadPost_id threadPost_request
+
+
+
+deleteThreadPostR :: ThreadPostId -> Handler Value
+deleteThreadPostR threadPost_id = do
+  user_id <- requireAuthId
+  void $ deleteThreadPostM user_id threadPost_id
+  pure $ toJSON ()
+
+
+
+getCountThreadPostsR :: Handler Value
+getCountThreadPostsR = do
+  user_id <- requireAuthId
+  toJSON <$> countThreadPostsM user_id
+
+
+
+getThreadPostStatsR :: Handler Value
+getThreadPostStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostStatsM user_id
+
+
+
+getThreadPostStatR :: ThreadPostId -> Handler Value
+getThreadPostStatR thread_post_id = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostStatM user_id thread_post_id
+
+
+
+getThreadPostPacksR :: Handler Value
+getThreadPostPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostPacksM user_id
+
+
+
+getThreadPostPackR :: ThreadPostId -> Handler Value
+getThreadPostPackR thread_post_id = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostPackM user_id thread_post_id
+
+
+
+
+
+
+
+
+--
+-- Model/Function
+--
+
+threadPostRequestToThreadPost :: UserId -> ThreadId -> Maybe ThreadPostId -> ThreadPostRequest -> ThreadPost
+threadPostRequestToThreadPost user_id thread_id _ ThreadPostRequest{..} = ThreadPost {
+  threadPostUserId      = user_id,
+  threadPostThreadId    = thread_id,
+  threadPostParentId    = Nothing,
+  threadPostTitle       = threadPostRequestTitle,
+  threadPostBody        = encodeText threadPostRequestBody,
+  threadPostTags        = threadPostRequestTags,
+  threadPostPrivateTags = threadPostRequestPrivateTags,
+  threadPostActive      = True,
+  threadPostGuard       = threadPostRequestGuard,
+  threadPostCreatedAt   = Nothing,
+  threadPostModifiedBy  = Nothing,
+  threadPostModifiedAt  = Nothing,
+  threadPostActivityAt  = Nothing
+}
+
+
+
+threadPostToResponse :: Entity ThreadPost -> ThreadPostResponse
+threadPostToResponse (Entity thread_post_id ThreadPost{..}) = ThreadPostResponse {
+  threadPostResponseId          = keyToInt64 thread_post_id,
+  threadPostResponseUserId      = keyToInt64 threadPostUserId,
+  threadPostResponseThreadId    = keyToInt64 threadPostThreadId,
+  threadPostResponseParentId    = fmap keyToInt64 threadPostParentId,
+  threadPostResponseTitle       = threadPostTitle,
+  threadPostResponseBody        = maybe PostDataEmpty id $ decodeText threadPostBody,
+  threadPostResponseTags        = threadPostTags,
+  threadPostResponsePrivateTags = threadPostPrivateTags,
+  threadPostResponseActive      = threadPostActive,
+  threadPostResponseGuard       = threadPostGuard,
+  threadPostResponseCreatedAt   = threadPostCreatedAt,
+  threadPostResponseModifiedBy  = fmap keyToInt64 threadPostModifiedBy,
+  threadPostResponseModifiedAt  = threadPostModifiedAt,
+  threadPostResponseActivityAt  = threadPostActivityAt
+}
+
+
+
+threadPostsToResponses :: [Entity ThreadPost] -> ThreadPostResponses
+threadPostsToResponses thread_posts = ThreadPostResponses {
+  threadPostResponses = map threadPostToResponse thread_posts
+}
+
+
+
+
+
+
+
+
+--
+-- Model/Internal
+--
 
 {-
 getThreadPostsM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> Handler [Entity ThreadPost]
