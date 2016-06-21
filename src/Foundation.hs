@@ -1,80 +1,80 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE TypeFamilies     #-}
+
 module Foundation where
 
-import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Text.Hamlet          (hamletFile)
-import Text.Jasmine         (minifym)
-import Yesod.Auth.BrowserId (authBrowserId)
-import Yesod.Auth.OAuth2.Github
-import Yesod.Default.Util   (addStaticContentExternal)
-import Yesod.Core.Types     (Logger)
-import qualified Yesod.Core.Unsafe as Unsafe
 
-import Yesod.Auth.Dummy
-import Yesod.Auth.OAuth2.Github ()
 
-import Model.User (authenticateUser)
-import qualified Network.Wai as W
-import Network.Wai.Middleware.Cors
-import qualified Data.Text.Encoding as T (decodeUtf8)
-import qualified Data.Text as T
-import qualified Database.Redis as R
+import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
+import           Import.NoFoundation
+import           Text.Hamlet                 (hamletFile)
+import           Text.Jasmine                (minifym)
+import           Yesod.Auth.BrowserId        (authBrowserId)
+import           Yesod.Auth.OAuth2.Github    (oauth2Github, oauth2Url)
+import           Yesod.Core.Types            (Logger)
+import qualified Yesod.Core.Unsafe           as Unsafe (fakeHandlerGetLogger)
+import           Yesod.Default.Util          (addStaticContentExternal)
 
-import qualified Data.ByteString.Char8 as BSC
+import           Yesod.Auth.Dummy            (authDummy)
+import           Yesod.Auth.OAuth2.Github    ()
 
--- | The foundation datatype for your application. This can be a good place to
--- keep settings and values requiring initialization before your application
--- starts running, such as database connections. Every handler will have
--- access to the data present here.
+import qualified Data.Text                   as T (pack, append)
+import qualified Data.Text.Encoding          as T (decodeUtf8)
+import qualified Database.Redis              as R (Connection)
+import           Model.User                  (authenticateUser)
+import qualified Network.Wai                 as W (requestHeaders, rawPathInfo)
+import           Network.Wai.Middleware.Cors ()
+
+import qualified Data.ByteString.Char8       as BSC (isPrefixOf)
+
+
+
 data App = App
-    { appSettings    :: AppSettings
-    , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
-    , appHttpManager :: Manager
-    , appLogger      :: Logger
-    -- custom
-    , appGithubOAuthKeys   :: OAuthKeys
---    , appGoogleOAuthKeys :: OAuthKeys
-    , appRed               :: R.Connection
-    , appZChat             :: TChan Text
+    { appSettings        :: AppSettings
+    , appStatic          :: Static -- ^ Settings for static file serving.
+    , appConnPool        :: ConnectionPool -- ^ Database connection pool.
+    , appHttpManager     :: Manager
+    , appLogger          :: Logger
+
+    -- Custom Foundation Fields
+    , appGithubOAuthKeys :: OAuthKeys
+    -- appGoogleOAuthKeys :: OAuthKeys
+    , appRed             :: R.Connection
+    , appZChat           :: TChan Text
+    , cacheMe            :: Maybe User
+    , cacheOrganization  :: Maybe Organization
+    , cacheUser          :: Maybe User
+    , cacheForum         :: Maybe Forum
+    , cacheBoard         :: Maybe Board
+    , cacheThread        :: Maybe Thread
+    , cacheThreadPost    :: Maybe ThreadPost
     }
+
+
 
 instance HasHttpManager App where
     getHttpManager = appHttpManager
 
--- This is where we define all of the routes in our application. For a full
--- explanation of the syntax, please see:
--- http://www.yesodweb.com/book/routing-and-handlers
---
--- Note that this is really half the story; in Application.hs, mkYesodDispatch
--- generates the rest of the code. Please see the linked documentation for an
--- explanation for this split.
---
--- This function also generates the following type synonyms:
--- type Handler = HandlerT App IO
--- type Widget = WidgetT App IO ()
+
+
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
--- | A convenient synonym for creating forms.
+
+
 type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 
--- Please see the documentation for the Yesod typeclass. There are a number
--- of settings which can be configured by overriding methods here.
-instance Yesod App where
-    -- Controls the base of generated URLs. For more information on modifying,
-    -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
-    approot = ApprootMaster $ appRoot . appSettings
 
-    -- Store session data on the client in encrypted cookies,
-    -- default session idle timeout is 120 minutes
+
+instance Yesod App where
+    approot = ApprootMaster $ appRoot . appSettings
     makeSessionBackend _ = whenSSL sslOnlySessions $ fmap Just $ defaultClientSessionBackend
         sessionTimeout    -- timeout in minutes
         "config/client_session_key.aes"
 
---    yesodMiddleware = (sslOnlyMiddleware 120) . defaultYesodMiddleware
     yesodMiddleware =
       whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
---      simpleCors . whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
+      -- simpleCors . whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
 
     defaultLayout widget = do
         master <- getYesod
@@ -155,22 +155,31 @@ instance Yesod App where
         defaultErrorHandler errorResponse
 
 
+
 whenSSL :: (a -> a) -> (a -> a)
 whenSSL f = if (appForceSSL compileTimeAppSettings) then f else id
+
+
 
 -- | A session timeout of 1 week.. stop annoying me
 --
 sessionTimeout :: Int
 sessionTimeout = 10080
 
--- How to run database actions.
+
+
 instance YesodPersist App where
     type YesodPersistBackend App = SqlBackend
     runDB action = do
         master <- getYesod
         runSqlPool action $ appConnPool master
+
+
+
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner appConnPool
+
+
 
 instance YesodAuth App where
     type AuthId App = UserId
@@ -212,6 +221,7 @@ instance YesodAuth App where
     maybeAuthId = myMaybeAuthId
 
 
+
 myMaybeAuthId :: (YesodAuthPersist master, Typeable (AuthEntity master))
   => HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
@@ -223,17 +233,25 @@ myMaybeAuthId = do
 -- DEBUG:      liftIO $ print authHeader
       return $ fromPathPiece $ T.decodeUtf8 authHeader
 
+
+
 -- custom
 addAuthBackDoor :: App -> [AuthPlugin App] -> [AuthPlugin App]
 addAuthBackDoor app =
     if appAllowDummyAuth (appSettings app) then (authDummy :) else id
 
+
+
 instance YesodAuthPersist App
+
+
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
 instance RenderMessage App FormMessage where
     renderMessage _ _ = defaultFormMessage
+
+
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger

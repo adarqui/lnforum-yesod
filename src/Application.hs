@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
-
 {-# OPTIONS_GHC -fno-warn-orphans #-}
+
 module Application
     ( getApplicationDev
     , appMain
@@ -14,6 +14,8 @@ module Application
     , handler
     , db
     ) where
+
+
 
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
@@ -41,18 +43,12 @@ import           Network.Wai                          (Middleware)
 
 import qualified Database.Redis                       as R
 
-{-
-import Language.Haskell.TH
-import Language.Haskell.TH.Syntax
-addDependentFile "config/routes"
--}
 
--- Import all relevant handler modules here.
--- Don't forget to add new modules to your cabal file!
+
 import           All.GlobalGroup
-import           All.TeamMember
 import           All.Like
 import           All.Star
+import           All.TeamMember
 import           Handler.Api
 import           Handler.Board
 import           Handler.Common
@@ -73,12 +69,14 @@ import           Handler.Thread
 import           Handler.ThreadPost
 import           Handler.User
 
+
+
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
 -- comments there for more details.
 mkYesodDispatch "App" resourcesApp
 
--- qAddDependentFile "config/routes"
+
 
 -- | This function allocates resources (such as a database connection pool),
 -- performs initialization and returns a foundation datatype value. This is also
@@ -92,6 +90,14 @@ makeFoundation appSettings = do
 
     -- example chat initialization
     appZChat <- atomically newBroadcastTChan
+
+    cacheMe           <- pure Nothing
+    cacheOrganization <- pure Nothing
+    cacheUser         <- pure Nothing
+    cacheForum        <- pure Nothing
+    cacheBoard        <- pure Nothing
+    cacheThread       <- pure Nothing
+    cacheThreadPost   <- pure Nothing
 
     -- Some basic initializations: HTTP connection manager, logger, and static
     -- subsite.
@@ -132,6 +138,8 @@ makeFoundation appSettings = do
     githubOAuthKeys :: IO OAuthKeys
     githubOAuthKeys = return $ OAuthKeys "401608c91835421ad08a" "da30c2b38b22e5dda54bd47828aa7405dcf79abd"
 
+
+
 -- | Convert our foundation to a WAI Application by calling @toWaiAppPlain@ and
 -- applying some additional middlewares.
 makeApplication :: App -> IO Application
@@ -151,12 +159,16 @@ makeApplication foundation = do
     appPlain <- toWaiAppPlain foundation
     return $ logWare $ defaultMiddlewaresNoLogging appPlain
 
+
+
 -- | just prints bleh.. can be added like so: return $ bleh $ logWare $ ...
 -- bleh :: Middleware
 -- bleh app req sendResponse = do
 --  app req $ \rsp -> do
 --      putStrLn "bleh!"
 --      sendResponse rsp
+
+
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
@@ -173,6 +185,8 @@ warpSettings foundation =
             (toLogStr $ "Exception from Warp: " ++ show e))
       defaultSettings
 
+
+
 -- | For yesod devel, return the Warp settings and WAI Application.
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
@@ -182,12 +196,18 @@ getApplicationDev = do
     app <- makeApplication foundation
     return (wsettings, app)
 
+
+
 getAppSettings :: IO AppSettings
 getAppSettings = loadAppSettings [configSettingsYml] [] useEnv
+
+
 
 -- | main function for use by yesod devel
 develMain :: IO ()
 develMain = develMainHelper getApplicationDev
+
+
 
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
@@ -212,6 +232,7 @@ appMain = do
     runSettings (warpSettings foundation) $ app
 
 
+
 --------------------------------------------------------------
 -- Function for DevelMain.hs (a way to run the app from GHCi)
 --------------------------------------------------------------
@@ -222,6 +243,8 @@ getApplicationRepl = do
     wsettings <- getDevSettings $ warpSettings foundation
     app1 <- makeApplication foundation
     return (getPort wsettings, foundation, app1)
+
+
 
 shutdownApp :: App -> IO ()
 shutdownApp _ = return ()
@@ -234,6 +257,8 @@ shutdownApp _ = return ()
 -- | Run a handler
 handler :: Handler a -> IO a
 handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
+
+
 
 -- | Run DB queries
 db :: ReaderT SqlBackend (HandlerT App IO) a -> IO a
