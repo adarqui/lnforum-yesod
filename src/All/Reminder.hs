@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Reminder (
+  -- Handler
   getRemindersR,
   postRemindersR,
   getReminderR,
@@ -37,7 +38,7 @@ module All.Reminder (
 
 
 
-import           Handler.Prelude
+import           All.Prelude
 import           Model.Reminder
 import           LN.Lib.Url (toPrettyUrl)
 import           LN.T
@@ -45,6 +46,10 @@ import           Import
 import           Misc.Codec (keyToInt64)
 
 
+
+--
+-- Handler
+--
 
 getRemindersR :: Handler Value
 getRemindersR = do
