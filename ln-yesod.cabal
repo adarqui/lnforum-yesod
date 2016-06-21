@@ -34,13 +34,10 @@ library
                      All.Profile
                      All.Reminder
                      All.Resource
-                     All.Root
                      All.SPA
                      All.Team
                      All.Thread
                      All.ThreadPost
-                     All.User
-                     All.Star
                      All.TeamMember
                      All.Pack.Organization
                      All.Pack.User
@@ -56,6 +53,8 @@ library
                      Foundation
                      Handler.Prelude
                      Handler.Common
+                     Handler.Root
+                     Handler.Star
                      Helper.Request
                      Import
                      Import.NoFoundation
