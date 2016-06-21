@@ -1,10 +1,16 @@
-module Handler.Me (
+module All.Me (
   getMeR,
-  getMePackR
+  getMePackR,
+
+  -- Model/Internal
+  getMeM
 ) where
 
 
 
+import           Api.Params
+import           Api.Response
+import           Import
 import           Handler.Prelude
 import           Model.Me.Internal
 import           Model.Pack.User
@@ -23,3 +29,15 @@ getMePackR :: Handler Value
 getMePackR = do
   user_id <- requireAuthId
   toJSON <$> getUserPack_ByUserIdM user_id user_id defaultStandardParams
+
+
+
+
+
+--
+-- Model/Internal
+--
+
+getMeM :: UserId -> Handler (Entity User)
+getMeM user_id = do
+  notFoundMaybe =<< selectFirstDb [ UserId ==. user_id ] []
