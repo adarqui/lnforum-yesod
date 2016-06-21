@@ -75,12 +75,13 @@ getForumPack_ByForumM user_id forum = do
   forum_stats   <- getForumStatM user_id (entityKey forum)
 
   return $ ForumPackResponse {
-    forumPackResponseForum   = forumToResponse forum,
-    forumPackResponseForumId = forum_id,
-    forumPackResponseStat    = forum_stats,
-    forumPackResponseLike    = Nothing,
-    forumPackResponseStar    = Nothing,
-    forumPackResponseIsOwner = False
+    forumPackResponseForum            = forumToResponse forum,
+    forumPackResponseForumId          = forum_id,
+    forumPackResponseStat             = forum_stats,
+    forumPackResponseLike             = Nothing,
+    forumPackResponseStar             = Nothing,
+    forumPackResponseWithOrganization = Nothing,
+    forumPackResponseIsOwner          = False
   }
   where
   forum_id = entityKeyToInt64 forum

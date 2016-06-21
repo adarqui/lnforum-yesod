@@ -52,12 +52,16 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
 --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
   return $ ThreadPostPackResponse {
-    threadPostPackResponseThreadPost   = threadPostToResponse thread_post,
-    threadPostPackResponseThreadPostId = keyToInt64 thread_post_id,
-    threadPostPackResponseUser         = userToSanitizedResponse thread_post_user,
-    threadPostPackResponseUserId       = entityKeyToInt64 thread_post_user,
-    threadPostPackResponseStat         = thread_post_stat,
-    threadPostPackResponseLike         = fmap likeToResponse thread_post_like,
-    threadPostPackResponseStar         = Nothing,
-    threadPostPackResponseIsOwner      = False
+    threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
+    threadPostPackResponseThreadPostId     = keyToInt64 thread_post_id,
+    threadPostPackResponseUser             = userToSanitizedResponse thread_post_user,
+    threadPostPackResponseUserId           = entityKeyToInt64 thread_post_user,
+    threadPostPackResponseStat             = thread_post_stat,
+    threadPostPackResponseLike             = fmap likeToResponse thread_post_like,
+    threadPostPackResponseStar             = Nothing,
+    threadPostPackResponseWithOrganization = Nothing,
+    threadPostPackResponseWithForum        = Nothing,
+    threadPostPackResponseWithBoard        = Nothing,
+    threadPostPackResponseWithThread       = Nothing,
+    threadPostPackResponseIsOwner          = False
   }

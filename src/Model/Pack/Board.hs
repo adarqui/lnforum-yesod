@@ -73,6 +73,8 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
     boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
     boardPackResponseLike                 = Nothing,
     boardPackResponseStar                 = Nothing,
+    boardPackResponseWithOrganization     = Nothing,
+    boardPackResponseWithForum            = Nothing,
     boardPackResponseIsOwner              = False
   }
 
