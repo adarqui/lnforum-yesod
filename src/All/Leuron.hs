@@ -389,8 +389,8 @@ insertLeuronCategoriesM leuron_id resource_id LeuronRequest{..} = do
 
 -- | When a user inserts a leuron, add it to the proper sets
 --
-insertLeuronR :: UserId -> ResourceId -> LeuronId -> Handler ()
-insertLeuronR user_id resource_id leuron_id = do
+insertLeuronRedis :: UserId -> ResourceId -> LeuronId -> Handler ()
+insertLeuronRedis user_id resource_id leuron_id = do
   red <- getsYesod appRed
   void $ liftIO $ R.runRedis red $ do
 
@@ -408,8 +408,8 @@ insertLeuronR user_id resource_id leuron_id = do
 
 -- | Undo insertLeuronR
 --
-deleteLeuronR :: UserId -> ResourceId -> LeuronId -> Handler ()
-deleteLeuronR user_id resource_id leuron_id = do
+deleteLeuronRedis :: UserId -> ResourceId -> LeuronId -> Handler ()
+deleteLeuronRedis user_id resource_id leuron_id = do
   red <- getsYesod appRed
   void $ liftIO $ R.runRedis red $ do
 

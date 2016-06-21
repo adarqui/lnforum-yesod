@@ -1,7 +1,6 @@
 module All.Me (
   -- Handler
   getMeR,
-  getMePackR,
 
   -- Model/Internal
   getMeM
@@ -13,6 +12,7 @@ import           Api.Params
 import           Api.Response
 import           Import
 import           All.Prelude
+import           Model.User.Function
 
 
 
@@ -26,11 +26,6 @@ getMeR = do
   (toJSON . userToResponse) <$> getMeM user_id
 
 
-
-getMePackR :: Handler Value
-getMePackR = do
-  user_id <- requireAuthId
-  toJSON <$> getUserPack_ByUserIdM user_id user_id defaultStandardParams
 
 
 
