@@ -1,4 +1,9 @@
 module All.Pack.Forum (
+  -- Handler
+  getForumPacksR,
+  getForumPackR,
+  getForumPackH,
+
   -- Model
   getForumPacksM,
   getForumPackM,
@@ -9,6 +14,34 @@ module All.Pack.Forum (
 
 import           All.Prelude
 import           All.Forum
+
+
+
+--
+-- Handler
+--
+
+getForumPacksR :: Handler Value
+getForumPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPacksM user_id
+
+
+
+getForumPackR :: ForumId -> Handler Value
+getForumPackR forum_id = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPackM user_id forum_id
+
+
+
+getForumPackH :: Text -> Handler Value
+getForumPackH forum_name = do
+  user_id <- requireAuthId
+  toJSON <$> getForumPackMH user_id forum_name
+
+
+
 
 
 

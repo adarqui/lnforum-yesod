@@ -1,21 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Forum (
+  -- Handler
   getForumsR,
   postForumR0,
   getForumR,
   getForumH,
   putForumR,
   deleteForumR,
-
   getCountForumsR,
-
   getForumStatsR,
   getForumStatR,
-
-  getForumPacksR,
-  getForumPackR,
-  getForumPackH,
 
   -- Model/Function
   forumRequestToForum,
@@ -30,27 +25,20 @@ module All.Forum (
   getForums_ByUserIdM,
   getForums_ByUserNickM,
   getForums_ByEverythingM,
-
   getForumM,
   getForumMH,
-
   getForum_ByOrganizationIdMH,
-
   insertForumM,
   updateForumM,
   deleteForumM,
-
   countForumsM,
-
   getForumStatsM,
   getForumStatM,
 ) where
 
 
 
-import           Handler.Prelude
-import           Model.Pack.Forum
-import           Model.Prelude
+import           All.Prelude
 
 
 
@@ -128,24 +116,7 @@ getForumStatR forum_id = do
 
 
 
-getForumPacksR :: Handler Value
-getForumPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getForumPacksM user_id
 
-
-
-getForumPackR :: ForumId -> Handler Value
-getForumPackR forum_id = do
-  user_id <- requireAuthId
-  toJSON <$> getForumPackM user_id forum_id
-
-
-
-getForumPackH :: Text -> Handler Value
-getForumPackH forum_name = do
-  user_id <- requireAuthId
-  toJSON <$> getForumPackMH user_id forum_name
 
 
 
