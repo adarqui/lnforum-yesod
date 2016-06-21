@@ -2,19 +2,15 @@
 {-# LANGUAGE RecordWildCards     #-}
 
 module All.Board (
+  -- Handler
   getBoardsR,
   postBoardR0,
   getBoardR,
   getBoardH,
   putBoardR,
   deleteBoardR,
-
   getBoardStatsR,
   getBoardStatR,
-
-  getBoardPacksR,
-  getBoardPackR,
-  getBoardPackH,
 
   -- Model/Function
   boardRequestToBoard,
@@ -30,13 +26,11 @@ module All.Board (
   getBoards_ByForumNameM,
   getBoards_ByBoardParentIdM,
   getBoards_ByEverythingM,
-
   getBoardM,
   getBoardMH,
   insertBoardM,
   updateBoardM,
   deleteBoardM,
-
   getBoardStatsM,
   getBoardStatM,
 ) where
@@ -111,13 +105,6 @@ getBoardStatsR = notFound
 
 
 
-getBoardPacksR :: Handler Value
-getBoardPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getBoardPacksM user_id
-
-
-
 getBoardStatR :: BoardId -> Handler Value
 getBoardStatR board_id = do
   user_id <- requireAuthId
@@ -125,17 +112,7 @@ getBoardStatR board_id = do
 
 
 
-getBoardPackR :: BoardId -> Handler Value
-getBoardPackR board_id = do
-  user_id <- requireAuthId
-  toJSON <$> getBoardPackM user_id board_id
 
-
-
-getBoardPackH :: Text -> Handler Value
-getBoardPackH board_name = do
-  user_id <- requireAuthId
-  toJSON <$> getBoardPackMH user_id board_name
 
 
 

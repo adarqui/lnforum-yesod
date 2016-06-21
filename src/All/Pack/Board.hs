@@ -1,6 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Board (
+  -- Handler
+  getBoardPacksR,
+  getBoardPackR,
+  getBoardPackH,
+
   -- Model
   getBoardPacksM,
   getBoardPackM,
@@ -15,6 +20,36 @@ import           All.Thread
 import           All.ThreadPost
 import           Model.User.Function
 import           Model.User.Internal2
+
+
+
+--
+-- Handler
+--
+
+getBoardPacksR :: Handler Value
+getBoardPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getBoardPacksM user_id
+
+
+
+getBoardPackR :: BoardId -> Handler Value
+getBoardPackR board_id = do
+  user_id <- requireAuthId
+  toJSON <$> getBoardPackM user_id board_id
+
+
+
+getBoardPackH :: Text -> Handler Value
+getBoardPackH board_name = do
+  user_id <- requireAuthId
+  toJSON <$> getBoardPackMH user_id board_name
+
+
+
+
+
 
 
 
