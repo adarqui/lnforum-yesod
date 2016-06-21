@@ -39,7 +39,6 @@ module All.Reminder (
 
 
 import           All.Prelude
-import           Model.Reminder
 import           LN.Lib.Url (toPrettyUrl)
 import           LN.T
 import           Import
