@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module All.Pm (
+  -- Handler
   getPmsR,
   postPmR0,
   getPmR,
@@ -23,10 +24,13 @@ module All.Pm (
 
 
 
-import           Handler.Prelude
-import           Model.Pm
+import           All.Prelude
 
 
+
+--
+-- Handler
+--
 
 getPmsR :: Handler Value
 getPmsR = do
