@@ -1,10 +1,34 @@
+{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ExplicitForAll   #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs            #-}
 {-# LANGUAGE RecordWildCards  #-}
 {-# LANGUAGE TypeOperators    #-}
 
-module Model.Organization.Internal (
+module All.Organization (
+  getOrganizationsR,
+  postOrganizationR0,
+  getOrganizationR,
+  getOrganizationH,
+  putOrganizationR,
+  deleteOrganizationR,
+
+  getOrganizationCountR,
+
+  getOrganizationStatsR,
+  getOrganizationStatR,
+
+  getOrganizationPacksR,
+  getOrganizationPackR,
+  getOrganizationPackH,
+
+  -- Model/Function
+  organizationRequestToOrganization,
+  organizationToResponse,
+  organizationsToResponses,
+  validateOrganizationRequest
+
+  -- Model/Internal
   getOrganizationsM,
   getOrganizations_ByUserIdM,
   getOrganizations_ByEverythingM,
@@ -25,6 +49,9 @@ module Model.Organization.Internal (
 
 
 
+import           Handler.Prelude
+import           Model.Organization
+import           Model.Pack.Organization
 import           All.TeamMember
 import           Model.Prelude
 import           Model.Organization.Function
@@ -33,6 +60,187 @@ import           LN.T.Membership
 import           LN.T.Visibility
 
 
+
+
+getOrganizationsR :: Handler Value
+getOrganizationsR = do
+  user_id <- requireAuthId
+  (toJSON . organizationsToResponses) <$> getOrganizationsM user_id
+
+
+
+postOrganizationR0 :: Handler Value
+postOrganizationR0 = do
+
+  user_id <- requireAuthId
+
+  organization_request <- requireJsonBody :: Handler OrganizationRequest
+  (toJSON . organizationToResponse) <$> insertOrganizationM user_id organization_request
+
+
+
+getOrganizationR :: OrganizationId -> Handler Value
+getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
+--  user_id <- requireAuthId
+--  (toJSON . organizationToResponse) <$> getOrganizationM user_id organization_id
+
+
+
+getOrganizationH :: Text -> Handler Value
+getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
+--  user_id <- requireAuthId
+--  (toJSON . organizationToResponse) <$> getOrganizationMH user_id org_name
+
+
+
+getOrganizationR' :: forall master t.
+                     YesodAuth master
+                  => (AuthId master -> t -> HandlerT master IO (Entity Organization))
+                  -> t
+                  -> HandlerT master IO Value
+getOrganizationR' f a = do
+  user_id <- requireAuthId
+  (toJSON . organizationToResponse <$> f user_id a)
+
+
+
+putOrganizationR :: OrganizationId -> Handler Value
+putOrganizationR organization_id = do
+  user_id <- requireAuthId
+  organization_request <- requireJsonBody
+  (toJSON . organizationToResponse) <$> updateOrganizationM user_id organization_id organization_request
+
+
+
+deleteOrganizationR :: OrganizationId -> Handler Value
+deleteOrganizationR organization_id = do
+  user_id <- requireAuthId
+  void $ deleteOrganizationM user_id organization_id
+  pure $ toJSON ()
+
+
+
+getOrganizationCountR :: Handler Value
+getOrganizationCountR = do
+  user_id <- requireAuthId
+  toJSON <$> countOrganizationsM user_id
+
+
+
+getOrganizationStatsR :: Handler Value
+getOrganizationStatsR = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationStatsM user_id
+
+
+
+getOrganizationStatR :: OrganizationId -> Handler Value
+getOrganizationStatR organization_id = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationStatM user_id organization_id
+
+
+
+getOrganizationPacksR :: Handler Value
+getOrganizationPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPacksM user_id
+
+
+
+getOrganizationPackR :: OrganizationId -> Handler Value
+getOrganizationPackR organization_id = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackM user_id organization_id
+
+
+
+getOrganizationPackH :: Text -> Handler Value
+getOrganizationPackH org_name = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackMH user_id org_name
+
+
+
+
+
+
+--
+-- Model/Function
+--
+
+organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
+organizationRequestToOrganization user_id OrganizationRequest{..} = Organization {
+  organizationUserId      = user_id,
+  organizationName        = toPrettyName organizationRequestDisplayName,
+  organizationDisplayName = organizationRequestDisplayName,
+  organizationDescription = organizationRequestDescription,
+  organizationCompany     = organizationRequestCompany,
+  organizationLocation    = organizationRequestLocation,
+  organizationEmail       = organizationRequestEmail,
+  organizationEmailMD5    = "md5",
+  organizationMembership  = organizationRequestMembership,
+  organizationIcon        = organizationRequestIcon,
+  organizationTags        = organizationRequestTags,
+  organizationVisibility  = organizationRequestVisibility,
+  organizationActive      = True,
+  organizationGuard       = organizationRequestGuard,
+  organizationCreatedAt   = Nothing,
+  organizationModifiedBy  = Nothing,
+  organizationModifiedAt  = Nothing,
+  organizationActivityAt  = Nothing
+}
+
+
+organizationToResponse :: Entity Organization -> OrganizationResponse
+organizationToResponse (Entity organization_id Organization{..}) = OrganizationResponse {
+  organizationResponseId          = keyToInt64 organization_id,
+  organizationResponseUserId      = keyToInt64 organizationUserId,
+  organizationResponseName        = organizationName,
+  organizationResponseDisplayName = organizationDisplayName,
+  organizationResponseDescription = organizationDescription,
+  organizationResponseCompany     = organizationCompany,
+  organizationResponseLocation    = organizationLocation,
+  organizationResponseEmail       = organizationEmail,
+  organizationResponseEmailMD5    = organizationEmailMD5,
+  organizationResponseMembership  = organizationMembership,
+  organizationResponseIcon        = organizationIcon,
+  organizationResponseTags        = organizationTags,
+  organizationResponseVisibility  = organizationVisibility,
+  organizationResponseActive      = organizationActive,
+  organizationResponseGuard       = organizationGuard,
+  organizationResponseCreatedAt   = organizationCreatedAt,
+  organizationResponseModifiedBy  = fmap keyToInt64 organizationModifiedBy,
+  organizationResponseModifiedAt  = organizationModifiedAt,
+  organizationResponseActivityAt  = organizationActivityAt
+}
+
+
+
+organizationsToResponses :: [Entity Organization] -> OrganizationResponses
+organizationsToResponses orgs = OrganizationResponses {
+  organizationResponses = map organizationToResponse orgs
+}
+
+
+
+validateOrganizationRequest :: OrganizationRequest -> Either Text OrganizationRequest
+validateOrganizationRequest z@OrganizationRequest{..} = do
+--  _ <- isValidNick organizationRequestName
+  _ <- isValidName organizationRequestDisplayName
+  _ <- isValidEmail organizationRequestEmail
+  _ <- isValidNonEmptyString organizationRequestCompany
+  _ <- isValidNonEmptyString organizationRequestLocation
+  Right z
+
+
+
+
+
+
+--
+-- Model/Internal
+--
 
 getOrganizationsM :: UserId -> Handler [Entity Organization]
 getOrganizationsM user_id = do
