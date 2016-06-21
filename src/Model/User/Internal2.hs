@@ -26,6 +26,7 @@ import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
 import           All.Prelude
 import           All.Profile
+import           Model.User.Function
 
 
 

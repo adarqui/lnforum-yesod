@@ -10,8 +10,6 @@ module All.Resource (
   getCountResourcesR,
   getResourceStatsR,
   getResourceStatR,
-  getResourcePacksR,
-  getResourcePackR,
 
   -- Model/Function
   resourceRequestToResource,
@@ -33,7 +31,6 @@ module All.Resource (
 
 
 
-import           All.Pack.Resource
 import           All.Prelude
 import           Import
 import           LN.Lib.Url        (toPrettyUrl)
@@ -103,20 +100,6 @@ getResourceStatR :: ResourceId -> Handler Value
 getResourceStatR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getResourceStatM user_id thread_post_id
-
-
-
-getResourcePacksR :: Handler Value
-getResourcePacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getResourcePacksM user_id
-
-
-
-getResourcePackR :: ResourceId -> Handler Value
-getResourcePackR thread_post_id = do
-  user_id <- requireAuthId
-  toJSON <$> getResourcePackM user_id thread_post_id
 
 
 
