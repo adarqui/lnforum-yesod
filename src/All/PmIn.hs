@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.PmIn (
+  -- Handler
   getPmInsR,
   postPmInsR,
   getPmInR,
@@ -22,10 +23,13 @@ module All.PmIn (
 
 
 
-import           Handler.Prelude
-import           Model.PmIn
+import           All.Prelude
 
 
+
+--
+-- Handler
+--
 
 getPmInsR :: Handler Value
 getPmInsR = do
