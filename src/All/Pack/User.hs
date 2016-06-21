@@ -1,21 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.User (
+  -- Model
   getUserPacksM,
   getUserPackM,
-
   getUserPack_ByUserIdM
 ) where
 
 
 
-import           Model.Prelude
-import           Model.Profile.Function
-import           Model.Profile.Internal
+import           All.Prelude
+import           All.Profile
 import           Model.User.Function
 import           Model.User.Internal2
 
 
+
+--
+-- Model
+--
 
 getUserPacksM :: UserId -> Handler UserPackResponses
 getUserPacksM user_id = do

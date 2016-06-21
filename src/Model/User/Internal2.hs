@@ -9,7 +9,6 @@ module Model.User.Internal2 (
   getUsersM,
   getUsers_ByUserIdsM,
   getUsers_ByEverythingM,
-
   insertUsersM,
   insertUsers_TasksM,
   getUserM,
@@ -17,7 +16,6 @@ module Model.User.Internal2 (
   updateUserM,
   deleteUserM,
   countUsersM,
-
   getUserStatsM,
   getUserStatM
 ) where
@@ -26,9 +24,8 @@ module Model.User.Internal2 (
 
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
-import           Model.Prelude
-import           Model.Profile.Function
-import           Model.User.Function
+import           All.Prelude
+import           All.Profile
 
 
 

@@ -1,19 +1,23 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Resource (
+  -- Model
   getResourcePacksM,
   getResourcePackM
 ) where
 
 
 
-import           Model.Prelude
-import           Model.Resource.Function
-import           Model.Resource.Internal
+import           All.Prelude
+import           All.Resource
 import           Model.User.Function
 import           Model.User.Internal2
 
 
+
+--
+-- Model
+--
 
 getResourcePacksM :: UserId -> Handler ResourcePackResponses
 getResourcePacksM user_id = do
