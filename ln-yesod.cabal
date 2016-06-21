@@ -39,10 +39,13 @@ library
                      All.Thread
                      All.ThreadPost
                      All.TeamMember
+                     All.Pack.Me
                      All.Pack.Organization
                      All.Pack.User
                      All.Pack.Sanitized.User
+                     All.Pack.GlobalGroup
                      All.Pack.Team
+                     All.Pack.TeamMember
                      All.Pack.Forum
                      All.Pack.Board
                      All.Pack.Thread
