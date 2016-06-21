@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Pack.User (
+module All.Pack.User (
   getUserPacksM,
   getUserPackM,
 

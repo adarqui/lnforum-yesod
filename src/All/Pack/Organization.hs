@@ -1,4 +1,4 @@
-module Model.Pack.Organization (
+module All.Pack.Organization (
   getOrganizationPacksM,
   getOrganizationPackM,
   getOrganizationPackMH,

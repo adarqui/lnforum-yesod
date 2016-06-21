@@ -1,2 +1,2 @@
-module Model.Pack.Team (
+module All.Pack.Team (
 ) where

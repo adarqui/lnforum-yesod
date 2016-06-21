@@ -1,4 +1,4 @@
-module Model.Pack.Forum (
+module All.Pack.Forum (
   getForumPacksM,
   getForumPackM,
   getForumPackMH,

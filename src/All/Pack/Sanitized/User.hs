@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Pack.Sanitized.User (
+module All.Pack.Sanitized.User (
   getUsersSanitizedPacksM,
   getUserSanitizedPackM,
   getUserSanitizedPackMH,

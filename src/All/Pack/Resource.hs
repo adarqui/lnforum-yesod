@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Pack.Resource (
+module All.Pack.Resource (
   getResourcePacksM,
   getResourcePackM
 ) where

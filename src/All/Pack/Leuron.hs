@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Pack.Leuron (
+module All.Pack.Leuron (
   getLeuronPacksM,
   getLeuronPackM
 ) where

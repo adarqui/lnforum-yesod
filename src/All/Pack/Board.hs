@@ -1,4 +1,4 @@
-module Model.Pack.Board (
+module All.Pack.Board (
   getBoardPacksM,
   getBoardPackM,
   getBoardPackMH,

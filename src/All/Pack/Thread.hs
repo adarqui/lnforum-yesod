@@ -1,4 +1,4 @@
-module Model.Pack.Thread (
+module All.Pack.Thread (
   getThreadPacksM,
   getThreadPackM,
   getThreadPackMH,

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Model.Pack.ThreadPost (
+module All.Pack.ThreadPost (
   getThreadPostPacksM,
   getThreadPostPackM
 ) where
