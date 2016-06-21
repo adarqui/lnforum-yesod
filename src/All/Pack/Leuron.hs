@@ -1,21 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Leuron (
+  -- Model
   getLeuronPacksM,
   getLeuronPackM
 ) where
 
 
 
-import           Model.Prelude
-import           Model.Leuron.Function
-import           Model.Leuron.Internal
-import           Model.LeuronTraining.Function
-import           Model.LeuronTraining.Internal
+import           All.Leuron
+import           All.LeuronTraining
+import           All.Prelude
 import           Model.User.Function
 import           Model.User.Internal2
 
 
+
+--
+-- Model
+--
 
 getLeuronPacksM :: UserId -> Handler LeuronPackResponses
 getLeuronPacksM user_id = do
