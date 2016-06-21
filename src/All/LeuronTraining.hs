@@ -1,7 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.LeuronTraining (
-
   -- Model/Function
   leuronTrainingRequestToLeuronTraining,
   leuronTrainingToResponse,
@@ -13,14 +12,12 @@ module All.LeuronTraining (
 
 
 
-import           Model.Prelude
-import           Database.Esqueleto    ((^.))
-import qualified Database.Esqueleto    as E
-import qualified Database.Redis        as R
-import qualified LN.T.Like             as L
-import           Model.Leuron.Function
-import           Model.LeuronTraining.Function
-import           Model.Prelude
+import           All.Leuron
+import           All.Prelude
+import           Database.Esqueleto ((^.))
+import qualified Database.Esqueleto as E
+import qualified Database.Redis     as R
+import qualified LN.T.Like          as L
 
 
 

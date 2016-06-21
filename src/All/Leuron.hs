@@ -1,17 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Leuron (
+  -- Handler
   getLeuronsR,
   postLeuronR0,
   getLeuronR,
   putLeuronR,
   deleteLeuronR,
-
   getCountLeuronsR,
-
   getLeuronStatsR,
   getLeuronStatR,
-
   getLeuronPacksR,
   getLeuronPackR,
 
@@ -26,15 +24,12 @@ module All.Leuron (
   getLeurons_ByResourceId_RandomM,
   getLeurons_ByUserIdM,
   getLeurons_ByEverythingM,
-
   getLeuronsIdsM,
   getLeuronM,
   insertLeuronM,
   updateLeuronM,
   deleteLeuronM,
-
   countLeuronsM,
-
   getLeuronStatsM,
   getLeuronStatM
 ) where
@@ -43,16 +38,17 @@ module All.Leuron (
 
 import           Import
 import           Api.Params
-import Model.Prelude
-import           Model.Pack.Leuron
+import All.Prelude
 import           Database.Esqueleto    ((^.))
 import qualified Database.Esqueleto    as E
 import qualified Database.Redis        as R
 import qualified LN.T.Like             as L
-import           Model.Leuron.Function
-import           Model.Prelude
 
 
+
+--
+-- Handler
+--
 
 getLeuronsR :: Handler Value
 getLeuronsR = do
