@@ -49,25 +49,25 @@ import           All.GlobalGroup
 import           All.Like
 import           All.Star
 import           All.TeamMember
-import           Handler.Api
-import           Handler.Board
-import           Handler.Common
-import           Handler.Empty
-import           Handler.Forum
-import           Handler.Leuron
-import           Handler.Me
-import           Handler.Organization
-import           Handler.Pm
-import           Handler.PmIn
-import           Handler.PmOut
-import           Handler.Profile
-import           Handler.Reminder
-import           Handler.Resource
-import           Handler.SPA
-import           Handler.Team
-import           Handler.Thread
-import           Handler.ThreadPost
-import           Handler.User
+import           All.Api
+import           All.Board
+import           All.Common
+import           All.Empty
+import           All.Forum
+import           All.Leuron
+import           All.Me
+import           All.Organization
+import           All.Pm
+import           All.PmIn
+import           All.PmOut
+import           All.Profile
+import           All.Reminder
+import           All.Resource
+import           All.SPA
+import           All.Team
+import           All.Thread
+import           All.ThreadPost
+import           All.User
 
 
 
