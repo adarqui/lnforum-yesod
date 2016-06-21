@@ -12,6 +12,8 @@ module All.Pack.GlobalGroup (
 
 import           All.Prelude
 import           All.GlobalGroup
+import           Model.User.Function
+import           Model.User.Internal2
 
 
 
@@ -37,6 +39,10 @@ getGlobalGroupPackH :: Text -> Handler Value
 getGlobalGroupPackH global_group_name = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupPackMH user_id global_group_name
+
+
+
+
 
 
 
@@ -92,7 +98,7 @@ getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp = do
 
 
 getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> Handler GlobalGroupPackResponse
-getGlobalGroupPack_ByGlobalGroupM user_id globalGroup = do
+getGlobalGroupPack_ByGlobalGroupM user_id global_group@(Entity global_group_id GlobalGroup{..}) = do
 
   -- let sp = defaultStandardParams {
   --     spSortOrder = Just SortOrderBy_Dsc,
@@ -100,12 +106,14 @@ getGlobalGroupPack_ByGlobalGroupM user_id globalGroup = do
   --     spLimit     = Just 1
   --   }
 
-  global_group_stats   <- getGlobalGroupStatM user_id (entityKey globalGroup)
+  global_group_user    <- getUserM user_id globalGroupUserId
+  global_group_stats   <- getGlobalGroupStatM user_id (entityKey global_group)
 
   return $ GlobalGroupPackResponse {
-    globalGroupPackResponseGlobalGroup   = globalGroupToResponse globalGroup,
-    globalGroupPackResponseGlobalGroupId = global_group_id,
-    globalGroupPackResponseStat    = global_group_stats
+    globalGroupPackResponseUser          = userToSanitizedResponse global_group_user,
+    globalGroupPackResponseUserId        = entityKeyToInt64 global_group_user,
+    globalGroupPackResponseGlobalGroup   = globalGroupToResponse global_group,
+    globalGroupPackResponseGlobalGroupId = keyToInt64 global_group_id,
+    globalGroupPackResponseStat          = global_group_stats,
+    globalGroupPackResponsePermissions   = emptyPermissions
   }
-  where
-  global_group_id = entityKeyToInt64 globalGroup
