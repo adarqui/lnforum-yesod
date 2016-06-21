@@ -34,7 +34,7 @@ module All.Resource (
 import           All.Prelude
 import           Import
 import           LN.Lib.Url        (toPrettyUrl)
-import           LN.T
+import           LN.T              hiding (LikeOpt(..))
 import qualified LN.T.Like         as L
 import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 
