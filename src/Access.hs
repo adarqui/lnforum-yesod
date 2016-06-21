@@ -1,4 +1,4 @@
-module Model.Access (
+module Access (
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamNameM

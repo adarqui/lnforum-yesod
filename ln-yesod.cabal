@@ -30,6 +30,7 @@ library
                      All.Pm
                      All.PmIn
                      All.PmOut
+                     All.Prelude
                      All.Profile
                      All.Reminder
                      All.Resource
@@ -41,6 +42,16 @@ library
                      All.User
                      All.Star
                      All.TeamMember
+                     All.Pack.Organization
+                     All.Pack.User
+                     All.Pack.Sanitized.User
+                     All.Pack.Team
+                     All.Pack.Forum
+                     All.Pack.Board
+                     All.Pack.Thread
+                     All.Pack.ThreadPost
+                     All.Pack.Resource
+                     All.Pack.Leuron
                      Cache
                      Foundation
                      Handler.Prelude
@@ -48,28 +59,17 @@ library
                      Helper.Request
                      Import
                      Import.NoFoundation
+                     Access
+                     Parent
                      Misc
                      Misc.Codec
                      Misc.Magic
                      Misc.Widget
                      Model
                      Model.Prelude
-                     Model.Access
-                     Model.Parent
                      Model.DerivePersist
                      Model.Keys
                      Model.Misc
-                     Model.Pack.Organization
-                     Model.Pack.User
-                     Model.Pack.Sanitized.User
-                     Model.Pack.Team
-                     Model.Pack.Forum
-                     Model.Pack.Board
-                     Model.Pack.Thread
-                     Model.Pack.ThreadPost
-                     Model.Pack.Resource
-                     Model.Pack.Leuron
-                     Model.Profile.DerivePersist
                      Model.User
                      Model.User.Function
                      Model.User.Internal

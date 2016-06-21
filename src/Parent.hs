@@ -1,4 +1,4 @@
-module Model.Parent (
+module Parent (
   fatherOf_ThreadPostM,
   fatherIdOf_ThreadPostM
 --  parentOf_ThreadPostId
