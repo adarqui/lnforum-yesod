@@ -23,6 +23,7 @@ library
                      All.Like
                      All.Star
                      All.TeamMember
+                     Cache
                      Foundation
                      Handler.Prelude
                      Handler.Api

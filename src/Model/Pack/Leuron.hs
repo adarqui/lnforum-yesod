@@ -52,18 +52,18 @@ getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
   leuron_training <- insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View 0
 
   return $ LeuronPackResponse {
-    leuronPackResponseLeuron     = leuronToResponse leuron,
-    leuronPackResponseLeuronId   = keyToInt64 leuron_id,
-    leuronPackResponseUser       = userToSanitizedResponse leuron_user,
-    leuronPackResponseUserId     = entityKeyToInt64 leuron_user,
+    leuronPackResponseLeuron      = leuronToResponse leuron,
+    leuronPackResponseLeuronId    = keyToInt64 leuron_id,
+    leuronPackResponseUser        = userToSanitizedResponse leuron_user,
+    leuronPackResponseUserId      = entityKeyToInt64 leuron_user,
     -- TODO FIXME
-    leuronPackResponseTraining   = leuronTrainingToResponse leuron_training,
+    leuronPackResponseTraining    = leuronTrainingToResponse leuron_training,
     -- TODO FIXME
     -- leuronPackResponseTrainingId
-    leuronPackResponseStat       = leuron_stat,
-    leuronPackResponseLike       = Nothing,
-    leuronPackResponseStar       = Nothing,
-    leuronPackResponseIsOwner    = False
+    leuronPackResponseStat        = leuron_stat,
+    leuronPackResponseLike        = Nothing,
+    leuronPackResponseStar        = Nothing,
+    leuronPackResponsePermissions = emptyPermissions
 --    leuronPackResponseLike     = fmap leuronLikeToResponse leuron_like,
 --    leuronPackResponseStar     = fmap leuronStarToResponse leuron_star
   }

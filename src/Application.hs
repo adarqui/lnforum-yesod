@@ -91,14 +91,6 @@ makeFoundation appSettings = do
     -- example chat initialization
     appZChat <- atomically newBroadcastTChan
 
-    cacheMe           <- pure Nothing
-    cacheOrganization <- pure Nothing
-    cacheUser         <- pure Nothing
-    cacheForum        <- pure Nothing
-    cacheBoard        <- pure Nothing
-    cacheThread       <- pure Nothing
-    cacheThreadPost   <- pure Nothing
-
     -- Some basic initializations: HTTP connection manager, logger, and static
     -- subsite.
     appHttpManager <- newManager

@@ -67,5 +67,5 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseWithForum        = Nothing,
     threadPostPackResponseWithBoard        = Nothing,
     threadPostPackResponseWithThread       = Nothing,
-    threadPostPackResponseIsOwner          = False
+    threadPostPackResponsePermissions      = emptyPermissions
   }

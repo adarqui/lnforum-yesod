@@ -75,7 +75,7 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
     boardPackResponseStar                 = Nothing,
     boardPackResponseWithOrganization     = Nothing,
     boardPackResponseWithForum            = Nothing,
-    boardPackResponseIsOwner              = False
+    boardPackResponsePermissions          = emptyPermissions
   }
 
 

@@ -49,14 +49,14 @@ getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) _
 --  resource_star <- getResourceStar_ByResourceM user_id resource
 
   return $ ResourcePackResponse {
-    resourcePackResponseResource   = resourceToResponse resource,
-    resourcePackResponseResourceId = keyToInt64 resource_id,
-    resourcePackResponseUser       = userToSanitizedResponse resource_user,
-    resourcePackResponseUserId     = entityKeyToInt64 resource_user,
-    resourcePackResponseStat       = resource_stat,
-    resourcePackResponseLike       = Nothing,
-    resourcePackResponseStar       = Nothing,
-    resourcePackResponseIsOwner    = False
+    resourcePackResponseResource    = resourceToResponse resource,
+    resourcePackResponseResourceId  = keyToInt64 resource_id,
+    resourcePackResponseUser        = userToSanitizedResponse resource_user,
+    resourcePackResponseUserId      = entityKeyToInt64 resource_user,
+    resourcePackResponseStat        = resource_stat,
+    resourcePackResponseLike        = Nothing,
+    resourcePackResponseStar        = Nothing,
+    resourcePackResponsePermissions = emptyPermissions
 --    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
 --    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
   }

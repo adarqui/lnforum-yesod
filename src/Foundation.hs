@@ -42,13 +42,6 @@ data App = App
     -- appGoogleOAuthKeys :: OAuthKeys
     , appRed             :: R.Connection
     , appZChat           :: TChan Text
-    , cacheMe            :: Maybe User
-    , cacheOrganization  :: Maybe Organization
-    , cacheUser          :: Maybe User
-    , cacheForum         :: Maybe Forum
-    , cacheBoard         :: Maybe Board
-    , cacheThread        :: Maybe Thread
-    , cacheThreadPost    :: Maybe ThreadPost
     }
 
 

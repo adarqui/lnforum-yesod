@@ -83,5 +83,5 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
     threadPackResponseWithOrganization     = Nothing,
     threadPackResponseWithForum            = Nothing,
     threadPackResponseWithBoard            = Nothing,
-    threadPackResponseIsOwner              = False
+    threadPackResponsePermissions          = emptyPermissions
   }
