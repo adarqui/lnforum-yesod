@@ -57,10 +57,7 @@ library
                      Model.Access
                      Model.Parent
                      Model.DerivePersist
-                     Model.Ent.DerivePersist
                      Model.Keys
-                     Model.LeuronTraining.DerivePersist
-                     Model.Like.DerivePersist
                      Model.Misc
                      Model.Pack.Organization
                      Model.Pack.User
