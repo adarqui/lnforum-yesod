@@ -1,4 +1,10 @@
 module All.Pack.Thread (
+  -- Handler
+  getThreadPacksR,
+  getThreadPackR,
+  getThreadPackH,
+
+  -- Model
   getThreadPacksM,
   getThreadPackM,
   getThreadPackMH,
@@ -6,15 +12,46 @@ module All.Pack.Thread (
 
 
 
-import           Model.Prelude
+import           All.Prelude
 import           Model.User.Function
 import           Model.User.Internal2
-import           Model.Thread.Function
-import           Model.Thread.Internal
-import           Model.ThreadPost.Function
-import           Model.ThreadPost.Internal
+import           All.Thread
+import           All.ThreadPost
 
 
+
+--
+-- Handler
+--
+
+getThreadPacksR :: Handler Value
+getThreadPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPacksM user_id
+
+
+
+getThreadPackR :: ThreadId -> Handler Value
+getThreadPackR thread_id = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPackM user_id thread_id
+
+
+
+getThreadPackH :: Text -> Handler Value
+getThreadPackH thread_name = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPackMH user_id thread_name
+
+
+
+
+
+
+
+--
+-- Model
+--
 
 getThreadPacksM :: UserId -> Handler ThreadPackResponses
 getThreadPacksM user_id = do

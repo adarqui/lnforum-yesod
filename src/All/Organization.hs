@@ -26,7 +26,7 @@ module All.Organization (
   organizationRequestToOrganization,
   organizationToResponse,
   organizationsToResponses,
-  validateOrganizationRequest
+  validateOrganizationRequest,
 
   -- Model/Internal
   getOrganizationsM,

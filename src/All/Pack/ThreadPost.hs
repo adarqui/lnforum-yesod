@@ -1,6 +1,9 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.ThreadPost (
+  getThreadPostPacksR,
+  getThreadPostPackR,
+
   getThreadPostPacksM,
   getThreadPostPackM
 ) where
@@ -9,14 +12,37 @@ module All.Pack.ThreadPost (
 
 import           All.Like
 import           All.Star
-import           Model.Prelude
-import           Model.ThreadPost.Function
-import           Model.ThreadPost.Internal
+import           All.Prelude
+import           All.ThreadPost
 import           Model.User.Function
 import           Model.User.Internal2
 
 
 
+--
+-- Handler
+--
+
+getThreadPostPacksR :: Handler Value
+getThreadPostPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostPacksM user_id
+
+
+
+getThreadPostPackR :: ThreadPostId -> Handler Value
+getThreadPostPackR thread_post_id = do
+  user_id <- requireAuthId
+  toJSON <$> getThreadPostPackM user_id thread_post_id
+
+
+
+
+
+
+--
+-- Model
+--
 getThreadPostPacksM :: UserId -> Handler ThreadPostPackResponses
 getThreadPostPacksM user_id = do
 

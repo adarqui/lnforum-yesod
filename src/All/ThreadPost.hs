@@ -1,19 +1,15 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Handler.ThreadPost (
+module All.ThreadPost (
+  -- Handler
   getThreadPostsR,
   postThreadPostR0,
   getThreadPostR,
   putThreadPostR,
   deleteThreadPostR,
-
   getCountThreadPostsR,
-
   getThreadPostStatsR,
   getThreadPostStatR,
-
-  getThreadPostPacksR,
-  getThreadPostPackR,
 
   -- Model/Function
   threadPostRequestToThreadPost,
@@ -25,7 +21,6 @@ module Handler.ThreadPost (
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
   getThreadPosts_ByEverythingM,
-
   getThreadPostM,
   insertThreadPostM,
   updateThreadPostM,
@@ -37,12 +32,8 @@ module Handler.ThreadPost (
 
 
 
-import           Handler.Prelude
-import           Model.ThreadPost
-import           Model.Pack.ThreadPost
+import           All.Prelude
 import qualified LN.T.Like                 as L
-import           Model.Prelude
-import           Model.ThreadPost.Function
 
 
 
@@ -111,21 +102,6 @@ getThreadPostStatR :: ThreadPostId -> Handler Value
 getThreadPostStatR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadPostStatM user_id thread_post_id
-
-
-
-getThreadPostPacksR :: Handler Value
-getThreadPostPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getThreadPostPacksM user_id
-
-
-
-getThreadPostPackR :: ThreadPostId -> Handler Value
-getThreadPostPackR thread_post_id = do
-  user_id <- requireAuthId
-  toJSON <$> getThreadPostPackM user_id thread_post_id
-
 
 
 

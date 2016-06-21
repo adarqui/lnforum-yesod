@@ -21,7 +21,7 @@ module Handler.User (
 import           Handler.Prelude
 import           Model.User
 import           Model.User.Internal2
-import           Model.Pack.Sanitized.User
+import           All.Pack.Sanitized.User
 
 
 

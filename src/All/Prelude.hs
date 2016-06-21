@@ -1,4 +1,4 @@
-module Handler.Prelude (
+module All.Prelude (
   module A
 ) where
 

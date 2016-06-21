@@ -5,10 +5,6 @@ module Model where
 import           ClassyPrelude.Yesod
 import           Database.Persist.Quasi
 import           Model.DerivePersist
-import           Model.Like.DerivePersist
-import           Model.Profile.DerivePersist
-import           Model.Ent.DerivePersist
-import           Model.LeuronTraining.DerivePersist
 
 
 

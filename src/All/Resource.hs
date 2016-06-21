@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Handler.Resource (
+module All.Resource (
   getResourcesR,
   postResourceR0,
   getResourceR,
