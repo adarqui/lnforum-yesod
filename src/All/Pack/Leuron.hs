@@ -1,6 +1,10 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Leuron (
+  -- Handler
+  getLeuronPacksR,
+  getLeuronPackR,
+
   -- Model
   getLeuronPacksM,
   getLeuronPackM
@@ -13,6 +17,28 @@ import           All.LeuronTraining
 import           All.Prelude
 import           Model.User.Function
 import           Model.User.Internal2
+
+
+
+--
+-- Handler
+--
+
+getLeuronPacksR :: Handler Value
+getLeuronPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronPacksM user_id
+
+
+
+getLeuronPackR :: LeuronId -> Handler Value
+getLeuronPackR leuron_id = do
+  user_id <- requireAuthId
+  toJSON <$> getLeuronPackM user_id leuron_id
+
+
+
+
 
 
 

@@ -10,8 +10,6 @@ module All.Leuron (
   getCountLeuronsR,
   getLeuronStatsR,
   getLeuronStatR,
-  getLeuronPacksR,
-  getLeuronPackR,
 
   -- Model/Function
   leuronRequestToLeuron,
@@ -121,17 +119,7 @@ getLeuronStatR leuron_id = do
 
 
 
-getLeuronPacksR :: Handler Value
-getLeuronPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getLeuronPacksM user_id
 
-
-
-getLeuronPackR :: LeuronId -> Handler Value
-getLeuronPackR leuron_id = do
-  user_id <- requireAuthId
-  toJSON <$> getLeuronPackM user_id leuron_id
 
 
 
@@ -310,7 +298,7 @@ insertLeuronM user_id resource_id leuron_request = do
   insertLeuronCategoriesM leuron_id resource_id leuron_request
 
   -- Add leuron to our user's zsets etc
-  insertLeuronR user_id resource_id leuron_id
+  insertLeuronRedis user_id resource_id leuron_id
 
   --
   -- end background job
@@ -356,7 +344,7 @@ deleteLeuronM user_id leuron_id = do
   deleteWhereDb [ LeuronUserId ==. user_id, LeuronId ==. leuron_id ]
 
   -- Remove from redis
-  void $ deleteLeuronR user_id leuronResourceId leuron_id
+  void $ deleteLeuronRedis user_id leuronResourceId leuron_id
 
 
 
