@@ -1,4 +1,5 @@
 module All.Pack.Forum (
+  -- Model
   getForumPacksM,
   getForumPackM,
   getForumPackMH,
@@ -6,11 +7,14 @@ module All.Pack.Forum (
 
 
 
-import           Model.Prelude
-import           Model.Forum.Function
-import           Model.Forum.Internal
+import           All.Prelude
+import           All.Forum
 
 
+
+--
+-- Model
+--
 
 getForumPacksM :: UserId -> Handler ForumPackResponses
 getForumPacksM user_id = do
