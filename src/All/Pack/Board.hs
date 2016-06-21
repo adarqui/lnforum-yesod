@@ -1,4 +1,7 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.Pack.Board (
+  -- Model
   getBoardPacksM,
   getBoardPackM,
   getBoardPackMH,
@@ -6,17 +9,18 @@ module All.Pack.Board (
 
 
 
-import           Model.Prelude
+import           All.Board
+import           All.Prelude
+import           All.Thread
+import           All.ThreadPost
 import           Model.User.Function
 import           Model.User.Internal2
-import           Model.Board.Function
-import           Model.Board.Internal
-import           Model.Thread.Function
-import           Model.Thread.Internal
-import           Model.ThreadPost.Function
-import           Model.ThreadPost.Internal
 
 
+
+--
+-- Model
+--
 
 getBoardPacksM :: UserId -> Handler BoardPackResponses
 getBoardPacksM user_id = do
