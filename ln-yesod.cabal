@@ -56,6 +56,7 @@ library
                      Model.Prelude
                      Model.All
                      Model.Access
+                     Model.Parent
                      Model.Api
                      Model.Api.Function
                      Model.Api.Internal

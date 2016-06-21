@@ -42,14 +42,18 @@ getThreadPostPackM user_id thread_post_id = do
 
 
 getThreadPostPack_ByThreadPostM :: UserId -> Entity ThreadPost -> StandardParams -> Handler ThreadPostPackResponse
-getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id ThreadPost{..}) _ = do
+getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id ThreadPost{..}) StandardParams{..} = do
 
   thread_post_user <- getUserM user_id threadPostUserId
   thread_post_stat <- getThreadPostStatM user_id thread_post_id
   thread_post_like <- getLike_ByThreadPostIdM user_id thread_post_id
 
---  thread_post_like <- getThreadPostLike_ByThreadPostM user_id thread_post
 --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
+
+  -- TODO FIXME: this needs to be a function argument
+  org <- (if spWithOrganization
+             then pure Nothing
+             else pure Nothing)
 
   return $ ThreadPostPackResponse {
     threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
@@ -59,7 +63,7 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseStat             = thread_post_stat,
     threadPostPackResponseLike             = fmap likeToResponse thread_post_like,
     threadPostPackResponseStar             = Nothing,
-    threadPostPackResponseWithOrganization = Nothing,
+    threadPostPackResponseWithOrganization = org,
     threadPostPackResponseWithForum        = Nothing,
     threadPostPackResponseWithBoard        = Nothing,
     threadPostPackResponseWithThread       = Nothing,
