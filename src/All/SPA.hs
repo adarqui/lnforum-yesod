@@ -1,4 +1,4 @@
-module Handler.SPA (
+module All.SPA (
   getSPAR
 ) where
 
