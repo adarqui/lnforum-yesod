@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.PmOut (
+  -- Handler
   getPmOutsR,
   postPmOutsR,
   getPmOutR,
@@ -22,10 +23,13 @@ module All.PmOut (
 
 
 
-import           Handler.Prelude
-import           Model.PmOut
+import           All.Prelude
 
 
+
+--
+-- Handler
+--
 
 getPmOutsR :: Handler Value
 getPmOutsR = do
