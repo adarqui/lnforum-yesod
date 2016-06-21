@@ -1,26 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE ExplicitForAll   #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs            #-}
-{-# LANGUAGE RecordWildCards  #-}
-{-# LANGUAGE TypeOperators    #-}
 
 module All.Organization (
+  -- Handler
   getOrganizationsR,
   postOrganizationR0,
   getOrganizationR,
   getOrganizationH,
   putOrganizationR,
   deleteOrganizationR,
-
   getOrganizationCountR,
-
   getOrganizationStatsR,
   getOrganizationStatR,
-
-  getOrganizationPacksR,
-  getOrganizationPackR,
-  getOrganizationPackH,
 
   -- Model/Function
   organizationRequestToOrganization,
@@ -32,7 +22,6 @@ module All.Organization (
   getOrganizationsM,
   getOrganizations_ByUserIdM,
   getOrganizations_ByEverythingM,
-
   getOrganizationM,
   getOrganizationMH,
   getOrganization_ByOrganizationNameM,
@@ -40,22 +29,17 @@ module All.Organization (
   updateOrganizationM,
   deleteOrganizationM,
   deleteOrganizationTeamsM,
-
   countOrganizationsM,
-
   getOrganizationStatsM,
   getOrganizationStatM
 ) where
 
 
 
-import           Handler.Prelude
-import           Model.Organization
-import           Model.Pack.Organization
+import           All.Prelude
+import           All.Organization
 import           All.TeamMember
-import           Model.Prelude
-import           Model.Organization.Function
-import           Model.Team.Internal
+import           All.Team
 import           LN.T.Membership
 import           LN.T.Visibility
 
@@ -140,25 +124,6 @@ getOrganizationStatR organization_id = do
   toJSON <$> getOrganizationStatM user_id organization_id
 
 
-
-getOrganizationPacksR :: Handler Value
-getOrganizationPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getOrganizationPacksM user_id
-
-
-
-getOrganizationPackR :: OrganizationId -> Handler Value
-getOrganizationPackR organization_id = do
-  user_id <- requireAuthId
-  toJSON <$> getOrganizationPackM user_id organization_id
-
-
-
-getOrganizationPackH :: Text -> Handler Value
-getOrganizationPackH org_name = do
-  user_id <- requireAuthId
-  toJSON <$> getOrganizationPackMH user_id org_name
 
 
 

@@ -1,6 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Organization (
+  -- Handler
+  getOrganizationPacksR,
+  getOrganizationPackR,
+  getOrganizationPackH,
+
   -- Model
   getOrganizationPacksM,
   getOrganizationPackM,
@@ -15,6 +20,38 @@ import           Model.User.Function
 import           Model.User.Internal2
 
 
+
+--
+-- Handler
+--
+
+getOrganizationPacksR :: Handler Value
+getOrganizationPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPacksM user_id
+
+
+
+getOrganizationPackR :: OrganizationId -> Handler Value
+getOrganizationPackR organization_id = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackM user_id organization_id
+
+
+
+getOrganizationPackH :: Text -> Handler Value
+getOrganizationPackH org_name = do
+  user_id <- requireAuthId
+  toJSON <$> getOrganizationPackMH user_id org_name
+
+
+
+
+
+
+--
+-- Model
+--
 
 getOrganizationPacksM :: UserId -> Handler OrganizationPackResponses
 getOrganizationPacksM user_id = do
