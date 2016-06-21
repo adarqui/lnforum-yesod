@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Team (
+  -- Handler
   getTeamsR,
   postTeamR0,
   getTeamR,
@@ -17,22 +18,23 @@ module All.Team (
   getTeams_ByOrganizationIdM,
   getTeams_ByUserIdM,
   getTeams_ByEverythingM,
-
   getTeamM,
   insertTeamM,
   insertTeam_BypassM,
   updateTeamM,
   deleteTeamM,
-
   getTeamCountM
 ) where
 
 
 
-import           Handler.Prelude
-import           Model.Team
+import           All.Prelude
 
 
+
+--
+-- Handler
+--
 
 getTeamsR :: Handler Value
 getTeamsR = do
