@@ -264,11 +264,11 @@ insertOrganizationM user_id organization_request = do
   org@(Entity organization_id _) <- insertEntityDb organization
 
   -- bg job: Insert owners team
-  (Entity owners_id team) <- insertTeam_BypassM user_id organization_id (TeamRequest "owners" (Just "owners") Membership_InviteOnly Nothing [] Public 0)
+  (Entity owners_id team) <- insertTeam_BypassM user_id organization_id "owners" (Just "owners") (TeamRequest Membership_InviteOnly Nothing [] Public 0)
   void $ insertTeamMember_BypassM user_id owners_id (TeamMemberRequest 0)
 
   -- bg job: Insert members team
-  (Entity members_id team) <- insertTeam_BypassM user_id organization_id (TeamRequest "members" (Just "members") Membership_InviteOnly Nothing [] Public 0)
+  (Entity members_id team) <- insertTeam_BypassM user_id organization_id "owners" (Just "members") (TeamRequest Membership_InviteOnly Nothing [] Public 0)
   void $ insertTeamMember_BypassM user_id members_id (TeamMemberRequest 0)
 
   return org

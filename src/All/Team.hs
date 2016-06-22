@@ -3,10 +3,8 @@
 module All.Team (
   -- Handler
   getTeamsR,
-  postTeamR0,
   getTeamR,
   putTeamR,
-  deleteTeamR,
 
   -- Model/Function
   teamRequestToTeam,
@@ -19,7 +17,6 @@ module All.Team (
   getTeams_ByUserIdM,
   getTeams_ByEverythingM,
   getTeamM,
-  insertTeamM,
   insertTeam_BypassM,
   updateTeamM,
   deleteTeamM,
@@ -43,19 +40,17 @@ getTeamsR = run $ do
 
 
 
-postTeamR0 :: Handler Value
-postTeamR0 = run $ do
-
-  user_id <- _requireAuthId
-
-  sp <- lookupStandardParams
-  case (spOrganizationId sp) of
-
-    Nothing -> notFound
-
-    Just org_id -> do
-      team_request <- requireJsonBody :: HandlerEff TeamRequest
-      (toJSON . teamToResponse) <$> insertTeamM user_id org_id team_request
+-- INFO: Can't insert teams
+--
+-- postTeamR0 :: Handler Value
+-- postTeamR0 = run $ do
+--   user_id <- _requireAuthId
+--   sp <- lookupStandardParams
+--   case (spOrganizationId sp) of
+--     Nothing -> notFound
+--     Just org_id -> do
+--       team_request <- requireJsonBody :: HandlerEff TeamRequest
+--       (toJSON . teamToResponse) <$> insertTeamM user_id org_id team_request
 
 
 
@@ -74,11 +69,13 @@ putTeamR team_id = run $ do
 
 
 
-deleteTeamR :: TeamId -> Handler Value
-deleteTeamR team_id = run $ do
-  user_id <- _requireAuthId
-  void $ deleteTeamM user_id team_id
-  pure $ toJSON ()
+-- INFO: Can't delete teams
+--
+-- deleteTeamR :: TeamId -> Handler Value
+-- deleteTeamR team_id = run $ do
+--   user_id <- _requireAuthId
+--   void $ deleteTeamM user_id team_id
+--   pure $ toJSON ()
 
 
 
@@ -95,9 +92,9 @@ teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
 teamRequestToTeam user_id org_id TeamRequest{..} = Team {
   teamUserId      = user_id,
   teamOrgId       = org_id,
-  teamName        = toPrettyUrl teamRequestDisplayName,
-  teamDisplayName = teamRequestDisplayName,
-  teamDescription = teamRequestDescription,
+  teamName        = "",
+  teamDisplayName = "",
+  teamDescription = Nothing,
   teamMembership  = teamRequestMembership,
   teamIcon        = teamRequestIcon,
   teamTags        = teamRequestTags,
@@ -187,29 +184,25 @@ getTeamM _ team_id = do
 
 
 
-insertTeamM :: UserId -> OrganizationId -> TeamRequest -> HandlerEff (Entity Team)
-insertTeamM user_id org_id team_request = do
-
---  sp <- lookupStandardParams
-
-  ts <- timestampH'
-
-  let
-    team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
-
-  insertEntityDb team
+-- insertTeamM :: UserId -> OrganizationId -> TeamRequest -> HandlerEff (Entity Team)
+-- insertTeamM user_id org_id team_request = do
+-- --  sp <- lookupStandardParams
+--   ts <- timestampH'
+--   let
+--     team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
+--   insertEntityDb team
 
 
 
-insertTeam_BypassM :: UserId -> OrganizationId -> TeamRequest -> HandlerEff (Entity Team)
-insertTeam_BypassM user_id org_id team_request = do
+insertTeam_BypassM :: UserId -> OrganizationId -> Text -> Maybe Text -> TeamRequest -> HandlerEff (Entity Team)
+insertTeam_BypassM user_id org_id team_name team_desc team_request = do
 
   ts <- timestampH'
 
   let
     team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
 
-  insertEntityDb team
+  insertEntityDb $ team { teamName = team_name, teamDescription = team_desc }
 
 
 

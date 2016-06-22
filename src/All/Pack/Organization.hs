@@ -98,7 +98,6 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   organization_user    <- getUserM user_id organizationUserId
   organization_stats   <- getOrganizationStatM user_id (entityKey organization)
---  is_org_owner         <- isOwnerOf_OrganizationIdM user_id org_id
   is_org_member        <- isMemberOf_OrganizationIdM user_id org_id
 
   return $ OrganizationPackResponse {
@@ -109,8 +108,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponseStat           = organization_stats,
     organizationPackResponseLike           = Nothing,
     organizationPackResponseStar           = Nothing,
-    organizationPackResponsePermissions    = emptyPermissions
---    organizationPackResponseIsOwner        = is_org_owner,
+    organizationPackResponsePermissions    = emptyPermissions,
     organizationPackResponseIsMember       = is_org_member
   }
   where
