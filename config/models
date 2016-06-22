@@ -35,7 +35,7 @@ Organization
 Team
   userId       UserId
   orgId        OrganizationId
-  system       SystemTeam
+  system       SystemTeam default='Team_Members'
   membership   Membership
   icon         Text Maybe
   tags         [Text]
