@@ -224,9 +224,6 @@ updateTeamM user_id team_id team_request = do
   updateWhereDb
     [ TeamUserId ==. user_id, TeamId ==. team_id ]
     [ TeamModifiedAt  =. teamModifiedAt
-    , TeamName        =. teamName
-    , TeamDisplayName =. teamDisplayName
-    , TeamDescription =. teamDescription
     , TeamMembership  =. teamMembership
     , TeamIcon        =. teamIcon
     , TeamTags        =. teamTags
