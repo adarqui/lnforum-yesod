@@ -22,7 +22,7 @@ import           Yesod.Auth.OAuth2.Github    ()
 import qualified Data.Text                   as T (pack, append)
 import qualified Data.Text.Encoding          as T (decodeUtf8)
 import qualified Database.Redis              as R (Connection)
-import           Model.User                  (authenticateUser)
+import           OAuth2                      (authenticateUser)
 import qualified Network.Wai                 as W (requestHeaders, rawPathInfo)
 import           Network.Wai.Middleware.Cors ()
 

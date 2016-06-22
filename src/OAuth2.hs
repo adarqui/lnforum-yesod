@@ -8,7 +8,7 @@
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Model.User.Internal (
+module OAuth2 (
   User(..),
   userGravatar,
   intercomHash,

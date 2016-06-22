@@ -65,6 +65,7 @@ library
                      Import.NoFoundation
                      Access
                      Parent
+                     OAuth2
                      Misc
                      Misc.Codec
                      Misc.Magic
@@ -74,10 +75,6 @@ library
                      Model.DerivePersist
                      Model.Keys
                      Model.Misc
-                     Model.User
-                     Model.User.Function
-                     Model.User.Internal
-                     Model.User.Internal2
                      Settings
                      Settings.StaticFiles
                      Socket
