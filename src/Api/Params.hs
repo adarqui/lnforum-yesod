@@ -37,6 +37,7 @@ module Api.Params (
 
 
 import           Control
+import           Lifted
 import           Data.List             (nub)
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
@@ -393,7 +394,7 @@ selectListDb :: forall site val typ.
   -> EntityField val typ
   -> ControlMA (HandlerT site IO) [Entity val]
 selectListDb sp query filt field = do
-  lift $ _runDB $ selectList query ((spToSelect sp field) <> filt)
+  _runDB $ selectList query ((spToSelect sp field) <> filt)
 
 
 
@@ -422,7 +423,7 @@ selectKeysListDb :: forall site val typ.
                     -> EntityField val typ
                     -> ControlMA (HandlerT site IO) [Key val]
 selectKeysListDb sp query filt field = do
-  lift $ _runDB $ selectKeysList query ((spToSelect sp field) <> filt)
+  _runDB $ selectKeysList query ((spToSelect sp field) <> filt)
 
 
 
@@ -449,7 +450,7 @@ selectFirstDb :: forall site val.
                   YesodPersistBackend site ~ PersistEntityBackend val) =>
                  [Filter val]
                  -> [SelectOpt val] -> ControlMA (HandlerT site IO) (Maybe (Entity val))
-selectFirstDb query filt = lift $ _runDB $ selectFirst query filt
+selectFirstDb query filt = _runDB $ selectFirst query filt
 
 
 
@@ -460,7 +461,7 @@ insertDb :: forall a site.
              PersistStore (PersistEntityBackend a),
              PersistEntityBackend a ~ YesodPersistBackend site) =>
             a -> ControlMA (HandlerT site IO) (Key a)
-insertDb = lift . _runDB . insert
+insertDb = _runDB . insert
 
 
 
@@ -471,7 +472,7 @@ insertEntityDb :: forall site e.
                    PersistStore (YesodPersistBackend site),
                    YesodPersistBackend site ~ PersistEntityBackend e) =>
                   e -> ControlMA (HandlerT site IO) (Entity e)
-insertEntityDb entity = lift $ _runDB $ insertEntity entity
+insertEntityDb entity = _runDB $ insertEntity entity
 
 
 
@@ -482,7 +483,7 @@ updateDb :: forall site val.
              PersistStore (YesodPersistBackend site),
              YesodPersistBackend site ~ PersistEntityBackend val) =>
             Key val -> [Update val] -> ControlMA (HandlerT site IO) ()
-updateDb key update_values = lift $ _runDB $ update key update_values
+updateDb key update_values = _runDB $ update key update_values
 
 
 
@@ -493,7 +494,7 @@ updateWhereDb :: forall site val.
                   PersistQuery (YesodPersistBackend site),
                   YesodPersistBackend site ~ PersistEntityBackend val) =>
                  [Filter val] -> [Update val] -> ControlMA (HandlerT site IO) ()
-updateWhereDb filt query = lift $ _runDB $ updateWhere filt query
+updateWhereDb filt query = _runDB $ updateWhere filt query
 
 
 
@@ -504,7 +505,7 @@ deleteWhereDb :: forall site val.
                   PersistQuery (YesodPersistBackend site),
                   YesodPersistBackend site ~ PersistEntityBackend val) =>
                  [Filter val] -> ControlMA (HandlerT site IO) ()
-deleteWhereDb filt = lift $ _runDB $ deleteWhere filt
+deleteWhereDb filt = _runDB $ deleteWhere filt
 
 
 
@@ -515,7 +516,7 @@ deleteCascadeDb :: forall site record.
                    DeleteCascade record (PersistEntityBackend record),
                    PersistEntityBackend record ~ YesodPersistBackend site) =>
                   Key record -> ControlMA (HandlerT site IO) ()
-deleteCascadeDb entity = lift $ _runDB $ deleteCascade entity
+deleteCascadeDb entity = _runDB $ deleteCascade entity
 
 
 
@@ -528,7 +529,7 @@ deleteCascadeWhereDb :: forall site record.
   PersistEntityBackend record ~ YesodPersistBackend site) =>
   [Filter record]
   -> ControlMA (HandlerT site IO) ()
-deleteCascadeWhereDb = lift . _runDB . deleteCascadeWhere
+deleteCascadeWhereDb = _runDB . deleteCascadeWhere
 
 
 
@@ -539,7 +540,7 @@ countDb :: forall site val.
   YesodPersistBackend site ~ PersistEntityBackend val) =>
   [Filter val]
   -> ControlMA (HandlerT site IO) Int
-countDb query = lift $ _runDB $ count query
+countDb query = _runDB $ count query
 
 
 

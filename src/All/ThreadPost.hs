@@ -45,7 +45,7 @@ getThreadPostsR = run $ do
 
 
 postThreadPostR0 :: Handler Value
-postThreadPostR0 = do
+postThreadPostR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -62,14 +62,14 @@ postThreadPostR0 = do
 
 
 getThreadPostR :: ThreadPostId -> Handler Value
-getThreadPostR threadPost_id = do
+getThreadPostR threadPost_id = run $ do
   user_id <- _requireAuthId
   (toJSON . threadPostToResponse) <$> getThreadPostM user_id threadPost_id
 
 
 
 putThreadPostR :: ThreadPostId -> Handler Value
-putThreadPostR threadPost_id = do
+putThreadPostR threadPost_id = run $ do
   user_id <- _requireAuthId
   threadPost_request <- requireJsonBody
   (toJSON . threadPostToResponse) <$> updateThreadPostM user_id threadPost_id threadPost_request
@@ -77,7 +77,7 @@ putThreadPostR threadPost_id = do
 
 
 deleteThreadPostR :: ThreadPostId -> Handler Value
-deleteThreadPostR threadPost_id = do
+deleteThreadPostR threadPost_id = run $ do
   user_id <- _requireAuthId
   void $ deleteThreadPostM user_id threadPost_id
   pure $ toJSON ()

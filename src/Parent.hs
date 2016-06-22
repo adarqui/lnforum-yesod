@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Parent (
   fatherOf_ThreadPostM,
   fatherIdOf_ThreadPostM
@@ -6,18 +8,20 @@ module Parent (
 
 
 
-import           Import
 import           Api.Params
-import           Model.Misc
+import           Control
+import           Import
+import           Lifted
 import           LN.T.Membership
 import           LN.T.Visibility
+import           Model.Misc
 
 
 
 fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Thread))
 fatherOf_ThreadPostM user_id (Entity thread_post_id ThreadPost{..}) = do
 
-  lift $ _runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
+  _runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
 
 
 
