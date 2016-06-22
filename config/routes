@@ -237,9 +237,9 @@
 /api/user_sanitized_stats UserStatsR GET
 /api/user_sanitized_stat/#UserId UserStatR GET
 
-/api/user_sanitized_packs UserPacksR GET
-/api/user_sanitized_pack/#UserId UserPackR GET
-!/api/user_sanitized_pack/#Text UserPackH GET
+/api/user_sanitized_packs UserSanitizedPacksR GET
+/api/user_sanitized_pack/#UserId UserSanitizedPackR GET
+!/api/user_sanitized_pack/#Text UserSanitizedPackH GET
 
 
 

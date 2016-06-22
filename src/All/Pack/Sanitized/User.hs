@@ -1,6 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.Sanitized.User (
+  -- Handler
+  getUserSanitizedPacksR,
+  getUserSanitizedPackR,
+  getUserSanitizedPackH,
+
   -- Model
   getUsersSanitizedPacksM,
   getUserSanitizedPackM,
@@ -13,6 +18,35 @@ import           All.Prelude
 import           All.Profile
 import           Model.User.Function
 import           Model.User.Internal2
+
+
+
+--
+-- Handler
+--
+
+getUserSanitizedPacksR :: Handler Value
+getUserSanitizedPacksR = do
+  user_id <- requireAuthId
+  toJSON <$> getUsersSanitizedPacksM user_id
+
+
+
+getUserSanitizedPackR :: UserId -> Handler Value
+getUserSanitizedPackR lookup_user_id = do
+  user_id <- requireAuthId
+  toJSON <$> getUserSanitizedPackM user_id lookup_user_id
+
+
+
+getUserSanitizedPackH :: Text -> Handler Value
+getUserSanitizedPackH lookup_user_nick = do
+  user_id <- requireAuthId
+  toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick
+
+
+
+
 
 
 
