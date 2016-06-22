@@ -1,15 +1,22 @@
 -- Stolen from Carnival.
 --
 
-module Helper.Request
-    ( allowCrossOrigin
-    , fromMaybe404
-    ) where
+module Helper.Request (
+  allowCrossOrigin,
+  fromMaybe404
+) where
 
-import Import
+
+
+import           Control
+import           Import
+
+
 
 lookupUtf8Header :: HeaderName -> HandlerEff (Maybe Text)
 lookupUtf8Header headerName = return . fmap decodeUtf8 =<< lookupHeader headerName
+
+
 
 allowCrossOrigin :: HandlerEff ()
 allowCrossOrigin = do
@@ -26,6 +33,8 @@ allowCrossOrigin = do
 
     addHeader "Access-Control-Allow-Methods" "POST, GET, OPTIONS"
     addHeader "Access-Control-Allow-Credentials" "true"
+
+
 
 fromMaybe404 :: HandlerEff (Maybe a) -> HandlerEff a
 fromMaybe404 f = maybe notFound return =<< f

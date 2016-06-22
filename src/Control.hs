@@ -1,4 +1,5 @@
 module Control (
+  HandlerEff,
   ControlM,
   ControlMA,
   ControlReader,
@@ -12,6 +13,10 @@ module Control (
 import Control.Monad.Trans.RWS
 
 import Import
+
+
+
+type HandlerEff a = ControlMA Handler a
 
 
 
