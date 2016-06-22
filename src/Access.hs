@@ -3,7 +3,7 @@
 module Access (
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
-  isMemberOf_OrganizationId_TeamNameM
+  isMemberOf_OrganizationId_TeamM
 ) where
 
 
@@ -13,26 +13,27 @@ import           Control
 import           Import
 import           LN.T.Membership
 import           LN.T.Visibility
+import           LN.T.Team
 import           Model.Misc
 
 
 
 isOwnerOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff Bool
 isOwnerOf_OrganizationIdM user_id org_id = do
-  isMemberOf_OrganizationId_TeamNameM user_id org_id "owners"
+  isMemberOf_OrganizationId_TeamM user_id org_id Team_Owners
 
 
 
 isMemberOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff Bool
 isMemberOf_OrganizationIdM user_id org_id =
-  isMemberOf_OrganizationId_TeamNameM user_id org_id "members"
+  isMemberOf_OrganizationId_TeamM user_id org_id Team_Members
 
 
 
-isMemberOf_OrganizationId_TeamNameM :: UserId -> OrganizationId -> Text -> HandlerEff Bool
-isMemberOf_OrganizationId_TeamNameM user_id org_id team_name = do
+isMemberOf_OrganizationId_TeamM :: UserId -> OrganizationId -> SystemTeam -> HandlerEff Bool
+isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
-  m_team <- selectFirstDb [ TeamOrgId ==. org_id, TeamName ==. team_name, TeamActive ==. True ] []
+  m_team <- selectFirstDb [ TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True ] []
   case m_team of
     Nothing                        -> pure False
     Just (Entity team_id Team{..}) -> do

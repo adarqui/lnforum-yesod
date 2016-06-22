@@ -28,6 +28,9 @@ module All.Team (
 
 import           All.Prelude
 import           All.TeamMember
+import           LN.T.Membership
+import           LN.T.Visibility
+import           LN.T.Team
 
 
 
@@ -94,9 +97,7 @@ teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
 teamRequestToTeam user_id org_id TeamRequest{..} = Team {
   teamUserId      = user_id,
   teamOrgId       = org_id,
-  teamName        = "",
-  teamDisplayName = "",
-  teamDescription = Nothing,
+  teamSystem      = Team_Members,
   teamMembership  = teamRequestMembership,
   teamIcon        = teamRequestIcon,
   teamTags        = teamRequestTags,
@@ -116,9 +117,7 @@ teamToResponse (Entity team_id Team{..}) = TeamResponse {
   teamResponseId          = keyToInt64 team_id,
   teamResponseUserId      = keyToInt64 teamUserId,
   teamResponseOrgId       = keyToInt64 teamOrgId,
-  teamResponseName        = teamName,
-  teamResponseDisplayName = teamDisplayName,
-  teamResponseDescription = teamDescription,
+  teamResponseSystem      = teamSystem,
   teamResponseMembership  = teamMembership,
   teamResponseIcon        = teamIcon,
   teamResponseTags        = teamTags,
@@ -209,7 +208,7 @@ insertTeam_InternalM user_id org_id system_team team_request = do
 
 
 insert_SystemTeamsM :: UserId -> OrganizationId -> HandlerEff ()
-insert_SystemTeamsM user_id org_id = do
+insert_SystemTeamsM user_id organization_id = do
 
   -- bg job: Insert owners team
   (Entity owners_id team) <- insertTeam_InternalM user_id organization_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
@@ -254,4 +253,5 @@ deleteTeamM user_id team_id = do
 
 getTeamCountM :: HandlerEff Int
 getTeamCountM = do
-  _runDB $ count [ TeamName !=. "" ]
+  return 0
+--  _runDB $ count [ TeamName !=. "" ]

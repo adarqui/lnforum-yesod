@@ -21,7 +21,7 @@ module All.TeamMember (
   getTeamMemberMH,
   getTeamMemberMH',
   insertTeamMemberM,
-  insertTeamMember_BypassM,
+  insertTeamMember_InternalM,
   updateTeamMemberM,
   deleteTeamMemberM,
 ) where
@@ -209,12 +209,12 @@ insertTeamMemberM user_id team_member_request = do
 
   case spTeamId of
     Nothing      -> notFound
-    Just team_id -> insertTeamMember_BypassM user_id team_id team_member_request
+    Just team_id -> insertTeamMember_InternalM user_id team_id team_member_request
 
 
 
-insertTeamMember_BypassM :: UserId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
-insertTeamMember_BypassM user_id team_id team_member_request = do
+insertTeamMember_InternalM :: UserId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
+insertTeamMember_InternalM user_id team_id team_member_request = do
 
   ts <- timestampH'
 

@@ -263,7 +263,7 @@ insertOrganizationM user_id organization_request = do
     }
   org@(Entity organization_id _) <- insertEntityDb organization
 
-  void $ insert_SystemTeams user_id organization_id
+  void $ insert_SystemTeamsM user_id organization_id
 
   return org
 
