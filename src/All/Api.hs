@@ -30,15 +30,15 @@ import           Import
 
 
 getApisR :: HandlerEff Value
-getApisR = do
-  user_id <- requireAuthId
+getApisR = run $ do
+  user_id <- _requireAuthId
   (toJSON . apisToResponses) <$> getApisM user_id
 
 
 
 postApisR :: HandlerEff Value
-postApisR = do
-  user_id <- requireAuthId
+postApisR = run $ do
+  user_id <- _requireAuthId
   api_request <- requireJsonBody
   (toJSON . apiToResponse) <$> insertApiM user_id api_request
 
@@ -46,14 +46,14 @@ postApisR = do
 
 getApiR :: ApiId -> HandlerEff Value
 getApiR api_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . apiToResponse) <$> getApiM user_id api_id
 
 
 
 putApiR :: ApiId -> HandlerEff Value
 putApiR api_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   api_request <- requireJsonBody
   (toJSON . apiToResponse) <$> updateApiM user_id api_id api_request
 
@@ -61,7 +61,7 @@ putApiR api_id = do
 
 deleteApiR :: ApiId -> HandlerEff Value
 deleteApiR api_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteApiM user_id api_id
   pure $ toJSON ()
 

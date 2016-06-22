@@ -25,22 +25,22 @@ import           All.User
 --
 
 getUserSanitizedPacksR :: HandlerEff Value
-getUserSanitizedPacksR = do
-  user_id <- requireAuthId
+getUserSanitizedPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getUsersSanitizedPacksM user_id
 
 
 
 getUserSanitizedPackR :: UserId -> HandlerEff Value
 getUserSanitizedPackR lookup_user_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getUserSanitizedPackM user_id lookup_user_id
 
 
 
 getUserSanitizedPackH :: Text -> HandlerEff Value
 getUserSanitizedPackH lookup_user_nick = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick
 
 

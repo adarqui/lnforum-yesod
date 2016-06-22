@@ -31,9 +31,8 @@ module All.Like (
 
 
 
-import           Handler.Prelude
-import           Model.Prelude
-import qualified LN.T.Like as L
+import           All.Prelude
+import qualified LN.T.Like   as L
 
 
 
@@ -42,8 +41,8 @@ import qualified LN.T.Like as L
 --
 
 getLikesR :: HandlerEff Value
-getLikesR = do
-  user_id <- requireAuthId
+getLikesR = run $ do
+  user_id <- _requireAuthId
   (toJSON . likesToResponses) <$> getLikesM user_id
 
 
@@ -59,7 +58,7 @@ postLikeR0 = do
 
     Just (ent, ent_id) -> do
 
-      user_id <- requireAuthId
+      user_id <- _requireAuthId
       like_request <- requireJsonBody
       (toJSON . likeToResponse) <$> insertLikeM user_id ent ent_id like_request
 
@@ -67,14 +66,14 @@ postLikeR0 = do
 
 getLikeR :: LikeId -> HandlerEff Value
 getLikeR like_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . likeToResponse) <$> getLikeM user_id like_id
 
 
 
 putLikeR :: LikeId -> HandlerEff Value
 putLikeR like_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   like_request <- requireJsonBody
   (toJSON . likeToResponse) <$> updateLikeM user_id like_id like_request
 
@@ -82,22 +81,22 @@ putLikeR like_id = do
 
 deleteLikeR :: LikeId -> HandlerEff Value
 deleteLikeR like_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteLikeM user_id like_id
   pure $ toJSON ()
 
 
 
 getLikeStatsR :: HandlerEff Value
-getLikeStatsR = do
-  user_id <- requireAuthId
+getLikeStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getLikeStatsM user_id
 
 
 
 getLikeStatR :: LikeId -> HandlerEff Value
 getLikeStatR like_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getLikeStatM user_id like_id
 
 
@@ -196,7 +195,7 @@ updateLikeM user_id like_id LikeRequest{..} = do
 
   ts <- timestampH'
 
-  void $ runDB $ updateWhere
+  void $ updateWhereDb
     [ LikeId ==. like_id, LikeUserId ==. user_id ]
 
     [ LikeModifiedAt =. Just ts

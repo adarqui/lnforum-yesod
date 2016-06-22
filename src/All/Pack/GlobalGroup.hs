@@ -23,22 +23,22 @@ import           All.User
 --
 
 getGlobalGroupPacksR :: HandlerEff Value
-getGlobalGroupPacksR = do
-  user_id <- requireAuthId
+getGlobalGroupPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getGlobalGroupPacksM user_id
 
 
 
 getGlobalGroupPackR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupPackR global_group_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getGlobalGroupPackM user_id global_group_id
 
 
 
 getGlobalGroupPackH :: Text -> HandlerEff Value
 getGlobalGroupPackH global_group_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getGlobalGroupPackMH user_id global_group_name
 
 

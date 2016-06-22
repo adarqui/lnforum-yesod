@@ -21,8 +21,8 @@ import           Import
 --
 
 getMeR :: HandlerEff Value
-getMeR = do
-  user_id <- requireAuthId
+getMeR = run $ do
+  user_id <- _requireAuthId
   (toJSON . userToResponse) <$> getMeM user_id
 
 

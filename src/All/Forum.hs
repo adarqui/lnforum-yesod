@@ -49,8 +49,8 @@ import           All.User
 --
 
 getForumsR :: HandlerEff Value
-getForumsR = do
-  user_id <- requireAuthId
+getForumsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . forumsToResponses) <$> getForumsM user_id
 
 
@@ -58,7 +58,7 @@ getForumsR = do
 postForumR0 :: HandlerEff Value
 postForumR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -73,21 +73,21 @@ postForumR0 = do
 
 getForumR :: ForumId -> HandlerEff Value
 getForumR forum_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . forumToResponse) <$> getForumM user_id forum_id
 
 
 
 getForumH :: Text -> HandlerEff Value
 getForumH forum_name = do -- getForumR' getForumMH forum_name
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . forumToResponse) <$> getForumMH user_id forum_name
 
 
 
 putForumR :: ForumId -> HandlerEff Value
 putForumR forum_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   forum_request <- requireJsonBody
   (toJSON . forumToResponse) <$> updateForumM user_id forum_id forum_request
 
@@ -95,29 +95,29 @@ putForumR forum_id = do
 
 deleteForumR :: ForumId -> HandlerEff Value
 deleteForumR forum_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteForumM user_id forum_id
   pure $ toJSON ()
 
 
 
 getCountForumsR :: HandlerEff Value
-getCountForumsR = do
-  user_id <- requireAuthId
+getCountForumsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countForumsM user_id
 
 
 
 getForumStatsR :: HandlerEff Value
-getForumStatsR = do
-  user_id <- requireAuthId
+getForumStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getForumStatsM user_id
 
 
 
 getForumStatR :: ForumId -> HandlerEff Value
 getForumStatR forum_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getForumStatM user_id forum_id
 
 

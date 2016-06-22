@@ -47,8 +47,8 @@ import           All.Forum
 
 
 getBoardsR :: HandlerEff Value
-getBoardsR = do
-  user_id <- requireAuthId
+getBoardsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . boardsToResponses) <$> getBoardsM user_id
 
 
@@ -56,7 +56,7 @@ getBoardsR = do
 postBoardR0 :: HandlerEff Value
 postBoardR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -72,21 +72,21 @@ postBoardR0 = do
 
 getBoardR :: BoardId -> HandlerEff Value
 getBoardR board_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . boardToResponse) <$> getBoardM user_id board_id
 
 
 
 getBoardH :: Text -> HandlerEff Value
 getBoardH board_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . boardToResponse) <$> getBoardMH user_id board_name
 
 
 
 putBoardR :: BoardId -> HandlerEff Value
 putBoardR board_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   board_request <- requireJsonBody
   (toJSON . boardToResponse) <$> updateBoardM user_id board_id board_request
 
@@ -94,7 +94,7 @@ putBoardR board_id = do
 
 deleteBoardR :: BoardId -> HandlerEff Value
 deleteBoardR board_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteBoardM user_id board_id
   pure $ toJSON ()
 
@@ -107,7 +107,7 @@ getBoardStatsR = notFound
 
 getBoardStatR :: BoardId -> HandlerEff Value
 getBoardStatR board_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getBoardStatM user_id board_id
 
 
@@ -400,7 +400,7 @@ qBoardStats :: forall site.
      (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
      Key Board -> HandlerT site IO [(E.Value Int64, E.Value Int64, E.Value Int64)]
 qBoardStats board_id = do
-  runDB
+  _runDB
     $ E.select
     $ E.from $ \((thread_post :: E.SqlExpr (Entity ThreadPost)) `E.InnerJoin` (thread :: E.SqlExpr (Entity Thread)) `E.InnerJoin` (board :: E.SqlExpr (Entity Board))) -> do
       E.on $ thread ^. ThreadBoardId E.==. board ^. BoardId

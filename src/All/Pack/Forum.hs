@@ -22,22 +22,22 @@ import           All.Forum
 --
 
 getForumPacksR :: HandlerEff Value
-getForumPacksR = do
-  user_id <- requireAuthId
+getForumPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getForumPacksM user_id
 
 
 
 getForumPackR :: ForumId -> HandlerEff Value
 getForumPackR forum_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getForumPackM user_id forum_id
 
 
 
 getForumPackH :: Text -> HandlerEff Value
 getForumPackH forum_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getForumPackMH user_id forum_name
 
 

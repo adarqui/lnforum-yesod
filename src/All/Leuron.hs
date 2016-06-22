@@ -49,9 +49,9 @@ import qualified LN.T.Like             as L
 --
 
 getLeuronsR :: HandlerEff Value
-getLeuronsR = do
+getLeuronsR = run $ do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   (toJSON . leuronsToResponses) <$> getLeuronsM user_id
 
@@ -60,7 +60,7 @@ getLeuronsR = do
 postLeuronR0 :: HandlerEff Value
 postLeuronR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -77,14 +77,14 @@ postLeuronR0 = do
 
 getLeuronR :: LeuronId -> HandlerEff Value
 getLeuronR leuron_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . leuronToResponse) <$> getLeuronM user_id leuron_id
 
 
 
 putLeuronR :: LeuronId -> HandlerEff Value
 putLeuronR leuron_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   leuron_request <- requireJsonBody
   (toJSON . leuronToResponse) <$> updateLeuronM user_id leuron_id leuron_request
 
@@ -92,29 +92,29 @@ putLeuronR leuron_id = do
 
 deleteLeuronR :: LeuronId -> HandlerEff Value
 deleteLeuronR leuron_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteLeuronM user_id leuron_id
   pure $ toJSON ()
 
 
 
 getCountLeuronsR :: HandlerEff Value
-getCountLeuronsR = do
-  user_id <- requireAuthId
+getCountLeuronsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countLeuronsM user_id
 
 
 
 getLeuronStatsR :: HandlerEff Value
-getLeuronStatsR = do
-  user_id <- requireAuthId
+getLeuronStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getLeuronStatsM user_id
 
 
 
 getLeuronStatR :: LeuronId -> HandlerEff Value
 getLeuronStatR leuron_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getLeuronStatM user_id leuron_id
 
 
@@ -239,7 +239,7 @@ getLeurons_ByResourceId_RandomM _ resource_id _ = do
 -- SELECT * FROM leuron OFFSET floor(random() * (select count(*) from leuron)) LIMIT 1;
 -- TODO FIXME: the query below is not as efficient as the one above..
 
-  runDB
+  _runDB
     $ E.select
     $ E.from $ \leuron -> do
       E.where_ (leuron ^. LeuronResourceId E.==. E.val resource_id)

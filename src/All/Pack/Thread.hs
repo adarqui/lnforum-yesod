@@ -26,22 +26,22 @@ import           All.User
 --
 
 getThreadPacksR :: HandlerEff Value
-getThreadPacksR = do
-  user_id <- requireAuthId
+getThreadPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getThreadPacksM user_id
 
 
 
 getThreadPackR :: ThreadId -> HandlerEff Value
 getThreadPackR thread_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getThreadPackM user_id thread_id
 
 
 
 getThreadPackH :: Text -> HandlerEff Value
 getThreadPackH thread_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getThreadPackMH user_id thread_name
 
 

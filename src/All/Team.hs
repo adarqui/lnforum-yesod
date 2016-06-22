@@ -37,8 +37,8 @@ import           All.Prelude
 --
 
 getTeamsR :: HandlerEff Value
-getTeamsR = do
-  user_id <- requireAuthId
+getTeamsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . teamsToResponses) <$> getTeamsM user_id
 
 
@@ -46,7 +46,7 @@ getTeamsR = do
 postTeamR0 :: HandlerEff Value
 postTeamR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
   case (spOrganizationId sp) of
@@ -61,14 +61,14 @@ postTeamR0 = do
 
 getTeamR :: TeamId -> HandlerEff Value
 getTeamR team_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . teamToResponse) <$> getTeamM user_id team_id
 
 
 
 putTeamR :: TeamId -> HandlerEff Value
 putTeamR team_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   team_request <- requireJsonBody
   (toJSON . teamToResponse) <$> updateTeamM user_id team_id team_request
 
@@ -76,7 +76,7 @@ putTeamR team_id = do
 
 deleteTeamR :: TeamId -> HandlerEff Value
 deleteTeamR team_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteTeamM user_id team_id
   pure $ toJSON ()
 
@@ -246,4 +246,4 @@ deleteTeamM user_id team_id = do
 
 getTeamCountM :: HandlerEff Int
 getTeamCountM = do
-  runDB $ count [ TeamName !=. "" ]
+  _runDB $ count [ TeamName !=. "" ]

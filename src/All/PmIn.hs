@@ -32,15 +32,15 @@ import           All.Prelude
 --
 
 getPmInsR :: HandlerEff Value
-getPmInsR = do
-  user_id <- requireAuthId
+getPmInsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . pmInsToResponses) <$> getPmInsM user_id
 
 
 
 postPmInsR :: HandlerEff Value
-postPmInsR = do
-  user_id <- requireAuthId
+postPmInsR = run $ do
+  user_id <- _requireAuthId
   sp <- lookupStandardParams
   case (spPmId sp) of
     Nothing -> notFound
@@ -52,14 +52,14 @@ postPmInsR = do
 
 getPmInR :: PmInId -> HandlerEff Value
 getPmInR pmIn_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . pmInToResponse) <$> getPmInM user_id pmIn_id
 
 
 
 putPmInR :: PmInId -> HandlerEff Value
 putPmInR pmIn_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   pmIn_request <- requireJsonBody
   (toJSON . pmInToResponse) <$> updatePmInM user_id pmIn_id pmIn_request
 
@@ -67,7 +67,7 @@ putPmInR pmIn_id = do
 
 deletePmInR :: PmInId -> HandlerEff Value
 deletePmInR pmIn_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deletePmInM user_id pmIn_id
   pure $ toJSON ()
 

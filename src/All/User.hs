@@ -59,15 +59,15 @@ import           All.Profile
 --
 
 getUsersR :: HandlerEff Value
-getUsersR = do
-  user_id <- requireAuthId
+getUsersR = run $ do
+  user_id <- _requireAuthId
   (toJSON . usersToSanitizedResponses) <$> getUsersM user_id
 
 
 
 postUserR0 :: HandlerEff Value
 postUserR0 = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> insertUsersM user_id user_request
 
@@ -75,7 +75,7 @@ postUserR0 = do
 
 getUserR :: UserId -> HandlerEff Value
 getUserR lookup_user_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   response <- getUserM user_id lookup_user_id
   if (user_id == lookup_user_id)
     then
@@ -92,7 +92,7 @@ getUserH _ = notFound
 
 putUserR :: UserId -> HandlerEff Value
 putUserR lookup_user_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> updateUserM user_id lookup_user_id user_request
 
@@ -101,7 +101,7 @@ putUserR lookup_user_id = do
 deleteUserR :: UserId -> HandlerEff Value
 deleteUserR lookup_user_id = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   void $ deleteUserM user_id lookup_user_id
   pure $ toJSON ()
@@ -109,22 +109,22 @@ deleteUserR lookup_user_id = do
 
 
 getCountUsersR :: HandlerEff Value
-getCountUsersR = do
-  user_id <- requireAuthId
+getCountUsersR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countUsersM user_id
 
 
 
 getUserStatsR :: HandlerEff Value
-getUserStatsR = do
-  user_id <- requireAuthId
+getUserStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getUserStatsM user_id
 
 
 
 getUserStatR :: UserId -> HandlerEff Value
 getUserStatR lookup_user_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getUserStatM user_id lookup_user_id
 
 
@@ -328,7 +328,7 @@ updateUserM _ lookup_user_id user_request = do
       , userModifiedAt = Just ts
     }
 
-  void $ runDB $ updateWhere
+  void $ _runDB $ updateWhere
     [ UserId ==. lookup_user_id ]
 
     [ UserModifiedAt =. userModifiedAt
@@ -351,7 +351,7 @@ deleteUserM user_id lookup_user_id = do
   if (isSuper user_id) || (user_id == lookup_user_id)
 
     then
-      runDB $ delete lookup_user_id
+      _runDB $ delete lookup_user_id
 
     else
       permissionDenied "perms"
@@ -411,7 +411,7 @@ qUserStats :: forall site.
     (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
     Key User -> HandlerT site IO (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
 qUserStats user_id = do
-  runDB $ do
+  _runDB $ do
     (leurons:[]) <- E.select
       $ E.from $ \leuron -> do
       E.where_ $ leuron ^. LeuronUserId E.==. E.val user_id

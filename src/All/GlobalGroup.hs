@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.GlobalGroup (
   -- Handler
   getGlobalGroupsR,
@@ -31,14 +33,13 @@ module All.GlobalGroup (
 
 
 
-import           Handler.Prelude
-import           Model.Prelude
+import           All.Prelude
 
 
 
 getGlobalGroupsR :: HandlerEff Value
-getGlobalGroupsR = do
-  user_id <- requireAuthId
+getGlobalGroupsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . globalGroupsToResponses) <$> getGlobalGroupsM user_id
 
 
@@ -46,7 +47,7 @@ getGlobalGroupsR = do
 postGlobalGroupR0 :: HandlerEff Value
 postGlobalGroupR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   global_group_request <- requireJsonBody :: HandlerEff GlobalGroupRequest
   (toJSON . globalGroupToResponse) <$> insertGlobalGroupM user_id global_group_request
@@ -55,21 +56,21 @@ postGlobalGroupR0 = do
 
 getGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupR global_group_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupM user_id global_group_id
 
 
 
 getGlobalGroupH :: Text -> HandlerEff Value
 getGlobalGroupH group_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupMH user_id group_name
 
 
 
 putGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 putGlobalGroupR global_group_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   global_group_request <- requireJsonBody
   (toJSON . globalGroupToResponse) <$> updateGlobalGroupM user_id global_group_id global_group_request
 
@@ -77,29 +78,29 @@ putGlobalGroupR global_group_id = do
 
 deleteGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 deleteGlobalGroupR global_group_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteGlobalGroupM user_id global_group_id
   sendResponseStatus status200 ("DELETED" :: Text)
 
 
 
 getCountGlobalGroupsR :: HandlerEff Value
-getCountGlobalGroupsR = do
-  user_id <- requireAuthId
+getCountGlobalGroupsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countGlobalGroupsM user_id
 
 
 
 getGlobalGroupStatsR :: HandlerEff Value
-getGlobalGroupStatsR = do
-  user_id <- requireAuthId
+getGlobalGroupStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getGlobalGroupStatsM user_id
 
 
 
 getGlobalGroupStatR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupStatR global_group_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getGlobalGroupStatM user_id global_group_id
 
 

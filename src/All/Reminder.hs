@@ -51,8 +51,8 @@ import           Misc.Codec (keyToInt64)
 --
 
 getRemindersR :: HandlerEff Value
-getRemindersR = do
-  user_id <- requireAuthId
+getRemindersR = run $ do
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -61,9 +61,9 @@ getRemindersR = do
 
 
 postRemindersR :: HandlerEff Value
-postRemindersR = do
+postRemindersR = run $ do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -74,14 +74,14 @@ postRemindersR = do
 
 getReminderR :: ReminderId -> HandlerEff Value
 getReminderR reminder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . reminderToResponse) <$> getReminderM user_id reminder_id
 
 
 
 putReminderR :: ReminderId -> HandlerEff Value
 putReminderR reminder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   reminder_request <- requireJsonBody
   (toJSON . reminderToResponse) <$> updateReminderM user_id reminder_id reminder_request
 
@@ -89,7 +89,7 @@ putReminderR reminder_id = do
 
 deleteReminderR :: ReminderId -> HandlerEff Value
 deleteReminderR reminder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteReminderM user_id reminder_id
   pure $ toJSON ()
 
@@ -102,8 +102,8 @@ deleteReminderR reminder_id = do
 --
 
 getReminderFoldersR :: HandlerEff Value
-getReminderFoldersR = do
-  user_id <- requireAuthId
+getReminderFoldersR = run $ do
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -112,8 +112,8 @@ getReminderFoldersR = do
 
 
 postReminderFoldersR :: HandlerEff Value
-postReminderFoldersR = do
-  user_id <- requireAuthId
+postReminderFoldersR = run $ do
+  user_id <- _requireAuthId
   sp <- lookupStandardParams
   reminder_folder_request <- requireJsonBody
   (toJSON . reminderFolderToResponse) <$> insertReminderFoldersM user_id (spReminderFolderId sp) reminder_folder_request
@@ -122,14 +122,14 @@ postReminderFoldersR = do
 
 getReminderFolderR :: ReminderFolderId -> HandlerEff Value
 getReminderFolderR reminder_folder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . reminderFolderToResponse) <$> getReminderFolderM user_id reminder_folder_id
 
 
 
 postReminderFolderR :: ReminderFolderId -> HandlerEff Value
 postReminderFolderR reminder_folder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   reminder_folder_request <- requireJsonBody
   (toJSON . reminderFolderToResponse) <$> insertReminderFolderM user_id reminder_folder_id reminder_folder_request
 
@@ -137,7 +137,7 @@ postReminderFolderR reminder_folder_id = do
 
 putReminderFolderR :: ReminderFolderId -> HandlerEff Value
 putReminderFolderR reminder_folder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   reminder_folder_request <- requireJsonBody
   (toJSON . reminderFolderToResponse) <$> updateReminderFolderM user_id reminder_folder_id reminder_folder_request
 
@@ -145,7 +145,7 @@ putReminderFolderR reminder_folder_id = do
 
 deleteReminderFolderR :: ReminderFolderId -> HandlerEff Value
 deleteReminderFolderR reminder_folder_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteReminderFolderM user_id reminder_folder_id
   pure $ toJSON ()
 

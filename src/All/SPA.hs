@@ -4,7 +4,7 @@ module All.SPA (
 
 
 
-import           Import
+import           All.Prelude
 import           Misc.Widget
 import           Socket
 import           Yesod.WebSockets

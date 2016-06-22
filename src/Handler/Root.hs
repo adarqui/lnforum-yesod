@@ -1,6 +1,12 @@
-module Handler.Root where
+module Handler.Root (
+  getRootR
+) where
+
+
 
 import Import
+
+
 
 getRootR :: Handler Html
 getRootR = do

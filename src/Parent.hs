@@ -17,7 +17,7 @@ import           LN.T.Visibility
 fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Thread))
 fatherOf_ThreadPostM user_id (Entity thread_post_id ThreadPost{..}) = do
 
-  lift $ runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
+  lift $ _runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
 
 
 

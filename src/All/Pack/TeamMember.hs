@@ -23,22 +23,22 @@ import           All.User
 --
 
 getTeamMemberPacksR :: HandlerEff Value
-getTeamMemberPacksR = do
-  user_id <- requireAuthId
+getTeamMemberPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getTeamMemberPacksM user_id
 
 
 
 getTeamMemberPackR :: TeamMemberId -> HandlerEff Value
 getTeamMemberPackR team_member_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getTeamMemberPackM user_id team_member_id
 
 
 
 getTeamMemberPackH :: Text -> HandlerEff Value
 getTeamMemberPackH team_member_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getTeamMemberPackMH user_id team_member_name
 
 

@@ -41,8 +41,8 @@ import qualified LN.T.Star as L
 --
 
 getStarsR :: HandlerEff Value
-getStarsR = do
-  user_id <- requireAuthId
+getStarsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . starsToResponses) <$> getStarsM user_id
 
 
@@ -58,7 +58,7 @@ postStarR0 = do
 
     Just (ent, ent_id) -> do
 
-      user_id <- requireAuthId
+      user_id <- _requireAuthId
       star_request <- requireJsonBody
       (toJSON . starToResponse) <$> insertStarM user_id ent ent_id star_request
 
@@ -66,14 +66,14 @@ postStarR0 = do
 
 getStarR :: StarId -> HandlerEff Value
 getStarR star_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . starToResponse) <$> getStarM user_id star_id
 
 
 
 putStarR :: StarId -> HandlerEff Value
 putStarR star_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   star_request <- requireJsonBody
   (toJSON . starToResponse) <$> updateStarM user_id star_id star_request
 
@@ -81,22 +81,22 @@ putStarR star_id = do
 
 deleteStarR :: StarId -> HandlerEff Value
 deleteStarR star_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteStarM user_id star_id
   pure $ toJSON ()
 
 
 
 getStarStatsR :: HandlerEff Value
-getStarStatsR = do
-  user_id <- requireAuthId
+getStarStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getStarStatsM user_id
 
 
 
 getStarStatR :: StarId -> HandlerEff Value
 getStarStatR star_id = run $ do
-  user_id <- _requireAuthId
+  user_id <- __requireAuthId
   toJSON <$> getStarStatM user_id star_id
 
 

@@ -25,22 +25,22 @@ import           All.User
 --
 
 getOrganizationPacksR :: HandlerEff Value
-getOrganizationPacksR = do
-  user_id <- requireAuthId
+getOrganizationPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getOrganizationPacksM user_id
 
 
 
 getOrganizationPackR :: OrganizationId -> HandlerEff Value
 getOrganizationPackR organization_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getOrganizationPackM user_id organization_id
 
 
 
 getOrganizationPackH :: Text -> HandlerEff Value
 getOrganizationPackH org_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getOrganizationPackMH user_id org_name
 
 

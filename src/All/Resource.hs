@@ -45,15 +45,15 @@ import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 --
 
 getResourcesR :: HandlerEff Value
-getResourcesR = do
-  user_id <- requireAuthId
+getResourcesR = run $ do
+  user_id <- _requireAuthId
   (toJSON . resourcesToResponses) <$> getResourcesM user_id
 
 
 
 postResourceR0 :: HandlerEff Value
 postResourceR0 = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   resource_request <- requireJsonBody :: HandlerEff ResourceRequest
   (toJSON . resourceToResponse) <$> insertResourceM user_id resource_request
 
@@ -61,14 +61,14 @@ postResourceR0 = do
 
 getResourceR :: ResourceId -> HandlerEff Value
 getResourceR resource_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . resourceToResponse) <$> getResourceM user_id resource_id
 
 
 
 putResourceR :: ResourceId -> HandlerEff Value
 putResourceR resource_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   resource_request <- requireJsonBody
   (toJSON . resourceToResponse) <$> updateResourceM user_id resource_id resource_request
 
@@ -76,29 +76,29 @@ putResourceR resource_id = do
 
 deleteResourceR :: ResourceId -> HandlerEff Value
 deleteResourceR resource_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteResourceM user_id resource_id
   pure $ toJSON ()
 
 
 
 getCountResourcesR :: HandlerEff Value
-getCountResourcesR = do
-  user_id <- requireAuthId
+getCountResourcesR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countResourcesM user_id
 
 
 
 getResourceStatsR :: HandlerEff Value
-getResourceStatsR = do
-  user_id <- requireAuthId
+getResourceStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getResourceStatsM user_id
 
 
 
 getResourceStatR :: ResourceId -> HandlerEff Value
 getResourceStatR thread_post_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getResourceStatM user_id thread_post_id
 
 

@@ -46,8 +46,8 @@ import           LN.T.Visibility
 
 
 getOrganizationsR :: HandlerEff Value
-getOrganizationsR = do
-  user_id <- requireAuthId
+getOrganizationsR = run $ do
+  user_id <- _requireAuthId
   (toJSON . organizationsToResponses) <$> getOrganizationsM user_id
 
 
@@ -55,7 +55,7 @@ getOrganizationsR = do
 postOrganizationR0 :: HandlerEff Value
 postOrganizationR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   organization_request <- requireJsonBody :: HandlerEff OrganizationRequest
   (toJSON . organizationToResponse) <$> insertOrganizationM user_id organization_request
@@ -64,14 +64,14 @@ postOrganizationR0 = do
 
 getOrganizationR :: OrganizationId -> HandlerEff Value
 getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
---  user_id <- requireAuthId
+--  user_id <- _requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationM user_id organization_id
 
 
 
 getOrganizationH :: Text -> HandlerEff Value
 getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
---  user_id <- requireAuthId
+--  user_id <- _requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationMH user_id org_name
 
 
@@ -82,14 +82,14 @@ getOrganizationR' :: forall master t.
                   -> t
                   -> HandlerT master IO Value
 getOrganizationR' f a = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . organizationToResponse <$> f user_id a)
 
 
 
 putOrganizationR :: OrganizationId -> HandlerEff Value
 putOrganizationR organization_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   organization_request <- requireJsonBody
   (toJSON . organizationToResponse) <$> updateOrganizationM user_id organization_id organization_request
 
@@ -97,29 +97,29 @@ putOrganizationR organization_id = do
 
 deleteOrganizationR :: OrganizationId -> HandlerEff Value
 deleteOrganizationR organization_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteOrganizationM user_id organization_id
   pure $ toJSON ()
 
 
 
 getOrganizationCountR :: HandlerEff Value
-getOrganizationCountR = do
-  user_id <- requireAuthId
+getOrganizationCountR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countOrganizationsM user_id
 
 
 
 getOrganizationStatsR :: HandlerEff Value
-getOrganizationStatsR = do
-  user_id <- requireAuthId
+getOrganizationStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getOrganizationStatsM user_id
 
 
 
 getOrganizationStatR :: OrganizationId -> HandlerEff Value
 getOrganizationStatR organization_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getOrganizationStatM user_id organization_id
 
 
@@ -322,7 +322,7 @@ deleteOrganizationM user_id organization_id = do
   deleteOrganizationTeamsM user_id organization_id
 
   -- bg job: Delete Org
-  void $ runDB $ deleteWhere [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
+  void $ _runDB $ deleteWhere [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
   -}
 
 

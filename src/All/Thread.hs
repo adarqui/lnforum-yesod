@@ -47,9 +47,9 @@ import qualified Database.Esqueleto     as E
 --
 
 getThreadsR :: HandlerEff Value
-getThreadsR = do
+getThreadsR = run $ do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   (toJSON . threadsToResponses) <$> getThreadsM user_id
 
@@ -58,7 +58,7 @@ getThreadsR = do
 postThreadR0 :: HandlerEff Value
 postThreadR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   sp <- lookupStandardParams
 
@@ -73,21 +73,21 @@ postThreadR0 = do
 
 getThreadR :: ThreadId -> HandlerEff Value
 getThreadR thread_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . threadToResponse) <$> getThreadM user_id thread_id
 
 
 
 getThreadH :: Text -> HandlerEff Value
 getThreadH thread_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . threadToResponse) <$> getThreadMH user_id thread_name
 
 
 
 putThreadR :: ThreadId -> HandlerEff Value
 putThreadR thread_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   thread_request <- requireJsonBody
   (toJSON . threadToResponse) <$> updateThreadM user_id thread_id thread_request
 
@@ -95,29 +95,29 @@ putThreadR thread_id = do
 
 deleteThreadR :: ThreadId -> HandlerEff Value
 deleteThreadR thread_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteThreadM user_id thread_id
   pure $ toJSON ()
 
 
 
 getCountThreadsR :: HandlerEff Value
-getCountThreadsR = do
-  user_id <- requireAuthId
+getCountThreadsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countThreadsM user_id
 
 
 
 getThreadStatsR :: HandlerEff Value
-getThreadStatsR = do
-  user_id <- requireAuthId
+getThreadStatsR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getThreadStatsM user_id
 
 
 
 getThreadStatR :: ThreadId -> HandlerEff Value
 getThreadStatR thread_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getThreadStatM user_id thread_id
 
 
@@ -213,7 +213,7 @@ getThreadsM _ = do
 
   case spOrganizationId of
     Just org_id -> do
-      runDB
+      _runDB
         $ E.select
         $ E.from $ \(thread `E.InnerJoin` board `E.InnerJoin` forum `E.InnerJoin` org) -> do
           E.on $ forum ^. ForumOrgId E.==. org ^. OrganizationId
@@ -258,7 +258,7 @@ getThreadsM user_id = do
 getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByOrganizationIdM _ org_id sp = do
 
-  runDB
+  _runDB
     $ E.select
     $ E.from $ \(thread `E.InnerJoin` board `E.InnerJoin` forum `E.InnerJoin` org) -> do
       E.on $ forum ^. ForumOrgId E.==. org ^. OrganizationId

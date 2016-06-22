@@ -37,8 +37,8 @@ import           All.Prelude
 --
 
 getTeamMembersR :: HandlerEff Value
-getTeamMembersR = do
-  user_id <- requireAuthId
+getTeamMembersR = run $ do
+  user_id <- _requireAuthId
   (toJSON . teamMembersToResponses) <$> getTeamMembersM user_id
 
 
@@ -46,7 +46,7 @@ getTeamMembersR = do
 postTeamMemberR0 :: HandlerEff Value
 postTeamMemberR0 = do
 
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
 
   team_member_request <- requireJsonBody :: HandlerEff TeamMemberRequest
   (toJSON . teamMemberToResponse) <$> insertTeamMemberM user_id team_member_request
@@ -55,21 +55,21 @@ postTeamMemberR0 = do
 
 getTeamMemberR :: TeamMemberId -> HandlerEff Value
 getTeamMemberR team_member_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . teamMemberToResponse) <$> getTeamMemberM user_id team_member_id
 
 
 
 getTeamMemberH :: Text -> HandlerEff Value
 getTeamMemberH team_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   (toJSON . teamMemberToResponse) <$> getTeamMemberMH user_id team_name
 
 
 
 putTeamMemberR :: TeamMemberId -> HandlerEff Value
 putTeamMemberR team_member_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   team_member_request <- requireJsonBody
   (toJSON . teamMemberToResponse) <$> updateTeamMemberM user_id team_member_id team_member_request
 
@@ -77,15 +77,15 @@ putTeamMemberR team_member_id = do
 
 deleteTeamMemberR :: TeamMemberId -> HandlerEff Value
 deleteTeamMemberR team_member_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   void $ deleteTeamMemberM user_id team_member_id
   sendResponseStatus status200 ("DELETED" :: Text)
 
 
 
 getCountTeamMembersR :: HandlerEff Value
-getCountTeamMembersR = do
-  user_id <- requireAuthId
+getCountTeamMembersR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> countTeamMembersM user_id
 
 

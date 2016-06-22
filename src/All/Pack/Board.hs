@@ -27,22 +27,22 @@ import           All.User
 --
 
 getBoardPacksR :: HandlerEff Value
-getBoardPacksR = do
-  user_id <- requireAuthId
+getBoardPacksR = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getBoardPacksM user_id
 
 
 
 getBoardPackR :: BoardId -> HandlerEff Value
 getBoardPackR board_id = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getBoardPackM user_id board_id
 
 
 
 getBoardPackH :: Text -> HandlerEff Value
 getBoardPackH board_name = do
-  user_id <- requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getBoardPackMH user_id board_name
 
 
