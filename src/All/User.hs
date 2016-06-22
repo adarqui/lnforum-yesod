@@ -1,27 +1,21 @@
-module Handler.User (
+module All.User (
+  -- Handler
   getUsersR,
   postUserR0,
   getUserR,
   getUserH,
   putUserR,
   deleteUserR,
-
   getCountUsersR,
-
   getUserStatsR,
   getUserStatR,
-
-  getUserPacksR,
-  getUserPackR,
-  getUserPackH,
 ) where
 
 
 
-import           Handler.Prelude
+import           All.Prelude
 import           Model.User
 import           Model.User.Internal2
-import           All.Pack.Sanitized.User
 
 
 
@@ -93,24 +87,3 @@ getUserStatR :: UserId -> Handler Value
 getUserStatR lookup_user_id = do
   user_id <- requireAuthId
   toJSON <$> getUserStatM user_id lookup_user_id
-
-
-
-getUserPacksR :: Handler Value
-getUserPacksR = do
-  user_id <- requireAuthId
-  toJSON <$> getUsersSanitizedPacksM user_id
-
-
-
-getUserPackR :: UserId -> Handler Value
-getUserPackR lookup_user_id = do
-  user_id <- requireAuthId
-  toJSON <$> getUserSanitizedPackM user_id lookup_user_id
-
-
-
-getUserPackH :: Text -> Handler Value
-getUserPackH lookup_user_nick = do
-  user_id <- requireAuthId
-  toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick

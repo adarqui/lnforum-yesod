@@ -24,6 +24,7 @@ library
                      All.Forum
                      All.GlobalGroup
                      All.Leuron
+                     All.LeuronTraining
                      All.Like
                      All.Me
                      All.Organization
@@ -35,10 +36,12 @@ library
                      All.Reminder
                      All.Resource
                      All.SPA
+                     All.Star
                      All.Team
                      All.Thread
                      All.ThreadPost
                      All.TeamMember
+                     All.User
                      All.Pack.Me
                      All.Pack.Organization
                      All.Pack.User

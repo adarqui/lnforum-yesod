@@ -65,7 +65,7 @@ import           All.Team
 import           All.TeamMember
 import           All.Thread
 import           All.ThreadPost
--- import           All.User
+import           All.User
 import           All.Pack.Board
 import           All.Pack.Forum
 import           All.Pack.Leuron
@@ -79,7 +79,6 @@ import           All.Pack.TeamMember
 import           All.Pack.Thread
 import           All.Pack.ThreadPost
 import           All.Pack.User
-import           Handler.User
 
 import           Handler.Common
 import           Handler.Root
