@@ -35,9 +35,7 @@ Organization
 Team
   userId       UserId
   orgId        OrganizationId
-  name         Text
-  displayName  Text default='null'
-  description  Text Maybe
+  system       SystemTeam
   membership   Membership
   icon         Text Maybe
   tags         [Text]
@@ -51,8 +49,7 @@ Team
   modifiedAt  UTCTime Maybe
   activityAt  UTCTime Maybe
 
-  UniqueTeam            orgId name
-  UniqueTeamDisplayName orgId displayName
+  UniqueTeam            orgId system
 
   deriving Eq Show Typeable
 

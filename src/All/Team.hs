@@ -17,7 +17,8 @@ module All.Team (
   getTeams_ByUserIdM,
   getTeams_ByEverythingM,
   getTeamM,
-  insertTeam_BypassM,
+  insertTeam_InternalM,
+  insert_SystemTeamsM,
   updateTeamM,
   deleteTeamM,
   getTeamCountM
@@ -26,6 +27,7 @@ module All.Team (
 
 
 import           All.Prelude
+import           All.TeamMember
 
 
 
@@ -194,15 +196,31 @@ getTeamM _ team_id = do
 
 
 
-insertTeam_BypassM :: UserId -> OrganizationId -> Text -> Maybe Text -> TeamRequest -> HandlerEff (Entity Team)
-insertTeam_BypassM user_id org_id team_name team_desc team_request = do
+insertTeam_InternalM :: UserId -> OrganizationId -> SystemTeam -> TeamRequest -> HandlerEff (Entity Team)
+insertTeam_InternalM user_id org_id system_team team_request = do
 
   ts <- timestampH'
 
   let
     team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
 
-  insertEntityDb $ team { teamName = team_name, teamDescription = team_desc }
+  insertEntityDb $ team { teamSystem = system_team }
+
+
+
+insert_SystemTeamsM :: UserId -> OrganizationId -> HandlerEff ()
+insert_SystemTeamsM user_id org_id = do
+
+  -- bg job: Insert owners team
+  (Entity owners_id team) <- insertTeam_InternalM user_id organization_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
+  void $ insertTeamMember_InternalM user_id owners_id (TeamMemberRequest 0)
+
+  -- bg job: Insert members team
+  (Entity members_id team) <- insertTeam_InternalM user_id organization_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
+  void $ insertTeamMember_InternalM user_id members_id (TeamMemberRequest 0)
+
+  return ()
+
 
 
 
