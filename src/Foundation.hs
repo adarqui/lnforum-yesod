@@ -56,6 +56,7 @@ mkYesodData "App" $(parseRoutesFile "config/routes")
 
 
 
+-- TODO FIXME: need this in only one place.. cyclic deps issue
 type HandlerEff = RWST () () () Handler
 
 
