@@ -333,6 +333,19 @@ lookupStarEnt _                            = Nothing
 
 
 
+
+
+
+--
+-- TODO FIXME: MOVE THESE DB FUNCTIONS OUT INTO THEIR OWN MODULE
+--
+
+
+
+
+
+
+
 -- | For filtering, ordering, limiting etc.
 --
 spToSelect :: forall typ record. StandardParams -> EntityField record typ -> [SelectOpt record]
