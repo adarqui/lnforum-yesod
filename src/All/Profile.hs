@@ -29,21 +29,21 @@ import           All.Prelude
 -- Handler
 --
 
-getProfilesR :: Handler Value
+getProfilesR :: HandlerEff Value
 getProfilesR = do
   user_id <- requireAuthId
   (toJSON . profilesToResponses) <$> getProfilesM user_id
 
 
 
-getProfileR :: ProfileId -> Handler Value
+getProfileR :: ProfileId -> HandlerEff Value
 getProfileR profile_id = do
   user_id <- requireAuthId
   (toJSON . profileToResponse) <$> getProfileM user_id profile_id
 
 
 
-putProfileR :: ProfileId -> Handler Value
+putProfileR :: ProfileId -> HandlerEff Value
 putProfileR profile_id = do
   user_id <- requireAuthId
   profile_request <- requireJsonBody
@@ -108,25 +108,25 @@ profilesToResponses profiles = ProfileResponses {
 -- Model/Internal
 --
 
-getProfilesM :: UserId -> Handler [Entity Profile]
+getProfilesM :: UserId -> HandlerEff [Entity Profile]
 getProfilesM _ = do
   selectListDb' [] [] ProfileId
 
 
 
-getProfileM :: UserId -> ProfileId -> Handler (Entity Profile)
+getProfileM :: UserId -> ProfileId -> HandlerEff (Entity Profile)
 getProfileM _ profile_id = do
   notFoundMaybe =<< selectFirstDb [ ProfileId ==. profile_id ] []
 
 
 
-getProfile_ByUserIdM :: UserId -> UserId -> Handler (Entity Profile)
+getProfile_ByUserIdM :: UserId -> UserId -> HandlerEff (Entity Profile)
 getProfile_ByUserIdM _ lookup_user_id = do
   notFoundMaybe =<< selectFirstDb [ProfileUserId ==. lookup_user_id] []
 
 
 
-updateProfileM :: UserId -> ProfileId -> ProfileRequest -> Handler (Entity Profile)
+updateProfileM :: UserId -> ProfileId -> ProfileRequest -> HandlerEff (Entity Profile)
 updateProfileM user_id profile_id profile_request = do
 
   ts <- timestampH'

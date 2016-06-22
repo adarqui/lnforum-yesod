@@ -26,26 +26,35 @@ import Control.Monad.Trans.State
 -- Handler
 --
 
-getThreadPostPacksR :: Handler Value
+getThreadPostPacksR :: HandlerEff Value
 getThreadPostPacksR = do
   user_id <- requireAuthId
   toJSON <$> getThreadPostPacksM user_id
 
 
 
-getThreadPostPackR :: ThreadPostId -> Handler Value
+getThreadPostPackR :: ThreadPostId -> HandlerEff Value
 getThreadPostPackR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadPostPackM user_id thread_post_id
 
 
 
-getThreadPostPackR' :: ThreadPostId -> Handler Value
+getThreadPostPackR' :: ThreadPostId -> HandlerEff Value
 getThreadPostPackR' thread_post_id = do
   flip evalStateT () $ do
     user_id <- lift $ requireAuthId
-    toJSON <$> (lift $ getThreadPostPackM user_id thread_post_id)
+    toJSON <$> getThreadPostPackM' user_id thread_post_id
 
+getThreadPostPackM' :: UserId -> ThreadPostId -> StateT () HandlerEff ()
+getThreadPostPackM' user_id thread_post_id = do
+
+  return ()
+
+--  sp <- lookupStandardParams
+
+--  thread_post <- getThreadPostM user_id thread_post_id
+--  getThreadPostPack_ByThreadPostM user_id thread_post (sp { spLimit = Just 1 })
 
 
 
@@ -54,7 +63,7 @@ getThreadPostPackR' thread_post_id = do
 --
 -- Model
 --
-getThreadPostPacksM :: UserId -> Handler ThreadPostPackResponses
+getThreadPostPacksM :: UserId -> HandlerEff ThreadPostPackResponses
 getThreadPostPacksM user_id = do
 
   sp <- lookupStandardParams
@@ -68,7 +77,7 @@ getThreadPostPacksM user_id = do
 
 
 
-getThreadPostPackM :: UserId -> ThreadPostId -> Handler ThreadPostPackResponse
+getThreadPostPackM :: UserId -> ThreadPostId -> HandlerEff ThreadPostPackResponse
 getThreadPostPackM user_id thread_post_id = do
 
   sp <- lookupStandardParams
@@ -78,7 +87,7 @@ getThreadPostPackM user_id thread_post_id = do
 
 
 
-getThreadPostPack_ByThreadPostM :: UserId -> Entity ThreadPost -> StandardParams -> Handler ThreadPostPackResponse
+getThreadPostPack_ByThreadPostM :: UserId -> Entity ThreadPost -> StandardParams -> HandlerEff ThreadPostPackResponse
 getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id ThreadPost{..}) StandardParams{..} = do
 
   thread_post_user <- getUserM user_id threadPostUserId

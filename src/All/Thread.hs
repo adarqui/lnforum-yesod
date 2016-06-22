@@ -46,7 +46,7 @@ import qualified Database.Esqueleto     as E
 -- Handler
 --
 
-getThreadsR :: Handler Value
+getThreadsR :: HandlerEff Value
 getThreadsR = do
 
   user_id <- requireAuthId
@@ -55,7 +55,7 @@ getThreadsR = do
 
 
 
-postThreadR0 :: Handler Value
+postThreadR0 :: HandlerEff Value
 postThreadR0 = do
 
   user_id <- requireAuthId
@@ -66,26 +66,26 @@ postThreadR0 = do
     Nothing -> notFound
     (Just board_id) -> do
 
-      thread_request <- requireJsonBody :: Handler ThreadRequest
+      thread_request <- requireJsonBody :: HandlerEff ThreadRequest
       (toJSON . threadToResponse) <$> insertThreadM user_id board_id thread_request
 
 
 
-getThreadR :: ThreadId -> Handler Value
+getThreadR :: ThreadId -> HandlerEff Value
 getThreadR thread_id = do
   user_id <- requireAuthId
   (toJSON . threadToResponse) <$> getThreadM user_id thread_id
 
 
 
-getThreadH :: Text -> Handler Value
+getThreadH :: Text -> HandlerEff Value
 getThreadH thread_name = do
   user_id <- requireAuthId
   (toJSON . threadToResponse) <$> getThreadMH user_id thread_name
 
 
 
-putThreadR :: ThreadId -> Handler Value
+putThreadR :: ThreadId -> HandlerEff Value
 putThreadR thread_id = do
   user_id <- requireAuthId
   thread_request <- requireJsonBody
@@ -93,7 +93,7 @@ putThreadR thread_id = do
 
 
 
-deleteThreadR :: ThreadId -> Handler Value
+deleteThreadR :: ThreadId -> HandlerEff Value
 deleteThreadR thread_id = do
   user_id <- requireAuthId
   void $ deleteThreadM user_id thread_id
@@ -101,21 +101,21 @@ deleteThreadR thread_id = do
 
 
 
-getCountThreadsR :: Handler Value
+getCountThreadsR :: HandlerEff Value
 getCountThreadsR = do
   user_id <- requireAuthId
   toJSON <$> countThreadsM user_id
 
 
 
-getThreadStatsR :: Handler Value
+getThreadStatsR :: HandlerEff Value
 getThreadStatsR = do
   user_id <- requireAuthId
   toJSON <$> getThreadStatsM user_id
 
 
 
-getThreadStatR :: ThreadId -> Handler Value
+getThreadStatR :: ThreadId -> HandlerEff Value
 getThreadStatR thread_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadStatM user_id thread_id
@@ -206,7 +206,7 @@ orderByToField (Just order) =
 
 
 {-
-getThreadsM :: UserId -> Handler [Entity Thread]
+getThreadsM :: UserId -> HandlerEff [Entity Thread]
 getThreadsM _ = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -242,7 +242,7 @@ getThreadsM _ = do
 
 
 
-getThreadsM :: UserId -> Handler [Entity Thread]
+getThreadsM :: UserId -> HandlerEff [Entity Thread]
 getThreadsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -255,7 +255,7 @@ getThreadsM user_id = do
 
 
 
-getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByOrganizationIdM _ org_id sp = do
 
   runDB
@@ -270,28 +270,28 @@ getThreads_ByOrganizationIdM _ org_id sp = do
 
 
 
-getThreads_ByBoardIdM :: UserId -> BoardId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByBoardIdM :: UserId -> BoardId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByBoardIdM _ board_id sp@StandardParams{..} = do
 
   selectListDb sp [ThreadBoardId ==. board_id] [] (orderByToField spOrder)
 
 
 
-getThreads_ByBoardId_KeysM :: UserId -> BoardId -> StandardParams -> Handler [Key Thread]
+getThreads_ByBoardId_KeysM :: UserId -> BoardId -> StandardParams -> HandlerEff [Key Thread]
 getThreads_ByBoardId_KeysM _ board_id sp@StandardParams{..} = do
 
   selectKeysListDb sp [ThreadBoardId ==. board_id] [] (orderByToField spOrder)
 
 
 
-getThreads_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ThreadUserId ==. lookup_user_id ] [] ThreadId
 
 
 
-getThreads_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Thread]
+getThreads_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByEverythingM _ sp = do
 
   selectListDb sp [] [] ThreadId
@@ -299,13 +299,13 @@ getThreads_ByEverythingM _ sp = do
 
 
 
-getThreadM :: UserId -> ThreadId -> Handler (Entity Thread)
+getThreadM :: UserId -> ThreadId -> HandlerEff (Entity Thread)
 getThreadM _ thread_id = do
   notFoundMaybe =<< selectFirstDb [ ThreadId ==. thread_id ] []
 
 
 
-getThreadMH :: UserId -> Text -> Handler (Entity Thread)
+getThreadMH :: UserId -> Text -> HandlerEff (Entity Thread)
 getThreadMH _ thread_name = do
 
   StandardParams{..} <- lookupStandardParams
@@ -319,7 +319,7 @@ getThreadMH _ thread_name = do
 
 
 
-insertThreadM :: UserId -> BoardId -> ThreadRequest -> Handler (Entity Thread)
+insertThreadM :: UserId -> BoardId -> ThreadRequest -> HandlerEff (Entity Thread)
 insertThreadM user_id board_id thread_request = do
 
   ts <- timestampH'
@@ -331,7 +331,7 @@ insertThreadM user_id board_id thread_request = do
 
 
 
-updateThreadM :: UserId -> ThreadId -> ThreadRequest -> Handler (Entity Thread)
+updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerEff (Entity Thread)
 updateThreadM user_id thread_id thread_request = do
 
   ts <- timestampH'
@@ -358,13 +358,13 @@ updateThreadM user_id thread_id thread_request = do
 
 
 
-deleteThreadM :: UserId -> ThreadId -> Handler ()
+deleteThreadM :: UserId -> ThreadId -> HandlerEff ()
 deleteThreadM user_id thread_id = do
   deleteWhereDb [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
 
 
 
-countThreadsM :: UserId -> Handler CountResponses
+countThreadsM :: UserId -> HandlerEff CountResponses
 countThreadsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -382,7 +382,7 @@ countThreadsM _ = do
 
 
 
-getThreadStatsM :: UserId -> Handler ThreadStatResponses
+getThreadStatsM :: UserId -> HandlerEff ThreadStatResponses
 getThreadStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -395,7 +395,7 @@ getThreadStatsM _ = do
 
 
 
-getThreadStatM :: UserId -> ThreadId -> Handler ThreadStatResponse
+getThreadStatM :: UserId -> ThreadId -> HandlerEff ThreadStatResponse
 getThreadStatM _ thread_id = do
   -- get posts count
   num_thread_posts <- countDb [ ThreadPostThreadId ==. thread_id ]

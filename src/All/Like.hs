@@ -41,14 +41,14 @@ import qualified LN.T.Like as L
 -- Handler
 --
 
-getLikesR :: Handler Value
+getLikesR :: HandlerEff Value
 getLikesR = do
   user_id <- requireAuthId
   (toJSON . likesToResponses) <$> getLikesM user_id
 
 
 
-postLikeR0 :: Handler Value
+postLikeR0 :: HandlerEff Value
 postLikeR0 = do
 
   sp <- lookupStandardParams
@@ -65,14 +65,14 @@ postLikeR0 = do
 
 
 
-getLikeR :: LikeId -> Handler Value
+getLikeR :: LikeId -> HandlerEff Value
 getLikeR like_id = do
   user_id <- requireAuthId
   (toJSON . likeToResponse) <$> getLikeM user_id like_id
 
 
 
-putLikeR :: LikeId -> Handler Value
+putLikeR :: LikeId -> HandlerEff Value
 putLikeR like_id = do
   user_id <- requireAuthId
   like_request <- requireJsonBody
@@ -80,7 +80,7 @@ putLikeR like_id = do
 
 
 
-deleteLikeR :: LikeId -> Handler Value
+deleteLikeR :: LikeId -> HandlerEff Value
 deleteLikeR like_id = do
   user_id <- requireAuthId
   void $ deleteLikeM user_id like_id
@@ -88,14 +88,14 @@ deleteLikeR like_id = do
 
 
 
-getLikeStatsR :: Handler Value
+getLikeStatsR :: HandlerEff Value
 getLikeStatsR = do
   user_id <- requireAuthId
   toJSON <$> getLikeStatsM user_id
 
 
 
-getLikeStatR :: LikeId -> Handler Value
+getLikeStatR :: LikeId -> HandlerEff Value
 getLikeStatR like_id = do
   user_id <- requireAuthId
   toJSON <$> getLikeStatM user_id like_id
@@ -152,13 +152,13 @@ likesToResponses likes = LikeResponses {
 -- Model/Internal
 --
 
-getLikesM :: UserId -> Handler [Entity Like]
+getLikesM :: UserId -> HandlerEff [Entity Like]
 getLikesM user_id = do
   selectListDb' [ LikeUserId ==. user_id ] [] LikeId
 
 
 
-insertLikeM :: UserId -> Ent -> Int64 -> LikeRequest -> Handler (Entity Like)
+insertLikeM :: UserId -> Ent -> Int64 -> LikeRequest -> HandlerEff (Entity Like)
 insertLikeM user_id ent ent_id like_request = do
 
   ts <- timestampH'
@@ -169,13 +169,13 @@ insertLikeM user_id ent ent_id like_request = do
 
 
 
-getLikeM :: UserId -> LikeId -> Handler (Entity Like)
+getLikeM :: UserId -> LikeId -> HandlerEff (Entity Like)
 getLikeM user_id like_id = do
   notFoundMaybe =<< selectFirstDb [ LikeId ==. like_id, LikeUserId ==. user_id ] []
 
 
 
-getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> Handler (Maybe (Entity Like))
+getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Like))
 getLike_ByThreadPostM user_id thread_post = do
   selectFirstDb [ LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id ] []
   where
@@ -183,7 +183,7 @@ getLike_ByThreadPostM user_id thread_post = do
 
 
 
-getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler (Maybe (Entity Like))
+getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff (Maybe (Entity Like))
 getLike_ByThreadPostIdM user_id thread_post_id = do
   selectFirstDb [ LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id' ] []
   where
@@ -191,7 +191,7 @@ getLike_ByThreadPostIdM user_id thread_post_id = do
 
 
 
-updateLikeM :: UserId -> LikeId -> LikeRequest -> Handler (Entity Like)
+updateLikeM :: UserId -> LikeId -> LikeRequest -> HandlerEff (Entity Like)
 updateLikeM user_id like_id LikeRequest{..} = do
 
   ts <- timestampH'
@@ -209,13 +209,13 @@ updateLikeM user_id like_id LikeRequest{..} = do
 
 
 
-deleteLikeM :: UserId -> LikeId -> Handler ()
+deleteLikeM :: UserId -> LikeId -> HandlerEff ()
 deleteLikeM user_id like_id = do
   deleteWhereDb [ LikeUserId ==. user_id, LikeId ==. like_id ]
 
 
 
-getLikeStatsM :: UserId -> Handler LikeStatResponses
+getLikeStatsM :: UserId -> HandlerEff LikeStatResponses
 getLikeStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -228,7 +228,7 @@ getLikeStatsM _ = do
 
 
 
-getLikeStatM :: UserId -> LikeId -> Handler LikeStatResponse
+getLikeStatM :: UserId -> LikeId -> HandlerEff LikeStatResponse
 getLikeStatM user_id _ = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -239,7 +239,7 @@ getLikeStatM user_id _ = do
 
 
 
-getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler LikeStatResponse
+getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff LikeStatResponse
 getLikeStat_ByThreadPostIdM user_id thread_post_id = do
 --  <- countDb [ LikePostLikeId ==. like_id ]
   likes <- selectListDb' [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64] [] LikeId

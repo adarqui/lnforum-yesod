@@ -36,14 +36,14 @@ import           All.Prelude
 -- Handler
 --
 
-getTeamsR :: Handler Value
+getTeamsR :: HandlerEff Value
 getTeamsR = do
   user_id <- requireAuthId
   (toJSON . teamsToResponses) <$> getTeamsM user_id
 
 
 
-postTeamR0 :: Handler Value
+postTeamR0 :: HandlerEff Value
 postTeamR0 = do
 
   user_id <- requireAuthId
@@ -54,19 +54,19 @@ postTeamR0 = do
     Nothing -> notFound
 
     Just org_id -> do
-      team_request <- requireJsonBody :: Handler TeamRequest
+      team_request <- requireJsonBody :: HandlerEff TeamRequest
       (toJSON . teamToResponse) <$> insertTeamM user_id org_id team_request
 
 
 
-getTeamR :: TeamId -> Handler Value
+getTeamR :: TeamId -> HandlerEff Value
 getTeamR team_id = do
   user_id <- requireAuthId
   (toJSON . teamToResponse) <$> getTeamM user_id team_id
 
 
 
-putTeamR :: TeamId -> Handler Value
+putTeamR :: TeamId -> HandlerEff Value
 putTeamR team_id = do
   user_id <- requireAuthId
   team_request <- requireJsonBody
@@ -74,7 +74,7 @@ putTeamR team_id = do
 
 
 
-deleteTeamR :: TeamId -> Handler Value
+deleteTeamR :: TeamId -> HandlerEff Value
 deleteTeamR team_id = do
   user_id <- requireAuthId
   void $ deleteTeamM user_id team_id
@@ -151,7 +151,7 @@ teamsToResponses teams = TeamResponses {
 -- Model/Internal
 --
 
-getTeamsM :: UserId -> Handler [Entity Team]
+getTeamsM :: UserId -> HandlerEff [Entity Team]
 getTeamsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -163,31 +163,31 @@ getTeamsM user_id = do
 
 
 
-getTeams_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Team]
+getTeams_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Team]
 getTeams_ByOrganizationIdM _ org_id sp = do
   selectListDb sp [TeamOrgId ==. org_id] [] TeamId
 
 
 
-getTeams_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Team]
+getTeams_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Team]
 getTeams_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [TeamUserId ==. lookup_user_id] [] TeamId
 
 
 
-getTeams_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Team]
+getTeams_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Team]
 getTeams_ByEverythingM _ sp = do
   selectListDb sp [] [] TeamId
 
 
 
-getTeamM :: UserId -> TeamId -> Handler (Entity Team)
+getTeamM :: UserId -> TeamId -> HandlerEff (Entity Team)
 getTeamM _ team_id = do
   notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
 
 
 
-insertTeamM :: UserId -> OrganizationId -> TeamRequest -> Handler (Entity Team)
+insertTeamM :: UserId -> OrganizationId -> TeamRequest -> HandlerEff (Entity Team)
 insertTeamM user_id org_id team_request = do
 
 --  sp <- lookupStandardParams
@@ -201,7 +201,7 @@ insertTeamM user_id org_id team_request = do
 
 
 
-insertTeam_BypassM :: UserId -> OrganizationId -> TeamRequest -> Handler (Entity Team)
+insertTeam_BypassM :: UserId -> OrganizationId -> TeamRequest -> HandlerEff (Entity Team)
 insertTeam_BypassM user_id org_id team_request = do
 
   ts <- timestampH'
@@ -213,7 +213,7 @@ insertTeam_BypassM user_id org_id team_request = do
 
 
 
-updateTeamM :: UserId -> TeamId -> TeamRequest -> Handler (Entity Team)
+updateTeamM :: UserId -> TeamId -> TeamRequest -> HandlerEff (Entity Team)
 updateTeamM user_id team_id team_request = do
 
   ts <- timestampH'
@@ -238,12 +238,12 @@ updateTeamM user_id team_id team_request = do
 
 
 
-deleteTeamM :: UserId -> TeamId -> Handler ()
+deleteTeamM :: UserId -> TeamId -> HandlerEff ()
 deleteTeamM user_id team_id = do
   deleteWhereDb [ TeamUserId ==. user_id, TeamId ==. team_id ]
 
 
 
-getTeamCountM :: Handler Int
+getTeamCountM :: HandlerEff Int
 getTeamCountM = do
   runDB $ count [ TeamName !=. "" ]

@@ -22,14 +22,14 @@ import           All.User
 -- Handler
 --
 
-getResourcePacksR :: Handler Value
+getResourcePacksR :: HandlerEff Value
 getResourcePacksR = do
   user_id <- requireAuthId
   toJSON <$> getResourcePacksM user_id
 
 
 
-getResourcePackR :: ResourceId -> Handler Value
+getResourcePackR :: ResourceId -> HandlerEff Value
 getResourcePackR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getResourcePackM user_id thread_post_id
@@ -43,7 +43,7 @@ getResourcePackR thread_post_id = do
 -- Model
 --
 
-getResourcePacksM :: UserId -> Handler ResourcePackResponses
+getResourcePacksM :: UserId -> HandlerEff ResourcePackResponses
 getResourcePacksM user_id = do
 
   sp <- lookupStandardParams
@@ -59,7 +59,7 @@ getResourcePacksM user_id = do
 
 
 
-getResourcePackM :: UserId -> ResourceId -> Handler ResourcePackResponse
+getResourcePackM :: UserId -> ResourceId -> HandlerEff ResourcePackResponse
 getResourcePackM user_id resource_id = do
 
   resource <- getResourceM user_id resource_id
@@ -68,7 +68,7 @@ getResourcePackM user_id resource_id = do
 
 
 
-getResourcePack_ByResourceM :: UserId -> Entity Resource -> StandardParams -> Handler ResourcePackResponse
+getResourcePack_ByResourceM :: UserId -> Entity Resource -> StandardParams -> HandlerEff ResourcePackResponse
 getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) _ = do
 
   resource_user <- getUserM user_id resourceUserId

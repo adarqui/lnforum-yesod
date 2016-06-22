@@ -24,21 +24,21 @@ import           All.User
 -- Handler
 --
 
-getOrganizationPacksR :: Handler Value
+getOrganizationPacksR :: HandlerEff Value
 getOrganizationPacksR = do
   user_id <- requireAuthId
   toJSON <$> getOrganizationPacksM user_id
 
 
 
-getOrganizationPackR :: OrganizationId -> Handler Value
+getOrganizationPackR :: OrganizationId -> HandlerEff Value
 getOrganizationPackR organization_id = do
   user_id <- requireAuthId
   toJSON <$> getOrganizationPackM user_id organization_id
 
 
 
-getOrganizationPackH :: Text -> Handler Value
+getOrganizationPackH :: Text -> HandlerEff Value
 getOrganizationPackH org_name = do
   user_id <- requireAuthId
   toJSON <$> getOrganizationPackMH user_id org_name
@@ -52,7 +52,7 @@ getOrganizationPackH org_name = do
 -- Model
 --
 
-getOrganizationPacksM :: UserId -> Handler OrganizationPackResponses
+getOrganizationPacksM :: UserId -> HandlerEff OrganizationPackResponses
 getOrganizationPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -61,7 +61,7 @@ getOrganizationPacksM user_id = do
 
 
 
-getOrganizationPackM :: UserId -> OrganizationId -> Handler OrganizationPackResponse
+getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff OrganizationPackResponse
 getOrganizationPackM user_id organization_id = do
 
   organization         <- getOrganizationM user_id organization_id
@@ -69,12 +69,12 @@ getOrganizationPackM user_id organization_id = do
 
 
 
-getOrganizationPackMH :: UserId -> Text -> Handler OrganizationPackResponse
+getOrganizationPackMH :: UserId -> Text -> HandlerEff OrganizationPackResponse
 getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
 
-getOrganizationPacks_ByEverythingM :: UserId -> StandardParams -> Handler OrganizationPackResponses
+getOrganizationPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff OrganizationPackResponses
 getOrganizationPacks_ByEverythingM user_id sp = do
 
   organizations       <- getOrganizations_ByEverythingM user_id sp
@@ -85,7 +85,7 @@ getOrganizationPacks_ByEverythingM user_id sp = do
 
 
 
-getOrganizationPack_ByOrganizationName :: UserId -> Text -> Handler OrganizationPackResponse
+getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff OrganizationPackResponse
 getOrganizationPack_ByOrganizationName user_id organization_name = do
 
   organization         <- getOrganization_ByOrganizationNameM user_id organization_name
@@ -93,7 +93,7 @@ getOrganizationPack_ByOrganizationName user_id organization_name = do
 
 
 
-getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> Handler OrganizationPackResponse
+getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff OrganizationPackResponse
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   organization_user    <- getUserM user_id organizationUserId

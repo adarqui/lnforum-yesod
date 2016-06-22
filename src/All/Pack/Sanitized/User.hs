@@ -24,21 +24,21 @@ import           All.User
 -- Handler
 --
 
-getUserSanitizedPacksR :: Handler Value
+getUserSanitizedPacksR :: HandlerEff Value
 getUserSanitizedPacksR = do
   user_id <- requireAuthId
   toJSON <$> getUsersSanitizedPacksM user_id
 
 
 
-getUserSanitizedPackR :: UserId -> Handler Value
+getUserSanitizedPackR :: UserId -> HandlerEff Value
 getUserSanitizedPackR lookup_user_id = do
   user_id <- requireAuthId
   toJSON <$> getUserSanitizedPackM user_id lookup_user_id
 
 
 
-getUserSanitizedPackH :: Text -> Handler Value
+getUserSanitizedPackH :: Text -> HandlerEff Value
 getUserSanitizedPackH lookup_user_nick = do
   user_id <- requireAuthId
   toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick
@@ -53,7 +53,7 @@ getUserSanitizedPackH lookup_user_nick = do
 -- Model
 --
 
-getUsersSanitizedPacksM :: UserId -> Handler UserSanitizedPackResponses
+getUsersSanitizedPacksM :: UserId -> HandlerEff UserSanitizedPackResponses
 getUsersSanitizedPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -65,7 +65,7 @@ getUsersSanitizedPacksM user_id = do
 
 
 
-getUsersSanitizedPacks_ByEverythingM :: UserId -> StandardParams -> Handler UserSanitizedPackResponses
+getUsersSanitizedPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByEverythingM user_id sp = do
 
   users_ids <- selectKeysListDb sp [] [] UserId
@@ -77,7 +77,7 @@ getUsersSanitizedPacks_ByEverythingM user_id sp = do
 
 
 
-getUserSanitizedPackM :: UserId -> UserId -> Handler UserSanitizedPackResponse
+getUserSanitizedPackM :: UserId -> UserId -> HandlerEff UserSanitizedPackResponse
 getUserSanitizedPackM user_id lookup_user_id = do
 
   sp <- lookupStandardParams
@@ -87,7 +87,7 @@ getUserSanitizedPackM user_id lookup_user_id = do
 
 
 
-getUserSanitizedPackMH :: UserId -> Text -> Handler UserSanitizedPackResponse
+getUserSanitizedPackMH :: UserId -> Text -> HandlerEff UserSanitizedPackResponse
 getUserSanitizedPackMH user_id lookup_user_nick = do
 
   sp <- lookupStandardParams
@@ -96,7 +96,7 @@ getUserSanitizedPackMH user_id lookup_user_nick = do
 
 
 
-getUsersSanitizedPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> Handler UserSanitizedPackResponses
+getUsersSanitizedPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByUserIdsM user_id user_ids sp = do
   users_packs <- mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key sp) user_ids
   return $ UserSanitizedPackResponses {
@@ -106,7 +106,7 @@ getUsersSanitizedPacks_ByUserIdsM user_id user_ids sp = do
 
 
 
-getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler UserSanitizedPackResponse
+getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserIdM user_id lookup_user_id sp = do
 
   lookup_user <- getUserM user_id lookup_user_id
@@ -115,7 +115,7 @@ getUserSanitizedPack_ByUserIdM user_id lookup_user_id sp = do
 
 
 
-getUserSanitizedPack_ByUserNickM :: UserId -> Text -> StandardParams -> Handler UserSanitizedPackResponse
+getUserSanitizedPack_ByUserNickM :: UserId -> Text -> StandardParams -> HandlerEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserNickM user_id lookup_user_nick sp = do
 
   lookup_user <- getUserMH user_id lookup_user_nick
@@ -124,7 +124,7 @@ getUserSanitizedPack_ByUserNickM user_id lookup_user_nick sp = do
 
 
 
-getUserSanitizedPack_ByUserM :: UserId -> Entity User -> StandardParams -> Handler UserSanitizedPackResponse
+getUserSanitizedPack_ByUserM :: UserId -> Entity User -> StandardParams -> HandlerEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserM user_id lookup_user _ = do
 
   stats       <- getUserStatM user_id lookup_user_id

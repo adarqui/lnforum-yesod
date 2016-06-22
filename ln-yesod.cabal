@@ -55,7 +55,9 @@ library
                      All.Pack.ThreadPost
                      All.Pack.Resource
                      All.Pack.Leuron
+                     Access
                      Cache
+                     Control
                      Foundation
                      Handler.Prelude
                      Handler.Common
@@ -63,7 +65,7 @@ library
                      Helper.Request
                      Import
                      Import.NoFoundation
-                     Access
+                     Lifted
                      Parent
                      OAuth2
                      Misc

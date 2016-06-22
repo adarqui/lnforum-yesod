@@ -2,18 +2,18 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Application
-    ( getApplicationDev
-    , appMain
-    , develMain
-    , makeFoundation
-    -- * for DevelMain
-    , getApplicationRepl
-    , shutdownApp
-    -- * for GHCI
-    , handler
-    , db
-    ) where
+module Application (
+  getApplicationDev,
+  appMain,
+  develMain,
+  makeFoundation,
+  -- * for DevelMain
+  getApplicationRepl,
+  shutdownApp,
+  -- * for GHCI
+  handler,
+  db
+) where
 
 
 

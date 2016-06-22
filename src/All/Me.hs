@@ -20,7 +20,7 @@ import           Import
 -- Handler
 --
 
-getMeR :: Handler Value
+getMeR :: HandlerEff Value
 getMeR = do
   user_id <- requireAuthId
   (toJSON . userToResponse) <$> getMeM user_id
@@ -35,6 +35,6 @@ getMeR = do
 -- Model/Internal
 --
 
-getMeM :: UserId -> Handler (Entity User)
+getMeM :: UserId -> HandlerEff (Entity User)
 getMeM user_id = do
   notFoundMaybe =<< selectFirstDb [ UserId ==. user_id ] []

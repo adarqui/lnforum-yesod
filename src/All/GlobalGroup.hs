@@ -36,38 +36,38 @@ import           Model.Prelude
 
 
 
-getGlobalGroupsR :: Handler Value
+getGlobalGroupsR :: HandlerEff Value
 getGlobalGroupsR = do
   user_id <- requireAuthId
   (toJSON . globalGroupsToResponses) <$> getGlobalGroupsM user_id
 
 
 
-postGlobalGroupR0 :: Handler Value
+postGlobalGroupR0 :: HandlerEff Value
 postGlobalGroupR0 = do
 
   user_id <- requireAuthId
 
-  global_group_request <- requireJsonBody :: Handler GlobalGroupRequest
+  global_group_request <- requireJsonBody :: HandlerEff GlobalGroupRequest
   (toJSON . globalGroupToResponse) <$> insertGlobalGroupM user_id global_group_request
 
 
 
-getGlobalGroupR :: GlobalGroupId -> Handler Value
+getGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupR global_group_id = do
   user_id <- requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupH :: Text -> Handler Value
+getGlobalGroupH :: Text -> HandlerEff Value
 getGlobalGroupH group_name = do
   user_id <- requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupMH user_id group_name
 
 
 
-putGlobalGroupR :: GlobalGroupId -> Handler Value
+putGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 putGlobalGroupR global_group_id = do
   user_id <- requireAuthId
   global_group_request <- requireJsonBody
@@ -75,7 +75,7 @@ putGlobalGroupR global_group_id = do
 
 
 
-deleteGlobalGroupR :: GlobalGroupId -> Handler Value
+deleteGlobalGroupR :: GlobalGroupId -> HandlerEff Value
 deleteGlobalGroupR global_group_id = do
   user_id <- requireAuthId
   void $ deleteGlobalGroupM user_id global_group_id
@@ -83,21 +83,21 @@ deleteGlobalGroupR global_group_id = do
 
 
 
-getCountGlobalGroupsR :: Handler Value
+getCountGlobalGroupsR :: HandlerEff Value
 getCountGlobalGroupsR = do
   user_id <- requireAuthId
   toJSON <$> countGlobalGroupsM user_id
 
 
 
-getGlobalGroupStatsR :: Handler Value
+getGlobalGroupStatsR :: HandlerEff Value
 getGlobalGroupStatsR = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupStatsM user_id
 
 
 
-getGlobalGroupStatR :: GlobalGroupId -> Handler Value
+getGlobalGroupStatR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupStatR global_group_id = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupStatM user_id global_group_id
@@ -165,7 +165,7 @@ globalGroupsToResponses globalGroups = GlobalGroupResponses {
 
 -- Model/Internal
 
-getGlobalGroupsM :: UserId -> Handler [Entity GlobalGroup]
+getGlobalGroupsM :: UserId -> HandlerEff [Entity GlobalGroup]
 getGlobalGroupsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -176,25 +176,25 @@ getGlobalGroupsM user_id = do
 
 
 
-getGlobalGroups_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity GlobalGroup]
+getGlobalGroups_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity GlobalGroup]
 getGlobalGroups_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [GlobalGroupUserId ==. lookup_user_id] [] GlobalGroupId
 
 
 
-getGlobalGroups_ByEverythingM :: UserId -> StandardParams -> Handler [Entity GlobalGroup]
+getGlobalGroups_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity GlobalGroup]
 getGlobalGroups_ByEverythingM _ sp = do
   selectListDb sp [] [] GlobalGroupId
 
 
 
-getGlobalGroupM :: UserId -> GlobalGroupId -> Handler (Entity GlobalGroup)
+getGlobalGroupM :: UserId -> GlobalGroupId -> HandlerEff (Entity GlobalGroup)
 getGlobalGroupM _ global_groupid = do
   notFoundMaybe =<< selectFirstDb [ GlobalGroupId ==. global_groupid ] []
 
 
 
-getGlobalGroupMH :: UserId -> Text -> Handler (Entity GlobalGroup)
+getGlobalGroupMH :: UserId -> Text -> HandlerEff (Entity GlobalGroup)
 getGlobalGroupMH user_id global_group_name = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -206,17 +206,17 @@ getGlobalGroupMH user_id global_group_name = do
 
 
 
-getGlobalGroup_ByUserIdMH :: UserId -> Text -> UserId -> StandardParams -> Handler (Entity GlobalGroup)
+getGlobalGroup_ByUserIdMH :: UserId -> Text -> UserId -> StandardParams -> HandlerEff (Entity GlobalGroup)
 getGlobalGroup_ByUserIdMH user_id global_group_name lookup_user_id _ = notFound
 
 
 
-getGlobalGroupMH' :: UserId -> Text -> StandardParams -> Handler (Entity GlobalGroup)
+getGlobalGroupMH' :: UserId -> Text -> StandardParams -> HandlerEff (Entity GlobalGroup)
 getGlobalGroupMH' user_id global_group_name _ = notFound
 
 
 
-insertGlobalGroupM :: UserId -> GlobalGroupRequest -> Handler (Entity GlobalGroup)
+insertGlobalGroupM :: UserId -> GlobalGroupRequest -> HandlerEff (Entity GlobalGroup)
 insertGlobalGroupM user_id global_group_request = do
 
 --  sp <- lookupStandardParams
@@ -230,7 +230,7 @@ insertGlobalGroupM user_id global_group_request = do
 
 
 
-updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> Handler (Entity GlobalGroup)
+updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> HandlerEff (Entity GlobalGroup)
 updateGlobalGroupM user_id global_groupid global_group_request = do
 
   ts <- timestampH'
@@ -255,13 +255,13 @@ updateGlobalGroupM user_id global_groupid global_group_request = do
 
 
 
-deleteGlobalGroupM :: UserId -> GlobalGroupId -> Handler ()
+deleteGlobalGroupM :: UserId -> GlobalGroupId -> HandlerEff ()
 deleteGlobalGroupM user_id global_groupid = do
   deleteWhereDb [ GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid ]
 
 
 
-countGlobalGroupsM :: UserId -> Handler CountResponses
+countGlobalGroupsM :: UserId -> HandlerEff CountResponses
 countGlobalGroupsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -279,7 +279,7 @@ countGlobalGroupsM _ = do
 
 
 
-getGlobalGroupStatsM :: UserId -> Handler GlobalGroupStatResponses
+getGlobalGroupStatsM :: UserId -> HandlerEff GlobalGroupStatResponses
 getGlobalGroupStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -291,7 +291,7 @@ getGlobalGroupStatsM _ = do
 
 
 
-getGlobalGroupStatM :: UserId -> GlobalGroupId -> Handler GlobalGroupStatResponse
+getGlobalGroupStatM :: UserId -> GlobalGroupId -> HandlerEff GlobalGroupStatResponse
 getGlobalGroupStatM _ global_group_id = do
 
   return $ GlobalGroupStatResponse {

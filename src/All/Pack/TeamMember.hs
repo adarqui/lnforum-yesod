@@ -22,21 +22,21 @@ import           All.User
 -- Handler
 --
 
-getTeamMemberPacksR :: Handler Value
+getTeamMemberPacksR :: HandlerEff Value
 getTeamMemberPacksR = do
   user_id <- requireAuthId
   toJSON <$> getTeamMemberPacksM user_id
 
 
 
-getTeamMemberPackR :: TeamMemberId -> Handler Value
+getTeamMemberPackR :: TeamMemberId -> HandlerEff Value
 getTeamMemberPackR team_member_id = do
   user_id <- requireAuthId
   toJSON <$> getTeamMemberPackM user_id team_member_id
 
 
 
-getTeamMemberPackH :: Text -> Handler Value
+getTeamMemberPackH :: Text -> HandlerEff Value
 getTeamMemberPackH team_member_name = do
   user_id <- requireAuthId
   toJSON <$> getTeamMemberPackMH user_id team_member_name
@@ -50,7 +50,7 @@ getTeamMemberPackH team_member_name = do
 -- Model
 --
 
-getTeamMemberPacksM :: UserId -> Handler TeamMemberPackResponses
+getTeamMemberPacksM :: UserId -> HandlerEff TeamMemberPackResponses
 getTeamMemberPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -62,7 +62,7 @@ getTeamMemberPacksM user_id = do
 
 
 
-getTeamMemberPackM :: UserId -> TeamMemberId -> Handler TeamMemberPackResponse
+getTeamMemberPackM :: UserId -> TeamMemberId -> HandlerEff TeamMemberPackResponse
 getTeamMemberPackM user_id team_member_id = do
 
   teamMember         <- getTeamMemberM user_id team_member_id
@@ -70,7 +70,7 @@ getTeamMemberPackM user_id team_member_id = do
 
 
 
-getTeamMemberPackMH :: UserId -> Text -> Handler TeamMemberPackResponse
+getTeamMemberPackMH :: UserId -> Text -> HandlerEff TeamMemberPackResponse
 getTeamMemberPackMH user_id team_member_name = do
 
   teamMember         <- getTeamMemberMH user_id team_member_name
@@ -78,7 +78,7 @@ getTeamMemberPackMH user_id team_member_name = do
 
 
 
-getTeamMemberPacks_ByEverythingM :: UserId -> StandardParams -> Handler TeamMemberPackResponses
+getTeamMemberPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff TeamMemberPackResponses
 getTeamMemberPacks_ByEverythingM user_id sp = do
   teamMembers       <- getTeamMembers_ByEverythingM user_id sp
   teamMembers_packs <- mapM (\teamMember -> getTeamMemberPack_ByTeamMemberM user_id teamMember) teamMembers
@@ -88,7 +88,7 @@ getTeamMemberPacks_ByEverythingM user_id sp = do
 
 
 
-getTeamMemberPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler TeamMemberPackResponses
+getTeamMemberPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff TeamMemberPackResponses
 getTeamMemberPacks_ByUserIdM user_id lookup_user_id sp = do
 
   teamMembers       <- getTeamMembers_ByUserIdM user_id lookup_user_id sp
@@ -99,7 +99,7 @@ getTeamMemberPacks_ByUserIdM user_id lookup_user_id sp = do
 
 
 
-getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> Handler TeamMemberPackResponse
+getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> HandlerEff TeamMemberPackResponse
 getTeamMemberPack_ByTeamMemberM user_id team_member@(Entity team_member_id TeamMember{..}) = do
 
   -- let sp = defaultStandardParams {

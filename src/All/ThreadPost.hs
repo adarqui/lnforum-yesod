@@ -37,14 +37,14 @@ import qualified LN.T.Like                 as L
 
 
 
-getThreadPostsR :: Handler Value
+getThreadPostsR :: HandlerEff Value
 getThreadPostsR = do
   user_id <- requireAuthId
   (toJSON . threadPostsToResponses) <$> getThreadPostsM user_id
 
 
 
-postThreadPostR0 :: Handler Value
+postThreadPostR0 :: HandlerEff Value
 postThreadPostR0 = do
 
   user_id <- requireAuthId
@@ -56,19 +56,19 @@ postThreadPostR0 = do
     (Nothing, Nothing) -> permissionDenied "Must supply a thread_id or parent_id"
 
     _ -> do
-      threadPost_request <- requireJsonBody :: Handler ThreadPostRequest
+      threadPost_request <- requireJsonBody :: HandlerEff ThreadPostRequest
       (toJSON . threadPostToResponse) <$> insertThreadPostM user_id (spThreadId sp) (spThreadPostId sp) threadPost_request
 
 
 
-getThreadPostR :: ThreadPostId -> Handler Value
+getThreadPostR :: ThreadPostId -> HandlerEff Value
 getThreadPostR threadPost_id = do
   user_id <- requireAuthId
   (toJSON . threadPostToResponse) <$> getThreadPostM user_id threadPost_id
 
 
 
-putThreadPostR :: ThreadPostId -> Handler Value
+putThreadPostR :: ThreadPostId -> HandlerEff Value
 putThreadPostR threadPost_id = do
   user_id <- requireAuthId
   threadPost_request <- requireJsonBody
@@ -76,7 +76,7 @@ putThreadPostR threadPost_id = do
 
 
 
-deleteThreadPostR :: ThreadPostId -> Handler Value
+deleteThreadPostR :: ThreadPostId -> HandlerEff Value
 deleteThreadPostR threadPost_id = do
   user_id <- requireAuthId
   void $ deleteThreadPostM user_id threadPost_id
@@ -84,14 +84,14 @@ deleteThreadPostR threadPost_id = do
 
 
 
-getCountThreadPostsR :: Handler Value
+getCountThreadPostsR :: HandlerEff Value
 getCountThreadPostsR = do
   user_id <- requireAuthId
   toJSON <$> countThreadPostsM user_id
 
 
 
-getThreadPostStatsR :: Handler Value
+getThreadPostStatsR :: HandlerEff Value
 getThreadPostStatsR = do
   user_id <- requireAuthId
   toJSON <$> getThreadPostStatsM user_id
@@ -99,8 +99,8 @@ getThreadPostStatsR = do
 
 
 getThreadPostStatR :: ThreadPostId -> Handler Value
-getThreadPostStatR thread_post_id = do
-  user_id <- requireAuthId
+getThreadPostStatR thread_post_id = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getThreadPostStatM user_id thread_post_id
 
 
@@ -169,7 +169,7 @@ threadPostsToResponses thread_posts = ThreadPostResponses {
 --
 
 {-
-getThreadPostsM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> Handler [Entity ThreadPost]
+getThreadPostsM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> HandlerEff [Entity ThreadPost]
 getThreadPostsM _ mthread_id mthreadPost_id = do
   selectListDb query [] ThreadPostId
   where
@@ -184,7 +184,7 @@ getThreadPostsM _ mthread_id mthreadPost_id = do
 
 
 
-getThreadPostsM :: UserId -> Handler [Entity ThreadPost]
+getThreadPostsM :: UserId -> HandlerEff [Entity ThreadPost]
 getThreadPostsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -199,31 +199,31 @@ getThreadPostsM user_id = do
 
 
 
-getThreadPosts_ByThreadIdM :: UserId -> ThreadId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByThreadIdM :: UserId -> ThreadId -> StandardParams -> HandlerEff [Entity ThreadPost]
 getThreadPosts_ByThreadIdM _ thread_id sp = do
   selectListDb sp [ThreadPostThreadId ==. thread_id] [] ThreadPostId
 
 
 
-getThreadPosts_ByThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> HandlerEff [Entity ThreadPost]
 getThreadPosts_ByThreadPostIdM _ parent_id sp = do
   selectListDb sp [ThreadPostParentId ==. Just parent_id] [] ThreadPostId
 
 
 
-getThreadPosts_ByEverythingM :: UserId -> StandardParams -> Handler [Entity ThreadPost]
+getThreadPosts_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity ThreadPost]
 getThreadPosts_ByEverythingM _ sp = do
   selectListDb sp [] [] ThreadPostId
 
 
 
-getThreadPostM :: UserId -> ThreadPostId -> Handler (Entity ThreadPost)
+getThreadPostM :: UserId -> ThreadPostId -> HandlerEff (Entity ThreadPost)
 getThreadPostM _ thread_post_id = do
   notFoundMaybe =<< selectFirstDb [ ThreadPostId ==. thread_post_id ] []
 
 
 
-insertThreadPostM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> ThreadPostRequest -> Handler (Entity ThreadPost)
+insertThreadPostM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> ThreadPostRequest -> HandlerEff (Entity ThreadPost)
 insertThreadPostM user_id mthread_id mthread_post_id threadPost_request = do
 
   ts <- timestampH'
@@ -245,7 +245,7 @@ insertThreadPostM user_id mthread_id mthread_post_id threadPost_request = do
 
 
 
-updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> Handler (Entity ThreadPost)
+updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerEff (Entity ThreadPost)
 updateThreadPostM user_id thread_post_id threadPost_request = do
 
   ts <- timestampH'
@@ -265,14 +265,14 @@ updateThreadPostM user_id thread_post_id threadPost_request = do
 
 
 
-deleteThreadPostM :: UserId -> ThreadPostId -> Handler ()
+deleteThreadPostM :: UserId -> ThreadPostId -> HandlerEff ()
 deleteThreadPostM user_id thread_post_id = do
   deleteWhereDb [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ]
 
 
 
 
-countThreadPostsM :: UserId -> Handler CountResponses
+countThreadPostsM :: UserId -> HandlerEff CountResponses
 countThreadPostsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -289,7 +289,7 @@ countThreadPostsM _ = do
 
 
 
-getThreadPostStatsM :: UserId -> Handler ThreadPostStatResponse
+getThreadPostStatsM :: UserId -> HandlerEff ThreadPostStatResponse
 getThreadPostStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -301,7 +301,7 @@ getThreadPostStatsM _ = do
 
 
 
-getThreadPostStatM :: UserId -> ThreadPostId -> Handler ThreadPostStatResponse
+getThreadPostStatM :: UserId -> ThreadPostId -> HandlerEff ThreadPostStatResponse
 getThreadPostStatM _ thread_post_id = do
 
   -- get like counts

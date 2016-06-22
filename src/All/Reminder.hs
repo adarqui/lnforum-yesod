@@ -50,7 +50,7 @@ import           Misc.Codec (keyToInt64)
 -- Handler
 --
 
-getRemindersR :: Handler Value
+getRemindersR :: HandlerEff Value
 getRemindersR = do
   user_id <- requireAuthId
 
@@ -60,26 +60,26 @@ getRemindersR = do
 
 
 
-postRemindersR :: Handler Value
+postRemindersR :: HandlerEff Value
 postRemindersR = do
 
   user_id <- requireAuthId
 
   sp <- lookupStandardParams
 
-  reminder_request <- requireJsonBody :: Handler ReminderRequest
+  reminder_request <- requireJsonBody :: HandlerEff ReminderRequest
   (toJSON . reminderToResponse) <$> insertRemindersM user_id (spReminderFolderId sp) reminder_request
 
 
 
-getReminderR :: ReminderId -> Handler Value
+getReminderR :: ReminderId -> HandlerEff Value
 getReminderR reminder_id = do
   user_id <- requireAuthId
   (toJSON . reminderToResponse) <$> getReminderM user_id reminder_id
 
 
 
-putReminderR :: ReminderId -> Handler Value
+putReminderR :: ReminderId -> HandlerEff Value
 putReminderR reminder_id = do
   user_id <- requireAuthId
   reminder_request <- requireJsonBody
@@ -87,7 +87,7 @@ putReminderR reminder_id = do
 
 
 
-deleteReminderR :: ReminderId -> Handler Value
+deleteReminderR :: ReminderId -> HandlerEff Value
 deleteReminderR reminder_id = do
   user_id <- requireAuthId
   void $ deleteReminderM user_id reminder_id
@@ -101,7 +101,7 @@ deleteReminderR reminder_id = do
 -- Folders
 --
 
-getReminderFoldersR :: Handler Value
+getReminderFoldersR :: HandlerEff Value
 getReminderFoldersR = do
   user_id <- requireAuthId
 
@@ -111,7 +111,7 @@ getReminderFoldersR = do
 
 
 
-postReminderFoldersR :: Handler Value
+postReminderFoldersR :: HandlerEff Value
 postReminderFoldersR = do
   user_id <- requireAuthId
   sp <- lookupStandardParams
@@ -120,14 +120,14 @@ postReminderFoldersR = do
 
 
 
-getReminderFolderR :: ReminderFolderId -> Handler Value
+getReminderFolderR :: ReminderFolderId -> HandlerEff Value
 getReminderFolderR reminder_folder_id = do
   user_id <- requireAuthId
   (toJSON . reminderFolderToResponse) <$> getReminderFolderM user_id reminder_folder_id
 
 
 
-postReminderFolderR :: ReminderFolderId -> Handler Value
+postReminderFolderR :: ReminderFolderId -> HandlerEff Value
 postReminderFolderR reminder_folder_id = do
   user_id <- requireAuthId
   reminder_folder_request <- requireJsonBody
@@ -135,7 +135,7 @@ postReminderFolderR reminder_folder_id = do
 
 
 
-putReminderFolderR :: ReminderFolderId -> Handler Value
+putReminderFolderR :: ReminderFolderId -> HandlerEff Value
 putReminderFolderR reminder_folder_id = do
   user_id <- requireAuthId
   reminder_folder_request <- requireJsonBody
@@ -143,7 +143,7 @@ putReminderFolderR reminder_folder_id = do
 
 
 
-deleteReminderFolderR :: ReminderFolderId -> Handler Value
+deleteReminderFolderR :: ReminderFolderId -> HandlerEff Value
 deleteReminderFolderR reminder_folder_id = do
   user_id <- requireAuthId
   void $ deleteReminderFolderM user_id reminder_folder_id
@@ -246,7 +246,7 @@ reminderFoldersToResponses reminderFolders = ReminderFolderResponses {
 -- Model/Internal
 --
 
-getRemindersM :: UserId -> Maybe ReminderFolderId -> Handler [Entity Reminder]
+getRemindersM :: UserId -> Maybe ReminderFolderId -> HandlerEff [Entity Reminder]
 getRemindersM user_id mfolder_id = do
   case mfolder_id of
     Nothing -> do
@@ -256,7 +256,7 @@ getRemindersM user_id mfolder_id = do
 
 
 
-insertRemindersM :: UserId -> Maybe ReminderFolderId -> ReminderRequest -> Handler (Entity Reminder)
+insertRemindersM :: UserId -> Maybe ReminderFolderId -> ReminderRequest -> HandlerEff (Entity Reminder)
 insertRemindersM user_id mfolder_id reminder_request = do
   case mfolder_id of
     Nothing -> notFound
@@ -269,7 +269,7 @@ insertRemindersM user_id mfolder_id reminder_request = do
 
 
 
-getReminderM :: UserId -> ReminderId -> Handler (Entity Reminder)
+getReminderM :: UserId -> ReminderId -> HandlerEff (Entity Reminder)
 getReminderM _ reminder_id = do
   notFoundMaybe =<< selectFirstDb [ ReminderId ==. reminder_id ] []
 
@@ -277,7 +277,7 @@ getReminderM _ reminder_id = do
 
 -- | We cant update the ReminderFolderId here..
 --
-updateReminderM :: UserId -> ReminderId -> ReminderRequest -> Handler (Entity Reminder)
+updateReminderM :: UserId -> ReminderId -> ReminderRequest -> HandlerEff (Entity Reminder)
 updateReminderM user_id reminder_id reminder_request = do
 
   ts <- timestampH'
@@ -295,7 +295,7 @@ updateReminderM user_id reminder_id reminder_request = do
 
 
 
-deleteReminderM :: UserId -> ReminderId -> Handler ()
+deleteReminderM :: UserId -> ReminderId -> HandlerEff ()
 deleteReminderM user_id reminder_id = do
   deleteWhereDb [ ReminderUserId ==. user_id, ReminderId ==. reminder_id ]
 
@@ -304,13 +304,13 @@ deleteReminderM user_id reminder_id = do
 
 -- | Get the CHILDREN folders
 --
-getReminderFoldersM :: UserId -> Maybe ReminderFolderId -> Handler [Entity ReminderFolder]
+getReminderFoldersM :: UserId -> Maybe ReminderFolderId -> HandlerEff [Entity ReminderFolder]
 getReminderFoldersM user_id mfolder_id = do
   selectListDb' [ ReminderFolderUserId ==. user_id, ReminderFolderParentId ==. mfolder_id ] [] ReminderFolderId
 
 
 
-insertReminderFoldersM :: UserId -> Maybe ReminderFolderId -> ReminderFolderRequest -> Handler (Entity ReminderFolder)
+insertReminderFoldersM :: UserId -> Maybe ReminderFolderId -> ReminderFolderRequest -> HandlerEff (Entity ReminderFolder)
 insertReminderFoldersM user_id mfolder_id reminder_folder_request = do
 
   ts <- timestampH'
@@ -322,13 +322,13 @@ insertReminderFoldersM user_id mfolder_id reminder_folder_request = do
 
 
 
-getReminderFolderM :: UserId -> ReminderFolderId -> Handler (Entity ReminderFolder)
+getReminderFolderM :: UserId -> ReminderFolderId -> HandlerEff (Entity ReminderFolder)
 getReminderFolderM _ reminder_folder_id = do
   notFoundMaybe =<< selectFirstDb [ ReminderFolderId ==. reminder_folder_id ] []
 
 
 
-insertReminderFolderM :: UserId -> ReminderFolderId -> ReminderFolderRequest -> Handler (Entity ReminderFolder)
+insertReminderFolderM :: UserId -> ReminderFolderId -> ReminderFolderRequest -> HandlerEff (Entity ReminderFolder)
 insertReminderFolderM user_id reminder_folder_id reminder_folder_request = do
 
   ts <- timestampH'
@@ -342,7 +342,7 @@ insertReminderFolderM user_id reminder_folder_id reminder_folder_request = do
 
 -- | Can't update ReminderFolderParentId here..
 --
-updateReminderFolderM :: UserId -> ReminderFolderId -> ReminderFolderRequest -> Handler (Entity ReminderFolder)
+updateReminderFolderM :: UserId -> ReminderFolderId -> ReminderFolderRequest -> HandlerEff (Entity ReminderFolder)
 updateReminderFolderM user_id reminder_folder_id reminder_folder_request = do
 
   ts <- timestampH'
@@ -359,6 +359,6 @@ updateReminderFolderM user_id reminder_folder_id reminder_folder_request = do
 
 
 
-deleteReminderFolderM :: UserId -> ReminderFolderId -> Handler ()
+deleteReminderFolderM :: UserId -> ReminderFolderId -> HandlerEff ()
 deleteReminderFolderM user_id reminder_folder_id = do
   deleteCascadeWhereDb [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id ]

@@ -8,10 +8,10 @@ module Helper.Request
 
 import Import
 
-lookupUtf8Header :: HeaderName -> Handler (Maybe Text)
+lookupUtf8Header :: HeaderName -> HandlerEff (Maybe Text)
 lookupUtf8Header headerName = return . fmap decodeUtf8 =<< lookupHeader headerName
 
-allowCrossOrigin :: Handler ()
+allowCrossOrigin :: HandlerEff ()
 allowCrossOrigin = do
     mo <- lookupUtf8Header "Origin"
     mrh <- lookupUtf8Header "Access-Control-Req-Headers"
@@ -27,5 +27,5 @@ allowCrossOrigin = do
     addHeader "Access-Control-Allow-Methods" "POST, GET, OPTIONS"
     addHeader "Access-Control-Allow-Credentials" "true"
 
-fromMaybe404 :: Handler (Maybe a) -> Handler a
+fromMaybe404 :: HandlerEff (Maybe a) -> HandlerEff a
 fromMaybe404 f = maybe notFound return =<< f

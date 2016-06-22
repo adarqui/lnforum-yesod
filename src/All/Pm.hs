@@ -32,14 +32,14 @@ import           All.Prelude
 -- Handler
 --
 
-getPmsR :: Handler Value
+getPmsR :: HandlerEff Value
 getPmsR = do
   user_id <- requireAuthId
   (toJSON . pmsToResponses) <$> getPmsM user_id
 
 
 
-postPmR0 :: Handler Value
+postPmR0 :: HandlerEff Value
 postPmR0 = do
   user_id <- requireAuthId
   sp <- lookupStandardParams
@@ -52,19 +52,19 @@ postPmR0 = do
           -- can't send a pm to yourself
           permissionDenied "Can't send a PM to yourself"
         else do
-          pm_request <- requireJsonBody :: Handler PmRequest
+          pm_request <- requireJsonBody :: HandlerEff PmRequest
           (toJSON . pmToResponse) <$> insertPmM user_id to_user_id pm_request
 
 
 
-getPmR :: PmId -> Handler Value
+getPmR :: PmId -> HandlerEff Value
 getPmR pm_id = do
   user_id <- requireAuthId
   (toJSON . pmToResponse) <$> getPmM user_id pm_id
 
 
 
-putPmR :: PmId -> Handler Value
+putPmR :: PmId -> HandlerEff Value
 putPmR pm_id = do
   user_id <- requireAuthId
   pm_request <- requireJsonBody
@@ -72,7 +72,7 @@ putPmR pm_id = do
 
 
 
-deletePmR :: PmId -> Handler Value
+deletePmR :: PmId -> HandlerEff Value
 deletePmR pm_id = do
   user_id <- requireAuthId
   void $ deletePmM user_id pm_id
@@ -132,19 +132,19 @@ pmsToResponses pms = PmResponses {
 -- Model/Internal
 --
 
-getPmsM :: UserId -> Handler [Entity Pm]
+getPmsM :: UserId -> HandlerEff [Entity Pm]
 getPmsM user_id = do
   selectListDb' [ PmUserId ==. user_id ] [] PmId
 
 
 
-getPmM :: UserId -> PmId -> Handler (Entity Pm)
+getPmM :: UserId -> PmId -> HandlerEff (Entity Pm)
 getPmM user_id pm_id = do
   notFoundMaybe =<< selectFirstDb [ PmUserId ==. user_id, PmId ==. pm_id ] []
 
 
 
-insertPmM :: UserId -> UserId -> PmRequest -> Handler (Entity Pm)
+insertPmM :: UserId -> UserId -> PmRequest -> HandlerEff (Entity Pm)
 insertPmM user_id to_user_id pm_request = do
 
   ts <- timestampH'
@@ -156,7 +156,7 @@ insertPmM user_id to_user_id pm_request = do
 
 
 
-updatePmM :: UserId -> PmId -> PmRequest -> Handler (Entity Pm)
+updatePmM :: UserId -> PmId -> PmRequest -> HandlerEff (Entity Pm)
 updatePmM user_id pm_id pm_request = do
 
   ts <- timestampH'
@@ -175,7 +175,7 @@ updatePmM user_id pm_id pm_request = do
 
 
 
-deletePmM :: UserId -> PmId -> Handler ()
+deletePmM :: UserId -> PmId -> HandlerEff ()
 deletePmM _ _ = do
   return ()
 --  deleteWhereDb [ PmUserId ==. user_id, PmId ==. pm_id ]

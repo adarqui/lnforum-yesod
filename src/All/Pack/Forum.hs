@@ -21,21 +21,21 @@ import           All.Forum
 -- Handler
 --
 
-getForumPacksR :: Handler Value
+getForumPacksR :: HandlerEff Value
 getForumPacksR = do
   user_id <- requireAuthId
   toJSON <$> getForumPacksM user_id
 
 
 
-getForumPackR :: ForumId -> Handler Value
+getForumPackR :: ForumId -> HandlerEff Value
 getForumPackR forum_id = do
   user_id <- requireAuthId
   toJSON <$> getForumPackM user_id forum_id
 
 
 
-getForumPackH :: Text -> Handler Value
+getForumPackH :: Text -> HandlerEff Value
 getForumPackH forum_name = do
   user_id <- requireAuthId
   toJSON <$> getForumPackMH user_id forum_name
@@ -49,7 +49,7 @@ getForumPackH forum_name = do
 -- Model
 --
 
-getForumPacksM :: UserId -> Handler ForumPackResponses
+getForumPacksM :: UserId -> HandlerEff ForumPackResponses
 getForumPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -62,7 +62,7 @@ getForumPacksM user_id = do
 
 
 
-getForumPackM :: UserId -> ForumId -> Handler ForumPackResponse
+getForumPackM :: UserId -> ForumId -> HandlerEff ForumPackResponse
 getForumPackM user_id forum_id = do
 
   forum         <- getForumM user_id forum_id
@@ -70,7 +70,7 @@ getForumPackM user_id forum_id = do
 
 
 
-getForumPackMH :: UserId -> Text -> Handler ForumPackResponse
+getForumPackMH :: UserId -> Text -> HandlerEff ForumPackResponse
 getForumPackMH user_id forum_name = do
 
   forum         <- getForumMH user_id forum_name
@@ -78,7 +78,7 @@ getForumPackMH user_id forum_name = do
 
 
 
-getForumPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler ForumPackResponses
+getForumPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff ForumPackResponses
 getForumPacks_ByOrganizationIdM user_id org_id sp = do
 
   forums       <- getForums_ByOrganizationIdM user_id org_id sp
@@ -89,7 +89,7 @@ getForumPacks_ByOrganizationIdM user_id org_id sp = do
 
 
 
-getForumPacks_ByOrganizationNameM :: UserId -> Text -> StandardParams -> Handler ForumPackResponses
+getForumPacks_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff ForumPackResponses
 getForumPacks_ByOrganizationNameM user_id org_name sp = do
 
   forums       <- getForums_ByOrganizationNameM user_id org_name sp
@@ -100,7 +100,7 @@ getForumPacks_ByOrganizationNameM user_id org_name sp = do
 
 
 
-getForumPack_ByForumM :: UserId -> Entity Forum -> Handler ForumPackResponse
+getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerEff ForumPackResponse
 getForumPack_ByForumM user_id forum = do
 
   -- let sp = defaultStandardParams {

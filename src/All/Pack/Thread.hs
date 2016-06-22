@@ -25,21 +25,21 @@ import           All.User
 -- Handler
 --
 
-getThreadPacksR :: Handler Value
+getThreadPacksR :: HandlerEff Value
 getThreadPacksR = do
   user_id <- requireAuthId
   toJSON <$> getThreadPacksM user_id
 
 
 
-getThreadPackR :: ThreadId -> Handler Value
+getThreadPackR :: ThreadId -> HandlerEff Value
 getThreadPackR thread_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadPackM user_id thread_id
 
 
 
-getThreadPackH :: Text -> Handler Value
+getThreadPackH :: Text -> HandlerEff Value
 getThreadPackH thread_name = do
   user_id <- requireAuthId
   toJSON <$> getThreadPackMH user_id thread_name
@@ -54,7 +54,7 @@ getThreadPackH thread_name = do
 -- Model
 --
 
-getThreadPacksM :: UserId -> Handler ThreadPackResponses
+getThreadPacksM :: UserId -> HandlerEff ThreadPackResponses
 getThreadPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -66,7 +66,7 @@ getThreadPacksM user_id = do
 
 
 
-getThreadPackM :: UserId -> ThreadId -> Handler ThreadPackResponse
+getThreadPackM :: UserId -> ThreadId -> HandlerEff ThreadPackResponse
 getThreadPackM user_id thread_id = do
 
   sp <- lookupStandardParams
@@ -76,7 +76,7 @@ getThreadPackM user_id thread_id = do
 
 
 
-getThreadPackMH :: UserId -> Text -> Handler ThreadPackResponse
+getThreadPackMH :: UserId -> Text -> HandlerEff ThreadPackResponse
 getThreadPackMH user_id thread_name = do
 
   sp <- lookupStandardParams
@@ -87,7 +87,7 @@ getThreadPackMH user_id thread_name = do
 
 
 
-getThreadPacks_ByBoardIdM :: UserId -> BoardId -> StandardParams -> Handler ThreadPackResponses
+getThreadPacks_ByBoardIdM :: UserId -> BoardId -> StandardParams -> HandlerEff ThreadPackResponses
 getThreadPacks_ByBoardIdM user_id board_id sp = do
 
   threads_keys <- getThreads_ByBoardId_KeysM user_id board_id sp
@@ -98,7 +98,7 @@ getThreadPacks_ByBoardIdM user_id board_id sp = do
 
 
 
-getThreadPack_ByThreadM :: UserId -> Entity Thread -> StandardParams -> Handler ThreadPackResponse
+getThreadPack_ByThreadM :: UserId -> Entity Thread -> StandardParams -> HandlerEff ThreadPackResponse
 getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
 
   thread_user   <- getUserM user_id threadUserId

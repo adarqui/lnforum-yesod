@@ -26,21 +26,21 @@ import           All.User
 -- Handler
 --
 
-getBoardPacksR :: Handler Value
+getBoardPacksR :: HandlerEff Value
 getBoardPacksR = do
   user_id <- requireAuthId
   toJSON <$> getBoardPacksM user_id
 
 
 
-getBoardPackR :: BoardId -> Handler Value
+getBoardPackR :: BoardId -> HandlerEff Value
 getBoardPackR board_id = do
   user_id <- requireAuthId
   toJSON <$> getBoardPackM user_id board_id
 
 
 
-getBoardPackH :: Text -> Handler Value
+getBoardPackH :: Text -> HandlerEff Value
 getBoardPackH board_name = do
   user_id <- requireAuthId
   toJSON <$> getBoardPackMH user_id board_name
@@ -56,7 +56,7 @@ getBoardPackH board_name = do
 -- Model
 --
 
-getBoardPacksM :: UserId -> Handler BoardPackResponses
+getBoardPacksM :: UserId -> HandlerEff BoardPackResponses
 getBoardPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -68,7 +68,7 @@ getBoardPacksM user_id = do
 
 
 
-getBoardPackM :: UserId -> BoardId -> Handler BoardPackResponse
+getBoardPackM :: UserId -> BoardId -> HandlerEff BoardPackResponse
 getBoardPackM user_id board_id = do
 
   board         <- getBoardM user_id board_id
@@ -76,7 +76,7 @@ getBoardPackM user_id board_id = do
 
 
 
-getBoardPackMH :: UserId -> Text -> Handler BoardPackResponse
+getBoardPackMH :: UserId -> Text -> HandlerEff BoardPackResponse
 getBoardPackMH user_id board_name = do
 
   board         <- getBoardMH user_id board_name
@@ -84,7 +84,7 @@ getBoardPackMH user_id board_name = do
 
 
 
-getBoardPack_ByBoardM :: UserId -> Entity Board -> Handler BoardPackResponse
+getBoardPack_ByBoardM :: UserId -> Entity Board -> HandlerEff BoardPackResponse
 getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
   let sp = defaultStandardParams {
@@ -118,7 +118,7 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
 
 
-getBoardPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> Handler BoardPackResponses
+getBoardPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff BoardPackResponses
 getBoardPacks_ByForumIdM user_id forum_id sp = do
 
   boards_keys <- getBoards_ByForumId_KeysM user_id forum_id sp

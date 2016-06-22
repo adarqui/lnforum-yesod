@@ -22,21 +22,21 @@ import           All.User
 -- Handler
 --
 
-getGlobalGroupPacksR :: Handler Value
+getGlobalGroupPacksR :: HandlerEff Value
 getGlobalGroupPacksR = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupPacksM user_id
 
 
 
-getGlobalGroupPackR :: GlobalGroupId -> Handler Value
+getGlobalGroupPackR :: GlobalGroupId -> HandlerEff Value
 getGlobalGroupPackR global_group_id = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupPackM user_id global_group_id
 
 
 
-getGlobalGroupPackH :: Text -> Handler Value
+getGlobalGroupPackH :: Text -> HandlerEff Value
 getGlobalGroupPackH global_group_name = do
   user_id <- requireAuthId
   toJSON <$> getGlobalGroupPackMH user_id global_group_name
@@ -49,7 +49,7 @@ getGlobalGroupPackH global_group_name = do
 
 -- Model
 
-getGlobalGroupPacksM :: UserId -> Handler GlobalGroupPackResponses
+getGlobalGroupPacksM :: UserId -> HandlerEff GlobalGroupPackResponses
 getGlobalGroupPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -61,7 +61,7 @@ getGlobalGroupPacksM user_id = do
 
 
 
-getGlobalGroupPackM :: UserId -> GlobalGroupId -> Handler GlobalGroupPackResponse
+getGlobalGroupPackM :: UserId -> GlobalGroupId -> HandlerEff GlobalGroupPackResponse
 getGlobalGroupPackM user_id global_group_id = do
 
   globalGroup         <- getGlobalGroupM user_id global_group_id
@@ -69,7 +69,7 @@ getGlobalGroupPackM user_id global_group_id = do
 
 
 
-getGlobalGroupPackMH :: UserId -> Text -> Handler GlobalGroupPackResponse
+getGlobalGroupPackMH :: UserId -> Text -> HandlerEff GlobalGroupPackResponse
 getGlobalGroupPackMH user_id global_group_name = do
 
   globalGroup         <- getGlobalGroupMH user_id global_group_name
@@ -77,7 +77,7 @@ getGlobalGroupPackMH user_id global_group_name = do
 
 
 
-getGlobalGroupPacks_ByEverythingM :: UserId -> StandardParams -> Handler GlobalGroupPackResponses
+getGlobalGroupPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff GlobalGroupPackResponses
 getGlobalGroupPacks_ByEverythingM user_id sp = do
   globalGroups       <- getGlobalGroups_ByEverythingM user_id sp
   globalGroups_packs <- mapM (\globalGroup -> getGlobalGroupPack_ByGlobalGroupM user_id globalGroup) globalGroups
@@ -87,7 +87,7 @@ getGlobalGroupPacks_ByEverythingM user_id sp = do
 
 
 
-getGlobalGroupPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler GlobalGroupPackResponses
+getGlobalGroupPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff GlobalGroupPackResponses
 getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp = do
 
   globalGroups       <- getGlobalGroups_ByUserIdM user_id lookup_user_id sp
@@ -98,7 +98,7 @@ getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp = do
 
 
 
-getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> Handler GlobalGroupPackResponse
+getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> HandlerEff GlobalGroupPackResponse
 getGlobalGroupPack_ByGlobalGroupM user_id global_group@(Entity global_group_id GlobalGroup{..}) = do
 
   -- let sp = defaultStandardParams {

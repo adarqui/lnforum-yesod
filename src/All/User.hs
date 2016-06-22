@@ -58,22 +58,22 @@ import           All.Profile
 -- Handler
 --
 
-getUsersR :: Handler Value
+getUsersR :: HandlerEff Value
 getUsersR = do
   user_id <- requireAuthId
   (toJSON . usersToSanitizedResponses) <$> getUsersM user_id
 
 
 
-postUserR0 :: Handler Value
+postUserR0 :: HandlerEff Value
 postUserR0 = do
   user_id <- requireAuthId
-  user_request <- requireJsonBody :: Handler UserRequest
+  user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> insertUsersM user_id user_request
 
 
 
-getUserR :: UserId -> Handler Value
+getUserR :: UserId -> HandlerEff Value
 getUserR lookup_user_id = do
   user_id <- requireAuthId
   response <- getUserM user_id lookup_user_id
@@ -85,20 +85,20 @@ getUserR lookup_user_id = do
 
 
 
-getUserH :: Text -> Handler Value
+getUserH :: Text -> HandlerEff Value
 getUserH _ = notFound
 
 
 
-putUserR :: UserId -> Handler Value
+putUserR :: UserId -> HandlerEff Value
 putUserR lookup_user_id = do
   user_id <- requireAuthId
-  user_request <- requireJsonBody :: Handler UserRequest
+  user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> updateUserM user_id lookup_user_id user_request
 
 
 
-deleteUserR :: UserId -> Handler Value
+deleteUserR :: UserId -> HandlerEff Value
 deleteUserR lookup_user_id = do
 
   user_id <- requireAuthId
@@ -108,21 +108,21 @@ deleteUserR lookup_user_id = do
 
 
 
-getCountUsersR :: Handler Value
+getCountUsersR :: HandlerEff Value
 getCountUsersR = do
   user_id <- requireAuthId
   toJSON <$> countUsersM user_id
 
 
 
-getUserStatsR :: Handler Value
+getUserStatsR :: HandlerEff Value
 getUserStatsR = do
   user_id <- requireAuthId
   toJSON <$> getUserStatsM user_id
 
 
 
-getUserStatR :: UserId -> Handler Value
+getUserStatR :: UserId -> HandlerEff Value
 getUserStatR lookup_user_id = do
   user_id <- requireAuthId
   toJSON <$> getUserStatM user_id lookup_user_id
@@ -230,7 +230,7 @@ validateUserRequest z@UserRequest{..} = do
 -- Model/Internal
 --
 
-getUsersM :: UserId -> Handler [Entity User]
+getUsersM :: UserId -> HandlerEff [Entity User]
 getUsersM user_id = do
 -- selectListDb [] [] UserId
 
@@ -243,21 +243,21 @@ getUsersM user_id = do
 
 
 
-getUsers_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> Handler [Entity User]
+getUsers_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff [Entity User]
 getUsers_ByUserIdsM _ user_ids sp = do
 
   selectListDb sp [UserId <-. user_ids] [] UserId
 
 
 
-getUsers_ByEverythingM :: UserId -> StandardParams -> Handler [Entity User]
+getUsers_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity User]
 getUsers_ByEverythingM _ sp = do
 
   selectListDb sp [] [] UserId
 
 
 
-insertUsersM :: UserId -> UserRequest -> Handler (Entity User)
+insertUsersM :: UserId -> UserRequest -> HandlerEff (Entity User)
 insertUsersM user_id user_request = do
 
   -- TODO: FIXME: Fix this
@@ -281,7 +281,7 @@ insertUsersM user_id user_request = do
 
 
 
-insertUsers_TasksM :: UserId -> Entity User -> Handler ()
+insertUsers_TasksM :: UserId -> Entity User -> HandlerEff ()
 insertUsers_TasksM _ (Entity new_user_id _) = do
 
   -- Create a default profile
@@ -296,12 +296,12 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
 
 
 
-getUserM :: UserId -> UserId -> Handler (Entity User)
+getUserM :: UserId -> UserId -> HandlerEff (Entity User)
 getUserM user_id lookup_user_id = getUserM' user_id (UserId ==. lookup_user_id)
 
 
 
-getUserMH :: UserId -> Text -> Handler (Entity User)
+getUserMH :: UserId -> Text -> HandlerEff (Entity User)
 getUserMH user_id lookup_user_nick = getUserM' user_id (UserNick ==. lookup_user_nick)
 
 
@@ -316,7 +316,7 @@ getUserM' _ q = do
 
 
 
-updateUserM :: UserId -> UserId -> UserRequest -> Handler (Entity User)
+updateUserM :: UserId -> UserId -> UserRequest -> HandlerEff (Entity User)
 updateUserM _ lookup_user_id user_request = do
 
   ts <- timestampH'
@@ -344,7 +344,7 @@ updateUserM _ lookup_user_id user_request = do
 
 
 
-deleteUserM :: UserId -> UserId -> Handler ()
+deleteUserM :: UserId -> UserId -> HandlerEff ()
 deleteUserM user_id lookup_user_id = do
 
   -- TODO: Fix this
@@ -359,7 +359,7 @@ deleteUserM user_id lookup_user_id = do
 
 
 
-countUsersM :: UserId -> Handler CountResponses
+countUsersM :: UserId -> HandlerEff CountResponses
 countUsersM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -377,7 +377,7 @@ countUsersM _ = do
 
 
 
-getUserStatsM :: UserId -> Handler UserSanitizedStatResponses
+getUserStatsM :: UserId -> HandlerEff UserSanitizedStatResponses
 getUserStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -388,7 +388,7 @@ getUserStatsM _ = do
 
 
 
-getUserStatM :: UserId -> UserId -> Handler UserSanitizedStatResponse
+getUserStatM :: UserId -> UserId -> HandlerEff UserSanitizedStatResponse
 getUserStatM _ lookup_user_id = do
 
   (a,b,c,d) <- qUserStats lookup_user_id

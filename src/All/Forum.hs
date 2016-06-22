@@ -48,14 +48,14 @@ import           All.User
 -- Handler
 --
 
-getForumsR :: Handler Value
+getForumsR :: HandlerEff Value
 getForumsR = do
   user_id <- requireAuthId
   (toJSON . forumsToResponses) <$> getForumsM user_id
 
 
 
-postForumR0 :: Handler Value
+postForumR0 :: HandlerEff Value
 postForumR0 = do
 
   user_id <- requireAuthId
@@ -66,26 +66,26 @@ postForumR0 = do
     Nothing -> permissionDenied "Must supply org_id"
 
     (Just org_id) -> do
-      forum_request <- requireJsonBody :: Handler ForumRequest
+      forum_request <- requireJsonBody :: HandlerEff ForumRequest
       (toJSON . forumToResponse) <$> insertForumM user_id org_id forum_request
 
 
 
-getForumR :: ForumId -> Handler Value
+getForumR :: ForumId -> HandlerEff Value
 getForumR forum_id = do
   user_id <- requireAuthId
   (toJSON . forumToResponse) <$> getForumM user_id forum_id
 
 
 
-getForumH :: Text -> Handler Value
+getForumH :: Text -> HandlerEff Value
 getForumH forum_name = do -- getForumR' getForumMH forum_name
   user_id <- requireAuthId
   (toJSON . forumToResponse) <$> getForumMH user_id forum_name
 
 
 
-putForumR :: ForumId -> Handler Value
+putForumR :: ForumId -> HandlerEff Value
 putForumR forum_id = do
   user_id <- requireAuthId
   forum_request <- requireJsonBody
@@ -93,7 +93,7 @@ putForumR forum_id = do
 
 
 
-deleteForumR :: ForumId -> Handler Value
+deleteForumR :: ForumId -> HandlerEff Value
 deleteForumR forum_id = do
   user_id <- requireAuthId
   void $ deleteForumM user_id forum_id
@@ -101,21 +101,21 @@ deleteForumR forum_id = do
 
 
 
-getCountForumsR :: Handler Value
+getCountForumsR :: HandlerEff Value
 getCountForumsR = do
   user_id <- requireAuthId
   toJSON <$> countForumsM user_id
 
 
 
-getForumStatsR :: Handler Value
+getForumStatsR :: HandlerEff Value
 getForumStatsR = do
   user_id <- requireAuthId
   toJSON <$> getForumStatsM user_id
 
 
 
-getForumStatR :: ForumId -> Handler Value
+getForumStatR :: ForumId -> HandlerEff Value
 getForumStatR forum_id = do
   user_id <- requireAuthId
   toJSON <$> getForumStatM user_id forum_id
@@ -189,7 +189,7 @@ forumsToResponses forums = ForumResponses {
 -- Model/Internal
 --
 
-getForumsM :: UserId -> Handler [Entity Forum]
+getForumsM :: UserId -> HandlerEff [Entity Forum]
 getForumsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -208,14 +208,14 @@ getForumsM user_id = do
 
 
 
-getForums_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Forum]
+getForums_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByOrganizationIdM _ org_id sp = do
 
   selectListDb sp [ForumOrgId ==. org_id] [] ForumId
 
 
 
-getForums_ByOrganizationId_KeysM :: UserId -> OrganizationId -> StandardParams -> Handler [Key Forum]
+getForums_ByOrganizationId_KeysM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Key Forum]
 getForums_ByOrganizationId_KeysM _ org_id sp = do
 
   selectKeysListDb sp [ForumOrgId ==. org_id] [] ForumId
@@ -223,7 +223,7 @@ getForums_ByOrganizationId_KeysM _ org_id sp = do
 
 
 
-getForums_ByOrganizationNameM :: UserId -> Text -> StandardParams -> Handler [Entity Forum]
+getForums_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByOrganizationNameM user_id org_name sp = do
 
   (Entity org_id _) <- getOrganizationMH user_id org_name
@@ -231,14 +231,14 @@ getForums_ByOrganizationNameM user_id org_name sp = do
 
 
 
-getForums_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Forum]
+getForums_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ForumUserId ==. lookup_user_id] [] ForumId
 
 
 
-getForums_ByUserNickM :: UserId -> Text -> StandardParams -> Handler [Entity Forum]
+getForums_ByUserNickM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByUserNickM user_id lookup_user_nick sp = do
 
   (Entity lookup_user_id _) <- getUserMH user_id lookup_user_nick
@@ -246,27 +246,27 @@ getForums_ByUserNickM user_id lookup_user_nick sp = do
 
 
 
-getForums_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Forum]
+getForums_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByEverythingM _ sp = do
 
   selectListDb sp [] [] ForumId
 
 
 
-getForum_ByOrganizationIdMH :: UserId -> Text -> OrganizationId -> StandardParams -> Handler (Entity Forum)
+getForum_ByOrganizationIdMH :: UserId -> Text -> OrganizationId -> StandardParams -> HandlerEff (Entity Forum)
 getForum_ByOrganizationIdMH user_id forum_name org_id sp = do
 
   notFoundMaybe =<< selectFirstDb [ ForumOrgId ==. org_id, ForumName ==. forum_name ] []
 
 
 
-getForumM :: UserId -> ForumId -> Handler (Entity Forum)
+getForumM :: UserId -> ForumId -> HandlerEff (Entity Forum)
 getForumM _ forum_id = do
   notFoundMaybe =<< selectFirstDb [ ForumId ==. forum_id ] []
 
 
 
-getForumMH :: UserId -> Text -> Handler (Entity Forum)
+getForumMH :: UserId -> Text -> HandlerEff (Entity Forum)
 getForumMH user_id forum_name = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -278,7 +278,7 @@ getForumMH user_id forum_name = do
 
 
 
--- getForum_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler (Entity Forum)
+-- getForum_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> HandlerEff (Entity Forum)
 -- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name _ = do
 
 --   (Entity org_id _) <- getOrganization_ByOrganizationNameM user_id org_name
@@ -287,7 +287,7 @@ getForumMH user_id forum_name = do
 
 
 
-insertForumM :: UserId -> OrganizationId -> ForumRequest -> Handler (Entity Forum)
+insertForumM :: UserId -> OrganizationId -> ForumRequest -> HandlerEff (Entity Forum)
 insertForumM user_id org_id forum_request = do
 
   ts <- timestampH'
@@ -299,7 +299,7 @@ insertForumM user_id org_id forum_request = do
 
 
 
-updateForumM :: UserId -> ForumId -> ForumRequest -> Handler (Entity Forum)
+updateForumM :: UserId -> ForumId -> ForumRequest -> HandlerEff (Entity Forum)
 updateForumM user_id forum_id forum_request = do
 
   ts <- timestampH'
@@ -326,13 +326,13 @@ updateForumM user_id forum_id forum_request = do
 
 
 
-deleteForumM :: UserId -> ForumId -> Handler ()
+deleteForumM :: UserId -> ForumId -> HandlerEff ()
 deleteForumM user_id forum_id = do
   deleteWhereDb [ ForumUserId ==. user_id, ForumId ==. forum_id ]
 
 
 
-countForumsM :: UserId -> Handler CountResponses
+countForumsM :: UserId -> HandlerEff CountResponses
 countForumsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -347,7 +347,7 @@ countForumsM _ = do
 
 
 
-getForumStatsM :: UserId -> Handler ForumStatResponses
+getForumStatsM :: UserId -> HandlerEff ForumStatResponses
 getForumStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -360,7 +360,7 @@ getForumStatsM _ = do
 
 
 
-getForumStatM :: UserId -> ForumId -> Handler ForumStatResponse
+getForumStatM :: UserId -> ForumId -> HandlerEff ForumStatResponse
 getForumStatM _ forum_id = do
 
   num_forum_boards <- countDb [ BoardForumId ==. forum_id ]

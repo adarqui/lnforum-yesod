@@ -29,14 +29,14 @@ import           Import
 
 
 
-getApisR :: Handler Value
+getApisR :: HandlerEff Value
 getApisR = do
   user_id <- requireAuthId
   (toJSON . apisToResponses) <$> getApisM user_id
 
 
 
-postApisR :: Handler Value
+postApisR :: HandlerEff Value
 postApisR = do
   user_id <- requireAuthId
   api_request <- requireJsonBody
@@ -44,14 +44,14 @@ postApisR = do
 
 
 
-getApiR :: ApiId -> Handler Value
+getApiR :: ApiId -> HandlerEff Value
 getApiR api_id = do
   user_id <- requireAuthId
   (toJSON . apiToResponse) <$> getApiM user_id api_id
 
 
 
-putApiR :: ApiId -> Handler Value
+putApiR :: ApiId -> HandlerEff Value
 putApiR api_id = do
   user_id <- requireAuthId
   api_request <- requireJsonBody
@@ -59,7 +59,7 @@ putApiR api_id = do
 
 
 
-deleteApiR :: ApiId -> Handler Value
+deleteApiR :: ApiId -> HandlerEff Value
 deleteApiR api_id = do
   user_id <- requireAuthId
   void $ deleteApiM user_id api_id
@@ -110,19 +110,19 @@ apisToResponses apis = ApiResponses {
 -- Model/Internal
 --
 
-getApisM :: UserId -> Handler [Entity Api]
+getApisM :: UserId -> HandlerEff [Entity Api]
 getApisM user_id = do
   selectListDb' [ ApiUserId ==. user_id ] [] ApiId
 
 
 
-getApiM :: UserId -> ApiId -> Handler (Entity Api)
+getApiM :: UserId -> ApiId -> HandlerEff (Entity Api)
 getApiM user_id api_id = do
   notFoundMaybe =<< selectFirstDb [ ApiUserId ==. user_id, ApiId ==. api_id ] []
 
 
 
-insertApiM :: UserId -> ApiRequest -> Handler (Entity Api)
+insertApiM :: UserId -> ApiRequest -> HandlerEff (Entity Api)
 insertApiM user_id api_request = do
   ts <- timestampH'
   uuid1 <- liftIO nextRandom
@@ -133,7 +133,7 @@ insertApiM user_id api_request = do
 
 
 
-updateApiM :: UserId -> ApiId -> ApiRequest -> Handler (Entity Api)
+updateApiM :: UserId -> ApiId -> ApiRequest -> HandlerEff (Entity Api)
 updateApiM user_id api_id api_request = do
   ts <- timestampH'
   updateWhereDb
@@ -143,6 +143,6 @@ updateApiM user_id api_id api_request = do
 
 
 
-deleteApiM :: UserId -> ApiId -> Handler ()
+deleteApiM :: UserId -> ApiId -> HandlerEff ()
 deleteApiM user_id api_id = do
   deleteWhereDb [ ApiUserId ==. user_id, ApiId ==. api_id ]

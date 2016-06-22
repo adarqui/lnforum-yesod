@@ -45,31 +45,31 @@ import           LN.T.Visibility
 
 
 
-getOrganizationsR :: Handler Value
+getOrganizationsR :: HandlerEff Value
 getOrganizationsR = do
   user_id <- requireAuthId
   (toJSON . organizationsToResponses) <$> getOrganizationsM user_id
 
 
 
-postOrganizationR0 :: Handler Value
+postOrganizationR0 :: HandlerEff Value
 postOrganizationR0 = do
 
   user_id <- requireAuthId
 
-  organization_request <- requireJsonBody :: Handler OrganizationRequest
+  organization_request <- requireJsonBody :: HandlerEff OrganizationRequest
   (toJSON . organizationToResponse) <$> insertOrganizationM user_id organization_request
 
 
 
-getOrganizationR :: OrganizationId -> Handler Value
+getOrganizationR :: OrganizationId -> HandlerEff Value
 getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
 --  user_id <- requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationM user_id organization_id
 
 
 
-getOrganizationH :: Text -> Handler Value
+getOrganizationH :: Text -> HandlerEff Value
 getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
 --  user_id <- requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationMH user_id org_name
@@ -87,7 +87,7 @@ getOrganizationR' f a = do
 
 
 
-putOrganizationR :: OrganizationId -> Handler Value
+putOrganizationR :: OrganizationId -> HandlerEff Value
 putOrganizationR organization_id = do
   user_id <- requireAuthId
   organization_request <- requireJsonBody
@@ -95,7 +95,7 @@ putOrganizationR organization_id = do
 
 
 
-deleteOrganizationR :: OrganizationId -> Handler Value
+deleteOrganizationR :: OrganizationId -> HandlerEff Value
 deleteOrganizationR organization_id = do
   user_id <- requireAuthId
   void $ deleteOrganizationM user_id organization_id
@@ -103,21 +103,21 @@ deleteOrganizationR organization_id = do
 
 
 
-getOrganizationCountR :: Handler Value
+getOrganizationCountR :: HandlerEff Value
 getOrganizationCountR = do
   user_id <- requireAuthId
   toJSON <$> countOrganizationsM user_id
 
 
 
-getOrganizationStatsR :: Handler Value
+getOrganizationStatsR :: HandlerEff Value
 getOrganizationStatsR = do
   user_id <- requireAuthId
   toJSON <$> getOrganizationStatsM user_id
 
 
 
-getOrganizationStatR :: OrganizationId -> Handler Value
+getOrganizationStatR :: OrganizationId -> HandlerEff Value
 getOrganizationStatR organization_id = do
   user_id <- requireAuthId
   toJSON <$> getOrganizationStatM user_id organization_id
@@ -206,7 +206,7 @@ validateOrganizationRequest z@OrganizationRequest{..} = do
 -- Model/Internal
 --
 
-getOrganizationsM :: UserId -> Handler [Entity Organization]
+getOrganizationsM :: UserId -> HandlerEff [Entity Organization]
 getOrganizationsM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
   case spUserId of
@@ -215,29 +215,29 @@ getOrganizationsM user_id = do
 
 
 
-getOrganizations_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Organization]
+getOrganizations_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Organization]
 getOrganizations_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
-getOrganizations_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Organization]
+getOrganizations_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Organization]
 getOrganizations_ByEverythingM _ sp = do
   selectListDb sp [] [] OrganizationId
 
 
 
-getOrganizationM :: UserId -> OrganizationId -> Handler (Entity Organization)
+getOrganizationM :: UserId -> OrganizationId -> HandlerEff (Entity Organization)
 getOrganizationM user_id org_id = getOrganizationM' user_id (OrganizationId ==. org_id)
 
 
 
-getOrganizationMH :: UserId -> Text -> Handler (Entity Organization)
+getOrganizationMH :: UserId -> Text -> HandlerEff (Entity Organization)
 getOrganizationMH user_id org_name = getOrganizationM' user_id (OrganizationName ==. org_name)
 
 
 
-getOrganization_ByOrganizationNameM :: UserId -> Text -> Handler (Entity Organization)
+getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerEff (Entity Organization)
 getOrganization_ByOrganizationNameM _ org_name = do
   notFoundMaybe =<< selectFirstDb [OrganizationName ==. org_name] []
 
@@ -253,7 +253,7 @@ getOrganizationM' _ q = do
 
 
 
-insertOrganizationM :: UserId -> OrganizationRequest -> Handler (Entity Organization)
+insertOrganizationM :: UserId -> OrganizationRequest -> HandlerEff (Entity Organization)
 insertOrganizationM user_id organization_request = do
 
   void $ permissionDeniedEither $ validateOrganizationRequest organization_request
@@ -280,7 +280,7 @@ insertOrganizationM user_id organization_request = do
 
 
 
-updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> Handler (Entity Organization)
+updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (Entity Organization)
 updateOrganizationM user_id organization_id organization_request = do
 
   void $ permissionDeniedEither $ validateOrganizationRequest organization_request
@@ -312,7 +312,7 @@ updateOrganizationM user_id organization_id organization_request = do
 
 
 
-deleteOrganizationM :: UserId -> OrganizationId -> Handler ()
+deleteOrganizationM :: UserId -> OrganizationId -> HandlerEff ()
 deleteOrganizationM user_id organization_id = do
 
   deleteCascadeWhereDb [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
@@ -328,14 +328,14 @@ deleteOrganizationM user_id organization_id = do
 
 
 
-deleteOrganizationTeamsM :: UserId -> OrganizationId -> Handler ()
+deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerEff ()
 deleteOrganizationTeamsM _ organization_id = do
   -- TODO: FIXME: security
   deleteWhereDb [ TeamOrgId ==. organization_id ]
 
 
 
-countOrganizationsM :: UserId -> Handler CountResponses
+countOrganizationsM :: UserId -> HandlerEff CountResponses
 countOrganizationsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -349,7 +349,7 @@ countOrganizationsM _ = do
 
 
 
-getOrganizationStatsM :: UserId -> Handler OrganizationStatResponses
+getOrganizationStatsM :: UserId -> HandlerEff OrganizationStatResponses
 getOrganizationStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -362,7 +362,7 @@ getOrganizationStatsM _ = do
 
 
 
-getOrganizationStatM :: UserId -> OrganizationId -> Handler OrganizationStatResponse
+getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff OrganizationStatResponse
 getOrganizationStatM _ organization_id = do
 
   return $ OrganizationStatResponse {

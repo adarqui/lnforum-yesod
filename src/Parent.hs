@@ -14,14 +14,14 @@ import           LN.T.Visibility
 
 
 
-fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> Handler (Maybe (Entity Thread))
+fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Thread))
 fatherOf_ThreadPostM user_id (Entity thread_post_id ThreadPost{..}) = do
 
-  runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
+  lift $ runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
 
 
 
-fatherIdOf_ThreadPostM :: UserId -> Entity ThreadPost -> Handler (Maybe ThreadId)
+fatherIdOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe ThreadId)
 fatherIdOf_ThreadPostM user_id thread_post = fmap entityKey <$> fatherOf_ThreadPostM user_id thread_post
 
 

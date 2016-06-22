@@ -23,14 +23,14 @@ import           All.User
 -- Handler
 --
 
-getLeuronPacksR :: Handler Value
+getLeuronPacksR :: HandlerEff Value
 getLeuronPacksR = do
   user_id <- requireAuthId
   toJSON <$> getLeuronPacksM user_id
 
 
 
-getLeuronPackR :: LeuronId -> Handler Value
+getLeuronPackR :: LeuronId -> HandlerEff Value
 getLeuronPackR leuron_id = do
   user_id <- requireAuthId
   toJSON <$> getLeuronPackM user_id leuron_id
@@ -45,7 +45,7 @@ getLeuronPackR leuron_id = do
 -- Model
 --
 
-getLeuronPacksM :: UserId -> Handler LeuronPackResponses
+getLeuronPacksM :: UserId -> HandlerEff LeuronPackResponses
 getLeuronPacksM user_id = do
 
   sp <- lookupStandardParams
@@ -61,7 +61,7 @@ getLeuronPacksM user_id = do
 
 
 
-getLeuronPackM :: UserId -> LeuronId -> Handler LeuronPackResponse
+getLeuronPackM :: UserId -> LeuronId -> HandlerEff LeuronPackResponse
 getLeuronPackM user_id leuron_id = do
 
   leuron <- getLeuronM user_id leuron_id
@@ -70,7 +70,7 @@ getLeuronPackM user_id leuron_id = do
 
 
 
-getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> StandardParams -> Handler LeuronPackResponse
+getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> StandardParams -> HandlerEff LeuronPackResponse
 getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) _ = do
 
   leuron_user     <- getUserM user_id leuronUserId

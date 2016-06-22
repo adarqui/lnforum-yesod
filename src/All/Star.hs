@@ -31,8 +31,7 @@ module All.Star (
 
 
 
-import           Handler.Prelude
-import           Model.Prelude
+import           All.Prelude
 import qualified LN.T.Star as L
 
 
@@ -41,14 +40,14 @@ import qualified LN.T.Star as L
 -- Handler
 --
 
-getStarsR :: Handler Value
+getStarsR :: HandlerEff Value
 getStarsR = do
   user_id <- requireAuthId
   (toJSON . starsToResponses) <$> getStarsM user_id
 
 
 
-postStarR0 :: Handler Value
+postStarR0 :: HandlerEff Value
 postStarR0 = do
 
   sp <- lookupStandardParams
@@ -65,14 +64,14 @@ postStarR0 = do
 
 
 
-getStarR :: StarId -> Handler Value
+getStarR :: StarId -> HandlerEff Value
 getStarR star_id = do
   user_id <- requireAuthId
   (toJSON . starToResponse) <$> getStarM user_id star_id
 
 
 
-putStarR :: StarId -> Handler Value
+putStarR :: StarId -> HandlerEff Value
 putStarR star_id = do
   user_id <- requireAuthId
   star_request <- requireJsonBody
@@ -80,7 +79,7 @@ putStarR star_id = do
 
 
 
-deleteStarR :: StarId -> Handler Value
+deleteStarR :: StarId -> HandlerEff Value
 deleteStarR star_id = do
   user_id <- requireAuthId
   void $ deleteStarM user_id star_id
@@ -88,16 +87,16 @@ deleteStarR star_id = do
 
 
 
-getStarStatsR :: Handler Value
+getStarStatsR :: HandlerEff Value
 getStarStatsR = do
   user_id <- requireAuthId
   toJSON <$> getStarStatsM user_id
 
 
 
-getStarStatR :: StarId -> Handler Value
-getStarStatR star_id = do
-  user_id <- requireAuthId
+getStarStatR :: StarId -> HandlerEff Value
+getStarStatR star_id = run $ do
+  user_id <- _requireAuthId
   toJSON <$> getStarStatM user_id star_id
 
 
@@ -148,13 +147,13 @@ starsToResponses stars = StarResponses {
 -- Model/Internal
 --
 
-getStarsM :: UserId -> Handler [Entity Star]
+getStarsM :: UserId -> HandlerEff [Entity Star]
 getStarsM user_id = do
   selectListDb' [ StarUserId ==. user_id ] [] StarId
 
 
 
-insertStarM :: UserId -> Ent -> Int64 -> StarRequest -> Handler (Entity Star)
+insertStarM :: UserId -> Ent -> Int64 -> StarRequest -> HandlerEff (Entity Star)
 insertStarM user_id ent ent_id star_request = do
 
   ts <- timestampH'
@@ -165,13 +164,13 @@ insertStarM user_id ent ent_id star_request = do
 
 
 
-getStarM :: UserId -> StarId -> Handler (Entity Star)
+getStarM :: UserId -> StarId -> HandlerEff (Entity Star)
 getStarM user_id star_id = do
   notFoundMaybe =<< selectFirstDb [ StarId ==. star_id, StarUserId ==. user_id ] []
 
 
 
-getStar_ByThreadPostM :: UserId -> Entity ThreadPost -> Handler (Maybe (Entity Star))
+getStar_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Star))
 getStar_ByThreadPostM user_id thread_post = do
   selectFirstDb [ StarUserId ==. user_id, StarEnt ==. Ent_ThreadPost, StarEntId ==. thread_post_id ] []
   where
@@ -179,7 +178,7 @@ getStar_ByThreadPostM user_id thread_post = do
 
 
 
-getStar_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler (Maybe (Entity Star))
+getStar_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff (Maybe (Entity Star))
 getStar_ByThreadPostIdM user_id thread_post_id = do
   selectFirstDb [ StarUserId ==. user_id, StarEnt ==. Ent_ThreadPost, StarEntId ==. thread_post_id' ] []
   where
@@ -187,12 +186,12 @@ getStar_ByThreadPostIdM user_id thread_post_id = do
 
 
 
-updateStarM :: UserId -> StarId -> StarRequest -> Handler (Entity Star)
+updateStarM :: UserId -> StarId -> StarRequest -> HandlerEff (Entity Star)
 updateStarM user_id star_id StarRequest{..} = do
 
   ts <- timestampH'
 
-  void $ runDB $ updateWhere
+  updateWhereDb
     [ StarId ==. star_id, StarUserId ==. user_id ]
 
     [ StarModifiedAt =. Just ts
@@ -203,13 +202,13 @@ updateStarM user_id star_id StarRequest{..} = do
 
 
 
-deleteStarM :: UserId -> StarId -> Handler ()
+deleteStarM :: UserId -> StarId -> HandlerEff ()
 deleteStarM user_id star_id = do
   deleteWhereDb [ StarUserId ==. user_id, StarId ==. star_id ]
 
 
 
-getStarStatsM :: UserId -> Handler StarStatResponses
+getStarStatsM :: UserId -> HandlerEff StarStatResponses
 getStarStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -222,7 +221,7 @@ getStarStatsM _ = do
 
 
 
-getStarStatM :: UserId -> StarId -> Handler StarStatResponse
+getStarStatM :: UserId -> StarId -> HandlerEff StarStatResponse
 getStarStatM user_id _ = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -233,7 +232,7 @@ getStarStatM user_id _ = do
 
 
 
-getStarStat_ByThreadPostIdM :: UserId -> ThreadPostId -> Handler StarStatResponse
+getStarStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff StarStatResponse
 getStarStat_ByThreadPostIdM user_id thread_post_id = do
 --  <- countDb [ StarPostStarId ==. star_id ]
   stars <- selectListDb' [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64] [] StarId

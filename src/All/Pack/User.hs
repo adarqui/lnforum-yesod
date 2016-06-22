@@ -19,7 +19,7 @@ import           All.User
 -- Model
 --
 
-getUserPacksM :: UserId -> Handler UserPackResponses
+getUserPacksM :: UserId -> HandlerEff UserPackResponses
 getUserPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -31,7 +31,7 @@ getUserPacksM user_id = do
 
 
 
-getUserPackM :: UserId -> UserId -> Handler UserPackResponse
+getUserPackM :: UserId -> UserId -> HandlerEff UserPackResponse
 getUserPackM user_id lookup_user_id = do
 
   sp <- lookupStandardParams
@@ -40,7 +40,7 @@ getUserPackM user_id lookup_user_id = do
 
 
 
-getUserPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> Handler UserPackResponses
+getUserPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff UserPackResponses
 getUserPacks_ByUserIdsM user_id user_ids sp = do
   users_packs <- mapM (\key -> getUserPack_ByUserIdM user_id key sp) user_ids
   return $ UserPackResponses {
@@ -50,7 +50,7 @@ getUserPacks_ByUserIdsM user_id user_ids sp = do
 
 
 
-getUserPack_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler UserPackResponse
+getUserPack_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff UserPackResponse
 getUserPack_ByUserIdM user_id lookup_user_id _ = do
 
   lookup_user <- getUserM user_id lookup_user_id

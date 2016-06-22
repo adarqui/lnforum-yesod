@@ -6,6 +6,7 @@ module Foundation where
 
 
 
+import           Control.Monad.Trans.RWS     (RWST)
 import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
 import           Import.NoFoundation
 import           Text.Hamlet                 (hamletFile)
@@ -52,6 +53,10 @@ instance HasHttpManager App where
 
 
 mkYesodData "App" $(parseRoutesFile "config/routes")
+
+
+
+type HandlerEff = RWST () () () Handler
 
 
 

@@ -44,29 +44,29 @@ import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 -- Handler
 --
 
-getResourcesR :: Handler Value
+getResourcesR :: HandlerEff Value
 getResourcesR = do
   user_id <- requireAuthId
   (toJSON . resourcesToResponses) <$> getResourcesM user_id
 
 
 
-postResourceR0 :: Handler Value
+postResourceR0 :: HandlerEff Value
 postResourceR0 = do
   user_id <- requireAuthId
-  resource_request <- requireJsonBody :: Handler ResourceRequest
+  resource_request <- requireJsonBody :: HandlerEff ResourceRequest
   (toJSON . resourceToResponse) <$> insertResourceM user_id resource_request
 
 
 
-getResourceR :: ResourceId -> Handler Value
+getResourceR :: ResourceId -> HandlerEff Value
 getResourceR resource_id = do
   user_id <- requireAuthId
   (toJSON . resourceToResponse) <$> getResourceM user_id resource_id
 
 
 
-putResourceR :: ResourceId -> Handler Value
+putResourceR :: ResourceId -> HandlerEff Value
 putResourceR resource_id = do
   user_id <- requireAuthId
   resource_request <- requireJsonBody
@@ -74,7 +74,7 @@ putResourceR resource_id = do
 
 
 
-deleteResourceR :: ResourceId -> Handler Value
+deleteResourceR :: ResourceId -> HandlerEff Value
 deleteResourceR resource_id = do
   user_id <- requireAuthId
   void $ deleteResourceM user_id resource_id
@@ -82,21 +82,21 @@ deleteResourceR resource_id = do
 
 
 
-getCountResourcesR :: Handler Value
+getCountResourcesR :: HandlerEff Value
 getCountResourcesR = do
   user_id <- requireAuthId
   toJSON <$> countResourcesM user_id
 
 
 
-getResourceStatsR :: Handler Value
+getResourceStatsR :: HandlerEff Value
 getResourceStatsR = do
   user_id <- requireAuthId
   toJSON <$> getResourceStatsM user_id
 
 
 
-getResourceStatR :: ResourceId -> Handler Value
+getResourceStatR :: ResourceId -> HandlerEff Value
 getResourceStatR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getResourceStatM user_id thread_post_id
@@ -178,7 +178,7 @@ resourcesToResponses resources = ResourceResponses {
 -- Model/Internal
 --
 
-getResourcesM :: UserId -> Handler [Entity Resource]
+getResourcesM :: UserId -> HandlerEff [Entity Resource]
 getResourcesM user_id = do
   sp@StandardParams{..} <- lookupStandardParams
 
@@ -192,25 +192,25 @@ getResourcesM user_id = do
 
 
 
-getResources_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Resource]
+getResources_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Resource]
 getResources_ByEverythingM _ sp = do
   selectListDb sp [] [] ResourceId
 
 
 
-getResources_ByUserIdM :: UserId -> UserId -> StandardParams -> Handler [Entity Resource]
+getResources_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Resource]
 getResources_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [ ResourceUserId ==. lookup_user_id ] [] ResourceId
 
 
 
-getResourceM :: UserId -> ResourceId -> Handler (Entity Resource)
+getResourceM :: UserId -> ResourceId -> HandlerEff (Entity Resource)
 getResourceM _ resource_id = do
   notFoundMaybe =<< selectFirstDb [ ResourceId ==. resource_id ] []
 
 
 
-insertResourceM :: UserId -> ResourceRequest -> Handler (Entity Resource)
+insertResourceM :: UserId -> ResourceRequest -> HandlerEff (Entity Resource)
 insertResourceM user_id resource_request = do
 
   ts <- timestampH'
@@ -222,7 +222,7 @@ insertResourceM user_id resource_request = do
 
 
 
-updateResourceM :: UserId -> ResourceId -> ResourceRequest -> Handler (Entity Resource)
+updateResourceM :: UserId -> ResourceId -> ResourceRequest -> HandlerEff (Entity Resource)
 updateResourceM user_id resource_id resource_request = do
 
   ts <- timestampH'
@@ -253,13 +253,13 @@ updateResourceM user_id resource_id resource_request = do
 
 
 
-deleteResourceM :: UserId -> ResourceId -> Handler ()
+deleteResourceM :: UserId -> ResourceId -> HandlerEff ()
 deleteResourceM user_id resource_id = do
   deleteWhereDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
 
 
 
-countResourcesM :: UserId -> Handler CountResponses
+countResourcesM :: UserId -> HandlerEff CountResponses
 countResourcesM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -272,7 +272,7 @@ countResourcesM _ = do
 
 
 
-getResourceStatsM :: UserId -> Handler ResourceStatResponse
+getResourceStatsM :: UserId -> HandlerEff ResourceStatResponse
 getResourceStatsM _ = do
 
   StandardParams{..} <- lookupStandardParams
@@ -284,7 +284,7 @@ getResourceStatsM _ = do
 
 
 
-getResourceStatM :: UserId -> ResourceId -> Handler ResourceStatResponse
+getResourceStatM :: UserId -> ResourceId -> HandlerEff ResourceStatResponse
 getResourceStatM _ resource_id = do
 
   -- leuron counts

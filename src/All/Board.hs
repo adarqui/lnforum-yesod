@@ -46,14 +46,14 @@ import           All.Forum
 
 
 
-getBoardsR :: Handler Value
+getBoardsR :: HandlerEff Value
 getBoardsR = do
   user_id <- requireAuthId
   (toJSON . boardsToResponses) <$> getBoardsM user_id
 
 
 
-postBoardR0 :: Handler Value
+postBoardR0 :: HandlerEff Value
 postBoardR0 = do
 
   user_id <- requireAuthId
@@ -65,26 +65,26 @@ postBoardR0 = do
     (Nothing, Nothing) -> permissionDenied "Must supply a forum_id or board_id"
 
     _ -> do
-      board_request <- requireJsonBody :: Handler BoardRequest
+      board_request <- requireJsonBody :: HandlerEff BoardRequest
       (toJSON . boardToResponse)  <$> insertBoardM user_id (spForumId sp) (spBoardId sp) board_request
 
 
 
-getBoardR :: BoardId -> Handler Value
+getBoardR :: BoardId -> HandlerEff Value
 getBoardR board_id = do
   user_id <- requireAuthId
   (toJSON . boardToResponse) <$> getBoardM user_id board_id
 
 
 
-getBoardH :: Text -> Handler Value
+getBoardH :: Text -> HandlerEff Value
 getBoardH board_name = do
   user_id <- requireAuthId
   (toJSON . boardToResponse) <$> getBoardMH user_id board_name
 
 
 
-putBoardR :: BoardId -> Handler Value
+putBoardR :: BoardId -> HandlerEff Value
 putBoardR board_id = do
   user_id <- requireAuthId
   board_request <- requireJsonBody
@@ -92,7 +92,7 @@ putBoardR board_id = do
 
 
 
-deleteBoardR :: BoardId -> Handler Value
+deleteBoardR :: BoardId -> HandlerEff Value
 deleteBoardR board_id = do
   user_id <- requireAuthId
   void $ deleteBoardM user_id board_id
@@ -100,12 +100,12 @@ deleteBoardR board_id = do
 
 
 
-getBoardStatsR :: Handler Value
+getBoardStatsR :: HandlerEff Value
 getBoardStatsR = notFound
 
 
 
-getBoardStatR :: BoardId -> Handler Value
+getBoardStatR :: BoardId -> HandlerEff Value
 getBoardStatR board_id = do
   user_id <- requireAuthId
   toJSON <$> getBoardStatM user_id board_id
@@ -183,7 +183,7 @@ boardsToResponses boards = BoardResponses {
 -- Model/Internal
 --
 
-getBoardsM :: UserId -> Handler [Entity Board]
+getBoardsM :: UserId -> HandlerEff [Entity Board]
 getBoardsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
@@ -207,7 +207,7 @@ getBoardsM user_id = do
 
 
 
-getBoards_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> Handler [Entity Board]
+getBoards_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByOrganizationIdM user_id org_id sp = do
 
   -- TODO FIXME: move this to esqueleto
@@ -217,7 +217,7 @@ getBoards_ByOrganizationIdM user_id org_id sp = do
 
 
 
-getBoards_ByOrganizationNameM :: UserId -> Text -> StandardParams -> Handler [Entity Board]
+getBoards_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByOrganizationNameM user_id org_name sp = do
 
   -- TODO FIXME: move this to esqueleto
@@ -227,21 +227,21 @@ getBoards_ByOrganizationNameM user_id org_name sp = do
 
 
 
-getBoards_ByForumIdM :: UserId -> ForumId -> StandardParams -> Handler [Entity Board]
+getBoards_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByForumIdM _ forum_id sp = do
 
   selectListDb sp [BoardForumId ==. forum_id] [] BoardId
 
 
 
-getBoards_ByForumId_KeysM :: UserId -> ForumId -> StandardParams -> Handler [Key Board]
+getBoards_ByForumId_KeysM :: UserId -> ForumId -> StandardParams -> HandlerEff [Key Board]
 getBoards_ByForumId_KeysM _ forum_id sp = do
 
   selectKeysListDb sp [BoardForumId ==. forum_id] [] BoardId
 
 
 
-getBoards_ByForumNameM :: UserId -> Text -> StandardParams -> Handler [Entity Board]
+getBoards_ByForumNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByForumNameM user_id forum_name sp = do
 
   (Entity forum_id _) <- getForumMH user_id forum_name
@@ -249,7 +249,7 @@ getBoards_ByForumNameM user_id forum_name sp = do
 
 
 
--- getBoards_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> Handler [Entity Board]
+-- getBoards_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> HandlerEff [Entity Board]
 -- getBoards_ByOrganizationName_ForumNameM user_id org_name forum_name sp = do
 
 --   (Entity forum_id _) <- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name sp
@@ -257,14 +257,14 @@ getBoards_ByForumNameM user_id forum_name sp = do
 
 
 
-getBoards_ByBoardParentIdM :: UserId -> BoardId -> StandardParams -> Handler [Entity Board]
+getBoards_ByBoardParentIdM :: UserId -> BoardId -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByBoardParentIdM _ board_parent_id sp = do
 
   selectListDb sp [BoardParentId ==. Just board_parent_id] [] BoardId
 
 
 
--- getBoards_ByOrganizationName_ForumName_BoardParentNameM :: UserId -> Text -> Text -> Text -> StandardParams -> Handler [Entity Board]
+-- getBoards_ByOrganizationName_ForumName_BoardParentNameM :: UserId -> Text -> Text -> Text -> StandardParams -> HandlerEff [Entity Board]
 -- getBoards_ByOrganizationName_ForumName_BoardParentNameM user_id org_name forum_name parent_name sp = do
 
 --   (Entity forum_id _) <- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name sp
@@ -272,20 +272,20 @@ getBoards_ByBoardParentIdM _ board_parent_id sp = do
 
 
 
-getBoards_ByEverythingM :: UserId -> StandardParams -> Handler [Entity Board]
+getBoards_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByEverythingM _ sp = do
 
   selectListDb sp [] [] BoardId
 
 
 
-getBoardM :: UserId -> BoardId -> Handler (Entity Board)
+getBoardM :: UserId -> BoardId -> HandlerEff (Entity Board)
 getBoardM _ board_id = do
   notFoundMaybe =<< selectFirstDb [ BoardId ==. board_id ] []
 
 
 
-getBoardMH :: UserId -> Text -> Handler (Entity Board)
+getBoardMH :: UserId -> Text -> HandlerEff (Entity Board)
 getBoardMH _ board_name = do
 
   StandardParams{..} <- lookupStandardParams
@@ -299,7 +299,7 @@ getBoardMH _ board_name = do
 
 
 
-insertBoardM :: UserId -> Maybe ForumId -> Maybe BoardId -> BoardRequest -> Handler (Entity Board)
+insertBoardM :: UserId -> Maybe ForumId -> Maybe BoardId -> BoardRequest -> HandlerEff (Entity Board)
 insertBoardM user_id forum_id _ board_request = do
 
   ts <- timestampH'
@@ -321,7 +321,7 @@ insertBoardM user_id forum_id _ board_request = do
 
 
 
-updateBoardM :: UserId -> BoardId -> BoardRequest -> Handler (Entity Board)
+updateBoardM :: UserId -> BoardId -> BoardRequest -> HandlerEff (Entity Board)
 updateBoardM user_id board_id board_request = do
 
   ts <- timestampH'
@@ -349,7 +349,7 @@ updateBoardM user_id board_id board_request = do
 
 
 
-deleteBoardM :: UserId -> BoardId -> Handler ()
+deleteBoardM :: UserId -> BoardId -> HandlerEff ()
 deleteBoardM user_id board_id = do
   deleteWhereDb [ BoardUserId ==. user_id, BoardId ==. board_id ]
 
@@ -357,7 +357,7 @@ deleteBoardM user_id board_id = do
 
 
 
-getBoardStatsM :: UserId -> Handler Value
+getBoardStatsM :: UserId -> HandlerEff Value
 getBoardStatsM _ = do
   StandardParams{..} <- lookupStandardParams
 
@@ -371,7 +371,7 @@ getBoardStatsM _ = do
 
 
 
-getBoardStatM :: UserId -> BoardId -> Handler BoardStatResponse
+getBoardStatM :: UserId -> BoardId -> HandlerEff BoardStatResponse
 getBoardStatM _ board_id = do
 
 {-
