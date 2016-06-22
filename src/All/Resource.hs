@@ -52,7 +52,7 @@ getResourcesR = run $ do
 
 
 postResourceR0 :: Handler Value
-postResourceR0 = do
+postResourceR0 = run $ do
   user_id <- _requireAuthId
   resource_request <- requireJsonBody :: HandlerEff ResourceRequest
   (toJSON . resourceToResponse) <$> insertResourceM user_id resource_request
@@ -60,14 +60,14 @@ postResourceR0 = do
 
 
 getResourceR :: ResourceId -> Handler Value
-getResourceR resource_id = do
+getResourceR resource_id = run $ do
   user_id <- _requireAuthId
   (toJSON . resourceToResponse) <$> getResourceM user_id resource_id
 
 
 
 putResourceR :: ResourceId -> Handler Value
-putResourceR resource_id = do
+putResourceR resource_id = run $ do
   user_id <- _requireAuthId
   resource_request <- requireJsonBody
   (toJSON . resourceToResponse) <$> updateResourceM user_id resource_id resource_request
@@ -75,7 +75,7 @@ putResourceR resource_id = do
 
 
 deleteResourceR :: ResourceId -> Handler Value
-deleteResourceR resource_id = do
+deleteResourceR resource_id = run $ do
   user_id <- _requireAuthId
   void $ deleteResourceM user_id resource_id
   pure $ toJSON ()
@@ -97,7 +97,7 @@ getResourceStatsR = run $ do
 
 
 getResourceStatR :: ResourceId -> Handler Value
-getResourceStatR thread_post_id = do
+getResourceStatR thread_post_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getResourceStatM user_id thread_post_id
 

@@ -58,7 +58,7 @@ getLeuronsR = run $ do
 
 
 postLeuronR0 :: Handler Value
-postLeuronR0 = do
+postLeuronR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -76,14 +76,14 @@ postLeuronR0 = do
 
 
 getLeuronR :: LeuronId -> Handler Value
-getLeuronR leuron_id = do
+getLeuronR leuron_id = run $ do
   user_id <- _requireAuthId
   (toJSON . leuronToResponse) <$> getLeuronM user_id leuron_id
 
 
 
 putLeuronR :: LeuronId -> Handler Value
-putLeuronR leuron_id = do
+putLeuronR leuron_id = run $ do
   user_id <- _requireAuthId
   leuron_request <- requireJsonBody
   (toJSON . leuronToResponse) <$> updateLeuronM user_id leuron_id leuron_request
@@ -91,7 +91,7 @@ putLeuronR leuron_id = do
 
 
 deleteLeuronR :: LeuronId -> Handler Value
-deleteLeuronR leuron_id = do
+deleteLeuronR leuron_id = run $ do
   user_id <- _requireAuthId
   void $ deleteLeuronM user_id leuron_id
   pure $ toJSON ()
@@ -113,7 +113,7 @@ getLeuronStatsR = run $ do
 
 
 getLeuronStatR :: LeuronId -> Handler Value
-getLeuronStatR leuron_id = do
+getLeuronStatR leuron_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLeuronStatM user_id leuron_id
 

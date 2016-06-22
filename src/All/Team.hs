@@ -44,7 +44,7 @@ getTeamsR = run $ do
 
 
 postTeamR0 :: Handler Value
-postTeamR0 = do
+postTeamR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -60,14 +60,14 @@ postTeamR0 = do
 
 
 getTeamR :: TeamId -> Handler Value
-getTeamR team_id = do
+getTeamR team_id = run $ do
   user_id <- _requireAuthId
   (toJSON . teamToResponse) <$> getTeamM user_id team_id
 
 
 
 putTeamR :: TeamId -> Handler Value
-putTeamR team_id = do
+putTeamR team_id = run $ do
   user_id <- _requireAuthId
   team_request <- requireJsonBody
   (toJSON . teamToResponse) <$> updateTeamM user_id team_id team_request
@@ -75,7 +75,7 @@ putTeamR team_id = do
 
 
 deleteTeamR :: TeamId -> Handler Value
-deleteTeamR team_id = do
+deleteTeamR team_id = run $ do
   user_id <- _requireAuthId
   void $ deleteTeamM user_id team_id
   pure $ toJSON ()

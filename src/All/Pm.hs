@@ -40,7 +40,7 @@ getPmsR = run $ do
 
 
 postPmR0 :: Handler Value
-postPmR0 = do
+postPmR0 = run $ do
   user_id <- _requireAuthId
   sp <- lookupStandardParams
   -- can handle groups, users, user .. if we want
@@ -58,14 +58,14 @@ postPmR0 = do
 
 
 getPmR :: PmId -> Handler Value
-getPmR pm_id = do
+getPmR pm_id = run $ do
   user_id <- _requireAuthId
   (toJSON . pmToResponse) <$> getPmM user_id pm_id
 
 
 
 putPmR :: PmId -> Handler Value
-putPmR pm_id = do
+putPmR pm_id = run $ do
   user_id <- _requireAuthId
   pm_request <- requireJsonBody
   (toJSON . pmToResponse) <$> updatePmM user_id pm_id pm_request
@@ -73,7 +73,7 @@ putPmR pm_id = do
 
 
 deletePmR :: PmId -> Handler Value
-deletePmR pm_id = do
+deletePmR pm_id = run $ do
   user_id <- _requireAuthId
   void $ deletePmM user_id pm_id
   pure $ toJSON ()

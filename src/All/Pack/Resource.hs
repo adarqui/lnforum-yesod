@@ -30,7 +30,7 @@ getResourcePacksR = run $ do
 
 
 getResourcePackR :: ResourceId -> Handler Value
-getResourcePackR thread_post_id = do
+getResourcePackR thread_post_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getResourcePackM user_id thread_post_id
 

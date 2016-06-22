@@ -53,7 +53,7 @@ getOrganizationsR = run $ do
 
 
 postOrganizationR0 :: Handler Value
-postOrganizationR0 = do
+postOrganizationR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -76,19 +76,14 @@ getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
 
 
 
-getOrganizationR' :: forall master t.
-                     YesodAuth master
-                  => (AuthId master -> t -> HandlerT master IO (Entity Organization))
-                  -> t
-                  -> HandlerT master IO Value
-getOrganizationR' f a = do
+getOrganizationR' f a = run $ do
   user_id <- _requireAuthId
   (toJSON . organizationToResponse <$> f user_id a)
 
 
 
 putOrganizationR :: OrganizationId -> Handler Value
-putOrganizationR organization_id = do
+putOrganizationR organization_id = run $ do
   user_id <- _requireAuthId
   organization_request <- requireJsonBody
   (toJSON . organizationToResponse) <$> updateOrganizationM user_id organization_id organization_request
@@ -96,7 +91,7 @@ putOrganizationR organization_id = do
 
 
 deleteOrganizationR :: OrganizationId -> Handler Value
-deleteOrganizationR organization_id = do
+deleteOrganizationR organization_id = run $ do
   user_id <- _requireAuthId
   void $ deleteOrganizationM user_id organization_id
   pure $ toJSON ()
@@ -118,7 +113,7 @@ getOrganizationStatsR = run $ do
 
 
 getOrganizationStatR :: OrganizationId -> Handler Value
-getOrganizationStatR organization_id = do
+getOrganizationStatR organization_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getOrganizationStatM user_id organization_id
 
@@ -247,7 +242,7 @@ getOrganizationM' :: forall t site val.
                      (PersistEntity val, YesodPersist site,
                       PersistQuery (YesodPersistBackend site),
                       YesodPersistBackend site ~ PersistEntityBackend val) =>
-                     t -> Filter val -> HandlerT site IO (Entity val)
+                     t -> Filter val -> ControlMA (HandlerT site IO) (Entity val)
 getOrganizationM' _ q = do
   notFoundMaybe =<< selectFirstDb [q] []
 

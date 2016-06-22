@@ -1,22 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Like (
-  -- handler
+  -- Handler
   getLikesR,
   postLikeR0,
   getLikeR,
   putLikeR,
   deleteLikeR,
-
   getLikeStatsR,
   getLikeStatR,
 
-  -- model/functions
+  -- Model/Function
   likeRequestToLike,
   likeToResponse,
   likesToResponses,
 
-  -- model/internal
+  -- Model/Internal
   getLikesM,
   insertLikeM,
   getLikeM,
@@ -24,7 +23,6 @@ module All.Like (
   getLike_ByThreadPostIdM,
   updateLikeM,
   deleteLikeM,
-
   getLikeStatsM,
   getLikeStatM
 ) where
@@ -48,7 +46,7 @@ getLikesR = run $ do
 
 
 postLikeR0 :: Handler Value
-postLikeR0 = do
+postLikeR0 = run $ do
 
   sp <- lookupStandardParams
 
@@ -65,14 +63,14 @@ postLikeR0 = do
 
 
 getLikeR :: LikeId -> Handler Value
-getLikeR like_id = do
+getLikeR like_id = run $ do
   user_id <- _requireAuthId
   (toJSON . likeToResponse) <$> getLikeM user_id like_id
 
 
 
 putLikeR :: LikeId -> Handler Value
-putLikeR like_id = do
+putLikeR like_id = run $ do
   user_id <- _requireAuthId
   like_request <- requireJsonBody
   (toJSON . likeToResponse) <$> updateLikeM user_id like_id like_request
@@ -80,7 +78,7 @@ putLikeR like_id = do
 
 
 deleteLikeR :: LikeId -> Handler Value
-deleteLikeR like_id = do
+deleteLikeR like_id = run $ do
   user_id <- _requireAuthId
   void $ deleteLikeM user_id like_id
   pure $ toJSON ()
@@ -95,7 +93,7 @@ getLikeStatsR = run $ do
 
 
 getLikeStatR :: LikeId -> Handler Value
-getLikeStatR like_id = do
+getLikeStatR like_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLikeStatM user_id like_id
 

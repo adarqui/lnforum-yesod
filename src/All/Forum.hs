@@ -56,7 +56,7 @@ getForumsR = run $ do
 
 
 postForumR0 :: Handler Value
-postForumR0 = do
+postForumR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -72,21 +72,21 @@ postForumR0 = do
 
 
 getForumR :: ForumId -> Handler Value
-getForumR forum_id = do
+getForumR forum_id = run $ do
   user_id <- _requireAuthId
   (toJSON . forumToResponse) <$> getForumM user_id forum_id
 
 
 
 getForumH :: Text -> Handler Value
-getForumH forum_name = do -- getForumR' getForumMH forum_name
+getForumH forum_name = run $ do -- getForumR' getForumMH forum_name
   user_id <- _requireAuthId
   (toJSON . forumToResponse) <$> getForumMH user_id forum_name
 
 
 
 putForumR :: ForumId -> Handler Value
-putForumR forum_id = do
+putForumR forum_id = run $ do
   user_id <- _requireAuthId
   forum_request <- requireJsonBody
   (toJSON . forumToResponse) <$> updateForumM user_id forum_id forum_request
@@ -94,7 +94,7 @@ putForumR forum_id = do
 
 
 deleteForumR :: ForumId -> Handler Value
-deleteForumR forum_id = do
+deleteForumR forum_id = run $ do
   user_id <- _requireAuthId
   void $ deleteForumM user_id forum_id
   pure $ toJSON ()
@@ -116,7 +116,7 @@ getForumStatsR = run $ do
 
 
 getForumStatR :: ForumId -> Handler Value
-getForumStatR forum_id = do
+getForumStatR forum_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getForumStatM user_id forum_id
 

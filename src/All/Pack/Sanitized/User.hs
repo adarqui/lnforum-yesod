@@ -32,14 +32,14 @@ getUserSanitizedPacksR = run $ do
 
 
 getUserSanitizedPackR :: UserId -> Handler Value
-getUserSanitizedPackR lookup_user_id = do
+getUserSanitizedPackR lookup_user_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getUserSanitizedPackM user_id lookup_user_id
 
 
 
 getUserSanitizedPackH :: Text -> Handler Value
-getUserSanitizedPackH lookup_user_nick = do
+getUserSanitizedPackH lookup_user_nick = run $ do
   user_id <- _requireAuthId
   toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick
 

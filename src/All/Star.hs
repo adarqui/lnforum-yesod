@@ -48,7 +48,7 @@ getStarsR = run $ do
 
 
 postStarR0 :: Handler Value
-postStarR0 = do
+postStarR0 = run $ do
 
   sp <- lookupStandardParams
 
@@ -65,14 +65,14 @@ postStarR0 = do
 
 
 getStarR :: StarId -> Handler Value
-getStarR star_id = do
+getStarR star_id = run $ do
   user_id <- _requireAuthId
   (toJSON . starToResponse) <$> getStarM user_id star_id
 
 
 
 putStarR :: StarId -> Handler Value
-putStarR star_id = do
+putStarR star_id = run $ do
   user_id <- _requireAuthId
   star_request <- requireJsonBody
   (toJSON . starToResponse) <$> updateStarM user_id star_id star_request
@@ -80,7 +80,7 @@ putStarR star_id = do
 
 
 deleteStarR :: StarId -> Handler Value
-deleteStarR star_id = do
+deleteStarR star_id = run $ do
   user_id <- _requireAuthId
   void $ deleteStarM user_id star_id
   pure $ toJSON ()
@@ -96,7 +96,7 @@ getStarStatsR = run $ do
 
 getStarStatR :: StarId -> Handler Value
 getStarStatR star_id = run $ do
-  user_id <- __requireAuthId
+  user_id <- _requireAuthId
   toJSON <$> getStarStatM user_id star_id
 
 

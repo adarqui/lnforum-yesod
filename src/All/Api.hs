@@ -45,14 +45,14 @@ postApisR = run $ do
 
 
 getApiR :: ApiId -> Handler Value
-getApiR api_id = do
+getApiR api_id = run $ do
   user_id <- _requireAuthId
   (toJSON . apiToResponse) <$> getApiM user_id api_id
 
 
 
 putApiR :: ApiId -> Handler Value
-putApiR api_id = do
+putApiR api_id = run $ do
   user_id <- _requireAuthId
   api_request <- requireJsonBody
   (toJSON . apiToResponse) <$> updateApiM user_id api_id api_request
@@ -60,7 +60,7 @@ putApiR api_id = do
 
 
 deleteApiR :: ApiId -> Handler Value
-deleteApiR api_id = do
+deleteApiR api_id = run $ do
   user_id <- _requireAuthId
   void $ deleteApiM user_id api_id
   pure $ toJSON ()

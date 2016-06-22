@@ -66,7 +66,7 @@ getUsersR = run $ do
 
 
 postUserR0 :: Handler Value
-postUserR0 = do
+postUserR0 = run $ do
   user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> insertUsersM user_id user_request
@@ -74,7 +74,7 @@ postUserR0 = do
 
 
 getUserR :: UserId -> Handler Value
-getUserR lookup_user_id = do
+getUserR lookup_user_id = run $ do
   user_id <- _requireAuthId
   response <- getUserM user_id lookup_user_id
   if (user_id == lookup_user_id)
@@ -91,7 +91,7 @@ getUserH _ = notFound
 
 
 putUserR :: UserId -> Handler Value
-putUserR lookup_user_id = do
+putUserR lookup_user_id = run $ do
   user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   (toJSON . userToResponse) <$> updateUserM user_id lookup_user_id user_request
@@ -99,7 +99,7 @@ putUserR lookup_user_id = do
 
 
 deleteUserR :: UserId -> Handler Value
-deleteUserR lookup_user_id = do
+deleteUserR lookup_user_id = run $ do
 
   user_id <- _requireAuthId
 
@@ -123,7 +123,7 @@ getUserStatsR = run $ do
 
 
 getUserStatR :: UserId -> Handler Value
-getUserStatR lookup_user_id = do
+getUserStatR lookup_user_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getUserStatM user_id lookup_user_id
 
@@ -310,7 +310,7 @@ getUserM' :: forall t site val.
              (PersistEntity val, YesodPersist site,
               PersistQuery (YesodPersistBackend site),
               YesodPersistBackend site ~ PersistEntityBackend val) =>
-             t -> Filter val -> HandlerT site IO (Entity val)
+             t -> Filter val -> ControlMA (HandlerT site IO) (Entity val)
 getUserM' _ q = do
   notFoundMaybe =<< selectFirstDb [q] []
 
@@ -409,7 +409,7 @@ getUserStatM _ lookup_user_id = do
 
 qUserStats :: forall site.
     (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-    Key User -> HandlerT site IO (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
+    Key User -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
 qUserStats user_id = do
   _runDB $ do
     (leurons:[]) <- E.select

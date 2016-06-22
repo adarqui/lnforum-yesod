@@ -30,14 +30,14 @@ getGlobalGroupPacksR = run $ do
 
 
 getGlobalGroupPackR :: GlobalGroupId -> Handler Value
-getGlobalGroupPackR global_group_id = do
+getGlobalGroupPackR global_group_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getGlobalGroupPackM user_id global_group_id
 
 
 
 getGlobalGroupPackH :: Text -> Handler Value
-getGlobalGroupPackH global_group_name = do
+getGlobalGroupPackH global_group_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getGlobalGroupPackMH user_id global_group_name
 

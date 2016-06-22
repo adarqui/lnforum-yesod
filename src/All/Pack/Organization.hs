@@ -32,14 +32,14 @@ getOrganizationPacksR = run $ do
 
 
 getOrganizationPackR :: OrganizationId -> Handler Value
-getOrganizationPackR organization_id = do
+getOrganizationPackR organization_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getOrganizationPackM user_id organization_id
 
 
 
 getOrganizationPackH :: Text -> Handler Value
-getOrganizationPackH org_name = do
+getOrganizationPackH org_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getOrganizationPackMH user_id org_name
 

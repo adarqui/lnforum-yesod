@@ -44,7 +44,7 @@ getTeamMembersR = run $ do
 
 
 postTeamMemberR0 :: Handler Value
-postTeamMemberR0 = run do
+postTeamMemberR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -54,21 +54,21 @@ postTeamMemberR0 = run do
 
 
 getTeamMemberR :: TeamMemberId -> Handler Value
-getTeamMemberR team_member_id = run do
+getTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   (toJSON . teamMemberToResponse) <$> getTeamMemberM user_id team_member_id
 
 
 
 getTeamMemberH :: Text -> Handler Value
-getTeamMemberH team_name = run do
+getTeamMemberH team_name = run $ do
   user_id <- _requireAuthId
   (toJSON . teamMemberToResponse) <$> getTeamMemberMH user_id team_name
 
 
 
 putTeamMemberR :: TeamMemberId -> Handler Value
-putTeamMemberR team_member_id = run do
+putTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   team_member_request <- requireJsonBody
   (toJSON . teamMemberToResponse) <$> updateTeamMemberM user_id team_member_id team_member_request
@@ -76,7 +76,7 @@ putTeamMemberR team_member_id = run do
 
 
 deleteTeamMemberR :: TeamMemberId -> Handler Value
-deleteTeamMemberR team_member_id = run do
+deleteTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   void $ deleteTeamMemberM user_id team_member_id
   sendResponseStatus status200 ("DELETED" :: Text)

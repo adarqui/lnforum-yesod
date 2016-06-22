@@ -30,14 +30,14 @@ getTeamMemberPacksR = run $ do
 
 
 getTeamMemberPackR :: TeamMemberId -> Handler Value
-getTeamMemberPackR team_member_id = do
+getTeamMemberPackR team_member_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getTeamMemberPackM user_id team_member_id
 
 
 
 getTeamMemberPackH :: Text -> Handler Value
-getTeamMemberPackH team_member_name = do
+getTeamMemberPackH team_member_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getTeamMemberPackMH user_id team_member_name
 

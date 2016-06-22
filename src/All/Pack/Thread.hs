@@ -33,14 +33,14 @@ getThreadPacksR = run $ do
 
 
 getThreadPackR :: ThreadId -> Handler Value
-getThreadPackR thread_id = do
+getThreadPackR thread_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getThreadPackM user_id thread_id
 
 
 
 getThreadPackH :: Text -> Handler Value
-getThreadPackH thread_name = do
+getThreadPackH thread_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getThreadPackMH user_id thread_name
 

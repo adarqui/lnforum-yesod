@@ -51,14 +51,14 @@ postPmInsR = run $ do
 
 
 getPmInR :: PmInId -> Handler Value
-getPmInR pmIn_id = do
+getPmInR pmIn_id = run $ do
   user_id <- _requireAuthId
   (toJSON . pmInToResponse) <$> getPmInM user_id pmIn_id
 
 
 
 putPmInR :: PmInId -> Handler Value
-putPmInR pmIn_id = do
+putPmInR pmIn_id = run $ do
   user_id <- _requireAuthId
   pmIn_request <- requireJsonBody
   (toJSON . pmInToResponse) <$> updatePmInM user_id pmIn_id pmIn_request
@@ -66,7 +66,7 @@ putPmInR pmIn_id = do
 
 
 deletePmInR :: PmInId -> Handler Value
-deletePmInR pmIn_id = do
+deletePmInR pmIn_id = run $ do
   user_id <- _requireAuthId
   void $ deletePmInM user_id pmIn_id
   pure $ toJSON ()

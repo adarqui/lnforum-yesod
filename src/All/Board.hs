@@ -38,7 +38,7 @@ module All.Board (
 
 
 
-import           Handler.Prelude
+import           All.Prelude
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
 import           Model.Prelude
@@ -54,7 +54,7 @@ getBoardsR = run $ do
 
 
 postBoardR0 :: Handler Value
-postBoardR0 = do
+postBoardR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -71,21 +71,21 @@ postBoardR0 = do
 
 
 getBoardR :: BoardId -> Handler Value
-getBoardR board_id = do
+getBoardR board_id = run $ do
   user_id <- _requireAuthId
   (toJSON . boardToResponse) <$> getBoardM user_id board_id
 
 
 
 getBoardH :: Text -> Handler Value
-getBoardH board_name = do
+getBoardH board_name = run $ do
   user_id <- _requireAuthId
   (toJSON . boardToResponse) <$> getBoardMH user_id board_name
 
 
 
 putBoardR :: BoardId -> Handler Value
-putBoardR board_id = do
+putBoardR board_id = run $ do
   user_id <- _requireAuthId
   board_request <- requireJsonBody
   (toJSON . boardToResponse) <$> updateBoardM user_id board_id board_request
@@ -93,7 +93,7 @@ putBoardR board_id = do
 
 
 deleteBoardR :: BoardId -> Handler Value
-deleteBoardR board_id = do
+deleteBoardR board_id = run $ do
   user_id <- _requireAuthId
   void $ deleteBoardM user_id board_id
   pure $ toJSON ()
@@ -106,7 +106,7 @@ getBoardStatsR = notFound
 
 
 getBoardStatR :: BoardId -> Handler Value
-getBoardStatR board_id = do
+getBoardStatR board_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getBoardStatM user_id board_id
 
@@ -357,7 +357,7 @@ deleteBoardM user_id board_id = do
 
 
 
-getBoardStatsM :: UserId -> Handler Value
+getBoardStatsM :: UserId -> HandlerEff Value
 getBoardStatsM _ = do
   StandardParams{..} <- lookupStandardParams
 
@@ -398,7 +398,7 @@ getBoardStatM _ board_id = do
 
 qBoardStats :: forall site.
      (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-     Key Board -> HandlerT site IO [(E.Value Int64, E.Value Int64, E.Value Int64)]
+     Key Board -> ControlMA (HandlerT site IO) [(E.Value Int64, E.Value Int64, E.Value Int64)]
 qBoardStats board_id = do
   _runDB
     $ E.select

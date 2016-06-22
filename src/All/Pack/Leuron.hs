@@ -31,7 +31,7 @@ getLeuronPacksR = run $ do
 
 
 getLeuronPackR :: LeuronId -> Handler Value
-getLeuronPackR leuron_id = do
+getLeuronPackR leuron_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLeuronPackM user_id leuron_id
 

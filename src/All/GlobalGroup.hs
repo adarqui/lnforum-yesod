@@ -45,7 +45,7 @@ getGlobalGroupsR = run $ do
 
 
 postGlobalGroupR0 :: Handler Value
-postGlobalGroupR0 = do
+postGlobalGroupR0 = run $ do
 
   user_id <- _requireAuthId
 
@@ -55,21 +55,21 @@ postGlobalGroupR0 = do
 
 
 getGlobalGroupR :: GlobalGroupId -> Handler Value
-getGlobalGroupR global_group_id = do
+getGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupM user_id global_group_id
 
 
 
 getGlobalGroupH :: Text -> Handler Value
-getGlobalGroupH group_name = do
+getGlobalGroupH group_name = run $ do
   user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupMH user_id group_name
 
 
 
 putGlobalGroupR :: GlobalGroupId -> Handler Value
-putGlobalGroupR global_group_id = do
+putGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   global_group_request <- requireJsonBody
   (toJSON . globalGroupToResponse) <$> updateGlobalGroupM user_id global_group_id global_group_request
@@ -77,7 +77,7 @@ putGlobalGroupR global_group_id = do
 
 
 deleteGlobalGroupR :: GlobalGroupId -> Handler Value
-deleteGlobalGroupR global_group_id = do
+deleteGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   void $ deleteGlobalGroupM user_id global_group_id
   sendResponseStatus status200 ("DELETED" :: Text)
@@ -99,7 +99,7 @@ getGlobalGroupStatsR = run $ do
 
 
 getGlobalGroupStatR :: GlobalGroupId -> Handler Value
-getGlobalGroupStatR global_group_id = do
+getGlobalGroupStatR global_group_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getGlobalGroupStatM user_id global_group_id
 

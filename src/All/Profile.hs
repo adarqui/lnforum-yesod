@@ -37,14 +37,14 @@ getProfilesR = run $ do
 
 
 getProfileR :: ProfileId -> Handler Value
-getProfileR profile_id = do
+getProfileR profile_id = run $ do
   user_id <- _requireAuthId
   (toJSON . profileToResponse) <$> getProfileM user_id profile_id
 
 
 
 putProfileR :: ProfileId -> Handler Value
-putProfileR profile_id = do
+putProfileR profile_id = run $ do
   user_id <- _requireAuthId
   profile_request <- requireJsonBody
   (toJSON . profileToResponse) <$> updateProfileM user_id profile_id profile_request

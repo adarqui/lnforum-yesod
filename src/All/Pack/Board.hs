@@ -34,14 +34,14 @@ getBoardPacksR = run $ do
 
 
 getBoardPackR :: BoardId -> Handler Value
-getBoardPackR board_id = do
+getBoardPackR board_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getBoardPackM user_id board_id
 
 
 
 getBoardPackH :: Text -> Handler Value
-getBoardPackH board_name = do
+getBoardPackH board_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getBoardPackMH user_id board_name
 

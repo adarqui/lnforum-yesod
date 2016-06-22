@@ -29,14 +29,14 @@ getForumPacksR = run $ do
 
 
 getForumPackR :: ForumId -> Handler Value
-getForumPackR forum_id = do
+getForumPackR forum_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getForumPackM user_id forum_id
 
 
 
 getForumPackH :: Text -> Handler Value
-getForumPackH forum_name = do
+getForumPackH forum_name = run $ do
   user_id <- _requireAuthId
   toJSON <$> getForumPackMH user_id forum_name
 

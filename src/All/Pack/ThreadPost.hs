@@ -34,27 +34,10 @@ getThreadPostPacksR = run $ do
 
 
 getThreadPostPackR :: ThreadPostId -> Handler Value
-getThreadPostPackR thread_post_id = do
+getThreadPostPackR thread_post_id = run $ do
   user_id <- _requireAuthId
   toJSON <$> getThreadPostPackM user_id thread_post_id
 
-
-
-getThreadPostPackR' :: ThreadPostId -> Handler Value
-getThreadPostPackR' thread_post_id = do
-  flip evalStateT () $ do
-    user_id <- lift $ _requireAuthId
-    toJSON <$> getThreadPostPackM' user_id thread_post_id
-
-getThreadPostPackM' :: UserId -> ThreadPostId -> StateT () HandlerEff ()
-getThreadPostPackM' user_id thread_post_id = do
-
-  return ()
-
---  sp <- lookupStandardParams
-
---  thread_post <- getThreadPostM user_id thread_post_id
---  getThreadPostPack_ByThreadPostM user_id thread_post (sp { spLimit = Just 1 })
 
 
 
