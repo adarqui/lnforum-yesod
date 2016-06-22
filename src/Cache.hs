@@ -1,12 +1,15 @@
+{-# LANGUAGE ExplicitForAll #-}
+
 module Cache (
   Cache (..),
-  CacheEntry (..)
+  CacheEntry (..),
+  defaultCache,
+  emptyCache
 ) where
 
 
 
 import           Import
-import           Api.Params
 import Control.Monad.Trans.RWS
 import           Model.Misc
 import           LN.T.Membership
@@ -21,12 +24,33 @@ data CacheEntry a
 
 
 
+type CacheMap a b = M.Map a (CacheEntry b)
+
+
 data Cache = Cache {
   cacheMe            :: Maybe User,
-  cacheOrganization  :: Maybe Organization,
-  cacheUser          :: M.Map UserId (CacheEntry User),
-  cacheForum         :: Maybe Forum,
-  cacheBoard         :: Maybe Board,
-  cacheThread        :: Maybe Thread,
-  cacheThreadPost    :: Maybe ThreadPost
+  cacheOrganizations  :: CacheMap OrganizationId Organization,
+  cacheUsers          :: CacheMap UserId User,
+  cacheForums         :: CacheMap ForumId Forum,
+  cacheBoards         :: CacheMap BoardId Board,
+  cacheThreads        :: CacheMap ThreadId Thread,
+  cacheThreadPosts    :: CacheMap ThreadPostId ThreadPost
+}
+
+
+
+emptyCache :: forall a b. CacheMap a b
+emptyCache = M.empty
+
+
+
+defaultCache :: Cache
+defaultCache = Cache {
+  cacheMe = Nothing,
+  cacheOrganizations = emptyCache,
+  cacheUsers = emptyCache,
+  cacheForums = emptyCache,
+  cacheBoards = emptyCache,
+  cacheThreads = emptyCache,
+  cacheThreadPosts = emptyCache
 }

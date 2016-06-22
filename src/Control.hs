@@ -5,14 +5,18 @@ module Control (
   ControlReader,
   ControlWriter,
   ControlState,
+  InternalControlState (..),
   run
 ) where
 
 
 
-import Control.Monad.Trans.RWS
+import           Control.Monad.Trans.RWS
+import qualified Data.Map                as M
 
-import Import
+import           Import
+
+import           Cache
 
 
 
@@ -24,9 +28,22 @@ type ControlM      = RWST
 type ControlMA m a = ControlM ControlReader ControlWriter ControlState m a
 type ControlReader = ()
 type ControlWriter = ()
-type ControlState  = ()
+type ControlState  = InternalControlState
+
+
+
+data InternalControlState = InternalControlState {
+  cache :: Cache
+}
+
+
+
+defaultControlState :: InternalControlState
+defaultControlState = InternalControlState {
+  cache    = defaultCache
+}
 
 
 
 -- run ::
-run op = fst <$> evalRWST op () ()
+run op = fst <$> evalRWST op () defaultControlState
