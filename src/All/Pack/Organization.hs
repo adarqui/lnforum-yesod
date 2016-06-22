@@ -16,8 +16,7 @@ module All.Pack.Organization (
 
 import           All.Organization
 import           All.Prelude
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

@@ -18,8 +18,7 @@ import           All.Board
 import           All.Prelude
 import           All.Thread
 import           All.ThreadPost
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

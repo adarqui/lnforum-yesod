@@ -1,9 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module All.Pack.ThreadPost (
+  -- Handler
   getThreadPostPacksR,
   getThreadPostPackR,
 
+  -- Model
   getThreadPostPacksM,
   getThreadPostPackM
 ) where
@@ -11,11 +13,10 @@ module All.Pack.ThreadPost (
 
 
 import           All.Like
-import           All.Star
 import           All.Prelude
+import           All.Star
 import           All.ThreadPost
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

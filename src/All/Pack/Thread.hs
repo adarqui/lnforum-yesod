@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.Pack.Thread (
   -- Handler
   getThreadPacksR,
@@ -13,10 +15,9 @@ module All.Pack.Thread (
 
 
 import           All.Prelude
-import           Model.User.Function
-import           Model.User.Internal2
 import           All.Thread
 import           All.ThreadPost
+import           All.User
 
 
 

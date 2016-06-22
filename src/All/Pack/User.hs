@@ -11,8 +11,7 @@ module All.Pack.User (
 
 import           All.Prelude
 import           All.Profile
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

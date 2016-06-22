@@ -15,8 +15,7 @@ module All.Pack.Leuron (
 import           All.Leuron
 import           All.LeuronTraining
 import           All.Prelude
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

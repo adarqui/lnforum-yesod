@@ -16,8 +16,7 @@ module All.Pack.Sanitized.User (
 
 import           All.Prelude
 import           All.Profile
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

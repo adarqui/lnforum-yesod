@@ -24,7 +24,7 @@ import qualified Data.Text               as T
 import           Import.NoFoundation
 import           LN.T.Profile            (ProfileX (..))
 import           Misc.Codec
-import           Model.User.Function    (profileNameToNick)
+-- import           Model.User.Function    (profileNameToNick)
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
 
@@ -107,8 +107,8 @@ authenticateUser creds@Creds{..} = do
 
 credsToUser :: UTCTime -> Creds m -> Either Text User
 credsToUser now Creds{..} = User
-  <$> (profileNameToNick <$> (profileName <$> eprofile))
-  <*> (profileNameToNick <$> (profileName <$> eprofile))
+  <$> (profileName <$> eprofile)
+  <*> (profileName <$> eprofile)
   <*> (profileName <$> eprofile)
   <*> (profileEmail <$> eprofile)
   <*> pure email_md5

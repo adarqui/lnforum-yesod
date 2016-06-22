@@ -14,8 +14,7 @@ module All.Pack.Resource (
 
 import           All.Prelude
 import           All.Resource
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

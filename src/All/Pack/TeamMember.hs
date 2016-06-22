@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.Pack.TeamMember (
   -- Handler
   getTeamMemberPacksR,
@@ -12,8 +14,7 @@ module All.Pack.TeamMember (
 
 import           All.Prelude
 import           All.TeamMember
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.User
 
 
 

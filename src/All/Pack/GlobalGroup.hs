@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module All.Pack.GlobalGroup (
   -- Handler
   getGlobalGroupPacksR,
@@ -10,10 +12,9 @@ module All.Pack.GlobalGroup (
 
 
 
-import           All.Prelude
 import           All.GlobalGroup
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.Prelude
+import           All.User
 
 
 

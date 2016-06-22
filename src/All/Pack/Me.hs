@@ -7,10 +7,9 @@ module All.Pack.Me (
 
 
 
-import           All.Prelude
 import           All.Pack.User
-import           Model.User.Function
-import           Model.User.Internal2
+import           All.Prelude
+import           All.User
 
 
 
