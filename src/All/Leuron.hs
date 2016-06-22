@@ -48,7 +48,7 @@ import qualified LN.T.Like             as L
 -- Handler
 --
 
-getLeuronsR :: HandlerEff Value
+getLeuronsR :: Handler Value
 getLeuronsR = run $ do
 
   user_id <- _requireAuthId
@@ -57,7 +57,7 @@ getLeuronsR = run $ do
 
 
 
-postLeuronR0 :: HandlerEff Value
+postLeuronR0 :: Handler Value
 postLeuronR0 = do
 
   user_id <- _requireAuthId
@@ -75,14 +75,14 @@ postLeuronR0 = do
 
 
 
-getLeuronR :: LeuronId -> HandlerEff Value
+getLeuronR :: LeuronId -> Handler Value
 getLeuronR leuron_id = do
   user_id <- _requireAuthId
   (toJSON . leuronToResponse) <$> getLeuronM user_id leuron_id
 
 
 
-putLeuronR :: LeuronId -> HandlerEff Value
+putLeuronR :: LeuronId -> Handler Value
 putLeuronR leuron_id = do
   user_id <- _requireAuthId
   leuron_request <- requireJsonBody
@@ -90,7 +90,7 @@ putLeuronR leuron_id = do
 
 
 
-deleteLeuronR :: LeuronId -> HandlerEff Value
+deleteLeuronR :: LeuronId -> Handler Value
 deleteLeuronR leuron_id = do
   user_id <- _requireAuthId
   void $ deleteLeuronM user_id leuron_id
@@ -98,21 +98,21 @@ deleteLeuronR leuron_id = do
 
 
 
-getCountLeuronsR :: HandlerEff Value
+getCountLeuronsR :: Handler Value
 getCountLeuronsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countLeuronsM user_id
 
 
 
-getLeuronStatsR :: HandlerEff Value
+getLeuronStatsR :: Handler Value
 getLeuronStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLeuronStatsM user_id
 
 
 
-getLeuronStatR :: LeuronId -> HandlerEff Value
+getLeuronStatR :: LeuronId -> Handler Value
 getLeuronStatR leuron_id = do
   user_id <- _requireAuthId
   toJSON <$> getLeuronStatM user_id leuron_id

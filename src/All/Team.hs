@@ -36,14 +36,14 @@ import           All.Prelude
 -- Handler
 --
 
-getTeamsR :: HandlerEff Value
+getTeamsR :: Handler Value
 getTeamsR = run $ do
   user_id <- _requireAuthId
   (toJSON . teamsToResponses) <$> getTeamsM user_id
 
 
 
-postTeamR0 :: HandlerEff Value
+postTeamR0 :: Handler Value
 postTeamR0 = do
 
   user_id <- _requireAuthId
@@ -59,14 +59,14 @@ postTeamR0 = do
 
 
 
-getTeamR :: TeamId -> HandlerEff Value
+getTeamR :: TeamId -> Handler Value
 getTeamR team_id = do
   user_id <- _requireAuthId
   (toJSON . teamToResponse) <$> getTeamM user_id team_id
 
 
 
-putTeamR :: TeamId -> HandlerEff Value
+putTeamR :: TeamId -> Handler Value
 putTeamR team_id = do
   user_id <- _requireAuthId
   team_request <- requireJsonBody
@@ -74,7 +74,7 @@ putTeamR team_id = do
 
 
 
-deleteTeamR :: TeamId -> HandlerEff Value
+deleteTeamR :: TeamId -> Handler Value
 deleteTeamR team_id = do
   user_id <- _requireAuthId
   void $ deleteTeamM user_id team_id

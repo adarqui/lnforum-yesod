@@ -26,21 +26,21 @@ import Control.Monad.Trans.State
 -- Handler
 --
 
-getThreadPostPacksR :: HandlerEff Value
+getThreadPostPacksR :: Handler Value
 getThreadPostPacksR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getThreadPostPacksM user_id
 
 
 
-getThreadPostPackR :: ThreadPostId -> HandlerEff Value
+getThreadPostPackR :: ThreadPostId -> Handler Value
 getThreadPostPackR thread_post_id = do
   user_id <- _requireAuthId
   toJSON <$> getThreadPostPackM user_id thread_post_id
 
 
 
-getThreadPostPackR' :: ThreadPostId -> HandlerEff Value
+getThreadPostPackR' :: ThreadPostId -> Handler Value
 getThreadPostPackR' thread_post_id = do
   flip evalStateT () $ do
     user_id <- lift $ _requireAuthId

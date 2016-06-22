@@ -40,14 +40,14 @@ import qualified LN.T.Star as L
 -- Handler
 --
 
-getStarsR :: HandlerEff Value
+getStarsR :: Handler Value
 getStarsR = run $ do
   user_id <- _requireAuthId
   (toJSON . starsToResponses) <$> getStarsM user_id
 
 
 
-postStarR0 :: HandlerEff Value
+postStarR0 :: Handler Value
 postStarR0 = do
 
   sp <- lookupStandardParams
@@ -64,14 +64,14 @@ postStarR0 = do
 
 
 
-getStarR :: StarId -> HandlerEff Value
+getStarR :: StarId -> Handler Value
 getStarR star_id = do
   user_id <- _requireAuthId
   (toJSON . starToResponse) <$> getStarM user_id star_id
 
 
 
-putStarR :: StarId -> HandlerEff Value
+putStarR :: StarId -> Handler Value
 putStarR star_id = do
   user_id <- _requireAuthId
   star_request <- requireJsonBody
@@ -79,7 +79,7 @@ putStarR star_id = do
 
 
 
-deleteStarR :: StarId -> HandlerEff Value
+deleteStarR :: StarId -> Handler Value
 deleteStarR star_id = do
   user_id <- _requireAuthId
   void $ deleteStarM user_id star_id
@@ -87,14 +87,14 @@ deleteStarR star_id = do
 
 
 
-getStarStatsR :: HandlerEff Value
+getStarStatsR :: Handler Value
 getStarStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getStarStatsM user_id
 
 
 
-getStarStatR :: StarId -> HandlerEff Value
+getStarStatR :: StarId -> Handler Value
 getStarStatR star_id = run $ do
   user_id <- __requireAuthId
   toJSON <$> getStarStatM user_id star_id

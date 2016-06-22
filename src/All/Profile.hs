@@ -29,21 +29,21 @@ import           All.Prelude
 -- Handler
 --
 
-getProfilesR :: HandlerEff Value
+getProfilesR :: Handler Value
 getProfilesR = run $ do
   user_id <- _requireAuthId
   (toJSON . profilesToResponses) <$> getProfilesM user_id
 
 
 
-getProfileR :: ProfileId -> HandlerEff Value
+getProfileR :: ProfileId -> Handler Value
 getProfileR profile_id = do
   user_id <- _requireAuthId
   (toJSON . profileToResponse) <$> getProfileM user_id profile_id
 
 
 
-putProfileR :: ProfileId -> HandlerEff Value
+putProfileR :: ProfileId -> Handler Value
 putProfileR profile_id = do
   user_id <- _requireAuthId
   profile_request <- requireJsonBody

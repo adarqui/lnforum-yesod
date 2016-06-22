@@ -45,14 +45,14 @@ import           LN.T.Visibility
 
 
 
-getOrganizationsR :: HandlerEff Value
+getOrganizationsR :: Handler Value
 getOrganizationsR = run $ do
   user_id <- _requireAuthId
   (toJSON . organizationsToResponses) <$> getOrganizationsM user_id
 
 
 
-postOrganizationR0 :: HandlerEff Value
+postOrganizationR0 :: Handler Value
 postOrganizationR0 = do
 
   user_id <- _requireAuthId
@@ -62,14 +62,14 @@ postOrganizationR0 = do
 
 
 
-getOrganizationR :: OrganizationId -> HandlerEff Value
+getOrganizationR :: OrganizationId -> Handler Value
 getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
 --  user_id <- _requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationM user_id organization_id
 
 
 
-getOrganizationH :: Text -> HandlerEff Value
+getOrganizationH :: Text -> Handler Value
 getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
 --  user_id <- _requireAuthId
 --  (toJSON . organizationToResponse) <$> getOrganizationMH user_id org_name
@@ -87,7 +87,7 @@ getOrganizationR' f a = do
 
 
 
-putOrganizationR :: OrganizationId -> HandlerEff Value
+putOrganizationR :: OrganizationId -> Handler Value
 putOrganizationR organization_id = do
   user_id <- _requireAuthId
   organization_request <- requireJsonBody
@@ -95,7 +95,7 @@ putOrganizationR organization_id = do
 
 
 
-deleteOrganizationR :: OrganizationId -> HandlerEff Value
+deleteOrganizationR :: OrganizationId -> Handler Value
 deleteOrganizationR organization_id = do
   user_id <- _requireAuthId
   void $ deleteOrganizationM user_id organization_id
@@ -103,21 +103,21 @@ deleteOrganizationR organization_id = do
 
 
 
-getOrganizationCountR :: HandlerEff Value
+getOrganizationCountR :: Handler Value
 getOrganizationCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countOrganizationsM user_id
 
 
 
-getOrganizationStatsR :: HandlerEff Value
+getOrganizationStatsR :: Handler Value
 getOrganizationStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getOrganizationStatsM user_id
 
 
 
-getOrganizationStatR :: OrganizationId -> HandlerEff Value
+getOrganizationStatR :: OrganizationId -> Handler Value
 getOrganizationStatR organization_id = do
   user_id <- _requireAuthId
   toJSON <$> getOrganizationStatM user_id organization_id

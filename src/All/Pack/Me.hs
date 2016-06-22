@@ -13,7 +13,7 @@ import           All.User
 
 
 
-getMePackR :: HandlerEff Value
+getMePackR :: Handler Value
 getMePackR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getUserPack_ByUserIdM user_id user_id defaultStandardParams

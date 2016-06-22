@@ -58,14 +58,14 @@ import           All.Profile
 -- Handler
 --
 
-getUsersR :: HandlerEff Value
+getUsersR :: Handler Value
 getUsersR = run $ do
   user_id <- _requireAuthId
   (toJSON . usersToSanitizedResponses) <$> getUsersM user_id
 
 
 
-postUserR0 :: HandlerEff Value
+postUserR0 :: Handler Value
 postUserR0 = do
   user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
@@ -73,7 +73,7 @@ postUserR0 = do
 
 
 
-getUserR :: UserId -> HandlerEff Value
+getUserR :: UserId -> Handler Value
 getUserR lookup_user_id = do
   user_id <- _requireAuthId
   response <- getUserM user_id lookup_user_id
@@ -85,12 +85,12 @@ getUserR lookup_user_id = do
 
 
 
-getUserH :: Text -> HandlerEff Value
+getUserH :: Text -> Handler Value
 getUserH _ = notFound
 
 
 
-putUserR :: UserId -> HandlerEff Value
+putUserR :: UserId -> Handler Value
 putUserR lookup_user_id = do
   user_id <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
@@ -98,7 +98,7 @@ putUserR lookup_user_id = do
 
 
 
-deleteUserR :: UserId -> HandlerEff Value
+deleteUserR :: UserId -> Handler Value
 deleteUserR lookup_user_id = do
 
   user_id <- _requireAuthId
@@ -108,21 +108,21 @@ deleteUserR lookup_user_id = do
 
 
 
-getCountUsersR :: HandlerEff Value
+getCountUsersR :: Handler Value
 getCountUsersR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countUsersM user_id
 
 
 
-getUserStatsR :: HandlerEff Value
+getUserStatsR :: Handler Value
 getUserStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getUserStatsM user_id
 
 
 
-getUserStatR :: UserId -> HandlerEff Value
+getUserStatR :: UserId -> Handler Value
 getUserStatR lookup_user_id = do
   user_id <- _requireAuthId
   toJSON <$> getUserStatM user_id lookup_user_id

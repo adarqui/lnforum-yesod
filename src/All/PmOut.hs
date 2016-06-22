@@ -31,14 +31,14 @@ import           All.Prelude
 -- Handler
 --
 
-getPmOutsR :: HandlerEff Value
+getPmOutsR :: Handler Value
 getPmOutsR = run $ do
   user_id <- _requireAuthId
   (toJSON . pmOutsToResponses) <$> getPmOutsM user_id
 
 
 
-postPmOutsR :: HandlerEff Value
+postPmOutsR :: Handler Value
 postPmOutsR = run $ do
   user_id <- _requireAuthId
   sp <- lookupStandardParams
@@ -50,14 +50,14 @@ postPmOutsR = run $ do
 
 
 
-getPmOutR :: PmOutId -> HandlerEff Value
+getPmOutR :: PmOutId -> Handler Value
 getPmOutR pmOut_id = do
   user_id <- _requireAuthId
   (toJSON . pmOutToResponse) <$> getPmOutM user_id pmOut_id
 
 
 
-putPmOutR :: PmOutId -> HandlerEff Value
+putPmOutR :: PmOutId -> Handler Value
 putPmOutR pmOut_id = do
   user_id <- _requireAuthId
   pmOut_request <- requireJsonBody
@@ -65,7 +65,7 @@ putPmOutR pmOut_id = do
 
 
 
-deletePmOutR :: PmOutId -> HandlerEff Value
+deletePmOutR :: PmOutId -> Handler Value
 deletePmOutR pmOut_id = do
   user_id <- _requireAuthId
   void $ deletePmOutM user_id pmOut_id

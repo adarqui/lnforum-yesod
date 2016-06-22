@@ -40,14 +40,14 @@ import qualified LN.T.Like   as L
 -- Handler
 --
 
-getLikesR :: HandlerEff Value
+getLikesR :: Handler Value
 getLikesR = run $ do
   user_id <- _requireAuthId
   (toJSON . likesToResponses) <$> getLikesM user_id
 
 
 
-postLikeR0 :: HandlerEff Value
+postLikeR0 :: Handler Value
 postLikeR0 = do
 
   sp <- lookupStandardParams
@@ -64,14 +64,14 @@ postLikeR0 = do
 
 
 
-getLikeR :: LikeId -> HandlerEff Value
+getLikeR :: LikeId -> Handler Value
 getLikeR like_id = do
   user_id <- _requireAuthId
   (toJSON . likeToResponse) <$> getLikeM user_id like_id
 
 
 
-putLikeR :: LikeId -> HandlerEff Value
+putLikeR :: LikeId -> Handler Value
 putLikeR like_id = do
   user_id <- _requireAuthId
   like_request <- requireJsonBody
@@ -79,7 +79,7 @@ putLikeR like_id = do
 
 
 
-deleteLikeR :: LikeId -> HandlerEff Value
+deleteLikeR :: LikeId -> Handler Value
 deleteLikeR like_id = do
   user_id <- _requireAuthId
   void $ deleteLikeM user_id like_id
@@ -87,14 +87,14 @@ deleteLikeR like_id = do
 
 
 
-getLikeStatsR :: HandlerEff Value
+getLikeStatsR :: Handler Value
 getLikeStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLikeStatsM user_id
 
 
 
-getLikeStatR :: LikeId -> HandlerEff Value
+getLikeStatR :: LikeId -> Handler Value
 getLikeStatR like_id = do
   user_id <- _requireAuthId
   toJSON <$> getLikeStatM user_id like_id

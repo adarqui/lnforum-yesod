@@ -21,21 +21,21 @@ import           All.Forum
 -- Handler
 --
 
-getForumPacksR :: HandlerEff Value
+getForumPacksR :: Handler Value
 getForumPacksR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getForumPacksM user_id
 
 
 
-getForumPackR :: ForumId -> HandlerEff Value
+getForumPackR :: ForumId -> Handler Value
 getForumPackR forum_id = do
   user_id <- _requireAuthId
   toJSON <$> getForumPackM user_id forum_id
 
 
 
-getForumPackH :: Text -> HandlerEff Value
+getForumPackH :: Text -> Handler Value
 getForumPackH forum_name = do
   user_id <- _requireAuthId
   toJSON <$> getForumPackMH user_id forum_name

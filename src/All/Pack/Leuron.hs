@@ -23,14 +23,14 @@ import           All.User
 -- Handler
 --
 
-getLeuronPacksR :: HandlerEff Value
+getLeuronPacksR :: Handler Value
 getLeuronPacksR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getLeuronPacksM user_id
 
 
 
-getLeuronPackR :: LeuronId -> HandlerEff Value
+getLeuronPackR :: LeuronId -> Handler Value
 getLeuronPackR leuron_id = do
   user_id <- _requireAuthId
   toJSON <$> getLeuronPackM user_id leuron_id

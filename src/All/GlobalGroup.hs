@@ -37,14 +37,14 @@ import           All.Prelude
 
 
 
-getGlobalGroupsR :: HandlerEff Value
+getGlobalGroupsR :: Handler Value
 getGlobalGroupsR = run $ do
   user_id <- _requireAuthId
   (toJSON . globalGroupsToResponses) <$> getGlobalGroupsM user_id
 
 
 
-postGlobalGroupR0 :: HandlerEff Value
+postGlobalGroupR0 :: Handler Value
 postGlobalGroupR0 = do
 
   user_id <- _requireAuthId
@@ -54,21 +54,21 @@ postGlobalGroupR0 = do
 
 
 
-getGlobalGroupR :: GlobalGroupId -> HandlerEff Value
+getGlobalGroupR :: GlobalGroupId -> Handler Value
 getGlobalGroupR global_group_id = do
   user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupH :: Text -> HandlerEff Value
+getGlobalGroupH :: Text -> Handler Value
 getGlobalGroupH group_name = do
   user_id <- _requireAuthId
   (toJSON . globalGroupToResponse) <$> getGlobalGroupMH user_id group_name
 
 
 
-putGlobalGroupR :: GlobalGroupId -> HandlerEff Value
+putGlobalGroupR :: GlobalGroupId -> Handler Value
 putGlobalGroupR global_group_id = do
   user_id <- _requireAuthId
   global_group_request <- requireJsonBody
@@ -76,7 +76,7 @@ putGlobalGroupR global_group_id = do
 
 
 
-deleteGlobalGroupR :: GlobalGroupId -> HandlerEff Value
+deleteGlobalGroupR :: GlobalGroupId -> Handler Value
 deleteGlobalGroupR global_group_id = do
   user_id <- _requireAuthId
   void $ deleteGlobalGroupM user_id global_group_id
@@ -84,21 +84,21 @@ deleteGlobalGroupR global_group_id = do
 
 
 
-getCountGlobalGroupsR :: HandlerEff Value
+getCountGlobalGroupsR :: Handler Value
 getCountGlobalGroupsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countGlobalGroupsM user_id
 
 
 
-getGlobalGroupStatsR :: HandlerEff Value
+getGlobalGroupStatsR :: Handler Value
 getGlobalGroupStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getGlobalGroupStatsM user_id
 
 
 
-getGlobalGroupStatR :: GlobalGroupId -> HandlerEff Value
+getGlobalGroupStatR :: GlobalGroupId -> Handler Value
 getGlobalGroupStatR global_group_id = do
   user_id <- _requireAuthId
   toJSON <$> getGlobalGroupStatM user_id global_group_id

@@ -22,14 +22,14 @@ import           All.User
 -- Handler
 --
 
-getResourcePacksR :: HandlerEff Value
+getResourcePacksR :: Handler Value
 getResourcePacksR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getResourcePacksM user_id
 
 
 
-getResourcePackR :: ResourceId -> HandlerEff Value
+getResourcePackR :: ResourceId -> Handler Value
 getResourcePackR thread_post_id = do
   user_id <- _requireAuthId
   toJSON <$> getResourcePackM user_id thread_post_id

@@ -37,14 +37,14 @@ import qualified LN.T.Like                 as L
 
 
 
-getThreadPostsR :: HandlerEff Value
+getThreadPostsR :: Handler Value
 getThreadPostsR = run $ do
   user_id <- _requireAuthId
   (toJSON . threadPostsToResponses) <$> getThreadPostsM user_id
 
 
 
-postThreadPostR0 :: HandlerEff Value
+postThreadPostR0 :: Handler Value
 postThreadPostR0 = do
 
   user_id <- _requireAuthId
@@ -61,14 +61,14 @@ postThreadPostR0 = do
 
 
 
-getThreadPostR :: ThreadPostId -> HandlerEff Value
+getThreadPostR :: ThreadPostId -> Handler Value
 getThreadPostR threadPost_id = do
   user_id <- _requireAuthId
   (toJSON . threadPostToResponse) <$> getThreadPostM user_id threadPost_id
 
 
 
-putThreadPostR :: ThreadPostId -> HandlerEff Value
+putThreadPostR :: ThreadPostId -> Handler Value
 putThreadPostR threadPost_id = do
   user_id <- _requireAuthId
   threadPost_request <- requireJsonBody
@@ -76,7 +76,7 @@ putThreadPostR threadPost_id = do
 
 
 
-deleteThreadPostR :: ThreadPostId -> HandlerEff Value
+deleteThreadPostR :: ThreadPostId -> Handler Value
 deleteThreadPostR threadPost_id = do
   user_id <- _requireAuthId
   void $ deleteThreadPostM user_id threadPost_id
@@ -84,7 +84,7 @@ deleteThreadPostR threadPost_id = do
 
 
 
-getCountThreadPostsR :: HandlerEff Value
+getCountThreadPostsR :: Handler Value
 getCountThreadPostsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countThreadPostsM user_id

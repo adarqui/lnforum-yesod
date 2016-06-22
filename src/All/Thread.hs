@@ -46,7 +46,7 @@ import qualified Database.Esqueleto     as E
 -- Handler
 --
 
-getThreadsR :: HandlerEff Value
+getThreadsR :: Handler Value
 getThreadsR = run $ do
 
   user_id <- _requireAuthId
@@ -55,7 +55,7 @@ getThreadsR = run $ do
 
 
 
-postThreadR0 :: HandlerEff Value
+postThreadR0 :: Handler Value
 postThreadR0 = do
 
   user_id <- _requireAuthId
@@ -71,21 +71,21 @@ postThreadR0 = do
 
 
 
-getThreadR :: ThreadId -> HandlerEff Value
+getThreadR :: ThreadId -> Handler Value
 getThreadR thread_id = do
   user_id <- _requireAuthId
   (toJSON . threadToResponse) <$> getThreadM user_id thread_id
 
 
 
-getThreadH :: Text -> HandlerEff Value
+getThreadH :: Text -> Handler Value
 getThreadH thread_name = do
   user_id <- _requireAuthId
   (toJSON . threadToResponse) <$> getThreadMH user_id thread_name
 
 
 
-putThreadR :: ThreadId -> HandlerEff Value
+putThreadR :: ThreadId -> Handler Value
 putThreadR thread_id = do
   user_id <- _requireAuthId
   thread_request <- requireJsonBody
@@ -93,7 +93,7 @@ putThreadR thread_id = do
 
 
 
-deleteThreadR :: ThreadId -> HandlerEff Value
+deleteThreadR :: ThreadId -> Handler Value
 deleteThreadR thread_id = do
   user_id <- _requireAuthId
   void $ deleteThreadM user_id thread_id
@@ -101,21 +101,21 @@ deleteThreadR thread_id = do
 
 
 
-getCountThreadsR :: HandlerEff Value
+getCountThreadsR :: Handler Value
 getCountThreadsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countThreadsM user_id
 
 
 
-getThreadStatsR :: HandlerEff Value
+getThreadStatsR :: Handler Value
 getThreadStatsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> getThreadStatsM user_id
 
 
 
-getThreadStatR :: ThreadId -> HandlerEff Value
+getThreadStatR :: ThreadId -> Handler Value
 getThreadStatR thread_id = do
   user_id <- _requireAuthId
   toJSON <$> getThreadStatM user_id thread_id

@@ -29,14 +29,14 @@ import           Import
 
 
 
-getApisR :: HandlerEff Value
+getApisR :: Handler Value
 getApisR = run $ do
   user_id <- _requireAuthId
   (toJSON . apisToResponses) <$> getApisM user_id
 
 
 
-postApisR :: HandlerEff Value
+postApisR :: Handler Value
 postApisR = run $ do
   user_id <- _requireAuthId
   api_request <- requireJsonBody
@@ -44,14 +44,14 @@ postApisR = run $ do
 
 
 
-getApiR :: ApiId -> HandlerEff Value
+getApiR :: ApiId -> Handler Value
 getApiR api_id = do
   user_id <- _requireAuthId
   (toJSON . apiToResponse) <$> getApiM user_id api_id
 
 
 
-putApiR :: ApiId -> HandlerEff Value
+putApiR :: ApiId -> Handler Value
 putApiR api_id = do
   user_id <- _requireAuthId
   api_request <- requireJsonBody
@@ -59,7 +59,7 @@ putApiR api_id = do
 
 
 
-deleteApiR :: ApiId -> HandlerEff Value
+deleteApiR :: ApiId -> Handler Value
 deleteApiR api_id = do
   user_id <- _requireAuthId
   void $ deleteApiM user_id api_id
