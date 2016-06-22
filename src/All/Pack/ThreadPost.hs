@@ -18,6 +18,8 @@ import           All.Star
 import           All.ThreadPost
 import           All.User
 
+import Control.Monad.Trans.State
+
 
 
 --
@@ -35,6 +37,14 @@ getThreadPostPackR :: ThreadPostId -> Handler Value
 getThreadPostPackR thread_post_id = do
   user_id <- requireAuthId
   toJSON <$> getThreadPostPackM user_id thread_post_id
+
+
+
+getThreadPostPackR' :: ThreadPostId -> Handler Value
+getThreadPostPackR' thread_post_id = do
+  flip evalStateT () $ do
+    user_id <- lift $ requireAuthId
+    toJSON <$> (lift $ getThreadPostPackM user_id thread_post_id)
 
 
 
