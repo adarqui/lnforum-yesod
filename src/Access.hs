@@ -47,8 +47,5 @@ userTeamsOf_OrganizationIdM user_id organization_id = do
 
   teams <- selectListDb'' [ TeamOrgId ==. organization_id, TeamActive ==. True ] [] TeamId
   catMaybes <$> mapM (\team@(Entity team_id _) -> do
-    m_team <- selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id ] []
-    case m_team of
-      Nothing -> pure Nothing
-      Just _  -> pure $ Just team)
+    maybe Nothing (const $ Just team) <$> selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id ] [])
     teams
