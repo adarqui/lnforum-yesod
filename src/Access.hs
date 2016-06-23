@@ -7,7 +7,8 @@ module Access (
   userTeamsOf_OrganizationIdM,
   organizationPermissions_BySystemTeamM,
   organizationPermissions_BySystemTeamsM,
-  organizationPermissions_ByOrganizationIdM
+  organizationPermissions_ByTeamsM,
+  userPermissions_ByOrganizationIdM,
 ) where
 
 
@@ -70,6 +71,19 @@ organizationPermissions_BySystemTeamsM = nub . concatMap organizationPermissions
 
 
 
-organizationPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
-organizationPermissions_ByOrganizationIdM user_id organization_id = do
-  pure []
+organizationPermissions_ByTeamsM :: [Entity Team] -> Permissions
+organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map (teamSystem . entityVal)
+
+
+
+
+userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
+userPermissions_ByOrganizationIdM user_id organization_id = do
+  org <- selectFirstDb [ OrganizationId ==. organization_id ] []
+  case org of
+    Nothing -> pure []
+    Just (Entity organization_id Organization{..}) -> do
+      user_teams <- userTeamsOf_OrganizationIdM user_id organization_id
+      case user_teams of
+        [] -> pure $ if organizationVisibility == Public then [Perm_Read] else []
+        xs -> pure $ organizationPermissions_ByTeamsM xs
