@@ -100,6 +100,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   organization_user    <- getUserM user_id organizationUserId
   organization_stats   <- getOrganizationStatM user_id (entityKey organization)
+  organization_perms   <- organizationPermissions_ByOrganizationIdM user_id org_id
   user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
 
   return $ OrganizationPackResponse {
@@ -110,7 +111,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponseStat           = organization_stats,
     organizationPackResponseLike           = Nothing,
     organizationPackResponseStar           = Nothing,
-    organizationPackResponsePermissions    = organizationPermissions_BySystemTeamsM $ map (teamSystem.entityVal) user_teams,
+    organizationPackResponsePermissions    = [],
     organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
   }
   where

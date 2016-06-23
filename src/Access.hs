@@ -6,7 +6,8 @@ module Access (
   isMemberOf_OrganizationId_TeamM,
   userTeamsOf_OrganizationIdM,
   organizationPermissions_BySystemTeamM,
-  organizationPermissions_BySystemTeamsM
+  organizationPermissions_BySystemTeamsM,
+  organizationPermissions_ByOrganizationIdM
 ) where
 
 
@@ -66,3 +67,9 @@ organizationPermissions_BySystemTeamM team =
 
 organizationPermissions_BySystemTeamsM :: [SystemTeam] -> Permissions
 organizationPermissions_BySystemTeamsM = nub . concatMap organizationPermissions_BySystemTeamM
+
+
+
+organizationPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
+organizationPermissions_ByOrganizationIdM user_id organization_id = do
+  pure []
