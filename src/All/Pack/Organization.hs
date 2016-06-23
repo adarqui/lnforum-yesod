@@ -18,6 +18,7 @@ import           Access
 import           All.Organization
 import           All.Prelude
 import           All.User
+import           Data.List        (nub)
 
 
 
@@ -109,7 +110,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponseStat           = organization_stats,
     organizationPackResponseLike           = Nothing,
     organizationPackResponseStar           = Nothing,
-    organizationPackResponsePermissions    = emptyPermissions,
+    organizationPackResponsePermissions    = organizationPermissions_BySystemTeamsM $ map (teamSystem.entityVal) user_teams,
     organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
   }
   where

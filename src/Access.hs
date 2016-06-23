@@ -5,16 +5,20 @@ module Access (
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,
   userTeamsOf_OrganizationIdM,
+  organizationPermissions_BySystemTeamM,
+  organizationPermissions_BySystemTeamsM
 ) where
 
 
 
 import           Api.Params
 import           Control
+import           Data.List       (nub)
 import           Import
 import           LN.T.Membership
-import           LN.T.Visibility
+import           LN.T.Permission
 import           LN.T.Team
+import           LN.T.Visibility
 import           Model.Misc
 
 
@@ -49,3 +53,16 @@ userTeamsOf_OrganizationIdM user_id organization_id = do
   catMaybes <$> mapM (\team@(Entity team_id _) -> do
     maybe Nothing (const $ Just team) <$> selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id ] [])
     teams
+
+
+
+organizationPermissions_BySystemTeamM :: SystemTeam -> Permissions
+organizationPermissions_BySystemTeamM team =
+  case team of
+    Team_Owners -> allPermissions
+    Team_Members -> [Perm_Read]
+
+
+
+organizationPermissions_BySystemTeamsM :: [SystemTeam] -> Permissions
+organizationPermissions_BySystemTeamsM = nub . concatMap organizationPermissions_BySystemTeamM
