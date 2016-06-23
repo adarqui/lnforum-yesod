@@ -14,6 +14,7 @@ module All.Pack.Organization (
 
 
 
+import           Access
 import           All.Organization
 import           All.Prelude
 import           All.User
@@ -98,7 +99,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   organization_user    <- getUserM user_id organizationUserId
   organization_stats   <- getOrganizationStatM user_id (entityKey organization)
-  is_org_member        <- isMemberOf_OrganizationIdM user_id org_id
+  user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
 
   return $ OrganizationPackResponse {
     organizationPackResponseOrganization   = organizationToResponse organization,
@@ -109,7 +110,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponseLike           = Nothing,
     organizationPackResponseStar           = Nothing,
     organizationPackResponsePermissions    = emptyPermissions,
-    organizationPackResponseIsMember       = is_org_member
+    organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
   }
   where
   organization_id = entityKeyToInt64 organization

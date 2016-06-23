@@ -3,7 +3,8 @@
 module Access (
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
-  isMemberOf_OrganizationId_TeamM
+  isMemberOf_OrganizationId_TeamM,
+  userTeamsOf_OrganizationIdM,
 ) where
 
 
@@ -38,3 +39,16 @@ isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
     Nothing                        -> pure False
     Just (Entity team_id Team{..}) -> do
       maybe False (const True) <$> selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] []
+
+
+
+userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff [Entity Team]
+userTeamsOf_OrganizationIdM user_id organization_id = do
+
+  teams <- selectListDb'' [ TeamOrgId ==. organization_id, TeamActive ==. True ] [] TeamId
+  catMaybes <$> mapM (\team@(Entity team_id _) -> do
+    m_team <- selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id ] []
+    case m_team of
+      Nothing -> pure Nothing
+      Just _  -> pure $ Just team)
+    teams

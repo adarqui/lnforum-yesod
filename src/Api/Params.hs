@@ -18,6 +18,7 @@ module Api.Params (
   spToSelectE,
   selectListDb,
   selectListDb',
+  selectListDb'',
   selectKeysListDb,
   selectKeysListDb',
   selectFirstDb,
@@ -421,6 +422,18 @@ selectListDb' :: forall val typ.
 selectListDb' query filt field = do
   sp <- lookupStandardParams
   selectListDb sp query filt field
+
+
+
+selectListDb'' :: forall val typ.
+  (PersistEntity val, PersistQuery (PersistEntityBackend val),
+  PersistEntityBackend val ~ SqlBackend) =>
+  [Filter val]
+  -> [SelectOpt val]
+  -> EntityField val typ
+  -> ControlMA (HandlerT App IO) [Entity val]
+selectListDb'' query filt field = do
+  _runDB $ selectList query filt
 
 
 
