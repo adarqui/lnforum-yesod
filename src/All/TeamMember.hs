@@ -42,9 +42,7 @@ getTeamMembersR = run $ do
 
 postTeamMemberR0 :: Handler Value
 postTeamMemberR0 = run $ do
-
   user_id <- _requireAuthId
-
   team_member_request <- requireJsonBody :: HandlerEff TeamMemberRequest
   (toJSON . teamMemberToResponse) <$> insertTeamMemberM user_id team_member_request
 
@@ -171,12 +169,37 @@ insertTeamMemberM user_id team_member_request = do
   --  TODO FIXME
   sp@StandardParams{..} <- lookupStandardParams
 
-  case spTeamId of
-    Nothing      -> notFound
-    Just team_id -> insertTeamMember_InternalM user_id team_id team_member_request
+  case (spOrganizationId, spTeamId) of
+    (Just organization_id, _)  -> insertTeamMember_JoinM user_id organization_id team_member_request
+    (_, Just team_id)          -> insertTeamMember_InternalM user_id team_id team_member_request
+    (_, _)                     -> notFound
 
 
 
+-- | Simple JOIN
+-- Find Team_Members and insert this user into that team
+--
+insertTeamMember_JoinM :: UserId -> OrganizationId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
+insertTeamMember_JoinM user_id organization_id team_member_request = do
+
+  ts <- timestampH'
+
+  (Entity team_id Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. organization_id, TeamSystem ==. Team_Members, TeamActive ==. True ] []
+
+  let
+    teamMember = (teamMemberRequestToTeamMember user_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
+
+  (Entity _ Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
+  case teamMembership of
+    Membership_Join -> insertEntityDb teamMember
+    _               -> lift $ permissionDenied "Unable to join team"
+
+
+
+-- | TODO ACCESS RESTRICTIONS
+-- 1. Can only add to owners, by an owner
+-- 2. Restrictions based on Membership
+--
 insertTeamMember_InternalM :: UserId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
 insertTeamMember_InternalM user_id team_id team_member_request = do
 
