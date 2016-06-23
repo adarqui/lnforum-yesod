@@ -77,6 +77,9 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 
 
 
+-- | Calculates permissions based on a user's membership of an Organization.
+-- If a user is not a member, calculates permissions based on the Organization's Visibility
+--
 userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
 userPermissions_ByOrganizationIdM user_id organization_id = do
   org <- selectFirstDb [ OrganizationId ==. organization_id ] []

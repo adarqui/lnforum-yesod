@@ -3,7 +3,6 @@ module All.TeamMember (
   getTeamMembersR,
   postTeamMemberR0,
   getTeamMemberR,
-  getTeamMemberH,
   putTeamMemberR,
   deleteTeamMemberR,
   getCountTeamMembersR,
@@ -15,11 +14,8 @@ module All.TeamMember (
 
   -- Model/Internal
   getTeamMembersM,
-  getTeamMembers_ByUserIdM,
-  getTeamMembers_ByEverythingM,
+  getTeamMembers_ByTeamIdM,
   getTeamMemberM,
-  getTeamMemberMH,
-  getTeamMemberMH',
   insertTeamMemberM,
   insertTeamMember_InternalM,
   updateTeamMemberM,
@@ -29,6 +25,7 @@ module All.TeamMember (
 
 
 import           All.Prelude
+import           LN.T.Membership
 
 
 
@@ -60,13 +57,6 @@ getTeamMemberR team_member_id = run $ do
 
 
 
-getTeamMemberH :: Text -> Handler Value
-getTeamMemberH team_name = run $ do
-  user_id <- _requireAuthId
-  (toJSON . teamMemberToResponse) <$> getTeamMemberMH user_id team_name
-
-
-
 putTeamMemberR :: TeamMemberId -> Handler Value
 putTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
@@ -79,7 +69,7 @@ deleteTeamMemberR :: TeamMemberId -> Handler Value
 deleteTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   void $ deleteTeamMemberM user_id team_member_id
-  sendResponseStatus status200 ("DELETED" :: Text)
+  pure $ toJSON ()
 
 
 
@@ -155,49 +145,23 @@ getTeamMembersM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case spUserId of
-    Just lookup_user_id -> getTeamMembers_ByUserIdM user_id lookup_user_id sp
-    _                   -> notFound
+  case spTeamId of
+    Just team_id -> getTeamMembers_ByTeamIdM user_id team_id sp
+    _            -> notFound
 
 
 
-getTeamMembers_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity TeamMember]
-getTeamMembers_ByUserIdM _ lookup_user_id sp = do
-  selectListDb sp [TeamMemberUserId ==. lookup_user_id] [] TeamMemberId
-
-
-
-getTeamMembers_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity TeamMember]
-getTeamMembers_ByEverythingM _ sp = do
-  selectListDb sp [] [] TeamMemberId
+getTeamMembers_ByTeamIdM :: UserId -> TeamId -> StandardParams -> HandlerEff [Entity TeamMember]
+getTeamMembers_ByTeamIdM _ team_id sp = do
+  -- TODO ACCESS:
+  selectListDb sp [TeamMemberTeamId ==. team_id] [] TeamMemberId
 
 
 
 getTeamMemberM :: UserId -> TeamMemberId -> HandlerEff (Entity TeamMember)
-getTeamMemberM _ team_memberid = do
-  notFoundMaybe =<< selectFirstDb [ TeamMemberId ==. team_memberid ] []
+getTeamMemberM _ team_member_id = do
+  notFoundMaybe =<< selectFirstDb [ TeamMemberId ==. team_member_id ] []
 
-
-
-getTeamMemberMH :: UserId -> Text -> HandlerEff (Entity TeamMember)
-getTeamMemberMH user_id team_member_name = do
-
-  sp@StandardParams{..} <- lookupStandardParams
-
-  case spUserId of
-
-    Just lookup_user_id -> getTeamMember_ByUserIdMH user_id team_member_name user_id sp
-    _                   -> getTeamMemberMH' user_id team_member_name sp
-
-
-
-getTeamMember_ByUserIdMH :: UserId -> Text -> UserId -> StandardParams -> HandlerEff (Entity TeamMember)
-getTeamMember_ByUserIdMH user_id team_member_name lookup_user_id _ = notFound
-
-
-
-getTeamMemberMH' :: UserId -> Text -> StandardParams -> HandlerEff (Entity TeamMember)
-getTeamMemberMH' user_id team_member_name _ = notFound
 
 
 
@@ -221,7 +185,10 @@ insertTeamMember_InternalM user_id team_id team_member_request = do
   let
     teamMember = (teamMemberRequestToTeamMember user_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
-  insertEntityDb teamMember
+  (Entity _ Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
+  case teamMembership of
+    Membership_Join -> insertEntityDb teamMember
+    _               -> lift $ permissionDenied "Unable to join team"
 
 
 

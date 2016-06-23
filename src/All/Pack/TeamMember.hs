@@ -4,10 +4,8 @@ module All.Pack.TeamMember (
   -- Handler
   getTeamMemberPacksR,
   getTeamMemberPackR,
-  getTeamMemberPackH,
 
   -- Model
-
 ) where
 
 
@@ -36,15 +34,6 @@ getTeamMemberPackR team_member_id = run $ do
 
 
 
-getTeamMemberPackH :: Text -> Handler Value
-getTeamMemberPackH team_member_name = run $ do
-  user_id <- _requireAuthId
-  toJSON <$> getTeamMemberPackMH user_id team_member_name
-
-
-
-
-
 
 --
 -- Model
@@ -55,10 +44,10 @@ getTeamMemberPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case spUserId of
+  case spTeamId of
 
-    Just lookup_user_id -> getTeamMemberPacks_ByUserIdM user_id lookup_user_id sp
-    _                   -> getTeamMemberPacks_ByEverythingM user_id sp
+    Just team_id -> getTeamMemberPacks_ByTeamIdM user_id team_id sp
+    _            -> notFound
 
 
 
@@ -70,31 +59,14 @@ getTeamMemberPackM user_id team_member_id = do
 
 
 
-getTeamMemberPackMH :: UserId -> Text -> HandlerEff TeamMemberPackResponse
-getTeamMemberPackMH user_id team_member_name = do
 
-  teamMember         <- getTeamMemberMH user_id team_member_name
-  getTeamMemberPack_ByTeamMemberM user_id teamMember
+getTeamMemberPacks_ByTeamIdM :: UserId -> TeamId -> StandardParams -> HandlerEff TeamMemberPackResponses
+getTeamMemberPacks_ByTeamIdM user_id team_id sp = do
 
-
-
-getTeamMemberPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff TeamMemberPackResponses
-getTeamMemberPacks_ByEverythingM user_id sp = do
-  teamMembers       <- getTeamMembers_ByEverythingM user_id sp
-  teamMembers_packs <- mapM (\teamMember -> getTeamMemberPack_ByTeamMemberM user_id teamMember) teamMembers
+  team_members      <- getTeamMembers_ByTeamIdM user_id team_id sp
+  team_member_packs <- mapM (\team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member) team_members
   return $ TeamMemberPackResponses {
-    teamMemberPackResponses = teamMembers_packs
-  }
-
-
-
-getTeamMemberPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff TeamMemberPackResponses
-getTeamMemberPacks_ByUserIdM user_id lookup_user_id sp = do
-
-  teamMembers       <- getTeamMembers_ByUserIdM user_id lookup_user_id sp
-  teamMembers_packs <- mapM (\teamMember -> getTeamMemberPack_ByTeamMemberM user_id teamMember) teamMembers
-  return $ TeamMemberPackResponses {
-    teamMemberPackResponses = teamMembers_packs
+    teamMemberPackResponses = team_member_packs
   }
 
 
