@@ -20,7 +20,6 @@ module All.ThreadPost (
   getThreadPostsM,
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
-  getThreadPosts_ByEverythingM,
   getThreadPostM,
   insertThreadPostM,
   updateThreadPostM,
@@ -195,7 +194,7 @@ getThreadPostsM user_id = do
 
     (_, _, _, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
 
-    (_, _, _, _, _, _)                   -> getThreadPosts_ByEverythingM user_id sp
+    (_, _, _, _, _, _)                   -> notFound
 
 
 
@@ -208,12 +207,6 @@ getThreadPosts_ByThreadIdM _ thread_id sp = do
 getThreadPosts_ByThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> HandlerEff [Entity ThreadPost]
 getThreadPosts_ByThreadPostIdM _ parent_id sp = do
   selectListDb sp [ThreadPostParentId ==. Just parent_id] [] ThreadPostId
-
-
-
-getThreadPosts_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity ThreadPost]
-getThreadPosts_ByEverythingM _ sp = do
-  selectListDb sp [] [] ThreadPostId
 
 
 

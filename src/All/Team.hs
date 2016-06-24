@@ -15,7 +15,6 @@ module All.Team (
   getTeamsM,
   getTeams_ByOrganizationIdM,
   getTeams_ByUserIdM,
-  getTeams_ByEverythingM,
   getTeamM,
   getTeamMH,
   insertTeam_InternalM,
@@ -181,12 +180,6 @@ getTeams_ByOrganizationIdM _ org_id sp = do
 getTeams_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Team]
 getTeams_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [TeamUserId ==. lookup_user_id] [] TeamId
-
-
-
-getTeams_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Team]
-getTeams_ByEverythingM _ sp = do
-  selectListDb sp [] [] TeamId
 
 
 

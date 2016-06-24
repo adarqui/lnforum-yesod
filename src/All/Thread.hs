@@ -25,7 +25,6 @@ module All.Thread (
   getThreads_ByBoardIdM,
   getThreads_ByBoardId_KeysM,
   getThreads_ByUserIdM,
-  getThreads_ByEverythingM,
   insertThreadM,
   updateThreadM,
   deleteThreadM,
@@ -251,7 +250,7 @@ getThreadsM user_id = do
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM user_id org_id sp
     (_, Just board_id, _)       -> getThreads_ByBoardIdM user_id board_id sp
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM user_id lookup_user_id sp
-    (_, _, _)                   -> getThreads_ByEverythingM user_id sp
+    (_, _, _)                   -> notFound
 
 
 
@@ -288,14 +287,6 @@ getThreads_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity
 getThreads_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ThreadUserId ==. lookup_user_id ] [] ThreadId
-
-
-
-getThreads_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Thread]
-getThreads_ByEverythingM _ sp = do
-
-  selectListDb sp [] [] ThreadId
-
 
 
 
