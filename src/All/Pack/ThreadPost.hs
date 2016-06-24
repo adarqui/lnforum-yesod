@@ -49,7 +49,20 @@ getThreadPostPackR thread_post_id = run $ do
 getThreadPostPacksM :: UserId -> HandlerEff ThreadPostPackResponses
 getThreadPostPacksM user_id = do
 
-  sp <- lookupStandardParams
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case (spForumId, spThreadId, spThreadPostId) of
+
+    (Just forum_id, _, _)       -> notFound
+
+    (_, Just thread_id, _)      -> getThreadPostPacks_BlehM user_id sp
+
+    (_, _, Just thread_post_id) -> getThreadPostPacks_BlehM user_id sp
+
+
+
+getThreadPostPacks_BlehM :: UserId -> StandardParams -> HandlerEff ThreadPostPackResponses
+getThreadPostPacks_BlehM user_id sp = do
 
   thread_posts <- getThreadPostsM user_id
   thread_post_packs <- mapM (\thread_post -> getThreadPostPack_ByThreadPostM user_id thread_post sp) thread_posts
@@ -57,6 +70,13 @@ getThreadPostPacksM user_id = do
   return $ ThreadPostPackResponses {
     threadPostPackResponses = thread_post_packs
   }
+
+
+
+getThreadPostPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff ThreadPostPackResponse
+getThreadPostPacks_ByForumIdM user_id forum_id sp = do
+--  forum <- getForumM user_id forum_id
+  notFound
 
 
 
