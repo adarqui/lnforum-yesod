@@ -147,6 +147,7 @@ boardToResponse :: Entity Board -> BoardResponse
 boardToResponse (Entity board_id Board{..}) = BoardResponse {
   boardResponseId                 = keyToInt64 board_id,
   boardResponseUserId             = keyToInt64 boardUserId,
+  boardResponseOrgId              = keyToInt64 boardOrgId,
   boardResponseForumId            =  keyToInt64 boardForumId,
   boardResponseParentId           = fmap keyToInt64 boardParentId,
   boardResponseName               = boardName,

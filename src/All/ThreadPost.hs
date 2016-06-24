@@ -138,6 +138,9 @@ threadPostToResponse :: Entity ThreadPost -> ThreadPostResponse
 threadPostToResponse (Entity thread_post_id ThreadPost{..}) = ThreadPostResponse {
   threadPostResponseId          = keyToInt64 thread_post_id,
   threadPostResponseUserId      = keyToInt64 threadPostUserId,
+  threadPostResponseOrgId       = keyToInt64 threadPostOrgId,
+  threadPostResponseForumId     = keyToInt64 threadPostForumId,
+  threadPostResponseBoardId     = keyToInt64 threadPostBoardId,
   threadPostResponseThreadId    = keyToInt64 threadPostThreadId,
   threadPostResponseParentId    = fmap keyToInt64 threadPostParentId,
   threadPostResponseTitle       = threadPostTitle,

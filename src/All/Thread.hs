@@ -158,6 +158,8 @@ threadToResponse :: Entity Thread -> ThreadResponse
 threadToResponse (Entity thread_id Thread{..}) = ThreadResponse {
   threadResponseId          = keyToInt64 thread_id,
   threadResponseUserId      = keyToInt64 threadUserId,
+  threadResponseOrgId       = keyToInt64 threadOrgId,
+  threadResponseForumId     = keyToInt64 threadForumId,
   threadResponseBoardId     = keyToInt64 threadBoardId,
   threadResponseName        = threadName,
   threadResponseDisplayName = threadDisplayName,

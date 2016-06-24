@@ -105,7 +105,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   return $ OrganizationPackResponse {
     organizationPackResponseOrganization   = organizationToResponse organization,
-    organizationPackResponseOrganizationId = org_id,
+    organizationPackResponseOrganizationId = keyToInt64 org_id,
     organizationPackResponseUser           = userToSanitizedResponse organization_user,
     organizationPackResponseUserId         = entityKeyToInt64 organization_user,
     organizationPackResponseStat           = organization_stats,
@@ -114,5 +114,3 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponsePermissions    = user_perms_by_org,
     organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
   }
-  where
-  org_id = entityKeyToInt64 organization
