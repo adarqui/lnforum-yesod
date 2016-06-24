@@ -22,7 +22,6 @@ module All.Forum (
   getForums_ByOrganizationIdM,
   getForums_ByOrganizationId_KeysM,
   getForums_ByUserIdM,
-  getForums_ByEverythingM,
   getForumM,
   getForumMH,
   getForum_ByOrganizationIdMH,
@@ -221,13 +220,6 @@ getForums_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity 
 getForums_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ForumUserId ==. lookup_user_id] [] ForumId
-
-
-
-getForums_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Forum]
-getForums_ByEverythingM _ sp = do
-
-  selectListDb sp [] [] ForumId
 
 
 
