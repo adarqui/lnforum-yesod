@@ -21,9 +21,7 @@ module All.Forum (
   getForumsM,
   getForums_ByOrganizationIdM,
   getForums_ByOrganizationId_KeysM,
-  getForums_ByOrganizationNameM,
   getForums_ByUserIdM,
-  getForums_ByUserNickM,
   getForums_ByEverythingM,
   getForumM,
   getForumMH,
@@ -194,17 +192,13 @@ getForumsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case (spOrganizationId, spOrganizationName, spUserId, spUserNick) of
+  case (spOrganizationId, spUserId) of
 
-    (Just org_id, _, _, _)         -> getForums_ByOrganizationIdM user_id org_id sp
+    (Just org_id, _)         -> getForums_ByOrganizationIdM user_id org_id sp
 
-    (_, Just org_name, _, _)       -> getForums_ByOrganizationNameM user_id org_name sp
+    (_, Just lookup_user_id) -> getForums_ByUserIdM user_id lookup_user_id sp
 
-    (_, _, Just lookup_user_id, _) -> getForums_ByUserIdM user_id lookup_user_id sp
-
-    (_, _, _, Just user_nick)      -> getForums_ByUserNickM user_id user_nick sp
-
-    (_, _, _, _)                   -> getForums_ByEverythingM user_id sp
+    (_, _)                   -> notFound
 
 
 
@@ -223,26 +217,10 @@ getForums_ByOrganizationId_KeysM _ org_id sp = do
 
 
 
-getForums_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Forum]
-getForums_ByOrganizationNameM user_id org_name sp = do
-
-  (Entity org_id _) <- getOrganizationMH user_id org_name
-  getForums_ByOrganizationIdM user_id org_id sp
-
-
-
 getForums_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Forum]
 getForums_ByUserIdM _ lookup_user_id sp = do
 
   selectListDb sp [ForumUserId ==. lookup_user_id] [] ForumId
-
-
-
-getForums_ByUserNickM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Forum]
-getForums_ByUserNickM user_id lookup_user_nick sp = do
-
-  (Entity lookup_user_id _) <- getUserMH user_id lookup_user_nick
-  getForums_ByUserIdM user_id lookup_user_id sp
 
 
 
@@ -275,15 +253,6 @@ getForumMH user_id forum_name = do
 
     Just org_id -> getForum_ByOrganizationIdMH user_id forum_name org_id sp
     _           -> notFound
-
-
-
--- getForum_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> HandlerEff (Entity Forum)
--- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name _ = do
-
---   (Entity org_id _) <- getOrganization_ByOrganizationNameM user_id org_name
---   notFoundMaybe =<< selectFirstDb [ForumOrgId ==. org_id, ForumName ==. forum_name] []
-
 
 
 

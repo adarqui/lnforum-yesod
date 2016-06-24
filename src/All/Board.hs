@@ -20,12 +20,9 @@ module All.Board (
   -- Model/Internal
   getBoardsM,
   getBoards_ByOrganizationIdM,
-  getBoards_ByOrganizationNameM,
   getBoards_ByForumIdM,
   getBoards_ByForumId_KeysM,
-  getBoards_ByForumNameM,
   getBoards_ByBoardParentIdM,
-  getBoards_ByEverythingM,
   getBoardM,
   getBoardMH,
   insertBoardM,
@@ -188,21 +185,15 @@ getBoardsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case (spOrganizationId, spOrganizationName, spForumId, spForumName, spParentId, spParentName) of
+  case (spOrganizationId, spForumId, spParentId) of
 
-    (J org_id, N, N, N, N, N)              -> getBoards_ByOrganizationIdM user_id org_id sp
+    (J org_id, N, N)              -> getBoards_ByOrganizationIdM user_id org_id sp
 
-    (N, J org_name, N, N, N, N)            -> getBoards_ByOrganizationNameM user_id org_name sp
+    (N, Just forum_id, N)         -> getBoards_ByForumIdM user_id forum_id sp
 
-    (N, N, Just forum_id, N, N, N)         -> getBoards_ByForumIdM user_id forum_id sp
+    (N, N, J board_parent_id)     -> getBoards_ByBoardParentIdM user_id (int64ToKey' board_parent_id) sp
 
---    (N, J org_name, N, J forum_name, N, N) -> getBoards_ByOrganizationName_ForumNameM user_id org_name forum_name sp
-
-    (N, N, N, N, J board_parent_id, N)     -> getBoards_ByBoardParentIdM user_id (int64ToKey' board_parent_id) sp
-
---    (N, J org_name, N, J forum_name, N, J board_name) -> getBoards_ByOrganizationName_ForumName_BoardParentNameM user_id org_name forum_name board_name sp
-
-    (_, _, _, _, _, _)                     -> getBoards_ByEverythingM user_id sp
+    (_, _, _)                     -> notFound
 
 
 
@@ -212,16 +203,6 @@ getBoards_ByOrganizationIdM user_id org_id sp = do
 
   -- TODO FIXME: move this to esqueleto
    forums <- getForums_ByOrganizationIdM user_id org_id sp
-   boards <- mapM (\(Entity forum_id _) -> getBoards_ByForumIdM user_id forum_id sp) forums
-   return $ concat boards
-
-
-
-getBoards_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Board]
-getBoards_ByOrganizationNameM user_id org_name sp = do
-
-  -- TODO FIXME: move this to esqueleto
-   forums <- getForums_ByOrganizationNameM user_id org_name sp
    boards <- mapM (\(Entity forum_id _) -> getBoards_ByForumIdM user_id forum_id sp) forums
    return $ concat boards
 
@@ -241,41 +222,10 @@ getBoards_ByForumId_KeysM _ forum_id sp = do
 
 
 
-getBoards_ByForumNameM :: UserId -> Text -> StandardParams -> HandlerEff [Entity Board]
-getBoards_ByForumNameM user_id forum_name sp = do
-
-  (Entity forum_id _) <- getForumMH user_id forum_name
-  getBoards_ByForumIdM user_id forum_id sp
-
-
-
--- getBoards_ByOrganizationName_ForumNameM :: UserId -> Text -> Text -> StandardParams -> HandlerEff [Entity Board]
--- getBoards_ByOrganizationName_ForumNameM user_id org_name forum_name sp = do
-
---   (Entity forum_id _) <- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name sp
---   selectListDb sp [BoardForumId ==. forum_id] [] BoardId
-
-
-
 getBoards_ByBoardParentIdM :: UserId -> BoardId -> StandardParams -> HandlerEff [Entity Board]
 getBoards_ByBoardParentIdM _ board_parent_id sp = do
 
   selectListDb sp [BoardParentId ==. Just board_parent_id] [] BoardId
-
-
-
--- getBoards_ByOrganizationName_ForumName_BoardParentNameM :: UserId -> Text -> Text -> Text -> StandardParams -> HandlerEff [Entity Board]
--- getBoards_ByOrganizationName_ForumName_BoardParentNameM user_id org_name forum_name parent_name sp = do
-
---   (Entity forum_id _) <- getForum_ByOrganizationName_ForumNameM user_id org_name forum_name sp
---   selectListDb sp [BoardName ==. parent_name, BoardForumId ==. forum_id] [] BoardId
-
-
-
-getBoards_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Board]
-getBoards_ByEverythingM _ sp = do
-
-  selectListDb sp [] [] BoardId
 
 
 

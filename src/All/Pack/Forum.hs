@@ -54,11 +54,10 @@ getForumPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case (spOrganizationId, spOrganizationName) of
+  case spOrganizationId of
 
-    (Just org_id, _)             -> getForumPacks_ByOrganizationIdM user_id org_id sp
-    (_          , Just org_name) -> getForumPacks_ByOrganizationNameM user_id org_name sp
-    (_          , _)             -> notFound
+    Just org_id   -> getForumPacks_ByOrganizationIdM user_id org_id sp
+    _             -> notFound
 
 
 
@@ -82,17 +81,6 @@ getForumPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams ->
 getForumPacks_ByOrganizationIdM user_id org_id sp = do
 
   forums       <- getForums_ByOrganizationIdM user_id org_id sp
-  forums_packs <- mapM (\forum -> getForumPack_ByForumM user_id forum) forums
-  return $ ForumPackResponses {
-    forumPackResponses = forums_packs
-  }
-
-
-
-getForumPacks_ByOrganizationNameM :: UserId -> Text -> StandardParams -> HandlerEff ForumPackResponses
-getForumPacks_ByOrganizationNameM user_id org_name sp = do
-
-  forums       <- getForums_ByOrganizationNameM user_id org_name sp
   forums_packs <- mapM (\forum -> getForumPack_ByForumM user_id forum) forums
   return $ ForumPackResponses {
     forumPackResponses = forums_packs
