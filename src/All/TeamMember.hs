@@ -18,6 +18,7 @@ module All.TeamMember (
   getTeamMemberM,
   insertTeamMemberM,
   insertTeamMember_InternalM,
+  insertTeamMember_BypassM,
   updateTeamMemberM,
   deleteTeamMemberM,
 ) where
@@ -215,6 +216,21 @@ insertTeamMember_InternalM user_id org_id team_id team_member_request = do
   case teamMembership of
     Membership_Join -> insertEntityDb teamMember
     _               -> lift $ permissionDenied "Unable to join team"
+
+
+
+insertTeamMember_BypassM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
+insertTeamMember_BypassM user_id org_id team_id team_member_request = do
+
+  ts <- timestampH'
+
+  let
+    teamMember = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
+
+  (Entity _ Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
+  case teamMembership of
+    _ -> insertEntityDb teamMember
+
 
 
 

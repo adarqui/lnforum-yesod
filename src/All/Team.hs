@@ -229,11 +229,11 @@ insert_SystemTeamsM user_id org_id = do
 
   -- bg job: Insert owners team
   (Entity owners_id team) <- insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
-  void $ insertTeamMember_InternalM user_id org_id owners_id (TeamMemberRequest 0)
+  void $ insertTeamMember_BypassM user_id org_id owners_id (TeamMemberRequest 0)
 
   -- bg job: Insert members team
   (Entity members_id team) <- insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
-  void $ insertTeamMember_InternalM user_id org_id members_id (TeamMemberRequest 0)
+  void $ insertTeamMember_BypassM user_id org_id members_id (TeamMemberRequest 0)
 
   return ()
 
