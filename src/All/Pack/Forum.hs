@@ -89,15 +89,10 @@ getForumPacks_ByOrganizationIdM user_id org_id sp = do
 
 
 getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerEff ForumPackResponse
-getForumPack_ByForumM user_id forum = do
+getForumPack_ByForumM user_id forum@(Entity forum_id Forum{..}) = do
 
-  -- let sp = defaultStandardParams {
-  --     spSortOrder = Just SortOrderBy_Dsc,
-  --     spOrder     = Just OrderBy_ActivityAt,
-  --     spLimit     = Just 1
-  --   }
-
-  forum_stats   <- getForumStatM user_id (entityKey forum)
+  forum_stats         <- getForumStatM user_id (entityKey forum)
+  user_perms_by_forum <- userPermissions_ByForumIdM user_id (entityKey forum)
 
   return $ ForumPackResponse {
     forumPackResponseForum            = forumToResponse forum,
@@ -106,7 +101,7 @@ getForumPack_ByForumM user_id forum = do
     forumPackResponseLike             = Nothing,
     forumPackResponseStar             = Nothing,
     forumPackResponseWithOrganization = Nothing,
-    forumPackResponsePermissions      = emptyPermissions
+    forumPackResponsePermissions      = user_perms_by_forum
   }
   where
   forum_id = entityKeyToInt64 forum

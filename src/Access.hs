@@ -9,6 +9,7 @@ module Access (
   organizationPermissions_BySystemTeamsM,
   organizationPermissions_ByTeamsM,
   userPermissions_ByOrganizationIdM,
+  userPermissions_ByForumIdM,
 ) where
 
 
@@ -76,6 +77,11 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 
 
 
+--
+-- TODO FIXME: HACKING STUFF UP, JUST TO GET STUFF WORKING
+--
+
+
 
 -- | Calculates permissions based on a user's membership of an Organization.
 -- If a user is not a member, calculates permissions based on the Organization's Visibility
@@ -90,3 +96,12 @@ userPermissions_ByOrganizationIdM user_id org_id = do
       case user_teams of
         [] -> pure $ if organizationVisibility == Public then [Perm_Read] else []
         xs -> pure $ organizationPermissions_ByTeamsM xs
+
+
+
+userPermissions_ByForumIdM :: UserId -> ForumId -> HandlerEff Permissions
+userPermissions_ByForumIdM user_id forum_id = do
+  m_forum <- selectFirstDb [ ForumId ==. forum_id ] []
+  case m_forum of
+    Nothing -> pure []
+    Just (Entity _ Forum{..}) -> userPermissions_ByOrganizationIdM user_id forumOrgId
