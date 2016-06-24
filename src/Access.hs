@@ -10,6 +10,9 @@ module Access (
   organizationPermissions_ByTeamsM,
   userPermissions_ByOrganizationIdM,
   userPermissions_ByForumIdM,
+  userPermissions_ByBoardIdM,
+  userPermissions_ByThreadIdM,
+  userPermissions_ByThreadPostIdM,
 ) where
 
 
@@ -105,3 +108,30 @@ userPermissions_ByForumIdM user_id forum_id = do
   case m_forum of
     Nothing -> pure []
     Just (Entity _ Forum{..}) -> userPermissions_ByOrganizationIdM user_id forumOrgId
+
+
+
+userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff Permissions
+userPermissions_ByBoardIdM user_id board_id = do
+  m_board <- selectFirstDb [ BoardId ==. board_id ] []
+  case m_board of
+    Nothing -> pure []
+    Just (Entity _ Board{..}) -> userPermissions_ByOrganizationIdM user_id boardOrgId
+
+
+
+userPermissions_ByThreadIdM :: UserId -> ThreadId -> HandlerEff Permissions
+userPermissions_ByThreadIdM user_id thread_id = do
+  m_thread <- selectFirstDb [ ThreadId ==. thread_id ] []
+  case m_thread of
+    Nothing -> pure []
+    Just (Entity _ Thread{..}) -> userPermissions_ByOrganizationIdM user_id threadOrgId
+
+
+
+userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff Permissions
+userPermissions_ByThreadPostIdM user_id thread_post_id = do
+  m_thread_post <- selectFirstDb [ ThreadPostId ==. thread_post_id ] []
+  case m_thread_post of
+    Nothing -> pure []
+    Just (Entity _ ThreadPost{..}) -> userPermissions_ByOrganizationIdM user_id threadPostOrgId
