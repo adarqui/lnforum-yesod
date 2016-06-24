@@ -54,9 +54,7 @@ getOrganizationsR = run $ do
 
 postOrganizationR0 :: Handler Value
 postOrganizationR0 = run $ do
-
   user_id <- _requireAuthId
-
   organization_request <- requireJsonBody :: HandlerEff OrganizationRequest
   (toJSON . organizationToResponse) <$> insertOrganizationM user_id organization_request
 
@@ -64,15 +62,11 @@ postOrganizationR0 = run $ do
 
 getOrganizationR :: OrganizationId -> Handler Value
 getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
---  user_id <- _requireAuthId
---  (toJSON . organizationToResponse) <$> getOrganizationM user_id org_id
 
 
 
 getOrganizationH :: Text -> Handler Value
 getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
---  user_id <- _requireAuthId
---  (toJSON . organizationToResponse) <$> getOrganizationMH user_id org_name
 
 
 
