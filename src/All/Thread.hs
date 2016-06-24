@@ -47,9 +47,7 @@ import qualified Database.Esqueleto     as E
 
 getThreadsR :: Handler Value
 getThreadsR = run $ do
-
   user_id <- _requireAuthId
-
   (toJSON . threadsToResponses) <$> getThreadsM user_id
 
 
