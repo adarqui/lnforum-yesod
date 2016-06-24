@@ -20,6 +20,7 @@ module All.GlobalGroup (
   -- Model/internal
   getGlobalGroupsM,
   getGlobalGroups_ByUserIdM,
+  getGlobalGroups_ByEverythingM,
   getGlobalGroupM,
   getGlobalGroupMH,
   getGlobalGroupMH',
@@ -179,6 +180,12 @@ getGlobalGroupsM user_id = do
 getGlobalGroups_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity GlobalGroup]
 getGlobalGroups_ByUserIdM _ lookup_user_id sp = do
   selectListDb sp [GlobalGroupUserId ==. lookup_user_id] [] GlobalGroupId
+
+
+
+getGlobalGroups_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity GlobalGroup]
+getGlobalGroups_ByEverythingM _ sp = do
+  selectListDb sp [] [] GlobalGroupId
 
 
 
