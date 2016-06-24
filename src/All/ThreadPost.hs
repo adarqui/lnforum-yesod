@@ -18,6 +18,7 @@ module All.ThreadPost (
 
   -- Model/Internal
   getThreadPostsM,
+  getThreadPosts_ByForumIdM,
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
   getThreadPostM,
@@ -182,16 +183,18 @@ getThreadPostsM _ mthread_id mthread_post_id = do
 
 getThreadPostsM :: UserId -> HandlerEff [Entity ThreadPost]
 getThreadPostsM user_id = do
-
   sp@StandardParams{..} <- lookupStandardParams
+  case (spForumId, spThreadId, spThreadPostId) of
+    (Just forum_id, _, _)       -> getThreadPosts_ByForumIdM user_id forum_id sp
+    (_, Just thread_id, _)      -> getThreadPosts_ByThreadIdM user_id thread_id sp
+    (_, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
+    (_, _, _)                   -> notFound
 
-  case (spThreadId, spThreadPostId) of
 
-    (Just thread_id, _)      -> getThreadPosts_ByThreadIdM user_id thread_id sp
 
-    (_, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
-
-    (_, _)                   -> notFound
+getThreadPosts_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff [Entity ThreadPost]
+getThreadPosts_ByForumIdM _ forum_id sp = do
+  selectListDb sp [ThreadPostForumId ==. forum_id] [] ThreadPostId
 
 
 
@@ -249,6 +252,8 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
   -- IMPORTANT: NEED TO UPDATE THREAD'S MODIFIED_AT
   --
+
+
 
 insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerEff (Entity ThreadPost)
 insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do

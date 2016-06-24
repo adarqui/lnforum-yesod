@@ -53,18 +53,18 @@ getThreadPostPacksM user_id = do
 
   case (spForumId, spThreadId, spThreadPostId) of
 
-    (Just forum_id, _, _)       -> notFound
+    (Just forum_id, _, _)       -> getThreadPostPacks_ByForumIdM user_id forum_id sp
 
-    (_, Just thread_id, _)      -> getThreadPostPacks_BlehM user_id sp
+    (_, Just thread_id, _)      -> getThreadPostPacks_ByThreadIdM user_id thread_id sp
 
-    (_, _, Just thread_post_id) -> getThreadPostPacks_BlehM user_id sp
+    (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM user_id thread_post_id sp
 
 
 
-getThreadPostPacks_BlehM :: UserId -> StandardParams -> HandlerEff ThreadPostPackResponses
-getThreadPostPacks_BlehM user_id sp = do
+getThreadPostPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff ThreadPostPackResponses
+getThreadPostPacks_ByForumIdM user_id forum_id sp = do
 
-  thread_posts <- getThreadPostsM user_id
+  thread_posts <- getThreadPosts_ByForumIdM user_id forum_id sp
   thread_post_packs <- mapM (\thread_post -> getThreadPostPack_ByThreadPostM user_id thread_post sp) thread_posts
 
   return $ ThreadPostPackResponses {
@@ -73,10 +73,27 @@ getThreadPostPacks_BlehM user_id sp = do
 
 
 
-getThreadPostPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff ThreadPostPackResponse
-getThreadPostPacks_ByForumIdM user_id forum_id sp = do
---  forum <- getForumM user_id forum_id
-  notFound
+getThreadPostPacks_ByThreadIdM :: UserId -> ThreadId -> StandardParams -> HandlerEff ThreadPostPackResponses
+getThreadPostPacks_ByThreadIdM user_id thread_id sp = do
+
+  thread_posts      <- getThreadPosts_ByThreadIdM user_id thread_id sp
+  thread_post_packs <- mapM (\thread_post -> getThreadPostPack_ByThreadPostM user_id thread_post sp) thread_posts
+
+  return $ ThreadPostPackResponses {
+    threadPostPackResponses = thread_post_packs
+  }
+
+
+
+getThreadPostPacks_ByThreadPostIdM :: UserId -> ThreadPostId -> StandardParams -> HandlerEff ThreadPostPackResponses
+getThreadPostPacks_ByThreadPostIdM user_id thread_post_id sp = do
+
+  thread_posts      <- getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
+  thread_post_packs <- mapM (\thread_post -> getThreadPostPack_ByThreadPostM user_id thread_post sp) thread_posts
+
+  return $ ThreadPostPackResponses {
+    threadPostPackResponses = thread_post_packs
+  }
 
 
 
