@@ -188,13 +188,13 @@ getThreadPostsM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
 
-  case (spOrganizationId, spUserId, spForumId, spBoardId, spThreadId, spThreadPostId) of
+  case (spThreadId, spThreadPostId) of
 
-    (_, _, _, _, Just thread_id, _)      -> getThreadPosts_ByThreadIdM user_id thread_id sp
+    (Just thread_id, _)      -> getThreadPosts_ByThreadIdM user_id thread_id sp
 
-    (_, _, _, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
+    (_, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM user_id thread_post_id sp
 
-    (_, _, _, _, _, _)                   -> notFound
+    (_, _)                   -> notFound
 
 
 
