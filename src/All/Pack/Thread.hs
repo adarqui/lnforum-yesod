@@ -108,6 +108,8 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
     Nothing -> pure Nothing
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
 
+  user_perms_by_thread <- userPermissions_ByThreadIdM user_id (entityKey thread)
+
   return $ ThreadPackResponse {
     threadPackResponseThread               = threadToResponse thread,
     threadPackResponseThreadId             = keyToInt64 thread_id,
@@ -121,5 +123,5 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
     threadPackResponseWithOrganization     = Nothing,
     threadPackResponseWithForum            = Nothing,
     threadPackResponseWithBoard            = Nothing,
-    threadPackResponsePermissions          = emptyPermissions
+    threadPackResponsePermissions          = user_perms_by_thread
   }

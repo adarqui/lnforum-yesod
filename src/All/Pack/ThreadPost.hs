@@ -121,6 +121,7 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
              then pure Nothing
              else pure Nothing)
 
+  user_perms_by_thread_post <- userPermissions_ByThreadPostM user_id (entityKey thread_post)
   return $ ThreadPostPackResponse {
     threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
     threadPostPackResponseThreadPostId     = keyToInt64 thread_post_id,
@@ -133,5 +134,5 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseWithForum        = Nothing,
     threadPostPackResponseWithBoard        = Nothing,
     threadPostPackResponseWithThread       = Nothing,
-    threadPostPackResponsePermissions      = emptyPermissions
+    threadPostPackResponsePermissions      = user_perms_by_thread_post
   }

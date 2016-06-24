@@ -102,6 +102,9 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
     Nothing -> pure Nothing
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
 
+
+  user_perms_by_board <- userPermissions_ByBoardIdM user_id (entityKey board)
+
   return $ BoardPackResponse {
     boardPackResponseBoard                = boardToResponse board,
     boardPackResponseBoardId              = keyToInt64 board_id,
@@ -113,7 +116,7 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
     boardPackResponseStar                 = Nothing,
     boardPackResponseWithOrganization     = Nothing,
     boardPackResponseWithForum            = Nothing,
-    boardPackResponsePermissions          = emptyPermissions
+    boardPackResponsePermissions          = user_perms_by_board
   }
 
 
