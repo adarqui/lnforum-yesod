@@ -52,18 +52,9 @@ getBoardsR = run $ do
 
 postBoardR0 :: Handler Value
 postBoardR0 = run $ do
-
   user_id <- _requireAuthId
-
-  sp <- lookupStandardParams
-
-  case (spForumId sp, spBoardId sp) of
-
-    (Nothing, Nothing) -> permissionDenied "Must supply a forum_id or board_id"
-
-    _ -> do
-      board_request <- requireJsonBody :: HandlerEff BoardRequest
-      (toJSON . boardToResponse)  <$> insertBoardM user_id (spForumId sp) (spBoardId sp) board_request
+  board_request <- requireJsonBody :: HandlerEff BoardRequest
+  (toJSON . boardToResponse) <$> insertBoardM user_id board_request
 
 
 
@@ -118,10 +109,10 @@ getBoardStatR board_id = run $ do
 -- Model/Function
 --
 
-boardRequestToBoard :: UserId -> ForumId -> Maybe BoardId -> BoardRequest -> Board
-boardRequestToBoard user_id forum_id m_board_id BoardRequest{..} = Board {
+boardRequestToBoard :: UserId -> OrganizationId -> ForumId -> Maybe BoardId -> BoardRequest -> Board
+boardRequestToBoard user_id org_id forum_id m_board_id BoardRequest{..} = Board {
   boardUserId             = user_id,
-  boardOrgId              = dummyId,
+  boardOrgId              = org_id,
   boardForumId            = forum_id,
   boardParentId           = m_board_id,
   boardName               = toPrettyUrl boardRequestDisplayName,
@@ -251,8 +242,8 @@ getBoardMH _ board_name = do
 
 
 
-insertBoardM :: UserId -> Maybe ForumId -> Maybe BoardId -> BoardRequest -> HandlerEff (Entity Board)
-insertBoardM user_id forum_id _ board_request = do
+insertBoardM :: UserId -> BoardRequest -> HandlerEff (Entity Board)
+insertBoardM user_id board_request = do
 
   ts <- timestampH'
 
@@ -260,16 +251,17 @@ insertBoardM user_id forum_id _ board_request = do
 
   case (spForumId, spBoardId) of
 
-    (Nothing, Nothing) -> permissionDenied "Must supply a forum_id or board_id"
-
     (Just forum_id, _) -> do
 
-      insertEntityDb $ (boardRequestToBoard user_id forum_id Nothing board_request) { boardCreatedAt = Just ts }
+      (Entity _ Forum{..}) <- notFoundMaybe =<< selectFirstDb [ForumId ==. forum_id] []
+      insertEntityDb $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
 
     (_, Just board_id) -> do
 
       (Entity board_id Board{..}) <- notFoundMaybe =<< selectFirstDb [ BoardId ==. board_id ] []
-      insertEntityDb $ (boardRequestToBoard user_id boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
+      insertEntityDb $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
+
+    (_, _)             -> permissionDenied "Must supply a forum_id or board_id"
 
 
 
@@ -279,7 +271,7 @@ updateBoardM user_id board_id board_request = do
   ts <- timestampH'
 
   let
-    Board{..} = (boardRequestToBoard user_id dummyId Nothing board_request) { boardModifiedAt = Just ts }
+    Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing board_request) { boardModifiedAt = Just ts }
 
   updateWhereDb
     [ BoardUserId ==. user_id, BoardId ==. board_id ]
