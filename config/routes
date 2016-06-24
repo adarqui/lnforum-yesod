@@ -188,6 +188,9 @@
 /api/team_member TeamMemberR0 POST
 /api/team_member/#TeamMemberId TeamMemberR GET PUT DELETE
 
+/api/team_member_packs TeamMemberPacksR GET
+/api/team_member_pack/#TeamMemberId TeamMemberPackR GET
+
 
 
 /api/threads ThreadsR GET
