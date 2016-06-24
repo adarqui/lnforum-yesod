@@ -171,7 +171,7 @@ lookupStandardParams = do
   bucket_id          <- lookupGetParam $ tshow ParamTag_ByBucketId
   forum_id           <- lookupGetParam $ tshow ParamTag_ByForumId
   leuron_id          <- lookupGetParam $ tshow ParamTag_ByLeuronId
-  organization_id    <- lookupGetParam $ tshow ParamTag_ByOrganizationId
+  org_id    <- lookupGetParam $ tshow ParamTag_ByOrganizationId
   pm_id              <- lookupGetParam $ tshow ParamTag_ByPmId
   reminder_id        <- lookupGetParam $ tshow ParamTag_ByReminderId
   reminder_folder_id <- lookupGetParam $ tshow ParamTag_ByReminderFolderId
@@ -219,7 +219,7 @@ lookupStandardParams = do
     spBucketId         = fmap textToKey' bucket_id,
     spForumId          = fmap textToKey' forum_id,
     spLeuronId         = fmap textToKey' leuron_id,
-    spOrganizationId   = fmap textToKey' organization_id,
+    spOrganizationId   = fmap textToKey' org_id,
     spPmId             = fmap textToKey' pm_id,
     spReminderId       = fmap textToKey' reminder_id,
     spReminderFolderId = fmap textToKey' reminder_folder_id,

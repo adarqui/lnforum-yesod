@@ -55,7 +55,7 @@ getTeamPacksM user_id = do
 
   case (spOrganizationId, spUserId, spSelf) of
 
-    (Just organization_id, _, _) -> getTeamPacks_ByOrganizationIdM user_id organization_id sp
+    (Just org_id, _, _) -> getTeamPacks_ByOrganizationIdM user_id org_id sp
     (_, Just lookup_user_id, _)  -> getTeamPacks_ByUserIdM user_id lookup_user_id sp
     (_, _, _)                    -> notFound
 
@@ -75,8 +75,8 @@ getTeamPackMH user_id team_name = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case spOrganizationId of
-    Just organization_id -> do
-      team <- getTeamMH user_id team_name organization_id
+    Just org_id -> do
+      team <- getTeamMH user_id team_name org_id
       getTeamPack_ByTeamM user_id team
     Nothing              -> notFound
 
@@ -94,8 +94,8 @@ getTeamPacks_ByUserIdM user_id lookup_user_id sp = do
 
 
 getTeamPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff TeamPackResponses
-getTeamPacks_ByOrganizationIdM user_id organization_id sp = do
-  teams       <- getTeams_ByOrganizationIdM user_id organization_id sp
+getTeamPacks_ByOrganizationIdM user_id org_id sp = do
+  teams       <- getTeams_ByOrganizationIdM user_id org_id sp
   teams_packs <- mapM (\team -> getTeamPack_ByTeamM user_id team) teams
   return $ TeamPackResponses {
     teamPackResponses = teams_packs

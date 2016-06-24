@@ -49,9 +49,9 @@ isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
 
 userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff [Entity Team]
-userTeamsOf_OrganizationIdM user_id organization_id = do
+userTeamsOf_OrganizationIdM user_id org_id = do
 
-  teams <- selectListDb'' [ TeamOrgId ==. organization_id, TeamActive ==. True ] [] TeamId
+  teams <- selectListDb'' [ TeamOrgId ==. org_id, TeamActive ==. True ] [] TeamId
   catMaybes <$> mapM (\team@(Entity team_id _) -> do
     maybe Nothing (const $ Just team) <$> selectFirstDb [ TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id ] [])
     teams
@@ -81,12 +81,12 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 -- If a user is not a member, calculates permissions based on the Organization's Visibility
 --
 userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
-userPermissions_ByOrganizationIdM user_id organization_id = do
-  org <- selectFirstDb [ OrganizationId ==. organization_id ] []
+userPermissions_ByOrganizationIdM user_id org_id = do
+  org <- selectFirstDb [ OrganizationId ==. org_id ] []
   case org of
     Nothing -> pure []
-    Just (Entity organization_id Organization{..}) -> do
-      user_teams <- userTeamsOf_OrganizationIdM user_id organization_id
+    Just (Entity org_id Organization{..}) -> do
+      user_teams <- userTeamsOf_OrganizationIdM user_id org_id
       case user_teams of
         [] -> pure $ if organizationVisibility == Public then [Perm_Read] else []
         xs -> pure $ organizationPermissions_ByTeamsM xs

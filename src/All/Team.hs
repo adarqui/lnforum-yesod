@@ -190,11 +190,11 @@ getTeamM _ team_id = do
 
 
 getTeamMH :: UserId -> Text -> OrganizationId -> HandlerEff (Entity Team)
-getTeamMH _ team_sid organization_id = do
+getTeamMH _ team_sid org_id = do
   case m_system_team of
     Nothing          -> notFound
     Just system_team -> do
-      notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. organization_id, TeamSystem ==. system_team ] []
+      notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. org_id, TeamSystem ==. system_team ] []
 
   where
   m_system_team = readMay $ T.unpack team_sid
@@ -225,14 +225,14 @@ insertTeam_InternalM user_id org_id system_team team_request = do
 
 
 insert_SystemTeamsM :: UserId -> OrganizationId -> HandlerEff ()
-insert_SystemTeamsM user_id organization_id = do
+insert_SystemTeamsM user_id org_id = do
 
   -- bg job: Insert owners team
-  (Entity owners_id team) <- insertTeam_InternalM user_id organization_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
+  (Entity owners_id team) <- insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
   void $ insertTeamMember_InternalM user_id owners_id (TeamMemberRequest 0)
 
   -- bg job: Insert members team
-  (Entity members_id team) <- insertTeam_InternalM user_id organization_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
+  (Entity members_id team) <- insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
   void $ insertTeamMember_InternalM user_id members_id (TeamMemberRequest 0)
 
   return ()

@@ -89,6 +89,7 @@ getTeamMembersCountR = run $ do
 teamMemberRequestToTeamMember :: UserId -> TeamId -> TeamMemberRequest -> TeamMember
 teamMemberRequestToTeamMember user_id team_id TeamMemberRequest{..} = TeamMember {
   teamMemberUserId      = user_id,
+  teamMemberOrgId       = dummyId,
   teamMemberTeamId      = team_id,
   teamMemberIsAccepted  = False,
   teamMemberAcceptedAt  = Nothing,
@@ -108,6 +109,7 @@ teamMemberToResponse :: Entity TeamMember -> TeamMemberResponse
 teamMemberToResponse (Entity team_memberid TeamMember{..}) = TeamMemberResponse {
   teamMemberResponseId          = keyToInt64 team_memberid,
   teamMemberResponseUserId      = keyToInt64 teamMemberUserId,
+  teamMemberResponseOrgId       = keyToInt64 teamMemberOrgId,
   teamMemberResponseTeamId      = keyToInt64 teamMemberTeamId,
   teamMemberResponseIsAccepted  = teamMemberIsAccepted,
   teamMemberResponseAcceptedAt  = teamMemberAcceptedAt,
@@ -170,7 +172,7 @@ insertTeamMemberM user_id team_member_request = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case (spOrganizationId, spTeamId) of
-    (Just organization_id, _)  -> insertTeamMember_JoinM user_id organization_id team_member_request
+    (Just org_id, _)  -> insertTeamMember_JoinM user_id org_id team_member_request
     (_, Just team_id)          -> insertTeamMember_InternalM user_id team_id team_member_request
     (_, _)                     -> notFound
 
@@ -180,11 +182,11 @@ insertTeamMemberM user_id team_member_request = do
 -- Find Team_Members and insert this user into that team
 --
 insertTeamMember_JoinM :: UserId -> OrganizationId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
-insertTeamMember_JoinM user_id organization_id team_member_request = do
+insertTeamMember_JoinM user_id org_id team_member_request = do
 
   ts <- timestampH'
 
-  (Entity team_id Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. organization_id, TeamSystem ==. Team_Members, TeamActive ==. True ] []
+  (Entity team_id Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True ] []
 
   let
     teamMember = (teamMemberRequestToTeamMember user_id team_id team_member_request) { teamMemberCreatedAt = Just ts }

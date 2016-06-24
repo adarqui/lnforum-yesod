@@ -54,17 +54,9 @@ getForumsR = run $ do
 
 postForumR0 :: Handler Value
 postForumR0 = run $ do
-
   user_id <- _requireAuthId
-
-  sp <- lookupStandardParams
-
-  case (spOrganizationId sp) of
-    Nothing -> permissionDenied "Must supply org_id"
-
-    (Just org_id) -> do
-      forum_request <- requireJsonBody :: HandlerEff ForumRequest
-      (toJSON . forumToResponse) <$> insertForumM user_id org_id forum_request
+  forum_request <- requireJsonBody :: HandlerEff ForumRequest
+  (toJSON . forumToResponse) <$> insertForumM user_id forum_request
 
 
 
@@ -248,8 +240,19 @@ getForumMH user_id forum_name = do
 
 
 
-insertForumM :: UserId -> OrganizationId -> ForumRequest -> HandlerEff (Entity Forum)
-insertForumM user_id org_id forum_request = do
+insertForumM :: UserId -> ForumRequest -> HandlerEff (Entity Forum)
+insertForumM user_id forum_request = do
+
+  sp@StandardParams{..} <- lookupStandardParams
+
+  case spOrganizationId of
+    Just org_id -> insertForum_ByOrganizationIdM user_id org_id forum_request
+    _                    -> permissionDenied "Must supply an org_id"
+
+
+
+insertForum_ByOrganizationIdM :: UserId -> OrganizationId -> ForumRequest -> HandlerEff (Entity Forum)
+insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
   ts <- timestampH'
 

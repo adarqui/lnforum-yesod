@@ -65,7 +65,7 @@ postOrganizationR0 = run $ do
 getOrganizationR :: OrganizationId -> Handler Value
 getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
 --  user_id <- _requireAuthId
---  (toJSON . organizationToResponse) <$> getOrganizationM user_id organization_id
+--  (toJSON . organizationToResponse) <$> getOrganizationM user_id org_id
 
 
 
@@ -83,17 +83,17 @@ getOrganizationR' f a = run $ do
 
 
 putOrganizationR :: OrganizationId -> Handler Value
-putOrganizationR organization_id = run $ do
+putOrganizationR org_id = run $ do
   user_id <- _requireAuthId
   organization_request <- requireJsonBody
-  (toJSON . organizationToResponse) <$> updateOrganizationM user_id organization_id organization_request
+  (toJSON . organizationToResponse) <$> updateOrganizationM user_id org_id organization_request
 
 
 
 deleteOrganizationR :: OrganizationId -> Handler Value
-deleteOrganizationR organization_id = run $ do
+deleteOrganizationR org_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteOrganizationM user_id organization_id
+  void $ deleteOrganizationM user_id org_id
   pure $ toJSON ()
 
 
@@ -113,9 +113,9 @@ getOrganizationStatsR = run $ do
 
 
 getOrganizationStatR :: OrganizationId -> Handler Value
-getOrganizationStatR organization_id = run $ do
+getOrganizationStatR org_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getOrganizationStatM user_id organization_id
+  toJSON <$> getOrganizationStatM user_id org_id
 
 
 
@@ -152,8 +152,8 @@ organizationRequestToOrganization user_id OrganizationRequest{..} = Organization
 
 
 organizationToResponse :: Entity Organization -> OrganizationResponse
-organizationToResponse (Entity organization_id Organization{..}) = OrganizationResponse {
-  organizationResponseId          = keyToInt64 organization_id,
+organizationToResponse (Entity org_id Organization{..}) = OrganizationResponse {
+  organizationResponseId          = keyToInt64 org_id,
   organizationResponseUserId      = keyToInt64 organizationUserId,
   organizationResponseName        = organizationName,
   organizationResponseDisplayName = organizationDisplayName,
@@ -261,16 +261,16 @@ insertOrganizationM user_id organization_request = do
         organizationEmailMD5 = email_md5
       , organizationCreatedAt = Just ts
     }
-  org@(Entity organization_id _) <- insertEntityDb organization
+  org@(Entity org_id _) <- insertEntityDb organization
 
-  void $ insert_SystemTeamsM user_id organization_id
+  void $ insert_SystemTeamsM user_id org_id
 
   return org
 
 
 
 updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (Entity Organization)
-updateOrganizationM user_id organization_id organization_request = do
+updateOrganizationM user_id org_id organization_request = do
 
   void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
@@ -281,7 +281,7 @@ updateOrganizationM user_id organization_id organization_request = do
     Organization{..} = (organizationRequestToOrganization user_id organization_request) { organizationModifiedAt = Just ts }
 
   updateWhereDb
-    [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
+    [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
     [ OrganizationModifiedAt  =. organizationModifiedAt
     , OrganizationActivityAt  =. Just ts
     , OrganizationName        =. organizationName
@@ -297,30 +297,30 @@ updateOrganizationM user_id organization_id organization_request = do
     , OrganizationVisibility  =. organizationVisibility
     , OrganizationGuard      +=. 1
     ]
-  notFoundMaybe =<< selectFirstDb [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ] []
+  notFoundMaybe =<< selectFirstDb [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ] []
 
 
 
 deleteOrganizationM :: UserId -> OrganizationId -> HandlerEff ()
-deleteOrganizationM user_id organization_id = do
+deleteOrganizationM user_id org_id = do
 
-  deleteCascadeWhereDb [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
+  deleteCascadeWhereDb [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
 
 {-
   -- bg job: Delete owners team
-  deleteOrganizationTeamsM user_id organization_id
+  deleteOrganizationTeamsM user_id org_id
 
   -- bg job: Delete Org
-  void $ _runDB $ deleteWhere [ OrganizationUserId ==. user_id, OrganizationId ==. organization_id ]
+  void $ _runDB $ deleteWhere [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
   -}
 
 
 
 
 deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerEff ()
-deleteOrganizationTeamsM _ organization_id = do
+deleteOrganizationTeamsM _ org_id = do
   -- TODO: FIXME: security
-  deleteWhereDb [ TeamOrgId ==. organization_id ]
+  deleteWhereDb [ TeamOrgId ==. org_id ]
 
 
 
@@ -352,10 +352,10 @@ getOrganizationStatsM _ = do
 
 
 getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff OrganizationStatResponse
-getOrganizationStatM _ organization_id = do
+getOrganizationStatM _ org_id = do
 
   return $ OrganizationStatResponse {
-    organizationStatResponseOrganizationId = keyToInt64 organization_id,
+    organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,
     organizationStatResponseMembers        = 0,
     organizationStatResponseForums         = 0,

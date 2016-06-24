@@ -57,6 +57,7 @@ Team
 
 TeamMember
   userId      UserId
+  orgId       OrganizationId
   teamId      TeamId
   isAccepted  Bool default=False
   acceptedAt  UTCTime Maybe

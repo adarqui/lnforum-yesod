@@ -34,9 +34,9 @@ getOrganizationPacksR = run $ do
 
 
 getOrganizationPackR :: OrganizationId -> Handler Value
-getOrganizationPackR organization_id = run $ do
+getOrganizationPackR org_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getOrganizationPackM user_id organization_id
+  toJSON <$> getOrganizationPackM user_id org_id
 
 
 
@@ -64,9 +64,9 @@ getOrganizationPacksM user_id = do
 
 
 getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff OrganizationPackResponse
-getOrganizationPackM user_id organization_id = do
+getOrganizationPackM user_id org_id = do
 
-  organization         <- getOrganizationM user_id organization_id
+  organization         <- getOrganizationM user_id org_id
   getOrganizationPack_ByOrganizationM user_id organization
 
 
@@ -105,7 +105,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   return $ OrganizationPackResponse {
     organizationPackResponseOrganization   = organizationToResponse organization,
-    organizationPackResponseOrganizationId = organization_id,
+    organizationPackResponseOrganizationId = org_id,
     organizationPackResponseUser           = userToSanitizedResponse organization_user,
     organizationPackResponseUserId         = entityKeyToInt64 organization_user,
     organizationPackResponseStat           = organization_stats,
@@ -115,4 +115,4 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
     organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
   }
   where
-  organization_id = entityKeyToInt64 organization
+  org_id = entityKeyToInt64 organization
