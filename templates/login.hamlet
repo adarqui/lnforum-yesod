@@ -10,9 +10,3 @@
 
     <div>
       <a href=@{AuthR $ oauth2Url "google"}>Sign in with Google
-
-    <div>
-      <a href=@{AuthR $ oauth2Url "facebook"}>Sign in with Facebook
-
-    <div>
-      <a href=@{AuthR $ oauth2Url "twitter"}>Sign in with Twitter

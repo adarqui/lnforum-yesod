@@ -11,12 +11,3 @@
 
     <div>
       <a .btn .btn-block .btn-social .btn-google href=@{AuthR $ oauth2Url "google"}>
-        <span .fa .fa-google>Sign in with Google
-
-    <div>
-      <a .btn .btn-block .btn-social .btn-facebook href=@{AuthR $ oauth2Url "facebook"}>
-        <span .fa .fa-facebook>Sign in with Facebook
-
-    <div>
-      <a .btn .btn-block .btn-social .btn-twitter href=@{AuthR $ oauth2Url "twitter"}>
-        <span .fa .fa-twitter>Sign in with Twitter
