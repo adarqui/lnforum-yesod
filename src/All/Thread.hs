@@ -133,6 +133,8 @@ getThreadStatR thread_id = run $ do
 threadRequestToThread :: UserId -> BoardId -> ThreadRequest -> Thread
 threadRequestToThread user_id board_id ThreadRequest{..} = Thread {
   threadUserId      = user_id,
+  threadOrgId       = dummyId,
+  threadForumId     = dummyId,
   threadBoardId     = board_id,
   threadName        = toPrettyUrl threadRequestDisplayName,
   threadDisplayName = threadRequestDisplayName,

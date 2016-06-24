@@ -115,6 +115,9 @@ getThreadPostStatR thread_post_id = run $ do
 threadPostRequestToThreadPost :: UserId -> ThreadId -> Maybe ThreadPostId -> ThreadPostRequest -> ThreadPost
 threadPostRequestToThreadPost user_id thread_id _ ThreadPostRequest{..} = ThreadPost {
   threadPostUserId      = user_id,
+  threadPostOrgId       = dummyId,
+  threadPostForumId     = dummyId,
+  threadPostBoardId     = dummyId,
   threadPostThreadId    = thread_id,
   threadPostParentId    = Nothing,
   threadPostTitle       = threadPostRequestTitle,

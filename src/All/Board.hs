@@ -121,6 +121,7 @@ getBoardStatR board_id = run $ do
 boardRequestToBoard :: UserId -> ForumId -> Maybe BoardId -> BoardRequest -> Board
 boardRequestToBoard user_id forum_id m_board_id BoardRequest{..} = Board {
   boardUserId             = user_id,
+  boardOrgId              = dummyId,
   boardForumId            = forum_id,
   boardParentId           = m_board_id,
   boardName               = toPrettyUrl boardRequestDisplayName,
