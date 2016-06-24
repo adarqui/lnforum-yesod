@@ -86,10 +86,10 @@ getTeamMembersCountR = run $ do
 -- Model/Function
 --
 
-teamMemberRequestToTeamMember :: UserId -> TeamId -> TeamMemberRequest -> TeamMember
-teamMemberRequestToTeamMember user_id team_id TeamMemberRequest{..} = TeamMember {
+teamMemberRequestToTeamMember :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> TeamMember
+teamMemberRequestToTeamMember user_id org_id team_id TeamMemberRequest{..} = TeamMember {
   teamMemberUserId      = user_id,
-  teamMemberOrgId       = dummyId,
+  teamMemberOrgId       = org_id,
   teamMemberTeamId      = team_id,
   teamMemberIsAccepted  = False,
   teamMemberAcceptedAt  = Nothing,
@@ -106,8 +106,8 @@ teamMemberRequestToTeamMember user_id team_id TeamMemberRequest{..} = TeamMember
 
 
 teamMemberToResponse :: Entity TeamMember -> TeamMemberResponse
-teamMemberToResponse (Entity team_memberid TeamMember{..}) = TeamMemberResponse {
-  teamMemberResponseId          = keyToInt64 team_memberid,
+teamMemberToResponse (Entity team_member_id TeamMember{..}) = TeamMemberResponse {
+  teamMemberResponseId          = keyToInt64 team_member_id,
   teamMemberResponseUserId      = keyToInt64 teamMemberUserId,
   teamMemberResponseOrgId       = keyToInt64 teamMemberOrgId,
   teamMemberResponseTeamId      = keyToInt64 teamMemberTeamId,
@@ -172,9 +172,10 @@ insertTeamMemberM user_id team_member_request = do
   sp@StandardParams{..} <- lookupStandardParams
 
   case (spOrganizationId, spTeamId) of
-    (Just org_id, _)  -> insertTeamMember_JoinM user_id org_id team_member_request
-    (_, Just team_id)          -> insertTeamMember_InternalM user_id team_id team_member_request
-    (_, _)                     -> notFound
+    (Just org_id, _)   -> insertTeamMember_JoinM user_id org_id team_member_request
+    -- TODO FIXME
+    -- (_, Just team_id)  -> insertTeamMember_InternalM user_id team_id team_member_request
+    (_, _)             -> notFound
 
 
 
@@ -189,7 +190,7 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
   (Entity team_id Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True ] []
 
   let
-    teamMember = (teamMemberRequestToTeamMember user_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
+    teamMember = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
   (Entity _ Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
   case teamMembership of
@@ -202,13 +203,13 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
 -- 1. Can only add to owners, by an owner
 -- 2. Restrictions based on Membership
 --
-insertTeamMember_InternalM :: UserId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
-insertTeamMember_InternalM user_id team_id team_member_request = do
+insertTeamMember_InternalM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
+insertTeamMember_InternalM user_id org_id team_id team_member_request = do
 
   ts <- timestampH'
 
   let
-    teamMember = (teamMemberRequestToTeamMember user_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
+    teamMember = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
   (Entity _ Team{..}) <- notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
   case teamMembership of
@@ -218,26 +219,26 @@ insertTeamMember_InternalM user_id team_id team_member_request = do
 
 
 updateTeamMemberM :: UserId -> TeamMemberId -> TeamMemberRequest -> HandlerEff (Entity TeamMember)
-updateTeamMemberM user_id team_memberid team_member_request = do
+updateTeamMemberM user_id team_member_id team_member_request = do
 
   ts <- timestampH'
 
   let
-    TeamMember{..} = (teamMemberRequestToTeamMember user_id dummyId team_member_request) { teamMemberModifiedAt = Just ts }
+    TeamMember{..} = (teamMemberRequestToTeamMember user_id dummyId dummyId team_member_request) { teamMemberModifiedAt = Just ts }
 
   updateWhereDb
-    [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_memberid ]
+    [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id ]
     [ TeamMemberModifiedAt  =. teamMemberModifiedAt
     , TeamMemberGuard      +=. teamMemberGuard
     ]
 
-  notFoundMaybe =<< selectFirstDb [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_memberid ] []
+  notFoundMaybe =<< selectFirstDb [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id ] []
 
 
 
 deleteTeamMemberM :: UserId -> TeamMemberId -> HandlerEff ()
-deleteTeamMemberM user_id team_memberid = do
-  deleteWhereDb [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_memberid ]
+deleteTeamMemberM user_id team_member_id = do
+  deleteWhereDb [ TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id ]
 
 
 
