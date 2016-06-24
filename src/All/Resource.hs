@@ -7,7 +7,7 @@ module All.Resource (
   getResourceR,
   putResourceR,
   deleteResourceR,
-  getCountResourcesR,
+  getResourcesCountR,
   getResourceStatsR,
   getResourceStatR,
 
@@ -82,8 +82,8 @@ deleteResourceR resource_id = run $ do
 
 
 
-getCountResourcesR :: Handler Value
-getCountResourcesR = run $ do
+getResourcesCountR :: Handler Value
+getResourcesCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countResourcesM user_id
 

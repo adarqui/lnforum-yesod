@@ -8,7 +8,7 @@ module All.User (
   getUserH,
   putUserR,
   deleteUserR,
-  getCountUsersR,
+  getUsersCountR,
   getUserStatsR,
   getUserStatR,
 
@@ -108,8 +108,8 @@ deleteUserR lookup_user_id = run $ do
 
 
 
-getCountUsersR :: Handler Value
-getCountUsersR = run $ do
+getUsersCountR :: Handler Value
+getUsersCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countUsersM user_id
 

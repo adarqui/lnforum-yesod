@@ -8,7 +8,7 @@ module All.GlobalGroup (
   getGlobalGroupH,
   putGlobalGroupR,
   deleteGlobalGroupR,
-  getCountGlobalGroupsR,
+  getGlobalGroupsCountR,
   getGlobalGroupStatsR,
   getGlobalGroupStatR,
 
@@ -84,8 +84,8 @@ deleteGlobalGroupR global_group_id = run $ do
 
 
 
-getCountGlobalGroupsR :: Handler Value
-getCountGlobalGroupsR = run $ do
+getGlobalGroupsCountR :: Handler Value
+getGlobalGroupsCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countGlobalGroupsM user_id
 

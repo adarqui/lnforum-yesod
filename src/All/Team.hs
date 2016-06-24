@@ -17,20 +17,23 @@ module All.Team (
   getTeams_ByUserIdM,
   getTeams_ByEverythingM,
   getTeamM,
+  getTeamMH,
   insertTeam_InternalM,
   insert_SystemTeamsM,
   updateTeamM,
   deleteTeamM,
-  getTeamCountM
+  getTeamCountM,
+  getTeamStatM
 ) where
 
 
 
 import           All.Prelude
 import           All.TeamMember
+import qualified Data.Text       as T
 import           LN.T.Membership
-import           LN.T.Visibility
 import           LN.T.Team
+import           LN.T.Visibility
 
 
 
@@ -139,6 +142,14 @@ teamsToResponses teams = TeamResponses {
 
 
 
+-- textToSystemTeam :: Text -> Maybe SystemTeam
+-- textToSystemTeam name =
+--   case name of
+--     owners -> Just Team_
+--   where
+--   owners = show Team_Owners
+--   members = show Team_Members
+
 
 
 
@@ -182,6 +193,19 @@ getTeams_ByEverythingM _ sp = do
 getTeamM :: UserId -> TeamId -> HandlerEff (Entity Team)
 getTeamM _ team_id = do
   notFoundMaybe =<< selectFirstDb [ TeamId ==. team_id ] []
+
+
+
+getTeamMH :: UserId -> Text -> OrganizationId -> HandlerEff (Entity Team)
+getTeamMH _ team_sid organization_id = do
+  case m_system_team of
+    Nothing          -> notFound
+    Just system_team -> do
+      notFoundMaybe =<< selectFirstDb [ TeamOrgId ==. organization_id, TeamSystem ==. system_team ] []
+
+  where
+  m_system_team = readMay $ T.unpack team_sid
+
 
 
 
@@ -255,3 +279,11 @@ getTeamCountM :: HandlerEff Int
 getTeamCountM = do
   return 0
 --  _runDB $ count [ TeamName !=. "" ]
+
+
+
+getTeamStatM :: UserId -> TeamId -> HandlerEff TeamStatResponse
+getTeamStatM _ team_id = do
+  return $ TeamStatResponse {
+    teamStatResponseMembers = 0 -- TODO FIXME
+  }

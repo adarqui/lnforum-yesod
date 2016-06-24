@@ -7,7 +7,7 @@ module All.Leuron (
   getLeuronR,
   putLeuronR,
   deleteLeuronR,
-  getCountLeuronsR,
+  getLeuronsCountR,
   getLeuronStatsR,
   getLeuronStatR,
 
@@ -98,8 +98,8 @@ deleteLeuronR leuron_id = run $ do
 
 
 
-getCountLeuronsR :: Handler Value
-getCountLeuronsR = run $ do
+getLeuronsCountR :: Handler Value
+getLeuronsCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countLeuronsM user_id
 

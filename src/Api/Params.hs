@@ -91,6 +91,7 @@ data StandardParams = StandardParams {
   spThreadPostName   :: Maybe Text,
   spResourceName     :: Maybe Text,
   spParentName       :: Maybe Text,
+  spSelf             :: Bool,
   spWithOrganization :: Bool,
   spWithForum        :: Bool,
   spWithBoard        :: Bool,
@@ -142,6 +143,7 @@ defaultStandardParams = StandardParams {
   spThreadPostName   = Nothing,
   spResourceName     = Nothing,
   spParentName       = Nothing,
+  spSelf             = False,
   spWithOrganization = False,
   spWithForum        = False,
   spWithBoard        = False,
@@ -193,6 +195,7 @@ lookupStandardParams = do
   thread_post_name   <- lookupGetParam $ tshow ParamTag_ByThreadPostName
   resource_name      <- lookupGetParam $ tshow ParamTag_ByResourceName
   parent_name        <- lookupGetParam $ tshow ParamTag_ByParentName
+  self               <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_BySelf)
   with_organization  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithOrganization)
   with_forum         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithForum)
   with_board         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithBoard)
@@ -240,6 +243,7 @@ lookupStandardParams = do
     spThreadPostName   = thread_post_name,
     spResourceName     = resource_name,
     spParentName       = parent_name,
+    spSelf             = self,
     spWithOrganization = with_organization,
     spWithForum        = with_forum,
     spWithBoard        = with_board,

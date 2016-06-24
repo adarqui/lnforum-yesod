@@ -8,7 +8,7 @@ module All.Thread (
   getThreadH,
   putThreadR,
   deleteThreadR,
-  getCountThreadsR,
+  getThreadsCountR,
   getThreadStatsR,
   getThreadStatR,
 
@@ -101,8 +101,8 @@ deleteThreadR thread_id = run $ do
 
 
 
-getCountThreadsR :: Handler Value
-getCountThreadsR = run $ do
+getThreadsCountR :: Handler Value
+getThreadsCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countThreadsM user_id
 

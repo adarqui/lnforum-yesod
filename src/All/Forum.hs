@@ -8,7 +8,7 @@ module All.Forum (
   getForumH,
   putForumR,
   deleteForumR,
-  getCountForumsR,
+  getForumCountsR,
   getForumStatsR,
   getForumStatR,
 
@@ -101,8 +101,8 @@ deleteForumR forum_id = run $ do
 
 
 
-getCountForumsR :: Handler Value
-getCountForumsR = run $ do
+getForumCountsR :: Handler Value
+getForumCountsR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countForumsM user_id
 

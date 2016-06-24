@@ -7,7 +7,7 @@ module All.ThreadPost (
   getThreadPostR,
   putThreadPostR,
   deleteThreadPostR,
-  getCountThreadPostsR,
+  getThreadPostsCountR,
   getThreadPostStatsR,
   getThreadPostStatR,
 
@@ -84,8 +84,8 @@ deleteThreadPostR threadPost_id = run $ do
 
 
 
-getCountThreadPostsR :: Handler Value
-getCountThreadPostsR = run $ do
+getThreadPostsCountR :: Handler Value
+getThreadPostsCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countThreadPostsM user_id
 

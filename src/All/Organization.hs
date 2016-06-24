@@ -8,7 +8,7 @@ module All.Organization (
   getOrganizationH,
   putOrganizationR,
   deleteOrganizationR,
-  getOrganizationCountR,
+  getOrganizationsCountR,
   getOrganizationStatsR,
   getOrganizationStatR,
 
@@ -98,8 +98,8 @@ deleteOrganizationR organization_id = run $ do
 
 
 
-getOrganizationCountR :: Handler Value
-getOrganizationCountR = run $ do
+getOrganizationsCountR :: Handler Value
+getOrganizationsCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countOrganizationsM user_id
 

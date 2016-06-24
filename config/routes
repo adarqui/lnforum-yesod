@@ -178,6 +178,10 @@
 -- /api/team TeamR0 POST
 /api/team/#TeamId TeamR GET PUT
 
+/api/team_packs TeamPacksR GET
+/api/team_pack/#TeamId TeamPackR GET
+!/api/team_pack/#Text TeamPackH GET
+
 
 
 /api/team_members TeamMembersR GET
@@ -243,8 +247,10 @@
 
 
 
-/api/users_count CountUsersR GET
-/api/threads_count CountThreadsR GET
-/api/thread_posts_count CountThreadPostsR GET
-/api/resources_count CountResourcesR GET
-/api/leurons_count CountLeuronsR GET
+/api/organizations_count OrganizationsCountR GET
+/api/teams_members_count TeamMembersCountR GET
+/api/users_count UsersCountR GET
+/api/threads_count ThreadsCountR GET
+/api/thread_posts_count ThreadPostsCountR GET
+/api/resources_count ResourcesCountR GET
+/api/leurons_count LeuronsCountR GET

@@ -5,7 +5,7 @@ module All.TeamMember (
   getTeamMemberR,
   putTeamMemberR,
   deleteTeamMemberR,
-  getCountTeamMembersR,
+  getTeamMembersCountR,
 
   -- Model/Function
   teamMemberRequestToTeamMember,
@@ -71,8 +71,8 @@ deleteTeamMemberR team_member_id = run $ do
 
 
 
-getCountTeamMembersR :: Handler Value
-getCountTeamMembersR = run $ do
+getTeamMembersCountR :: Handler Value
+getTeamMembersCountR = run $ do
   user_id <- _requireAuthId
   toJSON <$> countTeamMembersM user_id
 
