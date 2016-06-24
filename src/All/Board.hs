@@ -245,23 +245,28 @@ getBoardMH _ board_name = do
 insertBoardM :: UserId -> BoardRequest -> HandlerEff (Entity Board)
 insertBoardM user_id board_request = do
 
-  ts <- timestampH'
-
   sp@StandardParams{..} <- lookupStandardParams
 
   case (spForumId, spBoardId) of
-
-    (Just forum_id, _) -> do
-
-      (Entity _ Forum{..}) <- notFoundMaybe =<< selectFirstDb [ForumId ==. forum_id] []
-      insertEntityDb $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
-
-    (_, Just board_id) -> do
-
-      (Entity board_id Board{..}) <- notFoundMaybe =<< selectFirstDb [ BoardId ==. board_id ] []
-      insertEntityDb $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
-
+    (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
+    (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
     (_, _)             -> permissionDenied "Must supply a forum_id or board_id"
+
+
+
+insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerEff (Entity Board)
+insertBoard_ByForumId user_id forum_id board_request = do
+  ts <- timestampH'
+  (Entity _ Forum{..}) <- notFoundMaybe =<< selectFirstDb [ForumId ==. forum_id] []
+  insertEntityDb $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
+
+
+
+insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerEff (Entity Board)
+insertBoard_ByBoardId user_id board_id board_request = do
+  ts <- timestampH'
+  (Entity board_id Board{..}) <- notFoundMaybe =<< selectFirstDb [ BoardId ==. board_id ] []
+  insertEntityDb $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
 
 
 

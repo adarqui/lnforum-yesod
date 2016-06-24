@@ -56,17 +56,9 @@ getThreadsR = run $ do
 
 postThreadR0 :: Handler Value
 postThreadR0 = run $ do
-
   user_id <- _requireAuthId
-
-  sp <- lookupStandardParams
-
-  case (spBoardId sp) of
-    Nothing -> notFound
-    (Just board_id) -> do
-
-      thread_request <- requireJsonBody :: HandlerEff ThreadRequest
-      (toJSON . threadToResponse) <$> insertThreadM user_id board_id thread_request
+  thread_request <- requireJsonBody :: HandlerEff ThreadRequest
+  (toJSON . threadToResponse) <$> insertThreadM user_id thread_request
 
 
 
@@ -130,11 +122,11 @@ getThreadStatR thread_id = run $ do
 -- Model/Function
 --
 
-threadRequestToThread :: UserId -> BoardId -> ThreadRequest -> Thread
-threadRequestToThread user_id board_id ThreadRequest{..} = Thread {
+threadRequestToThread :: UserId -> OrganizationId -> ForumId -> BoardId -> ThreadRequest -> Thread
+threadRequestToThread user_id org_id forum_id board_id ThreadRequest{..} = Thread {
   threadUserId      = user_id,
-  threadOrgId       = dummyId,
-  threadForumId     = dummyId,
+  threadOrgId       = org_id,
+  threadForumId     = forum_id,
   threadBoardId     = board_id,
   threadName        = toPrettyUrl threadRequestDisplayName,
   threadDisplayName = threadRequestDisplayName,
@@ -314,14 +306,21 @@ getThreadMH _ thread_name = do
 
 
 
-insertThreadM :: UserId -> BoardId -> ThreadRequest -> HandlerEff (Entity Thread)
-insertThreadM user_id board_id thread_request = do
+insertThreadM :: UserId -> ThreadRequest -> HandlerEff (Entity Thread)
+insertThreadM user_id thread_request = do
+  sp@StandardParams{..} <- lookupStandardParams
+  case spBoardId of
+    Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
+    _             -> permissionDenied "Must supply a board_id"
 
+
+
+insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerEff (Entity Thread)
+insertThread_ByBoardIdM user_id board_id thread_request = do
+  (Entity _ Board{..}) <- notFoundMaybe =<< selectFirstDb [BoardId ==. board_id] []
   ts <- timestampH'
-
   let
-    thread = (threadRequestToThread user_id board_id thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
-
+    thread = (threadRequestToThread user_id boardOrgId boardForumId board_id thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
   insertEntityDb thread
 
 
@@ -332,7 +331,7 @@ updateThreadM user_id thread_id thread_request = do
   ts <- timestampH'
 
   let
-    Thread{..} = (threadRequestToThread user_id dummyId thread_request) { threadModifiedAt = Just ts, threadActivityAt = Just ts }
+    Thread{..} = (threadRequestToThread user_id dummyId dummyId dummyId thread_request) { threadModifiedAt = Just ts, threadActivityAt = Just ts }
 
   updateWhereDb
     [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
