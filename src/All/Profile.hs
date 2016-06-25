@@ -66,6 +66,7 @@ profileRequestToProfile user_id ProfileRequest{..} = Profile {
   profileWebsite    = profileRequestWebsite,
   profileLocation   = profileRequestLocation,
   profileSignature  = profileRequestSignature,
+  profileDebug      = profileRequestDebug,
   profileKarmaGood  = 0,
   profileKarmaBad   = 0,
   profileGuard      = profileRequestGuard,
@@ -85,6 +86,7 @@ profileToResponse (Entity profile_id Profile{..}) = ProfileResponse {
   profileResponseWebsite    = profileWebsite,
   profileResponseLocation   = profileLocation,
   profileResponseSignature  = profileSignature,
+  profileResponseDebug      = profileDebug,
   profileResponseKarmaGood  = profileKarmaGood,
   profileResponseKarmaBad   = profileKarmaBad,
   profileResponseGuard      = profileGuard,
@@ -137,11 +139,12 @@ updateProfileM user_id profile_id profile_request = do
   updateWhereDb
     [ ProfileUserId ==. user_id, ProfileId ==. profile_id ]
     [ ProfileModifiedAt =. profileModifiedAt
-    , ProfileGender =. profileGender
-    , ProfileBirthdate =. profileBirthdate
-    , ProfileWebsite =. profileWebsite
-    , ProfileLocation =. profileLocation
-    , ProfileSignature =. profileSignature
+    , ProfileGender     =. profileGender
+    , ProfileBirthdate  =. profileBirthdate
+    , ProfileWebsite    =. profileWebsite
+    , ProfileLocation   =. profileLocation
+    , ProfileSignature  =. profileSignature
+    , ProfileDebug      =. profileDebug
     ]
 
   notFoundMaybe =<< selectFirstDb [ ProfileUserId ==. user_id, ProfileId ==. profile_id ] []

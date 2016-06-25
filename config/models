@@ -173,6 +173,7 @@ Profile
   website    Text Maybe
   location   Text Maybe
   signature  Text Maybe
+  debug      Bool default=False
   karmaGood  Int default=0
   karmaBad   Int default=0
 
@@ -528,6 +529,9 @@ Forum
   description          Text Maybe
   threadsPerBoard      Int default=20
   threadPostsPerThread Int default=20
+  recentThreadsLimit   Int default=10
+  recentPostsLimit     Int default=10
+  motwLimit            Int default=10
   icon                 Text Maybe
   tags                 [Text]
   visibility           Visibility
