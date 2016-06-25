@@ -54,6 +54,8 @@ library
                      All.Pack.ThreadPost
                      All.Pack.Resource
                      All.Pack.Leuron
+                     All.Pack.PmIn
+                     All.Pack.PmOut
                      Access
                      Cache
                      Control

@@ -79,6 +79,8 @@ import           All.Pack.TeamMember
 import           All.Pack.Thread
 import           All.Pack.ThreadPost
 import           All.Pack.User
+import           All.Pack.PmIn
+import           All.Pack.PmOut
 
 import           Handler.Common
 import           Handler.Root

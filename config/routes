@@ -120,10 +120,16 @@
 /api/pm_ins PmInsR GET
 /api/pm_in/#PmInId PmInR GET PUT DELETE
 
+/api/pm_in_packs PmInPacksR GET
+/api/pm_in_pack/#PmInId PmInPackR GET
+
 
 
 /api/pm_outs PmOutsR GET
 /api/pm_out/#PmOutId PmOutR GET PUT DELETE
+
+/api/pm_out_packs PmOutPacksR GET
+/api/pm_out_pack/#PmOutId PmOutPackR GET
 
 
 
