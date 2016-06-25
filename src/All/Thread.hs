@@ -307,8 +307,8 @@ getThreadMH _ thread_name = do
 
 getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerEff (Maybe (Entity Thread))
 getWithThreadM False _ _ = pure Nothing
-getWithThreadM True _ _  = pure Nothing
-
+getWithThreadM True user_id thread_id = do
+  selectFirstDb [ThreadId ==. thread_id] []
 
 
 

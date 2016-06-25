@@ -243,7 +243,8 @@ getForumMH user_id forum_name = do
 
 getWithForumM :: Bool -> UserId -> ForumId -> HandlerEff (Maybe (Entity Forum))
 getWithForumM False _ _ = pure Nothing
-getWithForumM True _ _  = pure Nothing
+getWithForumM True user_id forum_id  = do
+  selectFirstDb [ForumId ==. forum_id] []
 
 
 

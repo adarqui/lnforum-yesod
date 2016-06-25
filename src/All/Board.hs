@@ -244,7 +244,8 @@ getBoardMH _ board_name = do
 
 getWithBoardM :: Bool -> UserId -> BoardId -> HandlerEff (Maybe (Entity Board))
 getWithBoardM False _ _ = pure Nothing
-getWithBoardM True _ _  = pure Nothing
+getWithBoardM True user_id board_id = do
+  selectFirstDb [BoardId ==. board_id] []
 
 
 
