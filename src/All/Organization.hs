@@ -64,14 +64,14 @@ postOrganizationR0 = run $ do
 getOrganizationR :: OrganizationId -> Handler Value
 getOrganizationR org_id = run $ do
   user_id <- _requireAuthId
-  notFoundMaybe =<< (fmap (toJSON . organizationToResponse)) <$> getOrganizationM user_id org_id
+  errorOrJSON organizationToResponse $ getOrganizationM user_id org_id
 
 
 
 getOrganizationH :: Text -> Handler Value
 getOrganizationH org_name = run $ do
   user_id <- _requireAuthId
-  notFoundMaybe =<< (fmap (toJSON . organizationToResponse)) <$> getOrganizationMH user_id org_name
+  errorOrJSON organizationToResponse $ getOrganizationMH user_id org_name
 
 
 
