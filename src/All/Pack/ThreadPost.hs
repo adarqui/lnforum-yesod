@@ -12,13 +12,14 @@ module All.Pack.ThreadPost (
 
 
 
+import           All.Board
+import           All.Forum
 import           All.Like
+import           All.Organization
 import           All.Prelude
-import           All.Star
+import           All.Thread
 import           All.ThreadPost
 import           All.User
-
-import Control.Monad.Trans.State
 
 
 
@@ -58,6 +59,8 @@ getThreadPostPacksM user_id = do
     (_, Just thread_id, _)      -> getThreadPostPacks_ByThreadIdM user_id thread_id sp
 
     (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM user_id thread_post_id sp
+
+    (_, _, _)                   -> notFound
 
 
 
@@ -116,12 +119,12 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
 
 --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
-  -- TODO FIXME: this needs to be a function argument
-  org <- (if spWithOrganization
-             then pure Nothing
-             else pure Nothing)
-
   user_perms_by_thread_post <- userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
+
+  m_org    <- getWithOrganizationM spWithOrganization user_id threadPostOrgId
+  m_forum  <- getWithForumM spWithForum user_id threadPostForumId
+  m_board  <- getWithBoardM spWithBoard user_id threadPostBoardId
+  m_thread <- getWithThreadM spWithThread user_id threadPostThreadId
 
   return $ ThreadPostPackResponse {
     threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
@@ -131,9 +134,9 @@ getThreadPostPack_ByThreadPostM user_id thread_post@(Entity thread_post_id Threa
     threadPostPackResponseStat             = thread_post_stat,
     threadPostPackResponseLike             = fmap likeToResponse thread_post_like,
     threadPostPackResponseStar             = Nothing,
-    threadPostPackResponseWithOrganization = org,
-    threadPostPackResponseWithForum        = Nothing,
-    threadPostPackResponseWithBoard        = Nothing,
-    threadPostPackResponseWithThread       = Nothing,
+    threadPostPackResponseWithOrganization = fmap organizationToResponse m_org,
+    threadPostPackResponseWithForum        = fmap forumToResponse m_forum,
+    threadPostPackResponseWithBoard        = fmap boardToResponse m_board,
+    threadPostPackResponseWithThread       = fmap threadToResponse m_thread,
     threadPostPackResponsePermissions      = user_perms_by_thread_post
   }

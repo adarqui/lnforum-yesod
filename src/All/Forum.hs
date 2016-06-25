@@ -25,6 +25,7 @@ module All.Forum (
   getForumM,
   getForumMH,
   getForum_ByOrganizationIdMH,
+  getWithForumM,
   insertForumM,
   updateForumM,
   deleteForumM,
@@ -237,6 +238,12 @@ getForumMH user_id forum_name = do
 
     Just org_id -> getForum_ByOrganizationIdMH user_id forum_name org_id sp
     _           -> notFound
+
+
+
+getWithForumM :: Bool -> UserId -> ForumId -> HandlerEff (Maybe (Entity Forum))
+getWithForumM False _ _ = pure Nothing
+getWithForumM True _ _  = pure Nothing
 
 
 

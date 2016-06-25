@@ -58,20 +58,21 @@ getOrganizationPacksM :: UserId -> HandlerEff OrganizationPackResponses
 getOrganizationPacksM user_id = do
 
   sp@StandardParams{..} <- lookupStandardParams
-
   getOrganizationPacks_ByEverythingM user_id sp
 
 
 
-getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff OrganizationPackResponse
+getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff (Maybe OrganizationPackResponse)
 getOrganizationPackM user_id org_id = do
 
-  organization         <- getOrganizationM user_id org_id
-  getOrganizationPack_ByOrganizationM user_id organization
+  m_organization <- getOrganizationM user_id org_id
+  case m_organization of
+    Nothing           -> pure Nothing
+    Just organization -> getOrganizationPack_ByOrganizationM user_id organization
 
 
 
-getOrganizationPackMH :: UserId -> Text -> HandlerEff OrganizationPackResponse
+getOrganizationPackMH :: UserId -> Text -> HandlerEff (Maybe OrganizationPackResponse)
 getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
@@ -80,22 +81,24 @@ getOrganizationPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff Org
 getOrganizationPacks_ByEverythingM user_id sp = do
 
   organizations       <- getOrganizations_ByEverythingM user_id sp
-  organizations_packs <- mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
+  organizations_packs <- catMaybes <$> mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
   return $ OrganizationPackResponses {
     organizationPackResponses = organizations_packs
   }
 
 
 
-getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff OrganizationPackResponse
+getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff (Maybe OrganizationPackResponse)
 getOrganizationPack_ByOrganizationName user_id organization_name = do
 
-  organization         <- getOrganization_ByOrganizationNameM user_id organization_name
-  getOrganizationPack_ByOrganizationM user_id organization
+  m_organization <- getOrganization_ByOrganizationNameM user_id organization_name
+  case m_organization of
+    Nothing           -> pure Nothing
+    Just organization -> getOrganizationPack_ByOrganizationM user_id organization
 
 
 
-getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff OrganizationPackResponse
+getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff (Maybe OrganizationPackResponse)
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   organization_user    <- getUserM user_id organizationUserId
@@ -103,7 +106,7 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
   user_perms_by_org    <- userPermissions_ByOrganizationIdM user_id org_id
   user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
 
-  return $ OrganizationPackResponse {
+  pure $ Just $ OrganizationPackResponse {
     organizationPackResponseOrganization   = organizationToResponse organization,
     organizationPackResponseOrganizationId = keyToInt64 org_id,
     organizationPackResponseUser           = userToSanitizedResponse organization_user,

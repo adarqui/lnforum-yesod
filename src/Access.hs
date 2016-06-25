@@ -12,7 +12,7 @@ module Access (
   userPermissions_ByForumIdM,
   userPermissions_ByBoardIdM,
   userPermissions_ByThreadIdM,
-  userPermissions_ByThreadPostIdM,
+  userPermissions_ByThreadPostIdM
 ) where
 
 

@@ -25,6 +25,7 @@ module All.Organization (
   getOrganizationM,
   getOrganizationMH,
   getOrganization_ByOrganizationNameM,
+  getWithOrganizationM,
   insertOrganizationM,
   updateOrganizationM,
   deleteOrganizationM,
@@ -61,18 +62,16 @@ postOrganizationR0 = run $ do
 
 
 getOrganizationR :: OrganizationId -> Handler Value
-getOrganizationR org_id = getOrganizationR' getOrganizationM org_id
+getOrganizationR org_id = run $ do
+  user_id <- _requireAuthId
+  notFoundMaybe =<< (fmap (toJSON . organizationToResponse)) <$> getOrganizationM user_id org_id
 
 
 
 getOrganizationH :: Text -> Handler Value
-getOrganizationH org_name = getOrganizationR' getOrganizationMH org_name
-
-
-
-getOrganizationR' f a = run $ do
+getOrganizationH org_name = run $ do
   user_id <- _requireAuthId
-  (toJSON . organizationToResponse <$> f user_id a)
+  notFoundMaybe =<< (fmap (toJSON . organizationToResponse)) <$> getOrganizationMH user_id org_name
 
 
 
@@ -216,29 +215,26 @@ getOrganizations_ByEverythingM _ sp = do
 
 
 
-getOrganizationM :: UserId -> OrganizationId -> HandlerEff (Entity Organization)
-getOrganizationM user_id org_id = getOrganizationM' user_id (OrganizationId ==. org_id)
+getOrganizationM :: UserId -> OrganizationId -> HandlerEff (Maybe (Entity Organization))
+getOrganizationM user_id org_id = do
+  selectFirstDb [OrganizationId ==. org_id] []
 
 
 
-getOrganizationMH :: UserId -> Text -> HandlerEff (Entity Organization)
-getOrganizationMH user_id org_name = getOrganizationM' user_id (OrganizationName ==. org_name)
+getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerEff (Maybe (Entity Organization))
+getWithOrganizationM False _ _           = pure Nothing
+getWithOrganizationM True user_id org_id = getOrganizationM user_id org_id
 
 
 
-getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerEff (Entity Organization)
+getOrganizationMH :: UserId -> Text -> HandlerEff (Maybe (Entity Organization))
+getOrganizationMH user_id org_name = getOrganization_ByOrganizationNameM user_id org_name
+
+
+
+getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerEff (Maybe (Entity Organization))
 getOrganization_ByOrganizationNameM _ org_name = do
-  notFoundMaybe =<< selectFirstDb [OrganizationName ==. org_name] []
-
-
-
-getOrganizationM' :: forall t site val.
-                     (PersistEntity val, YesodPersist site,
-                      PersistQuery (YesodPersistBackend site),
-                      YesodPersistBackend site ~ PersistEntityBackend val) =>
-                     t -> Filter val -> ControlMA (HandlerT site IO) (Entity val)
-getOrganizationM' _ q = do
-  notFoundMaybe =<< selectFirstDb [q] []
+  selectFirstDb [OrganizationName ==. org_name] []
 
 
 
@@ -320,11 +316,8 @@ deleteOrganizationTeamsM _ org_id = do
 
 countOrganizationsM :: UserId -> HandlerEff CountResponses
 countOrganizationsM _ = do
-
   StandardParams{..} <- lookupStandardParams
-
   case spUserId of
-
     Just _  -> notFound
     Nothing -> do
       n <- countDb [ OrganizationActive ==. True ]
@@ -334,11 +327,8 @@ countOrganizationsM _ = do
 
 getOrganizationStatsM :: UserId -> HandlerEff OrganizationStatResponses
 getOrganizationStatsM _ = do
-
   StandardParams{..} <- lookupStandardParams
-
   case spBoardId of
-
     Just _  -> notFound
     Nothing -> notFound
 
@@ -347,7 +337,6 @@ getOrganizationStatsM _ = do
 
 getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff OrganizationStatResponse
 getOrganizationStatM _ org_id = do
-
   return $ OrganizationStatResponse {
     organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,

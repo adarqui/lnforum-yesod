@@ -25,6 +25,7 @@ module All.Board (
   getBoards_ByBoardParentIdM,
   getBoardM,
   getBoardMH,
+  getWithBoardM,
   insertBoardM,
   updateBoardM,
   deleteBoardM,
@@ -239,6 +240,12 @@ getBoardMH _ board_name = do
       notFoundMaybe =<< selectFirstDb [ BoardName ==. board_name, BoardForumId ==. forum_id ] []
 
     Nothing -> notFound
+
+
+
+getWithBoardM :: Bool -> UserId -> BoardId -> HandlerEff (Maybe (Entity Board))
+getWithBoardM False _ _ = pure Nothing
+getWithBoardM True _ _  = pure Nothing
 
 
 
