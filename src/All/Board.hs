@@ -39,7 +39,6 @@ module All.Board (
 import           All.Prelude
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
-import           Model.Prelude
 import           All.Forum
 
 

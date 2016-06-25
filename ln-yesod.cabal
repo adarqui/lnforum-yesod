@@ -18,7 +18,6 @@ library
                      Application.Prelude
                      Api.Auth
                      Api.Params
-                     Api.Response
                      All.Api
                      All.Board
                      All.Forum
@@ -58,8 +57,8 @@ library
                      Access
                      Cache
                      Control
+                     Error
                      Foundation
-                     Handler.Prelude
                      Handler.Common
                      Handler.Root
                      Helper.Request
@@ -73,7 +72,6 @@ library
                      Misc.Magic
                      Misc.Widget
                      Model
-                     Model.Prelude
                      Model.DerivePersist
                      Model.Keys
                      Model.Misc

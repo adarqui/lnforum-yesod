@@ -6,10 +6,10 @@ module All.Prelude (
 
 import           Access       as A
 import           Api.Params   as A
-import           Api.Response as A
 import           Cache        as A
 import           Control      as A
 import           Data.Maybe   as A (fromJust)
+import           Error        as A
 import           Import       as A
 import           Lifted       as A
 import           LN.Lib       as A

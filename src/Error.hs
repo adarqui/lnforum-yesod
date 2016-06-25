@@ -1,6 +1,7 @@
-module Api.Response (
+module Error (
   notFoundMaybe,
-  permissionDeniedEither
+  errorOrJSON,
+  permissionDeniedEither,
 ) where
 
 
@@ -14,6 +15,10 @@ notFoundMaybe mentity = do
   case mentity of
     Nothing       -> notFound
     (Just entity) -> return entity
+
+
+
+errorOrJSON trfm go = notFoundMaybe =<< (fmap (toJSON . trfm)) <$> go
 
 
 
