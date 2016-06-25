@@ -165,6 +165,18 @@ threadPostsToResponses thread_posts = ThreadPostResponses {
 -- Model/Internal
 --
 
+-- orderByToField :: forall typ record. OrderBy -> EntityField record typ
+-- TODO FIXME, this type sig might cause problems
+orderByToField :: Maybe OrderBy -> EntityField ThreadPost (Maybe UTCTime)
+orderByToField Nothing = ThreadPostCreatedAt
+orderByToField (Just order) =
+  case order of
+    OrderBy_CreatedAt -> ThreadPostCreatedAt
+    OrderBy_ActivityAt -> ThreadPostActivityAt
+    _                  -> ThreadPostCreatedAt
+
+
+
 {-
 getThreadPostsM :: UserId -> Maybe ThreadId -> Maybe ThreadPostId -> HandlerEff [Entity ThreadPost]
 getThreadPostsM _ mthread_id mthread_post_id = do
@@ -193,8 +205,8 @@ getThreadPostsM user_id = do
 
 
 getThreadPosts_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff [Entity ThreadPost]
-getThreadPosts_ByForumIdM _ forum_id sp = do
-  selectListDb sp [ThreadPostForumId ==. forum_id] [] ThreadPostId
+getThreadPosts_ByForumIdM _ forum_id sp@StandardParams{..} = do
+  selectListDb sp [ThreadPostForumId ==. forum_id] [] (orderByToField spOrder)
 
 
 
