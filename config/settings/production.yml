@@ -22,9 +22,9 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 # force-ssl: true
 
 database:
-  user:     "_env:PGUSER:x"
+  user:     "_env:PGUSER:postgres"
   password: "_env:PGPASS:"
-  host:     "_env:PGHOST:dev.adarq.org"
+  host:     "_env:PGHOST:adarq.internal"
   port:     "_env:PGPORT:5432"
   database: "_env:PGDATABASE:leuro"
   poolsize: "_env:PGPOOLSIZE:10"
