@@ -67,6 +67,9 @@ library
                      Import
                      Import.NoFoundation
                      Job
+                     Job.Shared
+                     Job.Enqueue
+                     Job.Dequeue
                      Lifted
                      Parent
                      OAuth2
