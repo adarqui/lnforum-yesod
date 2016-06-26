@@ -249,3 +249,31 @@ executable         ln-yesod
 --                 , hspec >= 2.0.0
 --                 , classy-prelude
 --                 , classy-prelude-yesod
+
+
+
+executable         ln-bg
+    default-language:  Haskell2010
+
+    if flag(library-only)
+        Buildable: False
+
+    main-is:           main.hs
+    hs-source-dirs:    bg
+    build-depends:     base, ln-yesod, ln-types
+
+    ghc-options:       -Wall -threaded -O0 -fobject-code -j
+
+
+
+executable         ln-bg-test
+    default-language:  Haskell2010
+
+    if flag(library-only)
+        Buildable: False
+
+    main-is:           main.hs
+    hs-source-dirs:    bg-test
+    build-depends:     base, ln-yesod, ln-types
+
+    ghc-options:       -Wall -threaded -O0 -fobject-code -j
