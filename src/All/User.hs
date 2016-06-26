@@ -396,13 +396,13 @@ getUserStatM _ lookup_user_id = do
   let (threads,thread_posts,resources,leurons) = (E.unValue a, E.unValue b, E.unValue c, E.unValue d)
 
   return $ UserSanitizedStatResponse {
-    userSanitizedStatResponseUserId = keyToInt64 lookup_user_id,
-    userSanitizedStatResponseThreads = threads,
+    userSanitizedStatResponseUserId      = keyToInt64 lookup_user_id,
+    userSanitizedStatResponseThreads     = threads,
     userSanitizedStatResponseThreadPosts = thread_posts,
-    userSanitizedStatResponseRespect = 0,
-    userSanitizedStatResponseResources = resources,
-    userSanitizedStatResponseLeurons = leurons,
-    userSanitizedStatResponseWorkouts = 0
+    userSanitizedStatResponseRespect     = 0,
+    userSanitizedStatResponseResources   = resources,
+    userSanitizedStatResponseLeurons     = leurons,
+    userSanitizedStatResponseWorkouts    = 0
   }
 
 

@@ -22,6 +22,7 @@ module OAuth2 (
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
 import           Import.NoFoundation
+import           LN.Lib.Url              (toPrettyName)
 import           LN.T.Profile            (ProfileX (..))
 import           Misc.Codec
 -- import           Model.User.Function    (profileNameToNick)
@@ -107,7 +108,7 @@ authenticateUser creds@Creds{..} = do
 
 credsToUser :: UTCTime -> Creds m -> Either Text User
 credsToUser now Creds{..} = User
-  <$> (profileName <$> eprofile)
+  <$> ((toPrettyName . profileName) <$> eprofile)
   <*> (profileName <$> eprofile)
   <*> (profileName <$> eprofile)
   <*> (profileEmail <$> eprofile)
