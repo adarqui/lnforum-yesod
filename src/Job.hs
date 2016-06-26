@@ -20,6 +20,35 @@ import           Network.AMQP
 
 
 
+import Import
+import Yesod.Default.Config
+import qualified Database.Persist
+import Database.Persist.Postgresql (PostgresConf)
+import Settings
+import Model
+import Control.Monad.Trans.Resource (runResourceT)
+import Control.Monad.Logger (runStdoutLoggingT)
+
+-- https://github.com/yesodweb/yesod/wiki/Using-Database.Persist.runPool-without-Foundation
+
+runQueries = do
+    users <- selectList [UserName ==. "adarqui"] []
+    return ()
+
+mainx :: IO ()
+mainx = do
+  conf <- Yesod.Default.Config.loadConfig $ (configSettings Production)
+
+  dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
+            Database.Persist.loadConfig >>=
+            Database.Persist.applyEnv
+  p <- Database.Persist.createPoolConfig (dbconf :: PostgresConf)
+
+  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf runQueries p
+
+
+
+
 enq_CreateUserProfile :: Int64 -> ProfileRequest -> IO ()
 enq_CreateUserProfile user_id profile_request = do
     conn <- openConnection "127.0.0.1" "/" "guest" "guest"
