@@ -22,10 +22,11 @@ module OAuth2 (
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
 import           Import.NoFoundation
+import           Job.Enqueue
 import           LN.Lib.Url              (toPrettyName)
 import           LN.T.Profile            (ProfileX (..))
+import           LN.T.Profile.Request    (defaultProfileRequest)
 import           Misc.Codec
--- import           Model.User.Function    (profileNameToNick)
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
 
@@ -82,26 +83,37 @@ authenticateUser creds@Creds{..} = do
   now <- liftIO $ getCurrentTime
 
   let
-    euser = credsToUser now creds
-    muserId = entityKey <$> muser
+    e_user = credsToUser now creds
+    m_user_id = entityKey <$> muser
 
-  maybe (authNew euser) (authExisting euser) $ muserId
+  maybe (authNew e_user) (authExisting e_user) $ m_user_id
 
   where
+
+
   updateByEmail email = updateWhere
     [ UserPlugin !=. credsPlugin
-    , UserIdent !=. credsIdent
-    , UserEmail ==. email
+    , UserIdent  !=. credsIdent
+    , UserEmail  ==. email
     ]
     [ UserPlugin =. credsPlugin
-    , UserIdent =. credsIdent
+    , UserIdent  =. credsIdent
     ]
 
-  authNew (Left err) = return $ ServerError $ credsPlugin ++ ": " ++ err
-  authNew (Right user) = Authenticated <$> insert user
 
-  authExisting euser userId = do
-    mapM_ (replace userId) euser
+
+  authNew (Left err)   = return $ ServerError $ credsPlugin ++ ": " ++ err
+  authNew (Right user) = do
+
+    -- Add user, then queue up a CreateUserProfile background job
+    user@(Entity user_id User{..}) <- insertEntity user
+    liftIO $ mkJob_CreateUserProfile user_id defaultProfileRequest
+    pure $ Authenticated (entityKey user)
+
+
+
+  authExisting e_user userId = do
+    mapM_ (replace userId) e_user
     return $ Authenticated userId
 
 

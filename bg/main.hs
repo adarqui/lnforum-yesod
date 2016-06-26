@@ -2,13 +2,13 @@ module Main where
 
 
 
-import Job
+import           Control.Monad
+import           Job
 
 
 
 main :: IO ()
 main = do
-  putStrLn "bg"
---  deq_CreateUserProfile
-  profilex'
-  putStrLn "done."
+  putStrLn "ln-bg"
+  runJobs "config/workers/dev.yaml"
+  forever $ getLine

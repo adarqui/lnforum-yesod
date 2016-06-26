@@ -2,35 +2,38 @@
 {-# LANGUAGE RecordWildCards   #-}
 
 module Job.Dequeue (
+  runJobs,
+  runJob_CreateUserProfile
 ) where
 
 
 
-import All.Organization
-import Misc.Codec (int64ToKey')
-import Control
+import           All.Organization
 import           Api.Params
 import           Control
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.List                  (nub)
+import           Control
+import qualified Data.ByteString.Lazy.Char8   as BL
+import           Data.List                    (nub)
 import           Import
 import           LN.T.Internal.Types
 import           LN.T.Job
+import           Misc.Codec                   (int64ToKey')
 import           Model.Misc
 import           Network.AMQP
+import Job.Shared
 
 
 
-import Import hiding (loadConfig)
-import Database.Persist.Postgresql as P
-import Yesod.Default.Config
+import           Control.Monad.Logger         (runStdoutLoggingT)
+import           Control.Monad.Trans.Resource (runResourceT)
+import           Data.Yaml
 import qualified Database.Persist
-import Database.Persist.Postgresql (PostgresConf)
-import Settings
-import Model
-import Control.Monad.Trans.Resource (runResourceT)
-import Control.Monad.Logger (runStdoutLoggingT)
-import Data.Yaml
+import           Database.Persist.Postgresql  as P
+import           Database.Persist.Postgresql  (PostgresConf)
+import           Import                       hiding (loadConfig)
+import           Model
+import           Settings
+import           Yesod.Default.Config
 
 
 
@@ -38,33 +41,26 @@ runQueries = do
   selectList [UserNick ==. "adarqui"] []
 
 
-profilex' :: IO ()
-profilex' = do
 
-  Just yaml <- decodeFile "config/workers.yaml"
-  conf <- parseMonad P.loadConfig yaml
-  dbconf <- applyEnv (conf :: PostgresConf)
-  p <- createPoolConfig dbconf
+runJobs :: FilePath -> IO ()
+runJobs path = do
 
-  conn <- openConnection "127.0.0.1" "/" "guest" "guest"
-  chan <- openChannel conn
+  Just yaml <- decodeFile path
+  conf      <- parseMonad P.loadConfig yaml
+  dbconf    <- applyEnv (conf :: PostgresConf)
+  pool      <- createPoolConfig dbconf
 
-  -- subscribe to the queue
-  consumeMsgs chan "myQueue" Ack (myCallback' dbconf p)
+  bgRunDeq QCreateUserProfile (bgDeq $ runJob_CreateUserProfile dbconf pool)
 
-  getLine :: IO Text
-  closeConnection conn
-  putStrLn "connection closed"
+--  closeConnection conn
 
 
 
--- myCallback' :: (Message,Envelope) -> IO ()
-myCallback' dbconf p (msg, env) = do
-  putStrLn "callback .. "
-  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go p
+runJob_CreateUserProfile dbconf pool (msg, env) = do
+  liftIO $ putStrLn "runJob_CreateUserProfile"
+  liftIO $ runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go pool
   ackEnv env
   where
   go = do
     users <- runQueries
---    void $ run $ getOrganizationsM (int64ToKey' 0)
     liftIO $ print users
