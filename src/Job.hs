@@ -3,7 +3,8 @@
 
 module Job (
   enq_CreateUserProfile,
-  deq_CreateUserProfile
+  deq_CreateUserProfile,
+  profilex'
 ) where
 
 
@@ -20,7 +21,8 @@ import           Network.AMQP
 
 
 
-import Import
+import Import hiding (loadConfig)
+import Database.Persist.Postgresql as P
 import Yesod.Default.Config
 import qualified Database.Persist
 import Database.Persist.Postgresql (PostgresConf)
@@ -28,6 +30,7 @@ import Settings
 import Model
 import Control.Monad.Trans.Resource (runResourceT)
 import Control.Monad.Logger (runStdoutLoggingT)
+import Data.Yaml
 
 -- https://github.com/yesodweb/yesod/wiki/Using-Database.Persist.runPool-without-Foundation
 
@@ -43,8 +46,9 @@ import Control.Monad.Logger (runStdoutLoggingT)
 
 
 runQueries = do
-    users <- selectList [UserName ==. "adarqui"] []
-    return ()
+  selectList [UserNick ==. "adarqui"] []
+
+
 
 mainx :: IO ()
 mainx = do
@@ -59,7 +63,66 @@ mainx = do
   where
   go = do
     liftIO $ enq_CreateUserProfile 0 defaultProfileRequest
-    runQueries
+    void $ runQueries
+
+
+
+
+profilex :: IO ()
+profilex = do
+  conf <- Yesod.Default.Config.loadConfig $ (configSettings Production)
+
+  dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
+            Database.Persist.loadConfig >>=
+            Database.Persist.applyEnv
+  p <- Database.Persist.createPoolConfig (dbconf :: PostgresConf)
+
+  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go p
+  where
+  go = do
+    liftIO $ enq_CreateUserProfile 0 defaultProfileRequest
+    void $ runQueries
+
+
+
+profilex' :: IO ()
+profilex' = do
+
+--  conf <- Yesod.Default.Config.loadConfig $ (configSettings Development)
+
+--  dbconf <- withYamlEnvironment "config/settings.yml" Development
+--            Database.Persist.loadConfig >>=
+--            Database.Persist.applyEnv
+
+  Just yaml <- decodeFile "config/workers.yaml"
+  conf <- parseMonad P.loadConfig yaml
+  dbconf <- applyEnv (conf :: PostgresConf)
+  p <- createPoolConfig dbconf
+--  runPool conf' (return ()) pool
+
+--  p <- Database.Persist.createPoolConfig (dbconf :: PostgresConf)
+
+  conn <- openConnection "127.0.0.1" "/" "guest" "guest"
+  chan <- openChannel conn
+
+  -- subscribe to the queue
+  consumeMsgs chan "myQueue" Ack (myCallback' dbconf p)
+
+  getLine :: IO Text
+  closeConnection conn
+  putStrLn "connection closed"
+
+
+
+-- myCallback' :: (Message,Envelope) -> IO ()
+myCallback' dbconf p (msg, env) = do
+  putStrLn "callback .. "
+  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go p
+  ackEnv env
+  where
+  go = do
+    users <- runQueries
+    liftIO $ print users
 
 
 

@@ -1,0 +1,6 @@
+database: leuro
+host: dev.adarq.org
+port: 5432
+user: x
+password: ""
+poolsize: 10
