@@ -88,19 +88,10 @@ profilex = do
 profilex' :: IO ()
 profilex' = do
 
---  conf <- Yesod.Default.Config.loadConfig $ (configSettings Development)
-
---  dbconf <- withYamlEnvironment "config/settings.yml" Development
---            Database.Persist.loadConfig >>=
---            Database.Persist.applyEnv
-
   Just yaml <- decodeFile "config/workers.yaml"
   conf <- parseMonad P.loadConfig yaml
   dbconf <- applyEnv (conf :: PostgresConf)
   p <- createPoolConfig dbconf
---  runPool conf' (return ()) pool
-
---  p <- Database.Persist.createPoolConfig (dbconf :: PostgresConf)
 
   conn <- openConnection "127.0.0.1" "/" "guest" "guest"
   chan <- openChannel conn
