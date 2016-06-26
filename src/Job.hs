@@ -55,7 +55,11 @@ mainx = do
             Database.Persist.applyEnv
   p <- Database.Persist.createPoolConfig (dbconf :: PostgresConf)
 
-  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf runQueries p
+  runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go p
+  where
+  go = do
+    liftIO $ enq_CreateUserProfile 0 defaultProfileRequest
+    runQueries
 
 
 
