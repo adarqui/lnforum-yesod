@@ -16,6 +16,8 @@ module All.Profile (
   getProfilesM,
   getProfileM,
   getProfile_ByUserIdM,
+  insertProfileM,
+  insertProfileM',
   updateProfileM,
 ) where
 
@@ -125,6 +127,24 @@ getProfileM _ profile_id = do
 getProfile_ByUserIdM :: UserId -> UserId -> HandlerEff (Entity Profile)
 getProfile_ByUserIdM _ lookup_user_id = do
   notFoundMaybe =<< selectFirstDb [ProfileUserId ==. lookup_user_id] []
+
+
+
+insertProfileM :: UserId -> ProfileRequest -> HandlerEff (Entity Profile)
+insertProfileM user_id profile_request = do
+  ts <- timestampH'
+  let
+    profile = (profileRequestToProfile user_id profile_request) { profileCreatedAt = Just ts }
+  insertEntityDb profile
+
+
+
+-- insertProfileM' :: UserId -> ProfileRequest -> IO (Entity Profile)
+insertProfileM' user_id profile_request = do
+  ts <- liftIO $ getCurrentTime
+  let
+    profile = (profileRequestToProfile user_id profile_request) { profileCreatedAt = Just ts }
+  insertEntity profile
 
 
 

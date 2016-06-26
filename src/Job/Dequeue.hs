@@ -8,19 +8,20 @@ module Job.Dequeue (
 
 
 
-import           All.Organization
+import           All.Profile                  (profileRequestToProfile)
 import           Api.Params
 import           Control
-import           Control
+import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8   as BL
 import           Data.List                    (nub)
 import           Import
+import           Job.Shared
 import           LN.T.Internal.Types
 import           LN.T.Job
 import           Misc.Codec                   (int64ToKey')
 import           Model.Misc
 import           Network.AMQP
-import Job.Shared
+import qualified Prelude                      as Prelude
 
 
 
@@ -37,11 +38,6 @@ import           Yesod.Default.Config
 
 
 
-runQueries = do
-  selectList [UserNick ==. "adarqui"] []
-
-
-
 runJobs :: FilePath -> IO ()
 runJobs path = do
 
@@ -52,15 +48,20 @@ runJobs path = do
 
   bgRunDeq QCreateUserProfile (bgDeq $ runJob_CreateUserProfile dbconf pool)
 
---  closeConnection conn
+--  closeConnection conn ??
 
 
 
-runJob_CreateUserProfile dbconf pool (msg, env) = do
+runJob_CreateUserProfile dbconf pool (Message{..}, env) = do
   liftIO $ putStrLn "runJob_CreateUserProfile"
-  liftIO $ runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go pool
-  ackEnv env
-  where
-  go = do
-    users <- runQueries
-    liftIO $ print users
+  let e_resp = eitherDecode msgBody :: Either String (UserId, ProfileRequest)
+  case e_resp of
+    Left err                         -> liftIO $ Prelude.putStrLn err
+    Right (user_id, profile_request) -> do
+      liftIO $ putStrLn "success"
+      liftIO $ runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go pool
+      ackEnv env
+      where
+      go = do
+        let profile = profileRequestToProfile user_id profile_request
+        insertEntity profile
