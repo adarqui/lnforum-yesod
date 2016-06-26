@@ -31,6 +31,17 @@ import Control.Monad.Logger (runStdoutLoggingT)
 
 -- https://github.com/yesodweb/yesod/wiki/Using-Database.Persist.runPool-without-Foundation
 
+-- also
+
+-- Probably the best way to run this is the same way that the scaffolded site runs the migration code:
+
+-- Perform database migration using our application's logging settings.
+-- runLoggingT
+--    (Database.Persist.runPool dbconf (runMigration migrateAll) p)
+--    (messageLoggerSource foundation logger)
+
+
+
 runQueries = do
     users <- selectList [UserName ==. "adarqui"] []
     return ()
