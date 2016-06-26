@@ -9,6 +9,9 @@ module Job (
 
 
 
+import All.Organization
+import Misc.Codec (int64ToKey')
+import Control
 import           Api.Params
 import           Control
 import qualified Data.ByteString.Lazy.Char8 as BL
@@ -113,6 +116,7 @@ myCallback' dbconf p (msg, env) = do
   where
   go = do
     users <- runQueries
+--    void $ run $ getOrganizationsM (int64ToKey' 0)
     liftIO $ print users
 
 
