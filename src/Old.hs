@@ -60,3 +60,37 @@ qBoardStats board_id = do
       let _ = thread ^. ThreadId
       let _ = board ^. BoardId
       return (E.countDistinct $ board ^. BoardId, E.countDistinct $ thread ^. ThreadId, E.countDistinct $ thread_post ^. ThreadPostId)
+
+
+
+-- getThreadsM :: UserId -> HandlerEff [Entity Thread]
+-- getThreadsM _ = do
+--
+--   sp@StandardParams{..} <- lookupStandardParams
+--
+--   case spOrganizationId of
+--     Just org_id -> do
+--       _runDB
+--         $ E.select
+--         $ E.from $ \(thread `E.InnerJoin` board `E.InnerJoin` forum `E.InnerJoin` org) -> do
+--           E.on $ forum ^. ForumOrgId E.==. org ^. OrganizationId
+--           E.on $ board ^. BoardForumId E.==. forum ^. ForumId
+--           E.on $ thread ^. ThreadBoardId E.==. board ^. BoardId
+--           E.where_ $ org ^. OrganizationId E.==. E.val org_id
+--           spToSelectE sp
+--           return thread
+--     Nothing       ->
+--
+--       case spBoardId of
+--         -- IMPORTANT: need to specify something other than ThreadId, because of ordering
+--
+--         Just board_id -> selectListDb [ThreadBoardId ==. board_id] [] (orderByToField spOrder)
+--
+--         Nothing ->
+--
+--           case spUserId of
+--             Just user_id' -> boop [ ThreadUserId ==. user_id' ]
+--             Nothing -> boop []
+--
+--   where
+--   boop k = selectListDb k [] ThreadId
