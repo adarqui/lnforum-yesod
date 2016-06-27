@@ -6,7 +6,10 @@ module Control (
   ControlWriter,
   ControlState,
   InternalControlState (..),
-  run
+  run,
+  ErrorEff,
+  left,
+  right
 ) where
 
 
@@ -17,6 +20,7 @@ import qualified Data.Map                as M
 import           Import
 
 import           Cache
+import           LN.T.Error
 
 
 
@@ -47,3 +51,12 @@ defaultControlState = InternalControlState {
 
 -- run ::
 run op = fst <$> evalRWST op () defaultControlState
+
+
+
+type ErrorEff = Either ApplicationError
+
+
+
+left  = pure . Left
+right = pure . Right

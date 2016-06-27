@@ -29,6 +29,7 @@ module Api.Params (
   selectKeysListDb,
   selectKeysListDb',
   selectFirstDb,
+  selectFirstDbEither,
   insertDb,
   insertEntityDb,
   updateDb,
@@ -55,6 +56,7 @@ import qualified Database.Esqueleto      as E
 -- import           Database.Esqueleto      ((^.))
 import           LN.T.Param
 import           LN.T.Ent (Ent(..))
+import           LN.T.Error (ApplicationError(..))
 
 
 
@@ -540,6 +542,20 @@ selectFirstDb :: forall site val.
                  [Filter val]
                  -> [SelectOpt val] -> ControlMA (HandlerT site IO) (Maybe (Entity val))
 selectFirstDb query filt = _runDB $ selectFirst query filt
+
+
+
+selectFirstDbEither :: forall site val.
+                 (PersistEntity val, YesodPersist site,
+                  PersistQuery (YesodPersistBackend site),
+                  YesodPersistBackend site ~ PersistEntityBackend val) =>
+                 [Filter val]
+                 -> [SelectOpt val] -> ControlMA (HandlerT site IO) (ErrorEff (Entity val))
+selectFirstDbEither query filt = do
+  m <- _runDB $ selectFirst query filt
+  case m of
+    Nothing -> pure $ Left Error_NotFound
+    Just v  -> pure $ Right v
 
 
 

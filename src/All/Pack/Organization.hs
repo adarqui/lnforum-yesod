@@ -18,7 +18,6 @@ import           Access
 import           All.Organization
 import           All.Prelude
 import           All.User
-import           Data.List        (nub)
 
 
 
@@ -61,17 +60,17 @@ getOrganizationPacksM m_sp user_id = do
 
 
 
-getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff (Maybe OrganizationPackResponse)
+getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPackM user_id org_id = do
 
-  m_organization <- getOrganizationM user_id org_id
-  case m_organization of
-    Nothing           -> pure Nothing
-    Just organization -> getOrganizationPack_ByOrganizationM user_id organization
+  e_organization <- getOrganizationM user_id org_id
+  case e_organization of
+    Left err           -> left err
+    Right organization -> getOrganizationPack_ByOrganizationM user_id organization
 
 
 
-getOrganizationPackMH :: UserId -> Text -> HandlerEff (Maybe OrganizationPackResponse)
+getOrganizationPackMH :: UserId -> Text -> HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
@@ -80,35 +79,35 @@ getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerE
 getOrganizationPacks_ByEverythingM m_sp user_id = do
 
   organizations       <- getOrganizations_ByEverythingM m_sp user_id
-  organizations_packs <- catMaybes <$> mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
+  organizations_packs <- rights <$> mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
   return $ OrganizationPackResponses {
     organizationPackResponses = organizations_packs
   }
 
 
 
-getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff (Maybe OrganizationPackResponse)
+getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPack_ByOrganizationName user_id organization_name = do
 
-  m_organization <- getOrganization_ByOrganizationNameM user_id organization_name
-  case m_organization of
-    Nothing           -> pure Nothing
-    Just organization -> getOrganizationPack_ByOrganizationM user_id organization
+  e_organization <- getOrganization_ByOrganizationNameM user_id organization_name
+  case e_organization of
+    Left err           -> left err
+    Right organization -> getOrganizationPack_ByOrganizationM user_id organization
 
 
 
-getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff (Maybe OrganizationPackResponse)
+getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   organization_user    <- getUserM user_id organizationUserId
-  m_organization_stats <- getOrganizationStatM user_id (entityKey organization)
+  e_organization_stats <- getOrganizationStatM user_id (entityKey organization)
   user_perms_by_org    <- userPermissions_ByOrganizationIdM user_id org_id
   user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
 
-  case m_organization_stats of
-    Just organization_stats -> do
+  case e_organization_stats of
+    Right organization_stats -> do
 
-      pure $ Just $ OrganizationPackResponse {
+      right $ OrganizationPackResponse {
         organizationPackResponseOrganization   = organizationToResponse organization,
         organizationPackResponseOrganizationId = keyToInt64 org_id,
         organizationPackResponseUser           = userToSanitizedResponse organization_user,
@@ -120,4 +119,4 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
         organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
       }
 
-    _ -> pure Nothing
+    _ -> left Error_Unexpected

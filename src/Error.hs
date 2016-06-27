@@ -1,12 +1,14 @@
 module Error (
   notFoundMaybe,
   errorOrJSON,
+  errorOrJSONMay,
   permissionDeniedEither,
 ) where
 
 
 
 import Import
+import LN.T.Error (ApplicationError)
 
 
 
@@ -18,7 +20,19 @@ notFoundMaybe mentity = do
 
 
 
-errorOrJSON trfm go = notFoundMaybe =<< (fmap (toJSON . trfm)) <$> go
+errorOrJSONMay
+  :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Maybe a) -> m Value
+errorOrJSONMay trfm go = notFoundMaybe =<< (fmap (toJSON . trfm)) <$> go
+
+
+
+errorOrJSON
+  :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Either ApplicationError a) -> m Value
+errorOrJSON trfm go = do
+  e <- (fmap (toJSON . trfm)) <$> go
+  case e of
+    Left err -> permissionDenied $ tshow err
+    Right v  -> pure v
 
 
 

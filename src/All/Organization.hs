@@ -78,7 +78,7 @@ getOrganizationH org_name = run $ do
 
 putOrganizationR :: OrganizationId -> Handler Value
 putOrganizationR org_id = run $ do
-  user_id <- _requireAuthId
+  user_id              <- _requireAuthId
   organization_request <- requireJsonBody
   errorOrJSON organizationToResponse $ updateOrganizationM user_id org_id organization_request
 
@@ -215,36 +215,36 @@ getOrganizations_ByEverythingM m_sp _ = do
 
 
 
-getOrganizationM :: UserId -> OrganizationId -> HandlerEff (Maybe (Entity Organization))
+getOrganizationM :: UserId -> OrganizationId -> HandlerEff (ErrorEff (Entity Organization))
 getOrganizationM user_id org_id = do
-  selectFirstDb [OrganizationId ==. org_id] []
+  selectFirstDbEither [OrganizationId ==. org_id] []
 
 
 
-getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerEff (Maybe (Entity Organization))
-getWithOrganizationM False _ _           = pure Nothing
-getWithOrganizationM True user_id org_id = getOrganizationM user_id org_id
+getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerEff (ErrorEff (Maybe (Entity Organization)))
+getWithOrganizationM False _ _           = left Error_Empty
+getWithOrganizationM True user_id org_id = fmap Just <$> getOrganizationM user_id org_id
 
 
 
-getOrganizationMH :: UserId -> Text -> HandlerEff (Maybe (Entity Organization))
+getOrganizationMH :: UserId -> Text -> HandlerEff (ErrorEff (Entity Organization))
 getOrganizationMH user_id org_name = getOrganization_ByOrganizationNameM user_id org_name
 
 
 
-getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerEff (Maybe (Entity Organization))
+getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerEff (ErrorEff (Entity Organization))
 getOrganization_ByOrganizationNameM _ org_name = do
-  selectFirstDb [OrganizationName ==. org_name] []
+  selectFirstDbEither [OrganizationName ==. org_name, OrganizationActive ==. True] []
 
 
 
-insertOrganizationM :: UserId -> OrganizationRequest -> HandlerEff (Maybe (Entity Organization))
+insertOrganizationM :: UserId -> OrganizationRequest -> HandlerEff (ErrorEff (Entity Organization))
 insertOrganizationM user_id organization_request = do
 
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> pure Nothing
+    Left _  -> left Error_Validation
     Right _ -> do
       ts <- timestampH'
 
@@ -258,17 +258,17 @@ insertOrganizationM user_id organization_request = do
 
       void $ insert_SystemTeamsM user_id org_id
 
-      pure $ Just org
+      right org
 
 
 
-updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (Maybe (Entity Organization))
+updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (ErrorEff (Entity Organization))
 updateOrganizationM user_id org_id organization_request = do
 
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> pure Nothing
+    Left _  -> left Error_Validation
     Right _ -> do
 
       ts <- timestampH'
@@ -295,7 +295,7 @@ updateOrganizationM user_id org_id organization_request = do
         , OrganizationGuard      +=. 1
         ]
 
-      selectFirstDb [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
+      selectFirstDbEither [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 
@@ -321,24 +321,23 @@ deleteOrganizationTeamsM _ org_id = do
 
 
 
-countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerEff (Maybe CountResponses)
+countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerEff (ErrorEff CountResponses)
 countOrganizationsM m_sp _ = do
   case (lookupSpMay m_sp spUserId) of
-    Just _  -> pure Nothing
+    Just _  -> left Error_NotImplemented
     Nothing -> do
       n <- countDb [OrganizationActive ==. True]
-      pure $ Just $ CountResponses [CountResponse 0 (fromIntegral n)]
+      right $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
-getOrganizationStatsM :: UserId -> HandlerEff (Maybe OrganizationStatResponses)
+getOrganizationStatsM :: UserId -> HandlerEff (ErrorEff OrganizationStatResponses)
 getOrganizationStatsM _ = do
-  pure Nothing
+  left Error_NotImplemented
 
 
 
-
-getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff (Maybe OrganizationStatResponse)
+getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff (ErrorEff OrganizationStatResponse)
 getOrganizationStatM _ org_id = do
 
   num_org_forums  <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
@@ -346,7 +345,7 @@ getOrganizationStatM _ org_id = do
   num_org_threads <- countDb [ThreadOrgId ==. org_id, ThreadActive ==. True]
   num_org_posts   <- countDb [ThreadPostOrgId ==. org_id, ThreadPostActive ==. True]
 
-  pure $ Just $ OrganizationStatResponse {
+  right $ OrganizationStatResponse {
     organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,
     organizationStatResponseMembers        = 0,
