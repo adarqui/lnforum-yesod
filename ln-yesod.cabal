@@ -81,6 +81,7 @@ library
                      Model.DerivePersist
                      Model.Keys
                      Model.Misc
+                     Old
                      Settings
                      Settings.StaticFiles
                      Socket
