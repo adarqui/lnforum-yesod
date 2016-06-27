@@ -397,10 +397,9 @@ getThreadStatsM _ = do
 
 getThreadStatM :: UserId -> ThreadId -> HandlerEff ThreadStatResponse
 getThreadStatM _ thread_id = do
-  -- get posts count
-  num_thread_posts <- countDb [ ThreadPostThreadId ==. thread_id ]
+  num_thread_posts <- countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
   return $ ThreadStatResponse {
-    threadStatResponseThreadId = keyToInt64 thread_id,
+    threadStatResponseThreadId    = keyToInt64 thread_id,
     threadStatResponseThreadPosts = fromIntegral $ num_thread_posts,
-    threadStatResponseViews = 0
+    threadStatResponseViews       = 0
   }

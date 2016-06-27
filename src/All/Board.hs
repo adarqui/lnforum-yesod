@@ -330,12 +330,12 @@ getBoardStatsM _ = do
 getBoardStatM :: UserId -> BoardId -> HandlerEff BoardStatResponse
 getBoardStatM _ board_id = do
 
-  threads      <- countDb [ThreadActive !=. False]
-  thread_posts <- countDb [ThreadPostActive !=. False]
+  num_threads      <- countDb [ThreadActive ==. True]
+  num_thread_posts <- countDb [ThreadPostActive ==. True]
 
   return $ BoardStatResponse {
     boardStatResponseBoardId     = keyToInt64 board_id,
-    boardStatResponseThreads     = fromIntegral threads,
-    boardStatResponseThreadPosts = fromIntegral thread_posts,
+    boardStatResponseThreads     = fromIntegral num_threads,
+    boardStatResponseThreadPosts = fromIntegral num_thread_posts,
     boardStatResponseViews       = 0
   }
