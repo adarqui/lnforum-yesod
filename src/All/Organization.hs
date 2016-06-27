@@ -49,7 +49,8 @@ import           LN.T.Visibility
 getOrganizationsR :: Handler Value
 getOrganizationsR = run $ do
   user_id <- _requireAuthId
-  (toJSON . organizationsToResponses) <$> getOrganizationsM user_id
+  sp      <- lookupStandardParams
+  (toJSON . organizationsToResponses) <$> getOrganizationsM (Just sp) user_id
 
 
 
@@ -194,24 +195,23 @@ validateOrganizationRequest z@OrganizationRequest{..} = do
 -- Model/Internal
 --
 
-getOrganizationsM :: UserId -> HandlerEff [Entity Organization]
-getOrganizationsM user_id = do
-  sp@StandardParams{..} <- lookupStandardParams
-  case spUserId of
-    Just lookup_user_id -> getOrganizations_ByUserIdM user_id lookup_user_id sp
-    Nothing             -> getOrganizations_ByEverythingM user_id sp
+getOrganizationsM :: Maybe Sp -> UserId -> HandlerEff [Entity Organization]
+getOrganizationsM m_sp user_id = do
+  case (lookupSpMay m_sp spUserId) of
+    Just lookup_user_id -> getOrganizations_ByUserIdM m_sp user_id lookup_user_id
+    Nothing             -> getOrganizations_ByEverythingM m_sp user_id
 
 
 
-getOrganizations_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Organization]
-getOrganizations_ByUserIdM _ lookup_user_id sp = do
-  selectListDb sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
+getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerEff [Entity Organization]
+getOrganizations_ByUserIdM m_sp _ lookup_user_id = do
+  selectListDbMay m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
-getOrganizations_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Organization]
-getOrganizations_ByEverythingM _ sp = do
-  selectListDb sp [] [] OrganizationId
+getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerEff [Entity Organization]
+getOrganizations_ByEverythingM m_sp _ = do
+  selectListDbMay m_sp [] [] OrganizationId
 
 
 

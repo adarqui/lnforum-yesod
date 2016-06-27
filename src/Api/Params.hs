@@ -5,8 +5,13 @@
 
 module Api.Params (
   StandardParams (..),
+  MStandardParams,
+  Sp,
+  MSp,
   defaultStandardParams,
   lookupStandardParams,
+  lookupSpMay,
+  lookupSpBool,
   lookupGetParam400,
   lookupGetParam401,
   lookupGetParam403,
@@ -15,8 +20,10 @@ module Api.Params (
   lookupLikeEnt,
   lookupStarEnt,
   spToSelect,
+  spToSelectMay,
   spToSelectE,
   selectListDb,
+  selectListDbMay,
   selectListDb',
   selectListDb'',
   selectKeysListDb,
@@ -48,6 +55,12 @@ import qualified Database.Esqueleto      as E
 -- import           Database.Esqueleto      ((^.))
 import           LN.T.Param
 import           LN.T.Ent (Ent(..))
+
+
+
+type Sp              = StandardParams
+type MSp             = Maybe StandardParams
+type MStandardParams = Maybe StandardParams
 
 
 
@@ -253,6 +266,18 @@ lookupStandardParams = do
 
 
 
+lookupSpMay :: Maybe StandardParams -> (StandardParams -> Maybe a) -> Maybe a
+lookupSpMay Nothing _   = Nothing
+lookupSpMay (Just sp) f = f sp
+
+
+
+lookupSpBool :: Maybe StandardParams -> (StandardParams -> Bool) -> Bool
+lookupSpBool Nothing f   = False
+lookupSpBool (Just sp) f = f sp
+
+
+
 lookupGetParam400 :: Text -> HandlerEff Text
 lookupGetParam400 = lookupGetParamStatus 400
 
@@ -372,6 +397,26 @@ spToSelect StandardParams{..} field =
 
 
 
+spToSelectMay :: forall typ record. Maybe StandardParams -> EntityField record typ -> [SelectOpt record]
+spToSelectMay Nothing field = []
+spToSelectMay (Just StandardParams{..}) field =
+  offset ++ limit ++ order
+  where
+  offset = case spOffset of
+           Nothing      -> []
+           Just offset' -> [OffsetBy offset']
+  limit  = case spLimit of
+           Nothing     -> []
+           Just limit' -> [LimitTo limit']
+  order  = case spSortOrder of
+           Nothing               -> []
+           Just SortOrderBy_Asc  -> [Asc field]
+           Just SortOrderBy_Dsc  -> [Desc field]
+           -- TODO FIXME: need rand
+           _                     -> [Asc field]
+
+
+
 -- spToSelect :: forall typ record. StandardParams -> EntityField record typ -> [SelectOpt record]
 -- esqueleto
 
@@ -413,6 +458,20 @@ selectListDb :: forall site val typ.
   -> ControlMA (HandlerT site IO) [Entity val]
 selectListDb sp query filt field = do
   _runDB $ selectList query ((spToSelect sp field) <> filt)
+
+
+
+selectListDbMay :: forall site val typ.
+  (PersistEntity val, PersistQuery (PersistEntityBackend val),
+  YesodPersist site,
+  PersistEntityBackend val ~ YesodPersistBackend site) =>
+  Maybe StandardParams
+  -> [Filter val]
+  -> [SelectOpt val]
+  -> EntityField val typ
+  -> ControlMA (HandlerT site IO) [Entity val]
+selectListDbMay m_sp query filt field = do
+  _runDB $ selectList query ((spToSelectMay m_sp field) <> filt)
 
 
 

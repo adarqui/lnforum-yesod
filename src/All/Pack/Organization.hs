@@ -29,7 +29,8 @@ import           Data.List        (nub)
 getOrganizationPacksR :: Handler Value
 getOrganizationPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getOrganizationPacksM user_id
+  sp      <- lookupStandardParams
+  toJSON <$> getOrganizationPacksM (Just sp) user_id
 
 
 
@@ -54,11 +55,9 @@ getOrganizationPackH org_name = run $ do
 -- Model
 --
 
-getOrganizationPacksM :: UserId -> HandlerEff OrganizationPackResponses
-getOrganizationPacksM user_id = do
-
-  sp@StandardParams{..} <- lookupStandardParams
-  getOrganizationPacks_ByEverythingM user_id sp
+getOrganizationPacksM :: Maybe StandardParams -> UserId -> HandlerEff OrganizationPackResponses
+getOrganizationPacksM m_sp user_id = do
+  getOrganizationPacks_ByEverythingM m_sp user_id
 
 
 
@@ -77,10 +76,10 @@ getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
 
-getOrganizationPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff OrganizationPackResponses
-getOrganizationPacks_ByEverythingM user_id sp = do
+getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerEff OrganizationPackResponses
+getOrganizationPacks_ByEverythingM m_sp user_id = do
 
-  organizations       <- getOrganizations_ByEverythingM user_id sp
+  organizations       <- getOrganizations_ByEverythingM m_sp user_id
   organizations_packs <- catMaybes <$> mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
   return $ OrganizationPackResponses {
     organizationPackResponses = organizations_packs
