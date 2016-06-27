@@ -17,6 +17,7 @@ module Application (
 
 
 
+import qualified Data.Text as T (pack)
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
@@ -53,6 +54,21 @@ import           All.Leuron
 import           All.Like
 import           All.Me
 import           All.Organization
+import           All.Pack.Board
+import           All.Pack.Forum
+import           All.Pack.GlobalGroup
+import           All.Pack.Leuron
+import           All.Pack.Me
+import           All.Pack.Organization
+import           All.Pack.PmIn
+import           All.Pack.PmOut
+import           All.Pack.Resource
+import           All.Pack.Sanitized.User
+import           All.Pack.Team
+import           All.Pack.TeamMember
+import           All.Pack.Thread
+import           All.Pack.ThreadPost
+import           All.Pack.User
 import           All.Pm
 import           All.PmIn
 import           All.PmOut
@@ -66,21 +82,6 @@ import           All.TeamMember
 import           All.Thread
 import           All.ThreadPost
 import           All.User
-import           All.Pack.Board
-import           All.Pack.Forum
-import           All.Pack.Leuron
-import           All.Pack.GlobalGroup
-import           All.Pack.Me
-import           All.Pack.Organization
-import           All.Pack.Resource
-import           All.Pack.Sanitized.User
-import           All.Pack.Team
-import           All.Pack.TeamMember
-import           All.Pack.Thread
-import           All.Pack.ThreadPost
-import           All.Pack.User
-import           All.Pack.PmIn
-import           All.Pack.PmOut
 
 import           Handler.Common
 import           Handler.Root
@@ -97,11 +98,11 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and returns a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> IO App
-makeFoundation appSettings = do
+makeFoundation :: AppSettings -> AppSettingsLN -> IO App
+makeFoundation appSettings appSettingsLN = do
 
 --    dbconf <- if appDatabaseUrl appSettings
-    appRed <- R.connect (R.defaultConnectInfo { R.connectHost = "adarq.internal", R.connectPort = R.PortNumber 16379 })
+    appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 16379 })
 
     -- example chat initialization
     appZChat <- atomically newBroadcastTChan
@@ -115,7 +116,7 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     -- custom
-    appGithubOAuthKeys <- githubOAuthKeys
+    appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsLN) (T.pack $ appGithubClientSecret appSettingsLN)
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
@@ -139,11 +140,6 @@ makeFoundation appSettings = do
 
     -- Return the foundation
     return $ mkFoundation pool
-
-  where
-
-    githubOAuthKeys :: IO OAuthKeys
-    githubOAuthKeys = return $ OAuthKeys "401608c91835421ad08a" "da30c2b38b22e5dda54bd47828aa7405dcf79abd"
 
 
 
@@ -197,16 +193,22 @@ warpSettings foundation =
 -- | For yesod devel, return the Warp settings and WAI Application.
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
-    settings <- getAppSettings
-    foundation <- makeFoundation settings
-    wsettings <- getDevSettings $ warpSettings foundation
-    app <- makeApplication foundation
+    settings    <- getAppSettings
+    ln_settings <- getAppSettingsLN
+    foundation  <- makeFoundation settings ln_settings
+    wsettings   <- getDevSettings $ warpSettings foundation
+    app         <- makeApplication foundation
     return (wsettings, app)
 
 
 
 getAppSettings :: IO AppSettings
 getAppSettings = loadAppSettings [configSettingsYml] [] useEnv
+
+
+
+getAppSettingsLN :: IO AppSettingsLN
+getAppSettingsLN = loadAppSettings [configSettingsYml] [] useEnv
 
 
 
@@ -227,8 +229,12 @@ appMain = do
         -- allow environment variables to override
         useEnv
 
+    ln_settings <- loadAppSettingsArgs
+        [configSettingsYmlValue]
+        useEnv
+
     -- Generate the foundation from the settings
-    foundation <- makeFoundation settings
+    foundation <- makeFoundation settings ln_settings
 
     -- Generate a WAI Application from the foundation
     app <- makeApplication foundation
@@ -245,10 +251,11 @@ appMain = do
 --------------------------------------------------------------
 getApplicationRepl :: IO (Int, App, Application)
 getApplicationRepl = do
-    settings <- getAppSettings
-    foundation <- makeFoundation settings
-    wsettings <- getDevSettings $ warpSettings foundation
-    app1 <- makeApplication foundation
+    settings    <- getAppSettings
+    ln_settings <- getAppSettingsLN
+    foundation  <- makeFoundation settings ln_settings
+    wsettings   <- getDevSettings $ warpSettings foundation
+    app1        <- makeApplication foundation
     return (getPort wsettings, foundation, app1)
 
 
@@ -263,7 +270,10 @@ shutdownApp _ = return ()
 
 -- | Run a handler
 handler :: Handler a -> IO a
-handler h = getAppSettings >>= makeFoundation >>= flip unsafeHandler h
+handler h = do
+  settings    <- getAppSettings
+  ln_settings <- getAppSettingsLN
+  makeFoundation settings ln_settings >>= flip unsafeHandler h
 
 
 

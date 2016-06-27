@@ -31,3 +31,7 @@ database:
 
 copyright: leuro (C)
 #analytics: UA-YOURCODE
+
+redis-host: "adarq.internal"
+oauth-github-client-id: "401608c91835421ad08a"
+oauth-github-client-secret: "da30c2b38b22e5dda54bd47828aa7405dcf79abd"

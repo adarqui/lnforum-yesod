@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards  #-}
 {-# LANGUAGE TemplateHaskell  #-}
 {-# LANGUAGE TypeFamilies     #-}
 
@@ -7,6 +8,7 @@ module Foundation where
 
 
 import           Control.Monad.Trans.RWS     (RWST)
+import           Data.Aeson                  (FromJSON, withObject)
 import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
 import           Import.NoFoundation
 import           Text.Hamlet                 (hamletFile)
@@ -20,19 +22,35 @@ import           Yesod.Default.Util          (addStaticContentExternal)
 import           Yesod.Auth.Dummy            (authDummy)
 import           Yesod.Auth.OAuth2.Github    ()
 
-import qualified Data.Text                   as T (pack, append)
+import qualified Data.Text                   as T (append, pack)
 import qualified Data.Text.Encoding          as T (decodeUtf8)
 import qualified Database.Redis              as R (Connection)
-import           OAuth2                      (authenticateUser)
-import qualified Network.Wai                 as W (requestHeaders, rawPathInfo)
+import qualified Network.Wai                 as W (rawPathInfo, requestHeaders)
 import           Network.Wai.Middleware.Cors ()
+import           OAuth2                      (authenticateUser)
 
 import qualified Data.ByteString.Char8       as BSC (isPrefixOf)
 
 
 
+data AppSettingsLN = AppSettingsLN {
+  appRedisHost          :: String,
+  appGithubClientID     :: String,
+  appGithubClientSecret :: String
+}
+
+instance FromJSON AppSettingsLN where
+  parseJSON = withObject "AppSettingsLN" $ \o -> do
+    appRedisHost          <- o .: "redis-host"
+    appGithubClientID     <- o .: "oauth-github-client-id"
+    appGithubClientSecret <- o .: "oauth-github-client-secret"
+    pure AppSettingsLN {..}
+
+
+
 data App = App
     { appSettings        :: AppSettings
+    , appSettingsLN      :: AppSettingsLN
     , appStatic          :: Static -- ^ Settings for static file serving.
     , appConnPool        :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager     :: Manager

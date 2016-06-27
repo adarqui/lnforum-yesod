@@ -4,13 +4,13 @@
 static-dir:     "_env:STATIC_DIR:static"
 host:           "_env:HOST:*4" # any IPv4 host
 port:           "_env:PORT:80"
-approot:        "_env:APPROOT:https://leuro.adarq.org"
+approot:        "_env:APPROOT:http://dev.adarq.org"
 ip-from-header: "_env:IP_FROM_HEADER:false"
 
 # Optional values with the following production defaults.
 # In development, they default to the inverse.
 #
-# development: false
+development: true
 # detailed-logging: false
 # should-log-all: false
 # reload-templates: false
@@ -31,3 +31,7 @@ database:
 
 copyright: leuro (C)
 #analytics: UA-YOURCODE
+
+redis-host: "dev.adarq.org"
+oauth-github-client-id: "b53b7cfba0fa60bc534a"
+oauth-github-client-secret: "9511f32914719d30d27aec8e9df639b05c142bac"
