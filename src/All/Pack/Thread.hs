@@ -101,10 +101,10 @@ getThreadPacks_ByBoardIdM user_id board_id sp = do
 getThreadPack_ByThreadM :: UserId -> Entity Thread -> StandardParams -> HandlerEff ThreadPackResponse
 getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
 
-  thread_user   <- getUserM user_id threadUserId
-  thread_stats  <- getThreadStatM user_id thread_id
-  mthread_posts <- getThreadPosts_ByThreadIdM user_id thread_id sp
-  muser         <- case (headMay mthread_posts) of
+  thread_user    <- getUserM user_id threadUserId
+  thread_stats   <- getThreadStatM user_id thread_id
+  m_thread_posts <- getThreadPosts_ByThreadIdM user_id thread_id sp
+  muser          <- case (headMay m_thread_posts) of
     Nothing -> pure Nothing
     Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
 
@@ -118,7 +118,7 @@ getThreadPack_ByThreadM user_id thread@(Entity thread_id Thread{..}) sp = do
     threadPackResponseStat                 = thread_stats,
     threadPackResponseLike                 = Nothing,
     threadPackResponseStar                 = Nothing,
-    threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay mthread_posts,
+    threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay m_thread_posts,
     threadPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
     threadPackResponseWithOrganization     = Nothing,
     threadPackResponseWithForum            = Nothing,
