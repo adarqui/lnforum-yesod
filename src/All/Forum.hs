@@ -344,12 +344,14 @@ getForumStatsM _ = do
 getForumStatM :: UserId -> ForumId -> HandlerEff ForumStatResponse
 getForumStatM _ forum_id = do
 
-  num_forum_boards <- countDb [ BoardForumId ==. forum_id ]
+  num_forum_boards  <- countDb [BoardForumId ==. forum_id, BoardActive ==. True]
+  num_forum_threads <- countDb [ThreadForumId ==. forum_id, ThreadActive ==. True]
+  num_forum_posts   <- countDb [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True]
 
   return $ ForumStatResponse {
     forumStatResponseForumId     = keyToInt64 forum_id,
-    forumStatResponseBoards      = fromIntegral $ num_forum_boards,
-    forumStatResponseThreads     = 0, -- TODO FIXME
-    forumStatResponseThreadPosts = 0, -- TODO FIXME
+    forumStatResponseBoards      = fromIntegral num_forum_boards,
+    forumStatResponseThreads     = fromIntegral num_forum_threads,
+    forumStatResponseThreadPosts = fromIntegral num_forum_posts,
     forumStatResponseViews       = 0
   }
