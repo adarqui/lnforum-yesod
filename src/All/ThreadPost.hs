@@ -170,10 +170,10 @@ threadPostsToResponses thread_posts = ThreadPostResponses {
 -- orderByToField :: forall typ record. OrderBy -> EntityField record typ
 -- TODO FIXME, this type sig might cause problems
 orderByToField :: Maybe OrderBy -> EntityField ThreadPost (Maybe UTCTime)
-orderByToField Nothing = ThreadPostCreatedAt
+orderByToField Nothing      = ThreadPostCreatedAt
 orderByToField (Just order) =
   case order of
-    OrderBy_CreatedAt -> ThreadPostCreatedAt
+    OrderBy_CreatedAt  -> ThreadPostCreatedAt
     OrderBy_ActivityAt -> ThreadPostActivityAt
     _                  -> ThreadPostCreatedAt
 

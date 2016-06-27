@@ -28,6 +28,7 @@ module Api.Params (
   selectListDb'',
   selectKeysListDb,
   selectKeysListDb',
+  selectKeysListDbMay,
   selectFirstDb,
   selectFirstDbEither,
   insertDb,
@@ -515,6 +516,20 @@ selectKeysListDb :: forall site val typ.
                     -> ControlMA (HandlerT site IO) [Key val]
 selectKeysListDb sp query filt field = do
   _runDB $ selectKeysList query ((spToSelect sp field) <> filt)
+
+
+
+selectKeysListDbMay :: forall site val typ.
+                    (PersistEntity val, YesodPersist site,
+                     PersistQuery (PersistEntityBackend val),
+                     PersistEntityBackend val ~ YesodPersistBackend site) =>
+                    Maybe StandardParams
+                    -> [Filter val]
+                    -> [SelectOpt val]
+                    -> EntityField val typ
+                    -> ControlMA (HandlerT site IO) [Key val]
+selectKeysListDbMay m_sp query filt field = do
+  _runDB $ selectKeysList query ((spToSelectMay m_sp field) <> filt)
 
 
 

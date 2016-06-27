@@ -31,7 +31,7 @@ errorOrJSON
 errorOrJSON trfm go = do
   e <- (fmap (toJSON . trfm)) <$> go
   case e of
-    Left err -> permissionDenied $ tshow err
+    Left err -> permissionDenied $ tshow $ toJSON err
     Right v  -> pure v
 
 

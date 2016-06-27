@@ -7,7 +7,8 @@
 
 module Old (
   getBoardStatM_qBoardStats,
-  qBoardStats
+  qBoardStats,
+  getThreads_ByOrganizationIdM
 ) where
 
 
@@ -94,3 +95,20 @@ qBoardStats board_id = do
 --
 --   where
 --   boop k = selectListDb k [] ThreadId
+--
+--
+
+
+
+getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Thread]
+getThreads_ByOrganizationIdM _ org_id sp = do
+
+  _runDB
+    $ E.select
+    $ E.from $ \(thread `E.InnerJoin` board `E.InnerJoin` forum `E.InnerJoin` org) -> do
+      E.on $ forum ^. ForumOrgId E.==. org ^. OrganizationId
+      E.on $ board ^. BoardForumId E.==. forum ^. ForumId
+      E.on $ thread ^. ThreadBoardId E.==. board ^. BoardId
+      E.where_ $ org ^. OrganizationId E.==. E.val org_id
+      spToSelectE sp
+      return thread
