@@ -37,14 +37,14 @@ getOrganizationPacksR = run $ do
 getOrganizationPackR :: OrganizationId -> Handler Value
 getOrganizationPackR org_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getOrganizationPackM user_id org_id
+  errorOrJSON id $ getOrganizationPackM user_id org_id
 
 
 
 getOrganizationPackH :: Text -> Handler Value
 getOrganizationPackH org_name = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getOrganizationPackMH user_id org_name
+  errorOrJSON id $ getOrganizationPackMH user_id org_name
 
 
 
@@ -101,18 +101,23 @@ getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerE
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   organization_user    <- getUserM user_id organizationUserId
-  organization_stats   <- getOrganizationStatM user_id (entityKey organization)
+  m_organization_stats <- getOrganizationStatM user_id (entityKey organization)
   user_perms_by_org    <- userPermissions_ByOrganizationIdM user_id org_id
   user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
 
-  pure $ Just $ OrganizationPackResponse {
-    organizationPackResponseOrganization   = organizationToResponse organization,
-    organizationPackResponseOrganizationId = keyToInt64 org_id,
-    organizationPackResponseUser           = userToSanitizedResponse organization_user,
-    organizationPackResponseUserId         = entityKeyToInt64 organization_user,
-    organizationPackResponseStat           = organization_stats,
-    organizationPackResponseLike           = Nothing,
-    organizationPackResponseStar           = Nothing,
-    organizationPackResponsePermissions    = user_perms_by_org,
-    organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
-  }
+  case m_organization_stats of
+    Just organization_stats -> do
+
+      pure $ Just $ OrganizationPackResponse {
+        organizationPackResponseOrganization   = organizationToResponse organization,
+        organizationPackResponseOrganizationId = keyToInt64 org_id,
+        organizationPackResponseUser           = userToSanitizedResponse organization_user,
+        organizationPackResponseUserId         = entityKeyToInt64 organization_user,
+        organizationPackResponseStat           = organization_stats,
+        organizationPackResponseLike           = Nothing,
+        organizationPackResponseStar           = Nothing,
+        organizationPackResponsePermissions    = user_perms_by_org,
+        organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
+      }
+
+    _ -> pure Nothing

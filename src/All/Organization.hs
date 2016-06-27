@@ -56,9 +56,9 @@ getOrganizationsR = run $ do
 
 postOrganizationR0 :: Handler Value
 postOrganizationR0 = run $ do
-  user_id <- _requireAuthId
+  user_id              <- _requireAuthId
   organization_request <- requireJsonBody :: HandlerEff OrganizationRequest
-  (toJSON . organizationToResponse) <$> insertOrganizationM user_id organization_request
+  errorOrJSON organizationToResponse $ insertOrganizationM user_id organization_request
 
 
 
@@ -80,22 +80,22 @@ putOrganizationR :: OrganizationId -> Handler Value
 putOrganizationR org_id = run $ do
   user_id <- _requireAuthId
   organization_request <- requireJsonBody
-  (toJSON . organizationToResponse) <$> updateOrganizationM user_id org_id organization_request
+  errorOrJSON organizationToResponse $ updateOrganizationM user_id org_id organization_request
 
 
 
 deleteOrganizationR :: OrganizationId -> Handler Value
 deleteOrganizationR org_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteOrganizationM user_id org_id
-  pure $ toJSON ()
+  toJSON <$> deleteOrganizationM user_id org_id
 
 
 
 getOrganizationsCountR :: Handler Value
 getOrganizationsCountR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> countOrganizationsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ countOrganizationsM (Just sp) user_id
 
 
 
@@ -195,7 +195,7 @@ validateOrganizationRequest z@OrganizationRequest{..} = do
 -- Model/Internal
 --
 
-getOrganizationsM :: Maybe Sp -> UserId -> HandlerEff [Entity Organization]
+getOrganizationsM :: Maybe StandardParams -> UserId -> HandlerEff [Entity Organization]
 getOrganizationsM m_sp user_id = do
   case (lookupSpMay m_sp spUserId) of
     Just lookup_user_id -> getOrganizations_ByUserIdM m_sp user_id lookup_user_id
@@ -238,63 +238,70 @@ getOrganization_ByOrganizationNameM _ org_name = do
 
 
 
-insertOrganizationM :: UserId -> OrganizationRequest -> HandlerEff (Entity Organization)
+insertOrganizationM :: UserId -> OrganizationRequest -> HandlerEff (Maybe (Entity Organization))
 insertOrganizationM user_id organization_request = do
 
-  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
+--  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
-  ts <- timestampH'
+  case (validateOrganizationRequest organization_request) of
+    Left _  -> pure Nothing
+    Right _ -> do
+      ts <- timestampH'
 
-  let
-    email_md5 = md5Text (organizationRequestEmail organization_request)
-    organization = (organizationRequestToOrganization user_id organization_request) {
-        organizationEmailMD5 = email_md5
-      , organizationCreatedAt = Just ts
-    }
-  org@(Entity org_id _) <- insertEntityDb organization
+      let
+        email_md5 = md5Text (organizationRequestEmail organization_request)
+        organization = (organizationRequestToOrganization user_id organization_request) {
+            organizationEmailMD5 = email_md5
+          , organizationCreatedAt = Just ts
+        }
+      org@(Entity org_id _) <- insertEntityDb organization
 
-  void $ insert_SystemTeamsM user_id org_id
+      void $ insert_SystemTeamsM user_id org_id
 
-  return org
+      pure $ Just org
 
 
 
-updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (Entity Organization)
+updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerEff (Maybe (Entity Organization))
 updateOrganizationM user_id org_id organization_request = do
 
-  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
+--  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
-  ts <- timestampH'
+  case (validateOrganizationRequest organization_request) of
+    Left _  -> pure Nothing
+    Right _ -> do
 
-  let
-    email_md5 = md5Text (organizationRequestEmail organization_request)
-    Organization{..} = (organizationRequestToOrganization user_id organization_request) { organizationModifiedAt = Just ts }
+      ts <- timestampH'
 
-  updateWhereDb
-    [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
-    [ OrganizationModifiedAt  =. organizationModifiedAt
-    , OrganizationActivityAt  =. Just ts
-    , OrganizationName        =. organizationName
-    , OrganizationDisplayName =. organizationDisplayName
-    , OrganizationDescription =. organizationDescription
-    , OrganizationCompany     =. organizationCompany
-    , OrganizationLocation    =. organizationLocation
-    , OrganizationEmail       =. organizationEmail
-    , OrganizationEmailMD5    =. email_md5
-    , OrganizationMembership  =. organizationMembership
-    , OrganizationIcon        =. organizationIcon
-    , OrganizationTags        =. organizationTags
-    , OrganizationVisibility  =. organizationVisibility
-    , OrganizationGuard      +=. 1
-    ]
-  notFoundMaybe =<< selectFirstDb [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ] []
+      let
+        email_md5 = md5Text (organizationRequestEmail organization_request)
+        Organization{..} = (organizationRequestToOrganization user_id organization_request) { organizationModifiedAt = Just ts }
+
+      updateWhereDb
+        [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
+        [ OrganizationModifiedAt  =. organizationModifiedAt
+        , OrganizationActivityAt  =. Just ts
+        , OrganizationName        =. organizationName
+        , OrganizationDisplayName =. organizationDisplayName
+        , OrganizationDescription =. organizationDescription
+        , OrganizationCompany     =. organizationCompany
+        , OrganizationLocation    =. organizationLocation
+        , OrganizationEmail       =. organizationEmail
+        , OrganizationEmailMD5    =. email_md5
+        , OrganizationMembership  =. organizationMembership
+        , OrganizationIcon        =. organizationIcon
+        , OrganizationTags        =. organizationTags
+        , OrganizationVisibility  =. organizationVisibility
+        , OrganizationGuard      +=. 1
+        ]
+
+      selectFirstDb [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 
 deleteOrganizationM :: UserId -> OrganizationId -> HandlerEff ()
 deleteOrganizationM user_id org_id = do
-
-  deleteCascadeWhereDb [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
+  deleteCascadeWhereDb [OrganizationUserId ==. user_id, OrganizationId ==. org_id]
 
 {-
   -- bg job: Delete owners team
@@ -310,32 +317,28 @@ deleteOrganizationM user_id org_id = do
 deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerEff ()
 deleteOrganizationTeamsM _ org_id = do
   -- TODO: FIXME: security
-  deleteWhereDb [ TeamOrgId ==. org_id ]
+  deleteWhereDb [TeamOrgId ==. org_id]
 
 
 
-countOrganizationsM :: UserId -> HandlerEff CountResponses
-countOrganizationsM _ = do
-  StandardParams{..} <- lookupStandardParams
-  case spUserId of
-    Just _  -> notFound
+countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerEff (Maybe CountResponses)
+countOrganizationsM m_sp _ = do
+  case (lookupSpMay m_sp spUserId) of
+    Just _  -> pure Nothing
     Nothing -> do
-      n <- countDb [ OrganizationActive ==. True ]
-      return $ CountResponses [CountResponse 0 (fromIntegral n)]
+      n <- countDb [OrganizationActive ==. True]
+      pure $ Just $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
-getOrganizationStatsM :: UserId -> HandlerEff OrganizationStatResponses
+getOrganizationStatsM :: UserId -> HandlerEff (Maybe OrganizationStatResponses)
 getOrganizationStatsM _ = do
-  StandardParams{..} <- lookupStandardParams
-  case spBoardId of
-    Just _  -> notFound
-    Nothing -> notFound
+  pure Nothing
 
 
 
 
-getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff OrganizationStatResponse
+getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff (Maybe OrganizationStatResponse)
 getOrganizationStatM _ org_id = do
 
   num_org_forums  <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
@@ -343,7 +346,7 @@ getOrganizationStatM _ org_id = do
   num_org_threads <- countDb [ThreadOrgId ==. org_id, ThreadActive ==. True]
   num_org_posts   <- countDb [ThreadPostOrgId ==. org_id, ThreadPostActive ==. True]
 
-  return $ OrganizationStatResponse {
+  pure $ Just $ OrganizationStatResponse {
     organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,
     organizationStatResponseMembers        = 0,
