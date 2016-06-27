@@ -337,13 +337,19 @@ getOrganizationStatsM _ = do
 
 getOrganizationStatM :: UserId -> OrganizationId -> HandlerEff OrganizationStatResponse
 getOrganizationStatM _ org_id = do
+
+  num_org_forums  <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
+  num_org_boards  <- countDb [BoardOrgId ==. org_id, BoardActive ==. True]
+  num_org_threads <- countDb [ThreadOrgId ==. org_id, ThreadActive ==. True]
+  num_org_posts   <- countDb [ThreadPostOrgId ==. org_id, ThreadPostActive ==. True]
+
   return $ OrganizationStatResponse {
     organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,
     organizationStatResponseMembers        = 0,
-    organizationStatResponseForums         = 0,
-    organizationStatResponseBoards         = 0,
-    organizationStatResponseThreads        = 0,
-    organizationStatResponseThreadPosts    = 0,
+    organizationStatResponseForums         = fromIntegral num_org_forums,
+    organizationStatResponseBoards         = fromIntegral num_org_boards,
+    organizationStatResponseThreads        = fromIntegral num_org_threads,
+    organizationStatResponseThreadPosts    = fromIntegral num_org_posts,
     organizationStatResponseViews          = 0
   }
