@@ -23,14 +23,15 @@ import           All.User
 getTeamMemberPacksR :: Handler Value
 getTeamMemberPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getTeamMemberPacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getTeamMemberPacksM (pure sp) user_id
 
 
 
 getTeamMemberPackR :: TeamMemberId -> Handler Value
 getTeamMemberPackR team_member_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getTeamMemberPackM user_id team_member_id
+  errorOrJSON id $ getTeamMemberPackM user_id team_member_id
 
 
 
@@ -39,53 +40,47 @@ getTeamMemberPackR team_member_id = run $ do
 -- Model
 --
 
-getTeamMemberPacksM :: UserId -> HandlerEff TeamMemberPackResponses
-getTeamMemberPacksM user_id = do
+getTeamMemberPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff TeamMemberPackResponses
+getTeamMemberPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spTeamId) of
 
-  case spTeamId of
-
-    Just team_id -> getTeamMemberPacks_ByTeamIdM user_id team_id sp
-    _            -> notFound
+    Just team_id -> getTeamMemberPacks_ByTeamIdM m_sp user_id team_id
+    _            -> left $ Error_InvalidArguments "team_id"
 
 
 
-getTeamMemberPackM :: UserId -> TeamMemberId -> HandlerEff TeamMemberPackResponse
+getTeamMemberPackM :: UserId -> TeamMemberId -> HandlerErrorEff TeamMemberPackResponse
 getTeamMemberPackM user_id team_member_id = do
 
-  teamMember         <- getTeamMemberM user_id team_member_id
-  getTeamMemberPack_ByTeamMemberM user_id teamMember
+  e_team_member <- getTeamMemberM user_id team_member_id
+  rehtie e_team_member left $ \team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member
 
 
 
 
-getTeamMemberPacks_ByTeamIdM :: UserId -> TeamId -> StandardParams -> HandlerEff TeamMemberPackResponses
-getTeamMemberPacks_ByTeamIdM user_id team_id sp = do
+getTeamMemberPacks_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> HandlerErrorEff TeamMemberPackResponses
+getTeamMemberPacks_ByTeamIdM m_sp user_id team_id = do
 
-  team_members      <- getTeamMembers_ByTeamIdM user_id team_id sp
-  team_member_packs <- mapM (\team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member) team_members
-  return $ TeamMemberPackResponses {
-    teamMemberPackResponses = team_member_packs
-  }
+  e_team_members <- getTeamMembers_ByTeamIdM m_sp user_id team_id
+  rehtie e_team_members left $ \team_members -> do
+    team_member_packs <- rights <$> mapM (\team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member) team_members
+    right $ TeamMemberPackResponses {
+      teamMemberPackResponses = team_member_packs
+    }
 
 
 
-getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> HandlerEff TeamMemberPackResponse
+getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> HandlerErrorEff TeamMemberPackResponse
 getTeamMemberPack_ByTeamMemberM user_id team_member@(Entity team_member_id TeamMember{..}) = do
 
-  -- let sp = defaultStandardParams {
-  --     spSortOrder = Just SortOrderBy_Dsc,
-  --     spOrder     = Just OrderBy_ActivityAt,
-  --     spLimit     = Just 1
-  --   }
+  e_team_member_user <- getUserM user_id teamMemberUserId
+  rehtie e_team_member_user left $ \team_member_user -> do
 
-  team_member_user    <- getUserM user_id teamMemberUserId
-
-  return $ TeamMemberPackResponse {
-    teamMemberPackResponseUser         = userToSanitizedResponse team_member_user,
-    teamMemberPackResponseUserId       = entityKeyToInt64 team_member_user,
-    teamMemberPackResponseTeamMember   = teamMemberToResponse team_member,
-    teamMemberPackResponseTeamMemberId = keyToInt64 team_member_id,
-    teamMemberPackResponsePermissions  = emptyPermissions
-  }
+    right $ TeamMemberPackResponse {
+      teamMemberPackResponseUser         = userToSanitizedResponse team_member_user,
+      teamMemberPackResponseUserId       = entityKeyToInt64 team_member_user,
+      teamMemberPackResponseTeamMember   = teamMemberToResponse team_member,
+      teamMemberPackResponseTeamMemberId = keyToInt64 team_member_id,
+      teamMemberPackResponsePermissions  = emptyPermissions
+    }
