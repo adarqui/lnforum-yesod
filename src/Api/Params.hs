@@ -30,6 +30,7 @@ module Api.Params (
   selectKeysListDb,
   selectKeysListDb',
   selectKeysListDbMay,
+  selectKeysListDbEither,
   selectFirstDb,
   selectFirstDbEither,
   insertDb,
@@ -37,6 +38,7 @@ module Api.Params (
   updateDb,
   updateWhereDb,
   deleteWhereDb,
+  deleteWhereDbEither,
   deleteCascadeDb,
   deleteCascadeWhereDb,
   countDb,
@@ -548,6 +550,20 @@ selectKeysListDbMay m_sp query filt field = do
 
 
 
+selectKeysListDbEither :: forall site val typ.
+                    (PersistEntity val, YesodPersist site,
+                     PersistQuery (PersistEntityBackend val),
+                     PersistEntityBackend val ~ YesodPersistBackend site) =>
+                    Maybe StandardParams
+                    -> [Filter val]
+                    -> [SelectOpt val]
+                    -> EntityField val typ
+                    -> ControlMA (HandlerT site IO) (ErrorEff [Key val])
+selectKeysListDbEither m_sp query filt field = do
+  Right <$> (_runDB $ selectKeysList query ((spToSelectMay m_sp field) <> filt))
+
+
+
 -- | selectKeysListDb' helper
 --
 selectKeysListDb' :: forall val typ.
@@ -641,6 +657,15 @@ deleteWhereDb :: forall site val.
                   YesodPersistBackend site ~ PersistEntityBackend val) =>
                  [Filter val] -> ControlMA (HandlerT site IO) ()
 deleteWhereDb filt = _runDB $ deleteWhere filt
+
+
+
+deleteWhereDbEither :: forall site val.
+                 (PersistEntity val, YesodPersist site,
+                  PersistQuery (YesodPersistBackend site),
+                  YesodPersistBackend site ~ PersistEntityBackend val) =>
+                 [Filter val] -> ControlMA (HandlerT site IO) (ErrorEff ())
+deleteWhereDbEither filt = Right <$> (_runDB $ deleteWhere filt)
 
 
 

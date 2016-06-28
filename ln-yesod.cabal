@@ -118,6 +118,8 @@ library
     build-depends: base
                  , ln-types
                  , ln-lib
+                 , haskell-ebyam
+                 , haskell-rehtie
                  , yesod
                  , yesod-core
                  , yesod-auth

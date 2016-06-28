@@ -73,7 +73,8 @@ getThreadR thread_id = run $ do
 getThreadH :: Text -> Handler Value
 getThreadH thread_name = run $ do
   user_id <- _requireAuthId
-  errorOrJSON threadToResponse $ getThreadMH user_id thread_name
+  sp      <- lookupStandardParams
+  errorOrJSON threadToResponse $ getThreadMH (pure sp) user_id thread_name
 
 
 
@@ -263,7 +264,7 @@ getWithThreadM True user_id thread_id = do
 insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThreadM m_sp user_id thread_request = do
   case (lookupSpMay m_sp spBoardId) of
-    Just board_id -> insertThread_ByBoardIdM m_sp user_id board_id thread_request
+    Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
     _             -> left Error_NotImplemented
 
 
@@ -308,9 +309,9 @@ updateThreadM user_id thread_id thread_request = do
 
 
 
-deleteThreadM :: UserId -> ThreadId -> HandlerEff ()
+deleteThreadM :: UserId -> ThreadId -> HandlerErrorEff ()
 deleteThreadM user_id thread_id = do
-  deleteWhereDb [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
+  deleteWhereDbEither [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
 
 
 
