@@ -34,22 +34,23 @@ import           All.Prelude
 getProfilesR :: Handler Value
 getProfilesR = run $ do
   user_id <- _requireAuthId
-  (toJSON . profilesToResponses) <$> getProfilesM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON profilesToResponses $ getProfilesM (pure sp) user_id
 
 
 
 getProfileR :: ProfileId -> Handler Value
 getProfileR profile_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . profileToResponse) <$> getProfileM user_id profile_id
+  errorOrJSON profileToResponse $ getProfileM user_id profile_id
 
 
 
 putProfileR :: ProfileId -> Handler Value
 putProfileR profile_id = run $ do
-  user_id <- _requireAuthId
+  user_id         <- _requireAuthId
   profile_request <- requireJsonBody
-  (toJSON . profileToResponse) <$> updateProfileM user_id profile_id profile_request
+  errorOrJSON profileToResponse $ updateProfileM user_id profile_id profile_request
 
 
 
@@ -112,43 +113,34 @@ profilesToResponses profiles = ProfileResponses {
 -- Model/Internal
 --
 
-getProfilesM :: UserId -> HandlerEff [Entity Profile]
-getProfilesM _ = do
-  selectListDb' [] [] ProfileId
+getProfilesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Profile]
+getProfilesM m_sp _ = do
+  selectListDbEither m_sp [ProfileActive ==.True] [] ProfileId
 
 
 
-getProfileM :: UserId -> ProfileId -> HandlerEff (Entity Profile)
+getProfileM :: UserId -> ProfileId -> HandlerErrorEff (Entity Profile)
 getProfileM _ profile_id = do
-  notFoundMaybe =<< selectFirstDb [ ProfileId ==. profile_id ] []
+  selectFirstDbEither [ProfileId ==. profile_id, ProfileActive ==. True] []
 
 
 
-getProfile_ByUserIdM :: UserId -> UserId -> HandlerEff (Entity Profile)
+getProfile_ByUserIdM :: UserId -> UserId -> HandlerErrorEff (Entity Profile)
 getProfile_ByUserIdM _ lookup_user_id = do
-  notFoundMaybe =<< selectFirstDb [ProfileUserId ==. lookup_user_id] []
+  selectFirstDbEither [ProfileUserId ==. lookup_user_id, ProfileActive ==. True] []
 
 
 
-insertProfileM :: UserId -> ProfileRequest -> HandlerEff (Entity Profile)
+insertProfileM :: UserId -> ProfileRequest -> HandlerErrorEff (Entity Profile)
 insertProfileM user_id profile_request = do
   ts <- timestampH'
   let
     profile = (profileRequestToProfile user_id profile_request) { profileCreatedAt = Just ts }
-  insertEntityDb profile
+  insertEntityDbEither profile
 
 
 
--- insertProfileM' :: UserId -> ProfileRequest -> IO (Entity Profile)
-insertProfileM' user_id profile_request = do
-  ts <- liftIO $ getCurrentTime
-  let
-    profile = (profileRequestToProfile user_id profile_request) { profileCreatedAt = Just ts }
-  insertEntity profile
-
-
-
-updateProfileM :: UserId -> ProfileId -> ProfileRequest -> HandlerEff (Entity Profile)
+updateProfileM :: UserId -> ProfileId -> ProfileRequest -> HandlerErrorEff (Entity Profile)
 updateProfileM user_id profile_id profile_request = do
 
   ts <- timestampH'
@@ -167,4 +159,4 @@ updateProfileM user_id profile_id profile_request = do
     , ProfileDebug      =. profileDebug
     ]
 
-  notFoundMaybe =<< selectFirstDb [ ProfileUserId ==. user_id, ProfileId ==. profile_id ] []
+  selectFirstDbEither [ProfileUserId ==. user_id, ProfileId ==. profile_id, ProfileActive ==. True] []
