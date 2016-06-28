@@ -255,7 +255,7 @@ getApplicationRepl = do
 
 
 shutdownApp :: App -> IO ()
-shutdownApp _ = return ()
+shutdownApp _ = pure ()
 
 
 ---------------------------------------------
