@@ -118,7 +118,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     thread_post_user <- isT $ getUserM user_id threadPostUserId
     thread_post_stat <- isT $ getThreadPostStatM user_id thread_post_id
-    -- doesn't matter if we don't have a Like or not
+    -- doesn't matter if we have a Like or not
     m_thread_post_like <- (either (const $ Nothing) Just) <$> (lift $ getLike_ByThreadPostIdM user_id thread_post_id)
 
     --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
