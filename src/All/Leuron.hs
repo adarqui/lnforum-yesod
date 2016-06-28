@@ -77,7 +77,7 @@ putLeuronR :: LeuronId -> Handler Value
 putLeuronR leuron_id = run $ do
   user_id        <- _requireAuthId
   leuron_request <- requireJsonBody
-  errorOrJSON euronToResponse $ updateLeuronM user_id leuron_id leuron_request
+  errorOrJSON leuronToResponse $ updateLeuronM user_id leuron_id leuron_request
 
 
 
@@ -184,7 +184,7 @@ leuronsToResponses leurons = LeuronResponses {
 -- Model/Internal
 --
 
-getLeuronsM :: Maybe StandardParams -> UserId -> HandlerEff [Entity Leuron]
+getLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeuronsM m_sp user_id = do
 
   case (lookupSpMay m_sp spSortOrder) of
@@ -197,8 +197,8 @@ getLeuronsM m_sp user_id = do
   -- TODO FIXME: CLEANUP
   -- Clean up all of this.
   --
-  normal sp@StandardParams{..} = do
-    case (spResourceId, spUserId) of
+  normal = do
+    case (lookupSpMay m_sp spResourceId, lookupSpMay m_sp spUserId) of
 
       (Just resource_id, _)     -> getLeurons_ByResourceIdM m_sp user_id resource_id
 
@@ -233,14 +233,14 @@ getLeurons_ByResourceId_RandomM m_sp _ resource_id = do
 -- TODO FIXME: the query below is not as efficient as the one above..
 
   Right <$>
-    _runDB
+    (_runDB
     $ E.select
     $ E.from $ \leuron -> do
       E.where_ (leuron ^. LeuronResourceId E.==. E.val resource_id)
       E.orderBy [E.rand]
       E.offset 1
       E.limit 1
-      return leuron
+      return leuron)
 
 
 
@@ -268,11 +268,11 @@ getLeuronsIdsM m_sp _ resource_id = do
 getLeuronM :: UserId -> LeuronId -> HandlerErrorEff (Entity Leuron)
 getLeuronM _ leuron_id = do
 
-  electFirstDbEither [LeuronId ==. leuron_id, LeuronActive ==. True] []
+  selectFirstDbEither [LeuronId ==. leuron_id, LeuronActive ==. True] []
 
 
 
-insertLeuronM :: Maybe StandadParams -> UserId -> LeuronRequest -> HandlerErrorEff (Entity Leuron)
+insertLeuronM :: Maybe StandardParams -> UserId -> LeuronRequest -> HandlerErrorEff (Entity Leuron)
 insertLeuronM m_sp user_id leuron_request = do
 
   case (lookupSpMay m_sp spResourceId) of
@@ -296,7 +296,7 @@ insertLeuronM m_sp user_id leuron_request = do
           insertLeuronRedis user_id resource_id leuron_id
           --
           -- end background job
-          return entity
+          right entity
 
     _ -> left $ Error_InvalidArguments "resource_id"
 
@@ -327,7 +327,7 @@ updateLeuronM user_id leuron_id leuron_request = do
     , LeuronStyle         =. leuronStyle
     ]
 
-  selectFirstDb [LeuronUserId ==. user_id, LeuronId ==. leuron_id, LeuronActive ==. True] []
+  selectFirstDbEither [LeuronUserId ==. user_id, LeuronId ==. leuron_id, LeuronActive ==. True] []
 
 
 
@@ -341,6 +341,8 @@ deleteLeuronM user_id leuron_id = do
 
     -- Remove from redis
     void $ deleteLeuronRedis user_id leuronResourceId leuron_id
+
+    right ()
 
 
 

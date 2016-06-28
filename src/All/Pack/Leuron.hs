@@ -49,7 +49,7 @@ getLeuronPackR leuron_id = run $ do
 getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackResponses
 getLeuronPacksM m_sp user_id = do
 
-  e_leurons <- getLeuronsM user_id
+  e_leurons <- getLeuronsM m_sp user_id
   rehtie e_leurons left $ \leurons -> do
 
     leuron_packs <- fmap rights $ mapM (\leuron -> getLeuronPack_ByLeuronM user_id leuron) leurons
