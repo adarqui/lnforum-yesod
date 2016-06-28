@@ -315,7 +315,7 @@ lookupGetParamStatus status param = do
       403 -> permissionDenied "Nope."
       404 -> notFound
       _   -> notFound
-    Just r' -> return r'
+    Just r' -> pure r'
 
 
 
@@ -452,7 +452,7 @@ spToSelectE StandardParams{..} {-field-} = do
            Nothing      -> E.offset 0
            Just offset' -> E.offset $ fromIntegral offset'
   limit  = case spLimit of
-           Nothing     -> return ()
+           Nothing     -> pure ()
            Just limit' -> E.limit $ fromIntegral limit'
            {-
   order  = case spOrder of
@@ -771,8 +771,8 @@ timestamp :: StandardParams -> IO UTCTime
 timestamp sp = do
   case (spTs sp, spUnixTs sp) of
     (Nothing, Nothing) -> getCurrentTime
-    (Just ts, _)       -> return ts
-    (_, Just ts)       -> return $ posixSecondsToUTCTime $ fromIntegral ts
+    (Just ts, _)       -> pure ts
+    (_, Just ts)       -> pure $ posixSecondsToUTCTime $ fromIntegral ts
 
 
 
