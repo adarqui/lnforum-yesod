@@ -19,30 +19,26 @@ import           All.User
 -- Model
 --
 
-getUserPacksM :: UserId -> HandlerEff UserPackResponses
-getUserPacksM user_id = do
+getUserPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserPackResponses
+getUserPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spUserIds) of
 
-  case spUserIds of
-
-    Just user_ids  -> getUserPacks_ByUserIdsM user_id user_ids sp
-    _              -> notFound
+    Just user_ids  -> getUserPacks_ByUserIdsM m_sp user_id user_ids
+    _              -> left $ Error_InvalidArguments "user_ids"
 
 
 
 getUserPackM :: UserId -> UserId -> HandlerEff UserPackResponse
 getUserPackM user_id lookup_user_id = do
 
-  sp <- lookupStandardParams
-
-  getUserPack_ByUserIdM user_id lookup_user_id (sp { spLimit = Just 1 })
+  getUserPack_ByUserIdM user_id lookup_user_id -- (sp { spLimit = Just 1 })
 
 
 
-getUserPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff UserPackResponses
-getUserPacks_ByUserIdsM user_id user_ids sp = do
-  users_packs <- mapM (\key -> getUserPack_ByUserIdM user_id key sp) user_ids
+getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
+getUserPacks_ByUserIdsM m_sp user_id user_ids sp = do
+  users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
   return $ UserPackResponses {
     userPackResponses = users_packs
   }
