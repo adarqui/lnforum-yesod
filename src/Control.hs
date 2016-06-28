@@ -1,5 +1,6 @@
 module Control (
   HandlerEff,
+  HandlerErrorEff,
   ControlM,
   ControlMA,
   ControlReader,
@@ -9,7 +10,9 @@ module Control (
   run,
   ErrorEff,
   left,
-  right
+  right,
+  unknownError,
+  ApplicationError (..) -- re-export
 ) where
 
 
@@ -25,6 +28,8 @@ import           LN.T.Error
 
 
 type HandlerEff a = ControlMA Handler a
+type HandlerErrorEff a = HandlerEff (ErrorEff a)
+
 
 
 
@@ -60,3 +65,5 @@ type ErrorEff = Either ApplicationError
 
 left  = pure . Left
 right = pure . Right
+
+unknownError = left Error_Unexpected

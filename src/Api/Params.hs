@@ -219,7 +219,7 @@ lookupStandardParams = do
   with_resource      <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithResource)
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
-  return StandardParams {
+  pure $ StandardParams {
     spOffset           = fmap tread offset,
     spLimit            = fmap (abs . tread) limit,
     spSortOrder        = fmap tread sort_order,
@@ -686,6 +686,4 @@ timestampH sp = do
 
 
 timestampH' :: HandlerEff UTCTime
-timestampH' = do
-  sp <- lookupStandardParams
-  timestampH sp
+timestampH' = lookupStandardParams >>= timestampH

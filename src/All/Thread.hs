@@ -235,13 +235,13 @@ getThreads_ByUserIdM m_sp _ lookup_user_id = do
 
 
 
-getThreadM :: UserId -> ThreadId -> HandlerEff (ErrorEff (Entity Thread))
+getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
 getThreadM _ thread_id = do
   selectFirstDbEither [ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 
-getThreadMH :: Maybe StandardParams -> UserId -> Text -> HandlerEff (ErrorEff (Entity Thread))
+getThreadMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff (Entity Thread)
 getThreadMH m_sp _ thread_name = do
 
   case (lookupSpMay m_sp spBoardId) of
@@ -253,14 +253,14 @@ getThreadMH m_sp _ thread_name = do
 
 
 
-getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerEff (ErrorEff (Maybe (Entity Thread)))
+getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerErrorEff (Maybe (Entity Thread))
 getWithThreadM False _ _              = left Error_Empty
 getWithThreadM True user_id thread_id = do
   fmap Just <$> getThreadM user_id thread_id
 
 
 
-insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerEff (ErrorEff (Entity Thread))
+insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThreadM m_sp user_id thread_request = do
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM m_sp user_id board_id thread_request
@@ -268,7 +268,7 @@ insertThreadM m_sp user_id thread_request = do
 
 
 
-insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerEff (ErrorEff (Entity Thread))
+insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThread_ByBoardIdM user_id board_id thread_request = do
   e_board <- selectFirstDbEither [BoardId ==. board_id, BoardActive ==. True] []
   case e_board of
@@ -281,7 +281,7 @@ insertThread_ByBoardIdM user_id board_id thread_request = do
 
 
 
-updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerEff (ErrorEff (Entity Thread))
+updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 updateThreadM user_id thread_id thread_request = do
 
   ts <- timestampH'
@@ -314,7 +314,7 @@ deleteThreadM user_id thread_id = do
 
 
 
-countThreadsM :: Maybe StandardParams -> UserId -> HandlerEff (ErrorEff CountResponses)
+countThreadsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countThreadsM m_sp _ = do
 
   case (lookupSpMay m_sp spBoardId) of
@@ -327,12 +327,12 @@ countThreadsM m_sp _ = do
 
 
 
-getThreadStatsM :: UserId -> HandlerEff (ErrorEff ThreadStatResponses)
+getThreadStatsM :: UserId -> HandlerErrorEff ThreadStatResponses
 getThreadStatsM _ = left Error_NotImplemented
 
 
 
-getThreadStatM :: UserId -> ThreadId -> HandlerEff (ErrorEff ThreadStatResponse)
+getThreadStatM :: UserId -> ThreadId -> HandlerErrorEff ThreadStatResponse
 getThreadStatM _ thread_id = do
   num_thread_posts <- countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
   right $ ThreadStatResponse {

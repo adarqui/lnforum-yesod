@@ -32,9 +32,6 @@ import qualified Database.Persist
 import           Database.Persist.Postgresql  as P
 import           Database.Persist.Postgresql  (PostgresConf)
 import           Import                       hiding (loadConfig)
-import           Model
-import           Settings
-import           Yesod.Default.Config
 
 
 
@@ -52,6 +49,12 @@ runJobs path = do
 
 
 
+runJob_CreateUserProfile
+  :: forall c. (PersistConfig c, PersistConfigBackend c ~ ReaderT SqlBackend)
+  => c
+  -> PersistConfigPool c
+  -> (Message, Envelope)
+  -> IO ()
 runJob_CreateUserProfile dbconf pool (Message{..}, env) = do
   liftIO $ putStrLn "runJob_CreateUserProfile"
   let e_resp = eitherDecode msgBody :: Either String (UserId, ProfileRequest)
@@ -59,7 +62,7 @@ runJob_CreateUserProfile dbconf pool (Message{..}, env) = do
     Left err                         -> liftIO $ Prelude.putStrLn err
     Right (user_id, profile_request) -> do
       liftIO $ putStrLn "success"
-      liftIO $ runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go pool
+      void $ liftIO $ runStdoutLoggingT $ runResourceT $ Database.Persist.runPool dbconf go pool
       ackEnv env
       where
       go = do
