@@ -39,24 +39,31 @@ getUserPackM user_id lookup_user_id = do
 getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
 getUserPacks_ByUserIdsM m_sp user_id user_ids sp = do
   users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
-  return $ UserPackResponses {
+  right $ UserPackResponses {
     userPackResponses = users_packs
   }
 
 
 
 
-getUserPack_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff UserPackResponse
-getUserPack_ByUserIdM user_id lookup_user_id _ = do
+getUserPack_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff UserPackResponse
+getUserPack_ByUserIdM m_sp user_id lookup_user_id _ = do
 
-  lookup_user <- getUserM user_id lookup_user_id
-  stats       <- getUserStatM user_id lookup_user_id
-  profile     <- getProfile_ByUserIdM user_id lookup_user_id
+  lr <- runEitherT $ do
+    lookup_user <- getUserM user_id lookup_user_id
+    stats       <- getUserStatM user_id lookup_user_id
+    profile     <- getProfile_ByUserIdM user_id lookup_user_id
 
-  return $ UserPackResponse {
-    userPackResponseUser       = userToResponse lookup_user,
-    userPackResponseUserId     = entityKeyToInt64 lookup_user,
-    userPackResponseStat       = stats,
-    userPackResponseProfile    = profileToResponse profile,
-    userPackResponseProfileId  = entityKeyToInt64 profile
-  }
+    pure (lookup_user
+         ,stats
+         ,profile)
+
+
+  rehtie lr left $ \(lookup_user, stats, profile) -> do
+    right $ UserPackResponse {
+      userPackResponseUser       = userToResponse lookup_user,
+      userPackResponseUserId     = entityKeyToInt64 lookup_user,
+      userPackResponseStat       = stats,
+      userPackResponseProfile    = profileToResponse profile,
+      userPackResponseProfileId  = entityKeyToInt64 profile
+    }

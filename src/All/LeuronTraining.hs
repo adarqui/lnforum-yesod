@@ -12,12 +12,7 @@ module All.LeuronTraining (
 
 
 
-import           All.Leuron
 import           All.Prelude
-import           Database.Esqueleto ((^.))
-import qualified Database.Esqueleto as E
-import qualified Database.Redis     as R
-import qualified LN.T.Like          as L
 
 
 
@@ -67,7 +62,7 @@ leuronTrainingsToResponses leuronTrainings = LeuronTrainingResponses {
 -- Model/Internal
 --
 
-insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> HandlerEff (Entity LeuronTraining)
+insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> HandlerErrorEff (Entity LeuronTraining)
 insertLeuronTrainingM user_id leuron_id leuron_training_request = do
 
   ts <- timestampH'
@@ -75,6 +70,4 @@ insertLeuronTrainingM user_id leuron_id leuron_training_request = do
   let
     leuron_training = (leuronTrainingRequestToLeuronTraining user_id leuron_id leuron_training_request) { leuronTrainingCreatedAt = Just ts }
 
---  void $ notFoundMaybe =<< selectFirstDb [ LUserId ==. user_id, ResourceId ==. resource_id ] []
-
-  insertEntityDb leuron_training
+  insertEntityDbEither leuron_training
