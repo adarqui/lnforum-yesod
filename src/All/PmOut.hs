@@ -34,42 +34,39 @@ import           All.Prelude
 getPmOutsR :: Handler Value
 getPmOutsR = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmOutsToResponses) <$> getPmOutsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON pmOutsToResponses $ getPmOutsM (pure sp) user_id
 
 
 
 postPmOutsR :: Handler Value
 postPmOutsR = run $ do
-  user_id <- _requireAuthId
-  sp <- lookupStandardParams
-  case (spPmId sp) of
-    Nothing -> notFound
-    Just pm_id -> do
-      pmOut_request <- requireJsonBody :: HandlerEff PmOutRequest
-      (toJSON . pmOutToResponse) <$> insertPmOutM user_id pm_id pmOut_request
+  user_id        <- _requireAuthId
+  pm_out_request <- requireJsonBody
+  sp             <- lookupStandardParams
+  errorOrJSON pmOutToResponse $ insertPmOutM (pure sp) user_id pm_out_request
 
 
 
 getPmOutR :: PmOutId -> Handler Value
-getPmOutR pmOut_id = run $ do
+getPmOutR pm_out_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmOutToResponse) <$> getPmOutM user_id pmOut_id
+  errorOrJSON pmOutToResponse $ getPmOutM user_id pm_out_id
 
 
 
 putPmOutR :: PmOutId -> Handler Value
-putPmOutR pmOut_id = run $ do
-  user_id <- _requireAuthId
-  pmOut_request <- requireJsonBody
-  (toJSON . pmOutToResponse) <$> updatePmOutM user_id pmOut_id pmOut_request
+putPmOutR pm_out_id = run $ do
+  user_id        <- _requireAuthId
+  pm_out_request <- requireJsonBody
+  errorOrJSON pmOutToResponse $ updatePmOutM user_id pm_out_id pm_out_request
 
 
 
 deletePmOutR :: PmOutId -> Handler Value
-deletePmOutR pmOut_id = run $ do
+deletePmOutR pm_out_id = run $ do
   user_id <- _requireAuthId
-  void $ deletePmOutM user_id pmOut_id
-  pure $ toJSON ()
+  errorOrJSON id $ deletePmOutM user_id pm_out_id
 
 
 
@@ -124,49 +121,51 @@ pmOutsToResponses pmOuts = PmOutResponses {
 --
 
 
-getPmOutsM :: UserId -> HandlerEff [Entity PmOut]
-getPmOutsM user_id = do
-  selectListDb' [ PmOutUserId ==. user_id ] [] PmOutId
+getPmOutsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmOut]
+getPmOutsM m_sp user_id = do
+  selectListDbEither m_sp [PmOutUserId ==. user_id, PmOutActive ==. True] [] PmOutId
 
 
 
-getPmOutM :: UserId -> PmOutId -> HandlerEff (Entity PmOut)
-getPmOutM user_id pmOut_id = do
-  notFoundMaybe =<< selectFirstDb [ PmOutUserId ==. user_id, PmOutId ==. pmOut_id ] []
+getPmOutM :: UserId -> PmOutId -> HandlerErrorEff (Entity PmOut)
+getPmOutM user_id pm_out_id = do
+  selectFirstDbEither [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
 
 
 
-insertPmOutM :: UserId -> PmId -> PmOutRequest -> HandlerEff (Entity PmOut)
-insertPmOutM user_id pm_id pmOut_request = do
+insertPmOutM :: Maybe StandardParams -> UserId -> PmOutRequest -> HandlerErrorEff (Entity PmOut)
+insertPmOutM m_sp user_id pm_out_request = do
+
+  case (lookupSpMay m_sp spPmId) of
+
+    Just pm_id -> do
+      ts <- timestampH'
+      let
+        pm_out = (pmOutRequestToPmOut user_id pm_id pm_out_request) { pmOutCreatedAt = Just ts }
+      insertEntityDbEither pm_out
+
+    _          -> left $ Error_InvalidArguments "pm_id"
+
+
+
+updatePmOutM :: UserId -> PmOutId -> PmOutRequest -> HandlerErrorEff (Entity PmOut)
+updatePmOutM user_id pm_out_id pm_out_request = do
 
   ts <- timestampH'
 
   let
-    pmOut = (pmOutRequestToPmOut user_id pm_id pmOut_request) { pmOutCreatedAt = Just ts }
-
-  insertEntityDb pmOut
-
-
-
-updatePmOutM :: UserId -> PmOutId -> PmOutRequest -> HandlerEff (Entity PmOut)
-updatePmOutM user_id pmOut_id pmOut_request = do
-
-  ts <- timestampH'
-
-  let
-    PmOut{..} = (pmOutRequestToPmOut user_id dummyId pmOut_request) { pmOutModifiedAt = Just ts }
+    PmOut{..} = (pmOutRequestToPmOut user_id dummyId pm_out_request) { pmOutModifiedAt = Just ts }
 
   updateWhereDb
-    [ PmOutUserId ==. user_id, PmOutId ==. pmOut_id ]
+    [ PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True ]
     [ PmOutModifiedAt =. pmOutModifiedAt
     , PmOutLabel =. pmOutLabel
     ]
 
-  notFoundMaybe =<< selectFirstDb [ PmOutUserId ==. user_id, PmOutId ==. pmOut_id ] []
+  selectFirstDbEither [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
 
 
 
-deletePmOutM :: UserId -> PmOutId -> HandlerEff ()
+deletePmOutM :: UserId -> PmOutId -> HandlerErrorEff ()
 deletePmOutM _ _ = do
-  return ()
---  deleteWhereDb [ PmOutUserId ==. user_id, PmOutId ==. pmOut_id ]
+  right ()
