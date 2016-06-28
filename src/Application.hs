@@ -17,11 +17,12 @@ module Application (
 
 
 
-import qualified Data.Text as T (pack)
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
+import qualified Data.Text                            as T (pack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
                                                        runSqlPool)
+import qualified Database.Redis                       as R
 import           Import
 import           Language.Haskell.TH.Syntax           (qLocation)
 import           Network.Wai.Handler.Warp             (Settings,
@@ -38,7 +39,6 @@ import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import           System.Log.FastLogger                (defaultBufSize,
                                                        newStdoutLoggerSet,
                                                        toLogStr)
-import qualified Database.Redis                       as R
 
 
 
@@ -96,44 +96,44 @@ makeFoundation :: AppSettings -> AppSettingsLN -> IO App
 makeFoundation appSettings appSettingsLN = do
 
 --    dbconf <- if appDatabaseUrl appSettings
-    appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 16379 })
+  appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 16379 })
 
-    -- example chat initialization
-    appZChat <- atomically newBroadcastTChan
+  -- example chat initialization
+  appZChat <- atomically newBroadcastTChan
 
-    -- Some basic initializations: HTTP connection manager, logger, and static
-    -- subsite.
-    appHttpManager <- newManager
-    appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
-    appStatic <-
-        (if appMutableStatic appSettings then staticDevel else static)
-        (appStaticDir appSettings)
+  -- Some basic initializations: HTTP connection manager, logger, and static
+  -- subsite.
+  appHttpManager <- newManager
+  appLogger <- newStdoutLoggerSet defaultBufSize >>= makeYesodLogger
+  appStatic <-
+      (if appMutableStatic appSettings then staticDevel else static)
+      (appStaticDir appSettings)
 
-    -- custom
-    appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsLN) (T.pack $ appGithubClientSecret appSettingsLN)
+  -- custom
+  appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsLN) (T.pack $ appGithubClientSecret appSettingsLN)
 
-    -- We need a log function to create a connection pool. We need a connection
-    -- pool to create our foundation. And we need our foundation to get a
-    -- logging function. To get out of this loop, we initially create a
-    -- temporary foundation without a real connection pool, get a log function
-    -- from there, and then create the real foundation.
-    let mkFoundation appConnPool = App {..}
-        -- The App {..} syntax is an example of record wild cards. For more
-        -- information, see:
-        -- https://ocharles.org.uk/blog/posts/2014-12-04-record-wildcards.html
-        tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
-        logFunc = messageLoggerSource tempFoundation appLogger
+  -- We need a log function to create a connection pool. We need a connection
+  -- pool to create our foundation. And we need our foundation to get a
+  -- logging function. To get out of this loop, we initially create a
+  -- temporary foundation without a real connection pool, get a log function
+  -- from there, and then create the real foundation.
+  let mkFoundation appConnPool = App {..}
+      -- The App {..} syntax is an example of record wild cards. For more
+      -- information, see:
+      -- https://ocharles.org.uk/blog/posts/2014-12-04-record-wildcards.html
+      tempFoundation = mkFoundation $ error "connPool forced in tempFoundation"
+      logFunc = messageLoggerSource tempFoundation appLogger
 
-    -- Create the database connection pool
-    pool <- flip runLoggingT logFunc $ createPostgresqlPool
-        (pgConnStr  $ appDatabaseConf appSettings)
-        (pgPoolSize $ appDatabaseConf appSettings)
+  -- Create the database connection pool
+  pool <- flip runLoggingT logFunc $ createPostgresqlPool
+      (pgConnStr  $ appDatabaseConf appSettings)
+      (pgPoolSize $ appDatabaseConf appSettings)
 
-    -- Perform database migration using our application's logging settings.
-    runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+  -- Perform database migration using our application's logging settings.
+  runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
-    -- Return the foundation
-    return $ mkFoundation pool
+  -- Return the foundation
+  pure $ mkFoundation pool
 
 
 
@@ -141,20 +141,20 @@ makeFoundation appSettings appSettingsLN = do
 -- applying some additional middlewares.
 makeApplication :: App -> IO Application
 makeApplication foundation = do
-    logWare <- mkRequestLogger def
-        { outputFormat =
-            if appDetailedRequestLogging $ appSettings foundation
-                then Detailed True
-                else Apache
-                        (if appIpFromHeader $ appSettings foundation
-                            then FromFallback
-                            else FromSocket)
-        , destination = Logger $ loggerSet $ appLogger foundation
-        }
+  logWare <- mkRequestLogger $ def {
+    outputFormat =
+      if appDetailedRequestLogging $ appSettings foundation
+        then Detailed True
+        else Apache
+              (if appIpFromHeader $ appSettings foundation
+                then FromFallback
+                else FromSocket)
+    , destination = Logger $ loggerSet $ appLogger foundation
+  }
 
-    -- Create the WAI application and apply middlewares
-    appPlain <- toWaiAppPlain foundation
-    return $ logWare $ defaultMiddlewaresNoLogging appPlain
+  -- Create the WAI application and apply middlewares
+  appPlain <- toWaiAppPlain foundation
+  pure $ logWare $ defaultMiddlewaresNoLogging appPlain
 
 
 
