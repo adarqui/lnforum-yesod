@@ -144,11 +144,11 @@ makeApplication foundation = do
   logWare <- mkRequestLogger $ def {
     outputFormat =
       if appDetailedRequestLogging $ appSettings foundation
-        then Detailed True
-        else Apache
+         then Detailed True
+         else Apache
               (if appIpFromHeader $ appSettings foundation
-                then FromFallback
-                else FromSocket)
+                  then FromFallback
+                  else FromSocket)
     , destination = Logger $ loggerSet $ appLogger foundation
   }
 
@@ -170,29 +170,29 @@ makeApplication foundation = do
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
 warpSettings foundation =
-      setPort (appPort $ appSettings foundation)
-    $ setHost (appHost $ appSettings foundation)
-    $ setOnException (\_req e ->
-        when (defaultShouldDisplayException e) $ messageLoggerSource
-            foundation
-            (appLogger foundation)
-            $(qLocation >>= liftLoc)
-            "yesod"
-            LevelError
-            (toLogStr $ "Exception from Warp: " ++ show e))
-      defaultSettings
+    setPort (appPort $ appSettings foundation)
+  $ setHost (appHost $ appSettings foundation)
+  $ setOnException (\_req e ->
+      when (defaultShouldDisplayException e) $ messageLoggerSource
+          foundation
+          (appLogger foundation)
+          $(qLocation >>= liftLoc)
+          "yesod"
+          LevelError
+          (toLogStr $ "Exception from Warp: " ++ show e))
+    defaultSettings
 
 
 
 -- | For yesod devel, return the Warp settings and WAI Application.
 getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
-    settings    <- getAppSettings
-    ln_settings <- getAppSettingsLN
-    foundation  <- makeFoundation settings ln_settings
-    wsettings   <- getDevSettings $ warpSettings foundation
-    app         <- makeApplication foundation
-    return (wsettings, app)
+  settings    <- getAppSettings
+  ln_settings <- getAppSettingsLN
+  foundation  <- makeFoundation settings ln_settings
+  wsettings   <- getDevSettings $ warpSettings foundation
+  app         <- makeApplication foundation
+  pure (wsettings, app)
 
 
 
@@ -215,28 +215,28 @@ develMain = develMainHelper getApplicationDev
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
-    -- Get the settings from all relevant sources
-    settings <- loadYamlSettingsArgs
-        -- fall back to compile-time values, set to [] to require values at runtime
-        [configSettingsYmlValue]
+  -- Get the settings from all relevant sources
+  settings <- loadYamlSettingsArgs
+      -- fall back to compile-time values, set to [] to require values at runtime
+      [configSettingsYmlValue]
 
-        -- allow environment variables to override
-        useEnv
+      -- allow environment variables to override
+      useEnv
 
-    ln_settings <- loadYamlSettingsArgs
-        [configSettingsYmlValue]
-        useEnv
+  ln_settings <- loadYamlSettingsArgs
+      [configSettingsYmlValue]
+      useEnv
 
-    -- Generate the foundation from the settings
-    foundation <- makeFoundation settings ln_settings
+  -- Generate the foundation from the settings
+  foundation <- makeFoundation settings ln_settings
 
-    -- Generate a WAI Application from the foundation
-    app <- makeApplication foundation
+  -- Generate a WAI Application from the foundation
+  app <- makeApplication foundation
 
-    -- Run the application with Warp
-    -- simpleCors so we can make cross domain ajax requests
-    -- runSettings (warpSettings foundation) $ simpleCors app
-    runSettings (warpSettings foundation) $ app
+  -- Run the application with Warp
+  -- simpleCors so we can make cross domain ajax requests
+  -- runSettings (warpSettings foundation) $ simpleCors app
+  runSettings (warpSettings foundation) $ app
 
 
 
@@ -245,12 +245,12 @@ appMain = do
 --------------------------------------------------------------
 getApplicationRepl :: IO (Int, App, Application)
 getApplicationRepl = do
-    settings    <- getAppSettings
-    ln_settings <- getAppSettingsLN
-    foundation  <- makeFoundation settings ln_settings
-    wsettings   <- getDevSettings $ warpSettings foundation
-    app1        <- makeApplication foundation
-    return (getPort wsettings, foundation, app1)
+  settings    <- getAppSettings
+  ln_settings <- getAppSettingsLN
+  foundation  <- makeFoundation settings ln_settings
+  wsettings   <- getDevSettings $ warpSettings foundation
+  app1        <- makeApplication foundation
+  pure (getPort wsettings, foundation, app1)
 
 
 
