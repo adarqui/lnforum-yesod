@@ -49,15 +49,17 @@ import           All.User
 getForumsR :: Handler Value
 getForumsR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON forumsToResponses $ getForumsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON forumsToResponses $ getForumsM (pure sp) user_id
 
 
 
 postForumR0 :: Handler Value
 postForumR0 = run $ do
-  user_id <- _requireAuthId
+  user_id       <- _requireAuthId
   forum_request <- requireJsonBody :: HandlerEff ForumRequest
-  errorOrJSON forumToResponse $ insertForumM user_id forum_request
+  sp            <- lookupStandardParams
+  errorOrJSON forumToResponse $ insertForumM (pure sp) user_id forum_request
 
 
 
@@ -71,13 +73,14 @@ getForumR forum_id = run $ do
 getForumH :: Text -> Handler Value
 getForumH forum_name = run $ do -- getForumR' getForumMH forum_name
   user_id <- _requireAuthId
-  errorOrJSON forumToResponse $ getForumMH user_id forum_name
+  sp      <- lookupStandardParams
+  errorOrJSON forumToResponse $ getForumMH (pure sp) user_id forum_name
 
 
 
 putForumR :: ForumId -> Handler Value
 putForumR forum_id = run $ do
-  user_id <- _requireAuthId
+  user_id       <- _requireAuthId
   forum_request <- requireJsonBody
   errorOrJSON forumToResponse $ updateForumM user_id forum_id forum_request
 
@@ -93,14 +96,16 @@ deleteForumR forum_id = run $ do
 getForumCountsR :: Handler Value
 getForumCountsR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ countForumsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ countForumsM (pure sp) user_id
 
 
 
 getForumStatsR :: Handler Value
 getForumStatsR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ getForumStatsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getForumStatsM (pure sp) user_id
 
 
 
@@ -200,14 +205,14 @@ getForumsM m_sp user_id = do
 getForums_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Forum]
 getForums_ByOrganizationIdM m_sp _ org_id = do
 
-  selectListDbMay m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
+  selectListDbEither m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
 getForums_ByOrganizationId_KeysM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Key Forum]
 getForums_ByOrganizationId_KeysM m_sp _ org_id = do
 
-  selectKeysListDbMay m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
+  selectKeysListDbEither m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
@@ -215,21 +220,21 @@ getForums_ByOrganizationId_KeysM m_sp _ org_id = do
 getForums_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Forum]
 getForums_ByUserIdM m_sp _ lookup_user_id = do
 
-  selectListDbMay m_sp [ForumUserId ==. lookup_user_id, ForumActive ==. True] [] ForumId
+  selectListDbEither m_sp [ForumUserId ==. lookup_user_id, ForumActive ==. True] [] ForumId
 
 
 
 getForum_ByOrganizationIdMH :: Maybe StandardParams -> UserId -> Text -> OrganizationId -> HandlerErrorEff (Entity Forum)
 getForum_ByOrganizationIdMH m_sp user_id forum_name org_id = do
 
-  selectFirstDbMay m_sp [ForumOrgId ==. org_id, ForumName ==. forum_name, ForumActive ==. True] []
+  selectFirstDbEither [ForumOrgId ==. org_id, ForumName ==. forum_name, ForumActive ==. True] []
 
 
 
 getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
 getForumM _ forum_id = do
 
-  selectFirstDbMay [ForumId ==. forum_id, ForumActive ==. True] []
+  selectFirstDbEither [ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
@@ -253,7 +258,7 @@ insertForumM :: Maybe StandardParams -> UserId -> ForumRequest -> HandlerErrorEf
 insertForumM m_sp user_id forum_request = do
 
   case (lookupSpMay m_sp spOrganizationId) of
-    Just org_id -> insertForum_ByOrganizationIdM m_sp user_id org_id forum_request
+    Just org_id -> insertForum_ByOrganizationIdM user_id org_id forum_request
     _           -> left Error_NotImplemented
 
 
@@ -266,7 +271,7 @@ insertForum_ByOrganizationIdM user_id org_id forum_request = do
   let
     forum = (forumRequestToForum user_id org_id forum_request) { forumCreatedAt = Just ts }
 
-  insertEntityDb forum
+  Right <$> insertEntityDb forum
 
 
 
@@ -306,7 +311,7 @@ deleteForumM user_id forum_id = do
 
 
 
-countForumsM :: Maybe StandardParams -> UserId -> HandlerEff CountResponses
+countForumsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countForumsM m_sp _ = do
 
   case (lookupSpMay m_sp spOrganizationId) of
@@ -331,7 +336,7 @@ getForumStatM _ forum_id = do
   num_forum_threads <- countDb [ThreadForumId ==. forum_id, ThreadActive ==. True]
   num_forum_posts   <- countDb [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True]
 
-  return $ ForumStatResponse {
+  right $ ForumStatResponse {
     forumStatResponseForumId     = keyToInt64 forum_id,
     forumStatResponseBoards      = fromIntegral num_forum_boards,
     forumStatResponseThreads     = fromIntegral num_forum_threads,

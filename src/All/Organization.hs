@@ -205,13 +205,13 @@ getOrganizationsM m_sp user_id = do
 
 getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbMay m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
+  selectListDbEither m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
 getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByEverythingM m_sp _ = do
-  selectListDbMay m_sp [] [] OrganizationId
+  selectListDbEither m_sp [] [] OrganizationId
 
 
 
@@ -244,7 +244,7 @@ insertOrganizationM user_id organization_request = do
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left Error_Validation
+    Left _  -> left $ Error_Validation "TODO FIXME"
     Right _ -> do
       ts <- timestampH'
 
@@ -268,7 +268,7 @@ updateOrganizationM user_id org_id organization_request = do
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left Error_Validation
+    Left _  -> left $ Error_Validation "TODO FIXME"
     Right _ -> do
 
       ts <- timestampH'
@@ -301,7 +301,7 @@ updateOrganizationM user_id org_id organization_request = do
 
 deleteOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationM user_id org_id = do
-  deleteCascadeWhereDb [OrganizationUserId ==. user_id, OrganizationId ==. org_id]
+  deleteCascadeWhereDbEither [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True]
 
 {-
   -- bg job: Delete owners team
@@ -317,7 +317,7 @@ deleteOrganizationM user_id org_id = do
 deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationTeamsM _ org_id = do
   -- TODO: FIXME: security
-  deleteWhereDb [TeamOrgId ==. org_id]
+  deleteWhereDbEither [TeamOrgId ==. org_id, TeamActive ==. True]
 
 
 

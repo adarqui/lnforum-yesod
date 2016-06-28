@@ -89,7 +89,7 @@ getThreadPacks_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> Handle
 getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
   e_threads_keys <- getThreads_ByBoardId_KeysM m_sp user_id board_id
-  rehtie e_thread_keys left $ \threads_keys -> do
+  rehtie e_threads_keys left $ \threads_keys -> do
     threads_packs <- rights <$> mapM (\key -> getThreadPackM m_sp user_id key) threads_keys
     right $ ThreadPackResponses {
       threadPackResponses = threads_packs

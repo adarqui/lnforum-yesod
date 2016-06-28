@@ -29,7 +29,7 @@ getOrganizationPacksR :: Handler Value
 getOrganizationPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
-  toJSON <$> getOrganizationPacksM (Just sp) user_id
+  errorOrJSON id $ getOrganizationPacksM (Just sp) user_id
 
 
 
@@ -54,35 +54,37 @@ getOrganizationPackH org_name = run $ do
 -- Model
 --
 
-getOrganizationPacksM :: Maybe StandardParams -> UserId -> HandlerEff OrganizationPackResponses
+getOrganizationPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff OrganizationPackResponses
 getOrganizationPacksM m_sp user_id = do
   getOrganizationPacks_ByEverythingM m_sp user_id
 
 
 
-getOrganizationPackM :: UserId -> OrganizationId -> HandlerEff (ErrorEff OrganizationPackResponse)
+getOrganizationPackM :: UserId -> OrganizationId -> HandlerErrorEff OrganizationPackResponse
 getOrganizationPackM user_id org_id = do
 
   e_organization <- getOrganizationM user_id org_id
-  case e_organization of
-    Left err           -> left err
-    Right organization -> getOrganizationPack_ByOrganizationM user_id organization
+  rehtie e_organization left $ \organization -> do
+    getOrganizationPack_ByOrganizationM user_id organization
 
 
 
-getOrganizationPackMH :: UserId -> Text -> HandlerEff (ErrorEff OrganizationPackResponse)
+getOrganizationPackMH :: UserId -> Text -> HandlerErrorEff OrganizationPackResponse
 getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
 
-getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerEff OrganizationPackResponses
+getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff OrganizationPackResponses
 getOrganizationPacks_ByEverythingM m_sp user_id = do
 
-  organizations       <- getOrganizations_ByEverythingM m_sp user_id
-  organizations_packs <- rights <$> mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations
-  return $ OrganizationPackResponses {
-    organizationPackResponses = organizations_packs
-  }
+  e_organizations        <- getOrganizations_ByEverythingM m_sp user_id
+
+  rehtie e_organizations left $ \organizations -> do
+
+    organization_packs <- fmap rights (mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations)
+    right $ OrganizationPackResponses {
+      organizationPackResponses = organization_packs
+    }
 
 
 

@@ -40,7 +40,9 @@ module Api.Params (
   deleteWhereDb,
   deleteWhereDbEither,
   deleteCascadeDb,
+  deleteCascadeDbEither,
   deleteCascadeWhereDb,
+  deleteCascadeWhereDbEither,
   countDb,
   timestamp,
   timestampH,
@@ -680,6 +682,15 @@ deleteCascadeDb entity = _runDB $ deleteCascade entity
 
 
 
+deleteCascadeDbEither :: forall site record.
+                  (YesodPersist site,
+                   DeleteCascade record (PersistEntityBackend record),
+                   PersistEntityBackend record ~ YesodPersistBackend site) =>
+                  Key record -> ControlMA (HandlerT site IO) (ErrorEff ())
+deleteCascadeDbEither entity = Right <$> (_runDB $ deleteCascade entity)
+
+
+
 -- | deleteCascadeWhere helper
 --
 deleteCascadeWhereDb :: forall site record.
@@ -690,6 +701,17 @@ deleteCascadeWhereDb :: forall site record.
   [Filter record]
   -> ControlMA (HandlerT site IO) ()
 deleteCascadeWhereDb = _runDB . deleteCascadeWhere
+
+
+
+deleteCascadeWhereDbEither :: forall site record.
+  (PersistQuery (PersistEntityBackend record),
+  DeleteCascade record (PersistEntityBackend record),
+  YesodPersist site,
+  PersistEntityBackend record ~ YesodPersistBackend site) =>
+  [Filter record]
+  -> ControlMA (HandlerT site IO) (ErrorEff ())
+deleteCascadeWhereDbEither filt = Right <$> (_runDB $ deleteCascadeWhere filt)
 
 
 

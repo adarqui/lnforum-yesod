@@ -24,21 +24,23 @@ import           All.Forum
 getForumPacksR :: Handler Value
 getForumPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getForumPacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getForumPacksM (pure sp) user_id
 
 
 
 getForumPackR :: ForumId -> Handler Value
 getForumPackR forum_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getForumPackM user_id forum_id
+  errorOrJSON id $ getForumPackM user_id forum_id
 
 
 
 getForumPackH :: Text -> Handler Value
 getForumPackH forum_name = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getForumPackMH user_id forum_name
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getForumPackMH (pure sp) user_id forum_name
 
 
 
@@ -49,59 +51,60 @@ getForumPackH forum_name = run $ do
 -- Model
 --
 
-getForumPacksM :: UserId -> HandlerEff ForumPackResponses
-getForumPacksM user_id = do
+getForumPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumPackResponses
+getForumPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spOrganizationId) of
 
-  case spOrganizationId of
-
-    Just org_id   -> getForumPacks_ByOrganizationIdM user_id org_id sp
-    _             -> notFound
+    Just org_id   -> getForumPacks_ByOrganizationIdM m_sp user_id org_id
+    _             -> left $ Error_InvalidArguments "organization_id"
 
 
 
-getForumPackM :: UserId -> ForumId -> HandlerEff ForumPackResponse
+getForumPackM :: UserId -> ForumId -> HandlerErrorEff ForumPackResponse
 getForumPackM user_id forum_id = do
 
-  forum         <- getForumM user_id forum_id
-  getForumPack_ByForumM user_id forum
+  e_forum <- getForumM user_id forum_id
+  rehtie e_forum left $ \forum -> getForumPack_ByForumM user_id forum
 
 
 
-getForumPackMH :: UserId -> Text -> HandlerEff ForumPackResponse
-getForumPackMH user_id forum_name = do
+getForumPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff ForumPackResponse
+getForumPackMH m_sp user_id forum_name = do
 
-  forum         <- getForumMH user_id forum_name
-  getForumPack_ByForumM user_id forum
-
-
-
-getForumPacks_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff ForumPackResponses
-getForumPacks_ByOrganizationIdM user_id org_id sp = do
-
-  forums       <- getForums_ByOrganizationIdM user_id org_id sp
-  forums_packs <- mapM (\forum -> getForumPack_ByForumM user_id forum) forums
-  return $ ForumPackResponses {
-    forumPackResponses = forums_packs
-  }
+  e_forum <- getForumMH m_sp user_id forum_name
+  rehtie e_forum left $ \forum -> getForumPack_ByForumM user_id forum
 
 
 
-getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerEff ForumPackResponse
-getForumPack_ByForumM user_id forum@(Entity forum_id Forum{..}) = do
+getForumPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff ForumPackResponses
+getForumPacks_ByOrganizationIdM m_sp user_id org_id = do
 
-  forum_stats         <- getForumStatM user_id (entityKey forum)
-  user_perms_by_forum <- userPermissions_ByForumIdM user_id (entityKey forum)
+  e_forums       <- getForums_ByOrganizationIdM m_sp user_id org_id
+  rehtie e_forums left $ \forums -> do
+    forums_packs <- fmap rights (mapM (\forum -> getForumPack_ByForumM user_id forum) forums)
+    right $ ForumPackResponses {
+      forumPackResponses = forums_packs
+    }
 
-  return $ ForumPackResponse {
-    forumPackResponseForum            = forumToResponse forum,
-    forumPackResponseForumId          = forum_id,
-    forumPackResponseStat             = forum_stats,
-    forumPackResponseLike             = Nothing,
-    forumPackResponseStar             = Nothing,
-    forumPackResponseWithOrganization = Nothing,
-    forumPackResponsePermissions      = user_perms_by_forum
-  }
-  where
-  forum_id = entityKeyToInt64 forum
+
+
+getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerErrorEff ForumPackResponse
+getForumPack_ByForumM user_id forum@(Entity _ Forum{..}) = do
+
+  e_forum_stats       <- getForumStatM user_id (entityKey forum)
+  rehtie e_forum_stats left $ \forum_stats -> do
+
+    user_perms_by_forum <- userPermissions_ByForumIdM user_id (entityKey forum)
+
+    right $ ForumPackResponse {
+      forumPackResponseForum            = forumToResponse forum,
+      forumPackResponseForumId          = forum_id,
+      forumPackResponseStat             = forum_stats,
+      forumPackResponseLike             = Nothing,
+      forumPackResponseStar             = Nothing,
+      forumPackResponseWithOrganization = Nothing,
+      forumPackResponsePermissions      = user_perms_by_forum
+    }
+    where
+    forum_id = entityKeyToInt64 forum
