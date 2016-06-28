@@ -59,6 +59,7 @@ library
                      Access
                      Cache
                      Control
+                     Db
                      Error
                      Foundation
                      Handler.Common
