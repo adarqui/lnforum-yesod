@@ -61,71 +61,69 @@ import           All.Profile
 getUsersR :: Handler Value
 getUsersR = run $ do
   user_id <- _requireAuthId
-  (toJSON . usersToSanitizedResponses) <$> getUsersM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON usersToSanitizedResponses $ getUsersM (pure sp) user_id
 
 
 
 postUserR0 :: Handler Value
 postUserR0 = run $ do
-  user_id <- _requireAuthId
+  user_id      <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
-  (toJSON . userToResponse) <$> insertUsersM user_id user_request
+  errorOrJSON userToResponse $ insertUsersM user_id user_request
 
 
 
 getUserR :: UserId -> Handler Value
 getUserR lookup_user_id = run $ do
   user_id <- _requireAuthId
-  response <- getUserM user_id lookup_user_id
+  e_user <- getUserM user_id lookup_user_id
   if (user_id == lookup_user_id)
-    then
-      return $ toJSON $ userToResponse response
-    else
-      return $ toJSON $ userToSanitizedResponse response
+    then errorOrJSON userToResponse (pure e_user)
+    else errorOrJSON userToSanitizedResponse (pure e_user)
 
 
 
 getUserH :: Text -> Handler Value
-getUserH _ = notFound
+getUserH _ = pure $ toJSON Error_NotImplemented
 
 
 
 putUserR :: UserId -> Handler Value
 putUserR lookup_user_id = run $ do
-  user_id <- _requireAuthId
+  user_id       <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
-  (toJSON . userToResponse) <$> updateUserM user_id lookup_user_id user_request
+  errorOrJSON userToResponse $ updateUserM user_id lookup_user_id user_request
 
 
 
 deleteUserR :: UserId -> Handler Value
 deleteUserR lookup_user_id = run $ do
-
   user_id <- _requireAuthId
-
-  void $ deleteUserM user_id lookup_user_id
-  pure $ toJSON ()
+  errorOrJSON id $ deleteUserM user_id lookup_user_id
 
 
 
 getUsersCountR :: Handler Value
 getUsersCountR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> countUsersM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ countUsersM (pure sp) user_id
 
 
 
 getUserStatsR :: Handler Value
 getUserStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUserStatsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getUserStatsM (pure sp) user_id
 
 
 
 getUserStatR :: UserId -> Handler Value
 getUserStatR lookup_user_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUserStatM user_id lookup_user_id
+  errorOrJSON id $ getUserStatM user_id lookup_user_id
 
 
 
@@ -230,34 +228,31 @@ validateUserRequest z@UserRequest{..} = do
 -- Model/Internal
 --
 
-getUsersM :: UserId -> HandlerEff [Entity User]
-getUsersM user_id = do
--- selectListDb [] [] UserId
+getUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
+getUsersM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spUserIds) of
 
-  case spUserIds of
-
-    Just user_ids -> getUsers_ByUserIdsM user_id user_ids sp
-    _             -> getUsers_ByEverythingM user_id sp
+    Just user_ids -> getUsers_ByUserIdsM m_sp user_id user_ids
+    _             -> getUsers_ByEverythingM m_sp user_id
 
 
 
-getUsers_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff [Entity User]
-getUsers_ByUserIdsM _ user_ids sp = do
+getUsers_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff [Entity User]
+getUsers_ByUserIdsM m_sp _ user_ids = do
 
-  selectListDb sp [UserId <-. user_ids] [] UserId
-
-
-
-getUsers_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity User]
-getUsers_ByEverythingM _ sp = do
-
-  selectListDb sp [] [] UserId
+  selectListDbEither m_sp [UserId <-. user_ids, UserActive ==. True] [] UserId
 
 
 
-insertUsersM :: UserId -> UserRequest -> HandlerEff (Entity User)
+getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
+getUsers_ByEverythingM m_sp _ = do
+
+  selectListDbEither m_sp [] [] UserId
+
+
+
+insertUsersM :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
 insertUsersM user_id user_request = do
 
   -- TODO: FIXME: Fix this
@@ -275,13 +270,13 @@ insertUsersM user_id user_request = do
       new_user <- insertEntityDb user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
       insertUsers_TasksM user_id new_user
-      return new_user
+      right $ new_user
 
-    else permissionDenied "perms"
+    else left Error_PermissionDenied
 
 
 
-insertUsers_TasksM :: UserId -> Entity User -> HandlerEff ()
+insertUsers_TasksM :: UserId -> Entity User -> HandlerErrorEff ()
 insertUsers_TasksM _ (Entity new_user_id _) = do
 
   -- Create a default profile
@@ -292,31 +287,26 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
   -- TODO
   -- void $ insertEntityDb (settingsRequestToSettings new_user_id defaultSettingsRequest)
 
-  return ()
+  right ()
 
 
 
-getUserM :: UserId -> UserId -> HandlerEff (Entity User)
-getUserM user_id lookup_user_id = getUserM' user_id (UserId ==. lookup_user_id)
+getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
+getUserM user_id lookup_user_id = do
+
+  selectFirstDbEither [UserId ==. lookup_user_id] []
 
 
 
-getUserMH :: UserId -> Text -> HandlerEff (Entity User)
-getUserMH user_id lookup_user_nick = getUserM' user_id (UserNick ==. lookup_user_nick)
+getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
+getUserMH user_id lookup_user_nick = do
+
+  selectFirstDbEither [UserNick ==. lookup_user_nick] []
 
 
 
-getUserM' :: forall t site val.
-             (PersistEntity val, YesodPersist site,
-              PersistQuery (YesodPersistBackend site),
-              YesodPersistBackend site ~ PersistEntityBackend val) =>
-             t -> Filter val -> ControlMA (HandlerT site IO) (Entity val)
-getUserM' _ q = do
-  notFoundMaybe =<< selectFirstDb [q] []
 
-
-
-updateUserM :: UserId -> UserId -> UserRequest -> HandlerEff (Entity User)
+updateUserM :: UserId -> UserId -> UserRequest -> HandlerErrorEff (Entity User)
 updateUserM _ lookup_user_id user_request = do
 
   ts <- timestampH'
@@ -328,7 +318,7 @@ updateUserM _ lookup_user_id user_request = do
       , userModifiedAt = Just ts
     }
 
-  void $ _runDB $ updateWhere
+  void $ updateWhereDb
     [ UserId ==. lookup_user_id ]
 
     [ UserModifiedAt =. userModifiedAt
@@ -340,62 +330,52 @@ updateUserM _ lookup_user_id user_request = do
     , UserGuard      +=. 1
     ]
 
-  notFoundMaybe =<< selectFirstDb [ UserId ==. lookup_user_id ] []
+  selectFirstDbEither [UserId ==. lookup_user_id] []
 
 
 
-deleteUserM :: UserId -> UserId -> HandlerEff ()
+deleteUserM :: UserId -> UserId -> HandlerErrorEff ()
 deleteUserM user_id lookup_user_id = do
 
-  -- TODO: Fix this
+  -- TODO: ACCESS: SECURITY: Fix this
   if (isSuper user_id) || (user_id == lookup_user_id)
 
     then
-      _runDB $ delete lookup_user_id
+      deleteDbEither lookup_user_id
 
     else
-      permissionDenied "perms"
+      left Error_PermissionDenied
 
 
 
 
-countUsersM :: UserId -> HandlerEff CountResponses
-countUsersM _ = do
+countUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
+countUsersM m_sp _ = do
 
-  StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spOrganizationId) of
 
--- case (spOrganizationId, spUserId, spForumId, spBoardId, spThreadId) of
+    Just _ -> left Error_NotImplemented
 
-  case spOrganizationId of
-
-    Just _ -> notFound
-
-    Nothing -> do
-      n <- countDb [ UserActive ==. True ]
-      return $ CountResponses [CountResponse 0 (fromIntegral n)]
+    _ -> do
+      n <- countDb [UserActive ==. True]
+      right $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
 
-getUserStatsM :: UserId -> HandlerEff UserSanitizedStatResponses
-getUserStatsM _ = do
-
-  StandardParams{..} <- lookupStandardParams
-
-  case spUserIds of
-
-    _ -> notFound
+getUserStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedStatResponses
+getUserStatsM _ _ = left Error_NotImplemented
 
 
 
-getUserStatM :: UserId -> UserId -> HandlerEff UserSanitizedStatResponse
+getUserStatM :: UserId -> UserId -> HandlerErrorEff UserSanitizedStatResponse
 getUserStatM _ lookup_user_id = do
 
   (a,b,c,d) <- qUserStats lookup_user_id
 
   let (threads,thread_posts,resources,leurons) = (E.unValue a, E.unValue b, E.unValue c, E.unValue d)
 
-  return $ UserSanitizedStatResponse {
+  right $ UserSanitizedStatResponse {
     userSanitizedStatResponseUserId      = keyToInt64 lookup_user_id,
     userSanitizedStatResponseThreads     = threads,
     userSanitizedStatResponseThreadPosts = thread_posts,

@@ -45,6 +45,8 @@ module Api.Params (
   deleteCascadeDbEither,
   deleteCascadeWhereDb,
   deleteCascadeWhereDbEither,
+  deleteDb,
+  deleteDbEither,
   countDb,
   timestamp,
   timestampH,
@@ -732,6 +734,12 @@ deleteCascadeWhereDbEither :: forall site record.
   [Filter record]
   -> ControlMA (HandlerT site IO) (ErrorEff ())
 deleteCascadeWhereDbEither filt = Right <$> (_runDB $ deleteCascadeWhere filt)
+
+
+
+deleteDb = _runDB . delete
+
+deleteDbEither k = Right <$> deleteDb k
 
 
 
