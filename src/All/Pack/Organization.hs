@@ -101,13 +101,19 @@ getOrganizationPack_ByOrganizationName user_id organization_name = do
 getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
-  organization_user    <- getUserM user_id organizationUserId
-  e_organization_stats <- getOrganizationStatM user_id (entityKey organization)
-  user_perms_by_org    <- userPermissions_ByOrganizationIdM user_id org_id
-  user_teams           <- userTeamsOf_OrganizationIdM user_id org_id
+  lr <- runEitherT $ do
 
-  case e_organization_stats of
-    Right organization_stats -> do
+    organization_user  <- isT $ getUserM user_id organizationUserId
+    organization_stats <- isT $ getOrganizationStatM user_id (entityKey organization)
+    user_perms_by_org  <- lift $ userPermissions_ByOrganizationIdM user_id org_id
+    user_teams         <- lift $ userTeamsOf_OrganizationIdM user_id org_id
+
+    pure (organization_user
+         ,organization_stats
+         ,user_perms_by_org
+         ,user_teams)
+
+  rehtie lr left $ \(organization_user, organization_stats, user_perms_by_org, user_teams) -> do
 
       right $ OrganizationPackResponse {
         organizationPackResponseOrganization   = organizationToResponse organization,
@@ -120,5 +126,3 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
         organizationPackResponsePermissions    = user_perms_by_org,
         organizationPackResponseTeams          = map (teamSystem.entityVal) user_teams
       }
-
-    _ -> left Error_Unexpected
