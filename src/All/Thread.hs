@@ -250,7 +250,7 @@ getThreadMH m_sp _ thread_name = do
     Just board_id -> do
       selectFirstDbEither [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
 
-    _             -> left Error_NotImplemented
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 

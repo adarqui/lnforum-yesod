@@ -107,9 +107,7 @@ getThreadPostPackM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerE
 getThreadPostPackM m_sp user_id thread_post_id = do
 
   e_thread_post <- getThreadPostM user_id thread_post_id
-  case e_thread_post of
-    Left err          -> left err
-    Right thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post -- defaultStandardParams { spLimit = Just 1 })
+  rehtie e_thread_post left $ getThreadPostPack_ByThreadPostM m_sp user_id
 
 
 
