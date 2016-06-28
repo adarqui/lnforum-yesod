@@ -102,7 +102,7 @@ authenticateUser creds@Creds{..} = do
 
 
 
-  authNew (Left err)   = return $ ServerError $ credsPlugin ++ ": " ++ err
+  authNew (Left err)   = pure $ ServerError $ credsPlugin ++ ": " ++ err
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
@@ -114,7 +114,7 @@ authenticateUser creds@Creds{..} = do
 
   authExisting e_user userId = do
     mapM_ (replace userId) e_user
-    return $ Authenticated userId
+    pure $ Authenticated userId
 
 
 

@@ -17,5 +17,5 @@ lookupGetParamId :: forall (m :: * -> *) record.
 lookupGetParamId t = do
   v <- lookupGetParam t
   case v of
-    Nothing -> return $ Nothing
-    Just v' -> return $ int64ToKeyMaybe (textToInt64 v')
+    Nothing -> pure $ Nothing
+    Just v' -> pure $ int64ToKeyMaybe (textToInt64 v')

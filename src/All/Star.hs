@@ -237,7 +237,7 @@ getStarStat_ByThreadPostIdM user_id thread_post_id = do
 --  <- countDb [ StarPostStarId ==. star_id ]
   stars <- selectListDb' [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64] [] StarId
 
-  return $ StarStatResponse {
+  pure $ StarStatResponse {
     starStatResponseEnt   = Ent_ThreadPost,
     starStatResponseEntId = i64,
     starStatResponseStars = fromIntegral $ length stars
