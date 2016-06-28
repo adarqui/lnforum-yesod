@@ -29,21 +29,23 @@ import           All.User
 getBoardPacksR :: Handler Value
 getBoardPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getBoardPacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getBoardPacksM (pure sp) user_id
 
 
 
 getBoardPackR :: BoardId -> Handler Value
 getBoardPackR board_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getBoardPackM user_id board_id
+  errorOrJSON id $ getBoardPackM user_id board_id
 
 
 
 getBoardPackH :: Text -> Handler Value
 getBoardPackH board_name = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getBoardPackMH user_id board_name
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getBoardPackMH (pure sp) user_id board_name
 
 
 
@@ -56,35 +58,33 @@ getBoardPackH board_name = run $ do
 -- Model
 --
 
-getBoardPacksM :: UserId -> HandlerEff BoardPackResponses
-getBoardPacksM user_id = do
+getBoardPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff BoardPackResponses
+getBoardPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spForumId) of
 
-  case spForumId of
-
-    Just forum_id -> getBoardPacks_ByForumIdM user_id forum_id sp
-    _             -> notFound
+    Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
+    _             -> left $ Error_InvalidArguments "forum_id"
 
 
 
-getBoardPackM :: UserId -> BoardId -> HandlerEff BoardPackResponse
+getBoardPackM :: UserId -> BoardId -> HandlerErrorEff BoardPackResponse
 getBoardPackM user_id board_id = do
 
-  board         <- getBoardM user_id board_id
-  getBoardPack_ByBoardM user_id board
+  e_board <- getBoardM user_id board_id
+  rehtie e_board left $ getBoardPack_ByBoardM user_id
 
 
 
-getBoardPackMH :: UserId -> Text -> HandlerEff BoardPackResponse
-getBoardPackMH user_id board_name = do
+getBoardPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff BoardPackResponse
+getBoardPackMH m_sp user_id board_name = do
 
-  board         <- getBoardMH user_id board_name
-  getBoardPack_ByBoardM user_id board
+  e_board <- getBoardMH m_sp user_id board_name
+  rehtie e_board left $ getBoardPack_ByBoardM user_id
 
 
 
-getBoardPack_ByBoardM :: UserId -> Entity Board -> HandlerEff BoardPackResponse
+getBoardPack_ByBoardM :: UserId -> Entity Board -> HandlerErrorEff BoardPackResponse
 getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
   let sp = defaultStandardParams {
@@ -93,39 +93,50 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
       spLimit = Just 1
     }
 
-  board_stats   <- getBoardStatM user_id board_id
-  mthreads      <- getThreads_ByBoardIdM user_id board_id sp
-  mthread_posts <- case (headMay mthreads) of
-    Nothing -> pure []
-    Just (Entity thread_id _) -> getThreadPosts_ByThreadIdM user_id thread_id sp
-  muser         <- case (headMay mthread_posts) of
-    Nothing -> pure Nothing
-    Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
+  lr <- runEitherT $ do
+
+    board_stats         <- isT $ getBoardStatM user_id board_id
+    threads             <- isT $ getThreads_ByBoardIdM (Just sp) user_id board_id
+
+    m_thread_posts      <- case (headMay threads) of
+      Nothing                   -> pure []
+      Just (Entity thread_id _) -> isT $ getThreadPosts_ByThreadIdM (Just sp) user_id thread_id
+
+    m_user              <- case (headMay m_thread_posts) of
+      Nothing                        -> pure Nothing
+      Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
+
+    user_perms_by_board <- lift $ userPermissions_ByBoardIdM user_id (entityKey board)
+
+    pure (board_stats
+         ,threads
+         ,m_thread_posts
+         ,m_user
+         ,user_perms_by_board)
+
+  rehtie lr left $ \(board_stats, threads, m_thread_posts, m_user, user_perms_by_board) -> do
+    right $ BoardPackResponse {
+      boardPackResponseBoard                = boardToResponse board,
+      boardPackResponseBoardId              = keyToInt64 board_id,
+      boardPackResponseStat                 = board_stats,
+      boardPackResponseLatestThread         = fmap threadToResponse $ headMay threads,
+      boardPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay m_thread_posts,
+      boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse m_user,
+      boardPackResponseLike                 = Nothing,
+      boardPackResponseStar                 = Nothing,
+      boardPackResponseWithOrganization     = Nothing,
+      boardPackResponseWithForum            = Nothing,
+      boardPackResponsePermissions          = user_perms_by_board
+    }
 
 
-  user_perms_by_board <- userPermissions_ByBoardIdM user_id (entityKey board)
 
-  return $ BoardPackResponse {
-    boardPackResponseBoard                = boardToResponse board,
-    boardPackResponseBoardId              = keyToInt64 board_id,
-    boardPackResponseStat                 = board_stats,
-    boardPackResponseLatestThread         = fmap threadToResponse $ headMay mthreads,
-    boardPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay mthread_posts,
-    boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse muser,
-    boardPackResponseLike                 = Nothing,
-    boardPackResponseStar                 = Nothing,
-    boardPackResponseWithOrganization     = Nothing,
-    boardPackResponseWithForum            = Nothing,
-    boardPackResponsePermissions          = user_perms_by_board
-  }
+getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
+getBoardPacks_ByForumIdM m_sp user_id forum_id = do
 
-
-
-getBoardPacks_ByForumIdM :: UserId -> ForumId -> StandardParams -> HandlerEff BoardPackResponses
-getBoardPacks_ByForumIdM user_id forum_id sp = do
-
-  boards_keys <- getBoards_ByForumId_KeysM user_id forum_id sp
-  boards_packs <- mapM (\key -> getBoardPackM user_id key) boards_keys
-  return $ BoardPackResponses {
-    boardPackResponses = boards_packs
-  }
+  e_board_keys <- getBoards_ByForumId_KeysM m_sp user_id forum_id
+  rehtie e_board_keys left $ \board_keys -> do
+    board_packs <- rights <$> mapM (\key -> getBoardPackM user_id key) board_keys
+    right $ BoardPackResponses {
+      boardPackResponses = board_packs
+    }

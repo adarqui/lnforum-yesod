@@ -184,7 +184,7 @@ getBoardsM m_sp user_id = do
 
     (N, N, J board_parent_id)     -> getBoards_ByBoardParentIdM m_sp user_id (int64ToKey' board_parent_id)
 
-    _                             -> left Error_NotImplemented
+    _                             -> left $ Error_InvalidArguments "org_id, forum_id, parent_id"
 
 
 
@@ -286,7 +286,7 @@ updateBoardM user_id board_id board_request = do
     Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing board_request) { boardModifiedAt = Just ts }
 
   updateWhereDb
-    [ BoardUserId ==. user_id, BoardId ==. board_id ]
+    [ BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True ]
     [ BoardModifiedAt         =. boardModifiedAt
     , BoardActivityAt         =. Just ts
     , BoardName               =. boardName

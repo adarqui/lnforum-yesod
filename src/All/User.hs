@@ -1,4 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 
 module All.User (
   -- Handler
@@ -43,11 +45,6 @@ module All.User (
 import           All.Prelude
 import           Data.Char           (isAlphaNum)
 import qualified Data.Text           as T (filter, toLower)
-import           Import.NoFoundation
-import           LN.Lib.Url          (toPrettyName)
-import           LN.Lib.Validate
-import           LN.T
-import           Misc.Codec          (keyToInt64)
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
 import           All.Prelude
@@ -249,7 +246,7 @@ getUsers_ByUserIdsM m_sp _ user_ids = do
 getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
 getUsers_ByEverythingM m_sp _ = do
 
-  selectListDbEither m_sp [] [] UserId
+  selectListDbEither m_sp [UserActive ==. True] [] UserId
 
 
 
@@ -277,7 +274,7 @@ insertUsersM user_id user_request = do
         }
       new_user <- insertEntityDb user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
-      insertUsers_TasksM user_id new_user
+      void $ insertUsers_TasksM user_id new_user
       right $ new_user
 
     else left Error_PermissionDenied
@@ -300,16 +297,16 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
 
 
 getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
-getUserM user_id lookup_user_id = do
+getUserM _ lookup_user_id = do
 
-  selectFirstDbEither [UserId ==. lookup_user_id] []
+  selectFirstDbEither [UserId ==. lookup_user_id, UserActive ==. True] []
 
 
 
 getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
-getUserMH user_id lookup_user_nick = do
+getUserMH _ lookup_user_nick = do
 
-  selectFirstDbEither [UserNick ==. lookup_user_nick] []
+  selectFirstDbEither [UserNick ==. lookup_user_nick, UserActive ==. True] []
 
 
 
@@ -327,7 +324,7 @@ updateUserM _ lookup_user_id user_request = do
     }
 
   void $ updateWhereDb
-    [ UserId ==. lookup_user_id ]
+    [ UserId ==. lookup_user_id, UserActive ==. True ]
 
     [ UserModifiedAt =. userModifiedAt
     , UserNick        =. userNick
@@ -396,8 +393,9 @@ getUserStatM _ lookup_user_id = do
 
 
 qUserStats :: forall site.
-    (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-    Key User -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
+  (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
+  Key User ->
+  ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
 qUserStats user_id = do
   _runDB $ do
     (leurons:[]) <- E.select
