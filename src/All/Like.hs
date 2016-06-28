@@ -41,61 +41,53 @@ import qualified LN.T.Like   as L
 getLikesR :: Handler Value
 getLikesR = run $ do
   user_id <- _requireAuthId
-  (toJSON . likesToResponses) <$> getLikesM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON likesToResponses $ getLikesM (pure sp) user_id
 
 
 
 postLikeR0 :: Handler Value
 postLikeR0 = run $ do
-
-  sp <- lookupStandardParams
-
-  case (lookupLikeEnt sp) of
-
-    Nothing            -> permissionDenied "Must supply a entity information"
-
-    Just (ent, ent_id) -> do
-
-      user_id <- _requireAuthId
-      like_request <- requireJsonBody
-      (toJSON . likeToResponse) <$> insertLikeM user_id ent ent_id like_request
+  user_id      <- _requireAuthId
+  like_request <- requireJsonBody
+  sp           <- lookupStandardParams
+  errorOrJSON likeToResponse $ insertLikeM (pure sp) user_id ent ent_id like_request
 
 
 
 getLikeR :: LikeId -> Handler Value
 getLikeR like_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . likeToResponse) <$> getLikeM user_id like_id
+  errorOrJSON likeToResponse $ getLikeM user_id like_id
 
 
 
 putLikeR :: LikeId -> Handler Value
 putLikeR like_id = run $ do
-  user_id <- _requireAuthId
+  user_id      <- _requireAuthId
   like_request <- requireJsonBody
-  (toJSON . likeToResponse) <$> updateLikeM user_id like_id like_request
+  errorOrJSON likeToResponse) $ updateLikeM user_id like_id like_request
 
 
 
 deleteLikeR :: LikeId -> Handler Value
 deleteLikeR like_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteLikeM user_id like_id
-  pure $ toJSON ()
+  errorOrJSON id $ deleteLikeM user_id like_id
 
 
 
 getLikeStatsR :: Handler Value
 getLikeStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getLikeStatsM user_id
+  errorOrJSON id $ getLikeStatsM user_id
 
 
 
 getLikeStatR :: LikeId -> Handler Value
 getLikeStatR like_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getLikeStatM user_id like_id
+  errorOrJSON id $ getLikeStatM user_id like_id
 
 
 

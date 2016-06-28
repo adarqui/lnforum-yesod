@@ -100,17 +100,26 @@ getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 getThreadPack_ByThreadM :: Maybe StandardParams -> UserId -> Entity Thread -> HandlerErrorEff ThreadPackResponse
 getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
 
-  thread_user    <- getUserM user_id threadUserId
-  e_thread_stats   <- getThreadStatM user_id thread_id
-  m_thread_posts <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
-  m_user          <- case (headMay m_thread_posts) of
-    Nothing -> pure Nothing
-    Just (Entity _ ThreadPost{..}) -> Just <$> getUserM user_id threadPostUserId
+  lr <- runEitherT $ do
 
-  user_perms_by_thread <- userPermissions_ByThreadIdM user_id (entityKey thread)
+    thread_user  <- isT $ getUserM user_id threadUserId
+    thread_stats <- isT $ getThreadStatM user_id thread_id
+    thread_posts <- isT $ getThreadPosts_ByThreadIdM m_sp user_id thread_id
+    m_user       <- case (headMay thread_posts) of
+      Nothing -> pure Nothing
+      Just (Entity _ ThreadPost{..}) -> Just <$> isT $ getUserM user_id threadPostUserId
 
-  case e_thread_stats of
-    (Right thread_stats) -> do
+    user_perms_by_thread <- lift $ userPermissions_ByThreadIdM user_id (entityKey thread)
+
+    pure (thread_user
+         ,thread_stats
+         ,thread_posts
+         ,m_user
+         ,user_perms_by_thread)
+
+  rehtie lr left $
+    \(thread_user, thread_stats, thread_posts, m_user, user_perms_by_thread) -> do
+
       right $ ThreadPackResponse {
         threadPackResponseThread               = threadToResponse thread,
         threadPackResponseThreadId             = keyToInt64 thread_id,
@@ -119,12 +128,10 @@ getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
         threadPackResponseStat                 = thread_stats,
         threadPackResponseLike                 = Nothing,
         threadPackResponseStar                 = Nothing,
-        threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay m_thread_posts,
+        threadPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay thread_posts,
         threadPackResponseLatestThreadPostUser = fmap userToSanitizedResponse m_user,
         threadPackResponseWithOrganization     = Nothing,
         threadPackResponseWithForum            = Nothing,
         threadPackResponseWithBoard            = Nothing,
         threadPackResponsePermissions          = user_perms_by_thread
       }
-
-    _ -> left Error_Unexpected

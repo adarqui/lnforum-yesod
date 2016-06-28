@@ -92,7 +92,7 @@ getThreadPostPacks_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPo
 getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
   thread_posts      <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-  thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+  thread_post_packs <- fmap rights $ mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
 
   right $ ThreadPostPackResponses {
     threadPostPackResponses = thread_post_packs
@@ -121,7 +121,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
-    user_perms_by_thread_post <- isT $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
+    user_perms_by_thread_post <- lift $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
 
     m_org    <- isT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
     m_forum  <- isT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
