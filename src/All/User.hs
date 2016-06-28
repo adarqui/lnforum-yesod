@@ -47,7 +47,6 @@ import           Data.Char           (isAlphaNum)
 import qualified Data.Text           as T (filter, toLower)
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
-import           All.Prelude
 import           All.Profile
 
 
