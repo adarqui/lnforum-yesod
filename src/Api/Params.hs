@@ -18,6 +18,7 @@ module Api.Params (
   lookupGetParam404,
   lookupEnt,
   lookupLikeEnt,
+  lookupLikeEntMay,
   lookupStarEnt,
   spToSelect,
   spToSelectMay,
@@ -345,6 +346,12 @@ lookupEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 -- lookupEnt (spStarId -> Just v)         = Just (Ent_Star, keyToInt64 v)
 lookupEnt _                            = Nothing
 
+
+
+
+lookupLikeEntMay :: Maybe StandardParams -> Maybe (Ent, Int64)
+lookupLikeEntMay Nothing   = Nothing
+lookupLikeEntMay (Just sp) = lookupLikeEnt sp
 
 
 

@@ -51,7 +51,7 @@ postLikeR0 = run $ do
   user_id      <- _requireAuthId
   like_request <- requireJsonBody
   sp           <- lookupStandardParams
-  errorOrJSON likeToResponse $ insertLikeM (pure sp) user_id ent ent_id like_request
+  errorOrJSON likeToResponse $ insertLikeM (pure sp) user_id like_request
 
 
 
@@ -66,7 +66,7 @@ putLikeR :: LikeId -> Handler Value
 putLikeR like_id = run $ do
   user_id      <- _requireAuthId
   like_request <- requireJsonBody
-  errorOrJSON likeToResponse) $ updateLikeM user_id like_id like_request
+  errorOrJSON likeToResponse $ updateLikeM user_id like_id like_request
 
 
 
@@ -80,14 +80,16 @@ deleteLikeR like_id = run $ do
 getLikeStatsR :: Handler Value
 getLikeStatsR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ getLikeStatsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getLikeStatsM (pure sp) user_id
 
 
 
 getLikeStatR :: LikeId -> Handler Value
 getLikeStatR like_id = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ getLikeStatM user_id like_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getLikeStatM (pure sp) user_id like_id
 
 
 
@@ -141,46 +143,52 @@ likesToResponses likes = LikeResponses {
 -- Model/Internal
 --
 
-getLikesM :: UserId -> HandlerEff [Entity Like]
-getLikesM user_id = do
-  selectListDb' [ LikeUserId ==. user_id ] [] LikeId
+getLikesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Like]
+getLikesM m_sp user_id = do
+  selectListDbEither m_sp [LikeUserId ==. user_id, LikeActive ==. True] [] LikeId
 
 
 
-insertLikeM :: UserId -> Ent -> Int64 -> LikeRequest -> HandlerEff (Entity Like)
-insertLikeM user_id ent ent_id like_request = do
+insertLikeM :: Maybe StandardParams -> UserId -> LikeRequest -> HandlerErrorEff (Entity Like)
+insertLikeM m_sp user_id like_request = do
 
-  ts <- timestampH'
-  let
-    like = (likeRequestToLike user_id ent ent_id like_request) { likeCreatedAt = Just ts }
+  case (lookupLikeEntMay m_sp) of
+    Just (ent, ent_id) -> do
+      ts <- timestampH'
+      let
+        like = (likeRequestToLike user_id ent ent_id like_request) { likeCreatedAt = Just ts }
 
-  insertEntityDb like
+      insertEntityDbEither like
+
+    _ -> left $ Error_InvalidArguments "ent, ent_id"
 
 
 
-getLikeM :: UserId -> LikeId -> HandlerEff (Entity Like)
+getLikeM :: UserId -> LikeId -> HandlerErrorEff (Entity Like)
 getLikeM user_id like_id = do
-  notFoundMaybe =<< selectFirstDb [ LikeId ==. like_id, LikeUserId ==. user_id ] []
+  selectFirstDbEither [LikeId ==. like_id, LikeUserId ==. user_id , LikeActive ==. True] []
 
 
 
-getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Like))
+getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerErrorEff (Maybe (Entity Like))
 getLike_ByThreadPostM user_id thread_post = do
-  selectFirstDb [ LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id ] []
+  m_like <- selectFirstDb [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id, LikeActive ==. True] []
+  ebyam m_like (left Error_NotFound) (right . Just)
   where
   thread_post_id = entityKeyToInt64 thread_post
 
 
 
-getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff (Maybe (Entity Like))
+getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Maybe (Entity Like))
 getLike_ByThreadPostIdM user_id thread_post_id = do
-  selectFirstDb [ LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id' ] []
+  m_like <- selectFirstDb [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
+  ebyam m_like (left Error_NotFound) (right . Just)
   where
   thread_post_id' = keyToInt64 thread_post_id
 
 
 
-updateLikeM :: UserId -> LikeId -> LikeRequest -> HandlerEff (Entity Like)
+updateLikeM :: UserId -> LikeId -> LikeRequest -> HandlerErrorEff (Entity Like)
 updateLikeM user_id like_id LikeRequest{..} = do
 
   ts <- timestampH'
@@ -194,49 +202,40 @@ updateLikeM user_id like_id LikeRequest{..} = do
     , LikeScore      =. likeOptToScore likeRequestOpt
     ]
 
-  notFoundMaybe =<< selectFirstDb [ LikeId ==. like_id ] []
+  selectFirstDbEither [LikeId ==. like_id, LikeActive ==. True] []
 
 
 
-deleteLikeM :: UserId -> LikeId -> HandlerEff ()
+deleteLikeM :: UserId -> LikeId -> HandlerErrorEff ()
 deleteLikeM user_id like_id = do
-  deleteWhereDb [ LikeUserId ==. user_id, LikeId ==. like_id ]
+  deleteWhereDbEither [LikeUserId ==. user_id, LikeId ==. like_id, LikeActive ==. True]
 
 
 
-getLikeStatsM :: UserId -> HandlerEff LikeStatResponses
-getLikeStatsM _ = do
-
-  StandardParams{..} <- lookupStandardParams
-
-  case spBoardId of
-
-    Just _  -> notFound
-    Nothing -> notFound
+getLikeStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LikeStatResponses
+getLikeStatsM _ _ = left Error_NotImplemented
 
 
 
 
-getLikeStatM :: UserId -> LikeId -> HandlerEff LikeStatResponse
-getLikeStatM user_id _ = do
+getLikeStatM :: Maybe StandardParams -> UserId -> LikeId -> HandlerErrorEff LikeStatResponse
+getLikeStatM m_sp user_id _ = do
 
-  sp@StandardParams{..} <- lookupStandardParams
-
-  case spThreadPostId of
+  case (lookupSpMay m_sp spThreadPostId) of
     Just thread_post_id -> getLikeStat_ByThreadPostIdM user_id thread_post_id
-    _                   -> notFound
+    _                   -> left $ Error_InvalidArguments "thread_post_id"
 
 
 
-getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff LikeStatResponse
+getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff LikeStatResponse
 getLikeStat_ByThreadPostIdM user_id thread_post_id = do
---  <- countDb [ LikePostLikeId ==. like_id ]
-  likes <- selectListDb' [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64] [] LikeId
+
+  likes <- selectListDbMay Nothing [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64, LikeActive ==. True] [] LikeId
   let
     opts   = map (\(Entity _ Like{..}) -> likeOpt) likes
     scores = map (\(Entity _ Like{..}) -> likeScore) likes
 
-  return $ LikeStatResponse {
+  right $ LikeStatResponse {
     likeStatResponseEnt     = Ent_ThreadPost,
     likeStatResponseEntId   = i64,
     likeStatResponseScore   = fromIntegral $ sum scores,
