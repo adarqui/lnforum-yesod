@@ -29,15 +29,15 @@ getUserPacksM m_sp user_id = do
 
 
 
-getUserPackM :: UserId -> UserId -> HandlerEff UserPackResponse
+getUserPackM :: UserId -> UserId -> HandlerErrorEff UserPackResponse
 getUserPackM user_id lookup_user_id = do
 
-  getUserPack_ByUserIdM user_id lookup_user_id -- (sp { spLimit = Just 1 })
+  getUserPack_ByUserIdM user_id lookup_user_id
 
 
 
 getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
-getUserPacks_ByUserIdsM m_sp user_id user_ids sp = do
+getUserPacks_ByUserIdsM m_sp user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
   right $ UserPackResponses {
     userPackResponses = users_packs
@@ -46,8 +46,8 @@ getUserPacks_ByUserIdsM m_sp user_id user_ids sp = do
 
 
 
-getUserPack_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff UserPackResponse
-getUserPack_ByUserIdM m_sp user_id lookup_user_id = do
+getUserPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserPackResponse
+getUserPack_ByUserIdM user_id lookup_user_id = do
 
   lr <- runEitherT $ do
     lookup_user <- isT $ getUserM user_id lookup_user_id
