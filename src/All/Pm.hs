@@ -35,48 +35,39 @@ import           All.Prelude
 getPmsR :: Handler Value
 getPmsR = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmsToResponses) <$> getPmsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON pmsToResponses <$> getPmsM (pure sp) user_id
 
 
 
 postPmR0 :: Handler Value
 postPmR0 = run $ do
-  user_id <- _requireAuthId
-  sp <- lookupStandardParams
-  -- can handle groups, users, user .. if we want
-  case (spUserId sp) of
-    Nothing -> notFound
-    Just to_user_id ->
-      if user_id == to_user_id
-        then do
-          -- can't send a pm to yourself
-          permissionDenied "Can't send a PM to yourself"
-        else do
-          pm_request <- requireJsonBody :: HandlerEff PmRequest
-          (toJSON . pmToResponse) <$> insertPmM user_id to_user_id pm_request
+  user_id    <- _requireAuthId
+  sp         <- lookupStandardParams
+  pm_request <- requireJsonBody
+  errorOrJSON pmToResponse $ insertPmM (pure sp) user_id pm_request
 
 
 
 getPmR :: PmId -> Handler Value
 getPmR pm_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmToResponse) <$> getPmM user_id pm_id
+  errorOrJSON pmToResponse $ getPmM user_id pm_id
 
 
 
 putPmR :: PmId -> Handler Value
 putPmR pm_id = run $ do
-  user_id <- _requireAuthId
+  user_id    <- _requireAuthId
   pm_request <- requireJsonBody
-  (toJSON . pmToResponse) <$> updatePmM user_id pm_id pm_request
+  errorOrJSON pmToResponse $ updatePmM user_id pm_id pm_request
 
 
 
 deletePmR :: PmId -> Handler Value
 deletePmR pm_id = run $ do
   user_id <- _requireAuthId
-  void $ deletePmM user_id pm_id
-  pure $ toJSON ()
+  errorOrJSON id $ deletePmM user_id pm_id
 
 
 
@@ -132,31 +123,41 @@ pmsToResponses pms = PmResponses {
 -- Model/Internal
 --
 
-getPmsM :: UserId -> HandlerEff [Entity Pm]
-getPmsM user_id = do
-  selectListDb' [ PmUserId ==. user_id ] [] PmId
+getPmsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Pm]
+getPmsM m_sp user_id = do
+  selectListDbEither m_sp [PmUserId ==. user_id, PmActive ==. True] [] PmId
 
 
 
-getPmM :: UserId -> PmId -> HandlerEff (Entity Pm)
+getPmM :: UserId -> PmId -> HandlerErrorEff (Entity Pm)
 getPmM user_id pm_id = do
-  notFoundMaybe =<< selectFirstDb [ PmUserId ==. user_id, PmId ==. pm_id ] []
+  selectFirstDbEither [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
 
 
 
-insertPmM :: UserId -> UserId -> PmRequest -> HandlerEff (Entity Pm)
-insertPmM user_id to_user_id pm_request = do
+insertPmM :: Maybe StandardParams -> UserId -> PmRequest -> HandlerErrorEff (Entity Pm)
+insertPmM m_sp user_id pm_request = do
 
-  ts <- timestampH'
+  case (lookupSpMay m_sp spUserId) of
 
-  let
-    pm = (pmRequestToPm user_id to_user_id pm_request) { pmCreatedAt = Just ts }
+    Just to_user_id ->
+      if user_id == to_user_id
 
-  insertEntityDb pm
+        then do
+          -- can't send a pm to yourself
+          left $ Error_PermissionDenied -- TODO FIXME: PermissionDeniedReason "Can't send a PM to yourself"
+
+        else do
+          ts <- timestampH'
+          let
+            pm = (pmRequestToPm user_id to_user_id pm_request) { pmCreatedAt = Just ts }
+          insertEntityDbEither pm
+
+    _               -> left $ Error_InvalidArguments "user_id"
 
 
 
-updatePmM :: UserId -> PmId -> PmRequest -> HandlerEff (Entity Pm)
+updatePmM :: UserId -> PmId -> PmRequest -> HandlerErrorEff (Entity Pm)
 updatePmM user_id pm_id pm_request = do
 
   ts <- timestampH'
@@ -165,17 +166,15 @@ updatePmM user_id pm_id pm_request = do
     Pm{..} = (pmRequestToPm user_id dummyId pm_request) { pmModifiedAt = Just ts }
 
   updateWhereDb
-    [ PmUserId ==. user_id, PmId ==. pm_id ]
+    [ PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True ]
     [ PmModifiedAt =. pmModifiedAt
     , PmSubject =. pmSubject
     , PmBody =. pmBody
     ]
 
-  notFoundMaybe =<< selectFirstDb [ PmUserId ==. user_id, PmId ==. pm_id ] []
+  selectFirstDbEither [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
 
 
 
-deletePmM :: UserId -> PmId -> HandlerEff ()
-deletePmM _ _ = do
-  return ()
---  deleteWhereDb [ PmUserId ==. user_id, PmId ==. pm_id ]
+deletePmM :: UserId -> PmId -> HandlerErrorEff ()
+deletePmM _ _ = left Error_NotImplemented
