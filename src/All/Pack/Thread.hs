@@ -106,8 +106,8 @@ getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
     thread_stats <- isT $ getThreadStatM user_id thread_id
     thread_posts <- isT $ getThreadPosts_ByThreadIdM m_sp user_id thread_id
     m_user       <- case (headMay thread_posts) of
-      Nothing -> pure Nothing
-      Just (Entity _ ThreadPost{..}) -> Just <$> isT $ getUserM user_id threadPostUserId
+      Nothing                        -> pure Nothing
+      Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
 
     user_perms_by_thread <- lift $ userPermissions_ByThreadIdM user_id (entityKey thread)
 
