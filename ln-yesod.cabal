@@ -192,6 +192,7 @@ library
                  , hoauth2
                  , amqp
                  , resourcet
+                 , either
 
 executable         ln-yesod
     default-language:  Haskell2010

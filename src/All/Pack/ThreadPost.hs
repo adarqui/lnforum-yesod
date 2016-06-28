@@ -49,7 +49,7 @@ getThreadPostPackR thread_post_id = run $ do
 --
 -- Model
 --
-getThreadPostPacksM :: Maybe StandardParams -> UserId -> HandlerEff (ErrorEff ThreadPostPackResponses)
+getThreadPostPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spThreadId, lookupSpMay m_sp spThreadPostId) of
@@ -64,7 +64,7 @@ getThreadPostPacksM m_sp user_id = do
 
 
 
-getThreadPostPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerEff (ErrorEff ThreadPostPackResponses)
+getThreadPostPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByForumIdM m_sp user_id forum_id = do
 
   thread_posts <- getThreadPosts_ByForumIdM m_sp user_id forum_id
@@ -76,7 +76,7 @@ getThreadPostPacks_ByForumIdM m_sp user_id forum_id = do
 
 
 
-getThreadPostPacks_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerEff (ErrorEff ThreadPostPackResponses)
+getThreadPostPacks_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByThreadIdM m_sp user_id thread_id = do
 
   thread_posts      <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
@@ -88,7 +88,7 @@ getThreadPostPacks_ByThreadIdM m_sp user_id thread_id = do
 
 
 
-getThreadPostPacks_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerEff (ErrorEff ThreadPostPackResponses)
+getThreadPostPacks_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
   thread_posts      <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
@@ -100,7 +100,7 @@ getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
 
 
-getThreadPostPackM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerEff (ErrorEff ThreadPostPackResponse)
+getThreadPostPackM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff ThreadPostPackResponse
 getThreadPostPackM m_sp user_id thread_post_id = do
 
   e_thread_post <- getThreadPostM user_id thread_post_id
@@ -110,24 +110,36 @@ getThreadPostPackM m_sp user_id thread_post_id = do
 
 
 
-getThreadPostPack_ByThreadPostM :: Maybe StandardParams -> UserId -> Entity ThreadPost -> HandlerEff (ErrorEff ThreadPostPackResponse)
+getThreadPostPack_ByThreadPostM :: Maybe StandardParams -> UserId -> Entity ThreadPost -> HandlerErrorEff ThreadPostPackResponse
 getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id ThreadPost{..}) = do
 
-  thread_post_user   <- getUserM user_id threadPostUserId
-  e_thread_post_stat <- getThreadPostStatM user_id thread_post_id
-  thread_post_like   <- getLike_ByThreadPostIdM user_id thread_post_id
+  lr <- runEitherT $ do
 
---  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
+    thread_post_user <- isT $ getUserM user_id threadPostUserId
+    thread_post_stat <- isT $ getThreadPostStatM user_id thread_post_id
+    thread_post_like <- isT $ getLike_ByThreadPostIdM user_id thread_post_id
 
-  user_perms_by_thread_post <- userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
+    --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
-  e_m_org  <- getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
-  m_forum  <- getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
-  m_board  <- getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
-  m_thread <- getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
+    user_perms_by_thread_post <- isT $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
 
-  case (e_m_org, e_thread_post_stat) of
-    (Right m_org, Right thread_post_stat) -> do
+    m_org    <- isT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
+    m_forum  <- isT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
+    m_board  <- isT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
+    m_thread <- isT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
+
+    pure (thread_post_user
+         ,thread_post_stat
+         ,thread_post_like
+         ,user_perms_by_thread_post
+         ,m_org
+         ,m_forum
+         ,m_board
+         ,m_thread)
+
+  rehtie lr left $
+    \(thread_post_user, thread_post_stat, thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
+
       right $ ThreadPostPackResponse {
         threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
         threadPostPackResponseThreadPostId     = keyToInt64 thread_post_id,
@@ -142,4 +154,3 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
         threadPostPackResponseWithThread       = fmap threadToResponse m_thread,
         threadPostPackResponsePermissions      = user_perms_by_thread_post
       }
-    _   -> left Error_Unexpected

@@ -14,7 +14,6 @@ import           Import
 import           Job.Shared
 import           LN.T.Internal.Types
 import           LN.T.Job
-import           Model.Misc
 import           Network.AMQP
 import qualified Prelude                      as Prelude
 

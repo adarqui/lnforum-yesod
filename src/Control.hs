@@ -12,11 +12,15 @@ module Control (
   left,
   right,
   unknownError,
-  ApplicationError (..) -- re-export
+  ApplicationError (..),-- re-export
+  leftT,
+  rightT,
+  isT
 ) where
 
 
 
+import qualified Control.Monad.Trans.Either as Either
 import           Control.Monad.Trans.RWS
 import qualified Data.Map                as M
 
@@ -67,3 +71,14 @@ left  = pure . Left
 right = pure . Right
 
 unknownError = left Error_Unexpected
+
+
+
+leftT = Either.left
+rightT = Either.right
+
+isT go = do
+  x <- lift go
+  case x of
+    Left err -> leftT err
+    Right v  -> rightT v

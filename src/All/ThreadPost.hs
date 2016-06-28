@@ -41,7 +41,7 @@ getThreadPostsR :: Handler Value
 getThreadPostsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
-  (toJSON . threadPostsToResponses) <$> getThreadPostsM (pure sp) user_id
+  errorOrJSON threadPostsToResponses $ getThreadPostsM (pure sp) user_id
 
 
 
@@ -72,7 +72,7 @@ putThreadPostR thread_post_id = run $ do
 deleteThreadPostR :: ThreadPostId -> Handler Value
 deleteThreadPostR thread_post_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> deleteThreadPostM user_id thread_post_id
+  errorOrJSON id $ deleteThreadPostM user_id thread_post_id
 
 
 
@@ -87,14 +87,14 @@ getThreadPostsCountR = run $ do
 getThreadPostStatsR :: Handler Value
 getThreadPostStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getThreadPostStatsM user_id
+  errorOrJSON id $ getThreadPostStatsM user_id
 
 
 
 getThreadPostStatR :: ThreadPostId -> Handler Value
 getThreadPostStatR thread_post_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getThreadPostStatM user_id thread_post_id
+  errorOrJSON id $ getThreadPostStatM user_id thread_post_id
 
 
 
@@ -179,41 +179,41 @@ orderByToField (Just order) =
 
 
 
-getThreadPostsM :: Maybe StandardParams -> UserId -> HandlerEff [Entity ThreadPost]
+getThreadPostsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPostsM m_sp user_id = do
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spThreadId, lookupSpMay m_sp spThreadPostId) of
     (Just forum_id, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
     (_, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
     (_, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-    (_, _, _)                   -> pure []
+    _                           -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
-getThreadPosts_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerEff [Entity ThreadPost]
+getThreadPosts_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByForumIdM m_sp _ forum_id = do
-  selectListDbMay m_sp [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbEither m_sp [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreadPosts_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerEff [Entity ThreadPost]
+getThreadPosts_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByThreadIdM m_sp _ thread_id = do
-  selectListDbMay m_sp [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True] [] ThreadPostId
+  selectListDbEither m_sp [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True] [] ThreadPostId
 
 
 
-getThreadPosts_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerEff [Entity ThreadPost]
+getThreadPosts_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByThreadPostIdM m_sp _ parent_id = do
-  selectListDbMay m_sp [ThreadPostParentId ==. Just parent_id, ThreadPostActive ==. True] [] ThreadPostId
+  selectListDbEither m_sp [ThreadPostParentId ==. Just parent_id, ThreadPostActive ==. True] [] ThreadPostId
 
 
 
-getThreadPostM :: UserId -> ThreadPostId -> HandlerEff (ErrorEff (Entity ThreadPost))
+getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
 getThreadPostM _ thread_post_id = do
   selectFirstDbEither [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
-insertThreadPostM :: Maybe StandardParams -> UserId -> ThreadPostRequest -> HandlerEff (ErrorEff (Entity ThreadPost))
+insertThreadPostM :: Maybe StandardParams -> UserId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPostM m_sp user_id thread_post_request = do
 
   case (lookupSpMay m_sp spThreadId, lookupSpMay m_sp spThreadPostId) of
@@ -222,11 +222,11 @@ insertThreadPostM m_sp user_id thread_post_request = do
     (_, Just thread_post_id) -> insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request
 
                              -- TODO FIXME: Error_InvalidArguments "Must supply a thread_id or thread_post_id"
-    (_, _)                   -> left Error_NotImplemented
+    _                        -> left $ Error_InvalidArguments "thread_id, thread_post_id"
 
 
 
-insertThreadPost_ByThreadIdM :: UserId -> ThreadId -> ThreadPostRequest -> HandlerEff (ErrorEff (Entity ThreadPost))
+insertThreadPost_ByThreadIdM :: UserId -> ThreadId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
   e_thread <- selectFirstDbEither [ThreadId ==. thread_id, ThreadActive ==. True] []
@@ -255,7 +255,7 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
 
 
-insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerEff (ErrorEff (Entity ThreadPost))
+insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
   e_post <- selectFirstDbEither [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
@@ -281,7 +281,7 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
 
 
-updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerEff (ErrorEff (Entity ThreadPost))
+updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 updateThreadPostM user_id thread_post_id thread_post_request = do
 
   ts <- timestampH'
@@ -297,18 +297,19 @@ updateThreadPostM user_id thread_post_id thread_post_request = do
     , ThreadPostPrivateTags =. threadPostPrivateTags
     , ThreadPostGuard      +=. 1
     ]
+
   selectFirstDbEither [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
-deleteThreadPostM :: UserId -> ThreadPostId -> HandlerEff ()
+deleteThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 deleteThreadPostM user_id thread_post_id = do
-  deleteWhereDb [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id]
+  deleteWhereDbEither [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id]
 
 
 
 
-countThreadPostsM :: Maybe StandardParams -> UserId -> HandlerEff (ErrorEff CountResponses)
+countThreadPostsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countThreadPostsM m_sp _ = do
 
   case (lookupSpMay m_sp spThreadId) of
@@ -317,16 +318,16 @@ countThreadPostsM m_sp _ = do
       n <- countDb [ ThreadPostThreadId ==. thread_id ]
       right $ CountResponses [CountResponse (keyToInt64 thread_id) (fromIntegral n)]
 
-    Nothing -> left Error_NotImplemented
+    _              -> left $ Error_InvalidArguments "thread_id"
 
 
 
-getThreadPostStatsM :: UserId -> HandlerEff (ErrorEff ThreadPostStatResponse)
+getThreadPostStatsM :: UserId -> HandlerErrorEff ThreadPostStatResponse
 getThreadPostStatsM _ = left Error_NotImplemented
 
 
 
-getThreadPostStatM :: UserId -> ThreadPostId -> HandlerEff (ErrorEff ThreadPostStatResponse)
+getThreadPostStatM :: UserId -> ThreadPostId -> HandlerErrorEff ThreadPostStatResponse
 getThreadPostStatM _ thread_post_id = do
 
   -- get like counts
