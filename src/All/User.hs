@@ -401,21 +401,21 @@ qUserStats user_id = do
     (leurons:[]) <- E.select
       $ E.from $ \leuron -> do
       E.where_ $ leuron ^. LeuronUserId E.==. E.val user_id
-      return (E.countDistinct $ leuron ^. LeuronId)
+      pure (E.countDistinct $ leuron ^. LeuronId)
 
     (resources:[]) <- E.select
       $ E.from $ \resource -> do
       E.where_ $ resource ^. ResourceUserId E.==. E.val user_id
-      return (E.countDistinct $ resource ^. ResourceId)
+      pure (E.countDistinct $ resource ^. ResourceId)
 
     (thread_posts:[]) <- E.select
       $ E.from $ \thread_post -> do
       E.where_ $ thread_post ^. ThreadPostUserId E.==. E.val user_id
-      return (E.countDistinct $ thread_post ^. ThreadPostId)
+      pure (E.countDistinct $ thread_post ^. ThreadPostId)
 
     (threads:[]) <- E.select
       $ E.from $ \thread -> do
       E.where_ $ thread ^. ThreadUserId E.==. E.val user_id
-      return (E.countDistinct $ thread ^. ThreadId)
+      pure (E.countDistinct $ thread ^. ThreadId)
 
-    return (threads :: E.Value Int64, thread_posts :: E.Value Int64, resources :: E.Value Int64, leurons :: E.Value Int64)
+    pure (threads :: E.Value Int64, thread_posts :: E.Value Int64, resources :: E.Value Int64, leurons :: E.Value Int64)
