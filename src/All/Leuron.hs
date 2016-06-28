@@ -35,12 +35,9 @@ module All.Leuron (
 
 
 import           All.Prelude
-import           Api.Params
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import qualified Database.Redis     as R
-import           Import
-import qualified LN.T.Like          as L
 
 
 
@@ -227,7 +224,7 @@ getLeurons_ByResourceIdM m_sp _ resource_id = do
 
 -- ESQUELETO-QUERY
 getLeurons_ByResourceId_RandomM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [Entity Leuron]
-getLeurons_ByResourceId_RandomM m_sp _ resource_id = do
+getLeurons_ByResourceId_RandomM _ _ resource_id = do
 
 -- SELECT * FROM leuron OFFSET floor(random() * (select count(*) from leuron)) LIMIT 1;
 -- TODO FIXME: the query below is not as efficient as the one above..
@@ -240,7 +237,7 @@ getLeurons_ByResourceId_RandomM m_sp _ resource_id = do
       E.orderBy [E.rand]
       E.offset 1
       E.limit 1
-      return leuron)
+      pure leuron)
 
 
 
@@ -291,9 +288,9 @@ insertLeuronM m_sp user_id leuron_request = do
           -- background job
           --
           -- Add leuron categories to our redis keys
-          insertLeuronCategoriesM leuron_id resource_id leuron_request
+          void $ insertLeuronCategoriesM leuron_id resource_id leuron_request
           -- Add leuron to our user's zsets etc
-          insertLeuronRedis user_id resource_id leuron_id
+          void $ insertLeuronRedis user_id resource_id leuron_id
           --
           -- end background job
           right entity
@@ -407,7 +404,7 @@ deleteLeuronRedis user_id resource_id leuron_id = do
 
 
 countLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
-countLeuronsM m_sp _ = do
+countLeuronsM _ _ = do
 
   n <- countDb [LeuronActive ==. True]
   right $ CountResponses [CountResponse 0 (fromIntegral n)]
