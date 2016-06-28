@@ -67,36 +67,39 @@ getThreadPostPacksM m_sp user_id = do
 getThreadPostPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByForumIdM m_sp user_id forum_id = do
 
-  thread_posts <- getThreadPosts_ByForumIdM m_sp user_id forum_id
-  thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+  e_thread_posts <- getThreadPosts_ByForumIdM m_sp user_id forum_id
 
-  right $ ThreadPostPackResponses {
-    threadPostPackResponses = thread_post_packs
-  }
+  rehtie e_thread_posts left $ \thread_posts -> do
+    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    right $ ThreadPostPackResponses {
+      threadPostPackResponses = thread_post_packs
+    }
 
 
 
 getThreadPostPacks_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByThreadIdM m_sp user_id thread_id = do
 
-  thread_posts      <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
-  thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+  e_thread_posts <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
 
-  right $ ThreadPostPackResponses {
-    threadPostPackResponses = thread_post_packs
-  }
+  rehtie e_thread_posts left $ \thread_posts -> do
+    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    right $ ThreadPostPackResponses {
+      threadPostPackResponses = thread_post_packs
+    }
 
 
 
 getThreadPostPacks_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
-  thread_posts      <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-  thread_post_packs <- fmap rights $ mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+  e_thread_posts <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
 
-  right $ ThreadPostPackResponses {
-    threadPostPackResponses = thread_post_packs
-  }
+  rehtie e_thread_posts left $ \thread_posts -> do
+    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    right $ ThreadPostPackResponses {
+      threadPostPackResponses = thread_post_packs
+    }
 
 
 
