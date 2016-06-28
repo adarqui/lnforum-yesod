@@ -118,7 +118,8 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     thread_post_user <- isT $ getUserM user_id threadPostUserId
     thread_post_stat <- isT $ getThreadPostStatM user_id thread_post_id
-    thread_post_like <- isT $ getLike_ByThreadPostIdM user_id thread_post_id
+    -- doesn't matter if we don't have a Like or not
+    m_thread_post_like <- (either (const $ Nothing) Just) <$> (lift $ getLike_ByThreadPostIdM user_id thread_post_id)
 
     --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
 
@@ -131,15 +132,17 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     pure (thread_post_user
          ,thread_post_stat
-         ,thread_post_like
+         ,m_thread_post_like
          ,user_perms_by_thread_post
          ,m_org
          ,m_forum
          ,m_board
          ,m_thread)
 
+  liftIO $ print lr
+
   rehtie lr left $
-    \(thread_post_user, thread_post_stat, thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
+    \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
 
       right $ ThreadPostPackResponse {
         threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
@@ -147,7 +150,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
         threadPostPackResponseUser             = userToSanitizedResponse thread_post_user,
         threadPostPackResponseUserId           = entityKeyToInt64 thread_post_user,
         threadPostPackResponseStat             = thread_post_stat,
-        threadPostPackResponseLike             = fmap likeToResponse thread_post_like,
+        threadPostPackResponseLike             = fmap likeToResponse m_thread_post_like,
         threadPostPackResponseStar             = Nothing,
         threadPostPackResponseWithOrganization = fmap organizationToResponse m_org,
         threadPostPackResponseWithForum        = fmap forumToResponse m_forum,

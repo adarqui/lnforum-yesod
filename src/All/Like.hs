@@ -170,19 +170,14 @@ getLikeM user_id like_id = do
 
 
 
-getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerErrorEff (Maybe (Entity Like))
-getLike_ByThreadPostM user_id thread_post = do
-  m_like <- selectFirstDb [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id, LikeActive ==. True] []
-  ebyam m_like (left Error_NotFound) (right . Just)
-  where
-  thread_post_id = entityKeyToInt64 thread_post
+getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerErrorEff (Entity Like)
+getLike_ByThreadPostM user_id (Entity thread_post_id _) = getLike_ByThreadPostIdM user_id thread_post_id
 
 
 
-getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Maybe (Entity Like))
+getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity Like)
 getLike_ByThreadPostIdM user_id thread_post_id = do
-  m_like <- selectFirstDb [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
-  ebyam m_like (left Error_NotFound) (right . Just)
+  selectFirstDbEither [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
   where
   thread_post_id' = keyToInt64 thread_post_id
 
