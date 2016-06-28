@@ -25,21 +25,22 @@ import           All.User
 getGlobalGroupPacksR :: Handler Value
 getGlobalGroupPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getGlobalGroupPacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getGlobalGroupPacksM (pure sp) user_id
 
 
 
 getGlobalGroupPackR :: GlobalGroupId -> Handler Value
 getGlobalGroupPackR global_group_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getGlobalGroupPackM user_id global_group_id
+  errorOrJSON id $ getGlobalGroupPackM user_id global_group_id
 
 
 
 getGlobalGroupPackH :: Text -> Handler Value
 getGlobalGroupPackH global_group_name = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getGlobalGroupPackMH user_id global_group_name
+  errorOrJSON id $ getGlobalGroupPackMH user_id global_group_name
 
 
 
@@ -49,72 +50,69 @@ getGlobalGroupPackH global_group_name = run $ do
 
 -- Model
 
-getGlobalGroupPacksM :: UserId -> HandlerEff GlobalGroupPackResponses
-getGlobalGroupPacksM user_id = do
+getGlobalGroupPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spUserId) of
 
-  case spUserId of
-
-    Just lookup_user_id -> getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp
-    _                   -> getGlobalGroupPacks_ByEverythingM user_id sp
+    Just lookup_user_id -> getGlobalGroupPacks_ByUserIdM m_sp user_id lookup_user_id
+    _                   -> getGlobalGroupPacks_ByEverythingM m_sp user_id
 
 
 
-getGlobalGroupPackM :: UserId -> GlobalGroupId -> HandlerEff GlobalGroupPackResponse
+getGlobalGroupPackM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPackM user_id global_group_id = do
 
-  globalGroup         <- getGlobalGroupM user_id global_group_id
-  getGlobalGroupPack_ByGlobalGroupM user_id globalGroup
+  e_global_group <- getGlobalGroupM user_id global_group_id
+  rehtie e_global_group left $ getGlobalGroupPack_ByGlobalGroupM user_id
 
 
 
-getGlobalGroupPackMH :: UserId -> Text -> HandlerEff GlobalGroupPackResponse
+getGlobalGroupPackMH :: UserId -> Text -> HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPackMH user_id global_group_name = do
 
-  globalGroup         <- getGlobalGroupMH user_id global_group_name
-  getGlobalGroupPack_ByGlobalGroupM user_id globalGroup
+  e_global_group <- getGlobalGroupMH user_id global_group_name
+  rehtie e_global_group left $ getGlobalGroupPack_ByGlobalGroupM user_id
 
 
 
-getGlobalGroupPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff GlobalGroupPackResponses
-getGlobalGroupPacks_ByEverythingM user_id sp = do
-  globalGroups       <- getGlobalGroups_ByEverythingM user_id sp
-  globalGroups_packs <- mapM (\globalGroup -> getGlobalGroupPack_ByGlobalGroupM user_id globalGroup) globalGroups
-  return $ GlobalGroupPackResponses {
-    globalGroupPackResponses = globalGroups_packs
-  }
+getGlobalGroupPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacks_ByEverythingM m_sp user_id = do
+  e_global_groups <- getGlobalGroups_ByEverythingM m_sp user_id
+  rehtie e_global_groups left $ \global_groups -> do
+    global_groups_packs <- rights <$> mapM (\global_group -> getGlobalGroupPack_ByGlobalGroupM user_id global_group) global_groups
+    right $ GlobalGroupPackResponses {
+      globalGroupPackResponses = global_groups_packs
+    }
 
 
 
-getGlobalGroupPacks_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff GlobalGroupPackResponses
-getGlobalGroupPacks_ByUserIdM user_id lookup_user_id sp = do
+getGlobalGroupPacks_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
-  globalGroups       <- getGlobalGroups_ByUserIdM user_id lookup_user_id sp
-  globalGroups_packs <- mapM (\globalGroup -> getGlobalGroupPack_ByGlobalGroupM user_id globalGroup) globalGroups
-  return $ GlobalGroupPackResponses {
-    globalGroupPackResponses = globalGroups_packs
-  }
+  e_global_groups <- getGlobalGroups_ByUserIdM m_sp user_id lookup_user_id
+  rehtie e_global_groups left $ \global_groups -> do
+    global_groups_packs <- rights <$> mapM (\global_group -> getGlobalGroupPack_ByGlobalGroupM user_id global_group) global_groups
+    right $ GlobalGroupPackResponses {
+      globalGroupPackResponses = global_groups_packs
+    }
 
 
 
-getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> HandlerEff GlobalGroupPackResponse
+getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPack_ByGlobalGroupM user_id global_group@(Entity global_group_id GlobalGroup{..}) = do
 
-  -- let sp = defaultStandardParams {
-  --     spSortOrder = Just SortOrderBy_Dsc,
-  --     spOrder     = Just OrderBy_ActivityAt,
-  --     spLimit     = Just 1
-  --   }
+  lr <- runEitherT $ do
+    global_group_user    <- isT $ getUserM user_id globalGroupUserId
+    global_group_stats   <- isT $ getGlobalGroupStatM user_id (entityKey global_group)
+    pure (global_group_user, global_group_stats)
 
-  global_group_user    <- getUserM user_id globalGroupUserId
-  global_group_stats   <- getGlobalGroupStatM user_id (entityKey global_group)
-
-  return $ GlobalGroupPackResponse {
-    globalGroupPackResponseUser          = userToSanitizedResponse global_group_user,
-    globalGroupPackResponseUserId        = entityKeyToInt64 global_group_user,
-    globalGroupPackResponseGlobalGroup   = globalGroupToResponse global_group,
-    globalGroupPackResponseGlobalGroupId = keyToInt64 global_group_id,
-    globalGroupPackResponseStat          = global_group_stats,
-    globalGroupPackResponsePermissions   = emptyPermissions
-  }
+  rehtie lr left $ \(global_group_user, global_group_stats) -> do
+    right $ GlobalGroupPackResponse {
+      globalGroupPackResponseUser          = userToSanitizedResponse global_group_user,
+      globalGroupPackResponseUserId        = entityKeyToInt64 global_group_user,
+      globalGroupPackResponseGlobalGroup   = globalGroupToResponse global_group,
+      globalGroupPackResponseGlobalGroupId = keyToInt64 global_group_id,
+      globalGroupPackResponseStat          = global_group_stats,
+      globalGroupPackResponsePermissions   = emptyPermissions
+    }
