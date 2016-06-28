@@ -152,7 +152,7 @@ getTeams_ByUserIdM m_sp _ lookup_user_id = do
 
 getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
 getTeamM _ team_id = do
-  selectFirstDbEither [TeamId ==. team_id] []
+  selectFirstDbEither [TeamId ==. team_id, TeamActive ==. True] []
 
 
 
