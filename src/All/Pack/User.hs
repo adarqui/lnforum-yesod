@@ -47,12 +47,12 @@ getUserPacks_ByUserIdsM m_sp user_id user_ids sp = do
 
 
 getUserPack_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff UserPackResponse
-getUserPack_ByUserIdM m_sp user_id lookup_user_id _ = do
+getUserPack_ByUserIdM m_sp user_id lookup_user_id = do
 
   lr <- runEitherT $ do
-    lookup_user <- getUserM user_id lookup_user_id
-    stats       <- getUserStatM user_id lookup_user_id
-    profile     <- getProfile_ByUserIdM user_id lookup_user_id
+    lookup_user <- isT $ getUserM user_id lookup_user_id
+    stats       <- isT $ getUserStatM user_id lookup_user_id
+    profile     <- isT $ getProfile_ByUserIdM user_id lookup_user_id
 
     pure (lookup_user
          ,stats

@@ -17,7 +17,6 @@ module All.Profile (
   getProfileM,
   getProfile_ByUserIdM,
   insertProfileM,
-  insertProfileM',
   updateProfileM,
 ) where
 
