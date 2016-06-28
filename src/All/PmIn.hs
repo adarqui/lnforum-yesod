@@ -34,7 +34,8 @@ import           All.Prelude
 getPmInsR :: Handler Value
 getPmInsR = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmInsToResponses) <$> getPmInsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON pmInsToResponses $ getPmInsM (pure sp) user_id
 
 
 
@@ -42,34 +43,30 @@ postPmInsR :: Handler Value
 postPmInsR = run $ do
   user_id <- _requireAuthId
   sp <- lookupStandardParams
-  case (spPmId sp) of
-    Nothing -> notFound
-    Just pm_id -> do
-      pmIn_request <- requireJsonBody :: HandlerEff PmInRequest
-      (toJSON . pmInToResponse) <$> insertPmInM user_id pm_id pmIn_request
+  pm_in_request <- requireJsonBody
+  errorOrJSON pmInToResponse $ insertPmInM (pure sp) user_id pm_in_request
 
 
 
 getPmInR :: PmInId -> Handler Value
-getPmInR pmIn_id = run $ do
+getPmInR pm_in_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . pmInToResponse) <$> getPmInM user_id pmIn_id
+  errorOrJSON pmInToResponse $ getPmInM user_id pm_in_id
 
 
 
 putPmInR :: PmInId -> Handler Value
-putPmInR pmIn_id = run $ do
-  user_id <- _requireAuthId
-  pmIn_request <- requireJsonBody
-  (toJSON . pmInToResponse) <$> updatePmInM user_id pmIn_id pmIn_request
+putPmInR pm_in_id = run $ do
+  user_id       <- _requireAuthId
+  pm_in_request <- requireJsonBody
+  errorOrJSON pmInToResponse $ updatePmInM user_id pm_in_id pm_in_request
 
 
 
 deletePmInR :: PmInId -> Handler Value
-deletePmInR pmIn_id = run $ do
+deletePmInR pm_in_id = run $ do
   user_id <- _requireAuthId
-  void $ deletePmInM user_id pmIn_id
-  pure $ toJSON ()
+  errorOrJSON id $ deletePmInM user_id pm_in_id
 
 
 
@@ -129,51 +126,52 @@ pmInsToResponses pmIns = PmInResponses {
 -- Model/Internal
 --
 
-getPmInsM :: UserId -> HandlerEff [Entity PmIn]
-getPmInsM user_id = do
-  selectListDb' [ PmInUserId ==. user_id ] [] PmInId
+getPmInsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmIn]
+getPmInsM m_sp user_id = do
+  selectListDbEither m_sp [PmInUserId ==. user_id, PmInActive ==. True] [] PmInId
 
 
 
-getPmInM :: UserId -> PmInId -> HandlerEff (Entity PmIn)
-getPmInM user_id pmIn_id = do
-  notFoundMaybe =<< selectFirstDb [ PmInUserId ==. user_id, PmInId ==. pmIn_id ] []
+getPmInM :: UserId -> PmInId -> HandlerErrorEff (Entity PmIn)
+getPmInM user_id pm_in_id = do
+  selectFirstDbEither [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
 
 
 
-insertPmInM :: UserId -> PmId -> PmInRequest -> HandlerEff (Entity PmIn)
-insertPmInM user_id pm_id pmIn_request = do
+insertPmInM :: Maybe StandardParams -> UserId -> PmInRequest -> HandlerErrorEff (Entity PmIn)
+insertPmInM m_sp user_id pm_in_request = do
+
+  case (lookupSpMay m_sp spPmId) of
+
+    Just pm_id -> do
+      ts <- timestampH'
+
+      let
+        pm_in = (pmInRequestToPmIn user_id pm_id pm_in_request) { pmInCreatedAt = Just ts }
+
+      insertEntityDbEither pm_in
+
+
+
+updatePmInM :: UserId -> PmInId -> PmInRequest -> HandlerErrorEff (Entity PmIn)
+updatePmInM user_id pm_in_id pm_in_request = do
 
   ts <- timestampH'
 
   let
-    pmIn = (pmInRequestToPmIn user_id pm_id pmIn_request) { pmInCreatedAt = Just ts }
-
-  insertEntityDb pmIn
-
-
-
-updatePmInM :: UserId -> PmInId -> PmInRequest -> HandlerEff (Entity PmIn)
-updatePmInM user_id pmIn_id pmIn_request = do
-
-  ts <- timestampH'
-
-  let
-    PmIn{..} = (pmInRequestToPmIn user_id dummyId pmIn_request) { pmInModifiedAt = Just ts }
+    PmIn{..} = (pmInRequestToPmIn user_id dummyId pm_in_request) { pmInModifiedAt = Just ts }
 
   updateWhereDb
-    [ PmInUserId ==. user_id, PmInId ==. pmIn_id ]
+    [ PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True]
     [ PmInModifiedAt =. pmInModifiedAt
     , PmInLabel =. pmInLabel
     , PmInIsRead =. pmInIsRead
     , PmInIsStarred =. pmInIsStarred
     ]
 
-  notFoundMaybe =<< selectFirstDb [ PmInUserId ==. user_id, PmInId ==. pmIn_id ] []
+  selectFirstDbEither [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
 
 
 
-deletePmInM :: UserId -> PmInId -> HandlerEff ()
-deletePmInM _ _ = do
-  return ()
---  deleteWhereDb [ PmInUserId ==. user_id, PmInId ==. pmIn_id ]
+deletePmInM :: UserId -> PmInId -> HandlerErrorEff ()
+deletePmInM _ _ = right ()
