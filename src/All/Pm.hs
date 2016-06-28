@@ -36,7 +36,7 @@ getPmsR :: Handler Value
 getPmsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
-  errorOrJSON pmsToResponses <$> getPmsM (pure sp) user_id
+  errorOrJSON pmsToResponses $ getPmsM (pure sp) user_id
 
 
 
