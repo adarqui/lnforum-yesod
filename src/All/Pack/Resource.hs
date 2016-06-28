@@ -25,14 +25,15 @@ import           All.User
 getResourcePacksR :: Handler Value
 getResourcePacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getResourcePacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getResourcePacksM (pure sp) user_id
 
 
 
 getResourcePackR :: ResourceId -> Handler Value
 getResourcePackR thread_post_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getResourcePackM user_id thread_post_id
+  errorOrJSON id $ getResourcePackM user_id thread_post_id
 
 
 
@@ -43,48 +44,49 @@ getResourcePackR thread_post_id = run $ do
 -- Model
 --
 
-getResourcePacksM :: UserId -> HandlerEff ResourcePackResponses
-getResourcePacksM user_id = do
+getResourcePacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourcePackResponses
+getResourcePacksM m_sp user_id = do
 
-  sp <- lookupStandardParams
+  e_resources <- getResourcesM m_sp user_id
+  rehtie e_resources left $ \resources -> do
 
-  resources <- getResourcesM user_id
+    resource_packs <- rights <$> mapM (\resource -> getResourcePack_ByResourceM user_id resource) resources
 
-  resource_packs <- mapM (\resource -> getResourcePack_ByResourceM user_id resource sp) resources
-
-
-  return $ ResourcePackResponses {
-    resourcePackResponses = resource_packs
-  }
+    right $ ResourcePackResponses {
+      resourcePackResponses = resource_packs
+    }
 
 
 
-getResourcePackM :: UserId -> ResourceId -> HandlerEff ResourcePackResponse
+getResourcePackM :: UserId -> ResourceId -> HandlerErrorEff ResourcePackResponse
 getResourcePackM user_id resource_id = do
 
-  resource <- getResourceM user_id resource_id
-
-  getResourcePack_ByResourceM user_id resource defaultStandardParams
-
+  e_resource <- getResourceM user_id resource_id
+  rehtie e_resource left $ getResourcePack_ByResourceM user_id
 
 
-getResourcePack_ByResourceM :: UserId -> Entity Resource -> StandardParams -> HandlerEff ResourcePackResponse
-getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) _ = do
 
-  resource_user <- getUserM user_id resourceUserId
-  resource_stat <- getResourceStatM user_id resource_id
---  resource_like <- getResourceLike_ByResourceM user_id resource
---  resource_star <- getResourceStar_ByResourceM user_id resource
+getResourcePack_ByResourceM :: UserId -> Entity Resource -> HandlerErrorEff ResourcePackResponse
+getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) = do
 
-  return $ ResourcePackResponse {
-    resourcePackResponseResource    = resourceToResponse resource,
-    resourcePackResponseResourceId  = keyToInt64 resource_id,
-    resourcePackResponseUser        = userToSanitizedResponse resource_user,
-    resourcePackResponseUserId      = entityKeyToInt64 resource_user,
-    resourcePackResponseStat        = resource_stat,
-    resourcePackResponseLike        = Nothing,
-    resourcePackResponseStar        = Nothing,
-    resourcePackResponsePermissions = emptyPermissions
---    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
---    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
-  }
+  lr <- runEitherT $ do
+
+    resource_user <- isT $ getUserM user_id resourceUserId
+    resource_stat <- isT $ getResourceStatM user_id resource_id
+--  resource_like <- isT $ getResourceLike_ByResourceM user_id resource
+--  resource_star <- isT $ getResourceStar_ByResourceM user_id resource
+    pure (resource_user, resource_stat)
+
+  rehtie lr left $ \(resource_user, resource_stat) -> do
+    right $ ResourcePackResponse {
+      resourcePackResponseResource    = resourceToResponse resource,
+      resourcePackResponseResourceId  = keyToInt64 resource_id,
+      resourcePackResponseUser        = userToSanitizedResponse resource_user,
+      resourcePackResponseUserId      = entityKeyToInt64 resource_user,
+      resourcePackResponseStat        = resource_stat,
+      resourcePackResponseLike        = Nothing,
+      resourcePackResponseStar        = Nothing,
+      resourcePackResponsePermissions = emptyPermissions
+  --    resourcePackResponseLike     = fmap resourceLikeToResponse resource_like,
+  --    resourcePackResponseStar     = fmap resourceStarToResponse resource_star
+    }
