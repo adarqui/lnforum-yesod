@@ -9,16 +9,11 @@ module Job.Dequeue (
 
 
 import           All.Profile                  (profileRequestToProfile)
-import           Api.Params
-import           Control
 import           Data.Aeson
-import qualified Data.ByteString.Lazy.Char8   as BL
-import           Data.List                    (nub)
 import           Import
 import           Job.Shared
 import           LN.T.Internal.Types
 import           LN.T.Job
-import           Misc.Codec                   (int64ToKey')
 import           Model.Misc
 import           Network.AMQP
 import qualified Prelude                      as Prelude
@@ -26,12 +21,9 @@ import qualified Prelude                      as Prelude
 
 
 import           Control.Monad.Logger         (runStdoutLoggingT)
-import           Control.Monad.Trans.Resource (runResourceT)
 import           Data.Yaml
 import qualified Database.Persist
 import           Database.Persist.Postgresql  as P
-import           Database.Persist.Postgresql  (PostgresConf)
-import           Import                       hiding (loadConfig)
 
 
 

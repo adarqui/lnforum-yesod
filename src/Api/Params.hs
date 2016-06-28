@@ -34,7 +34,9 @@ module Api.Params (
   selectFirstDb,
   selectFirstDbEither,
   insertDb,
+  insertDbEither,
   insertEntityDb,
+  insertEntityDbEither,
   updateDb,
   updateWhereDb,
   deleteWhereDb,
@@ -618,6 +620,15 @@ insertDb = _runDB . insert
 
 
 
+insertDbEither :: forall a site.
+            (PersistEntity a, YesodPersist site,
+             PersistStore (PersistEntityBackend a),
+             PersistEntityBackend a ~ YesodPersistBackend site) =>
+            a -> ControlMA (HandlerT site IO) (ErrorEff (Key a))
+insertDbEither ent = Right <$> (_runDB $ insert ent)
+
+
+
 -- | insertEntity helper
 --
 insertEntityDb :: forall site e.
@@ -626,6 +637,15 @@ insertEntityDb :: forall site e.
                    YesodPersistBackend site ~ PersistEntityBackend e) =>
                   e -> ControlMA (HandlerT site IO) (Entity e)
 insertEntityDb entity = _runDB $ insertEntity entity
+
+
+
+insertEntityDbEither :: forall site e.
+                  (PersistEntity e, YesodPersist site,
+                   PersistStore (YesodPersistBackend site),
+                   YesodPersistBackend site ~ PersistEntityBackend e) =>
+                  e -> ControlMA (HandlerT site IO) (ErrorEff (Entity e))
+insertEntityDbEither entity = Right <$> (_runDB $ insertEntity entity)
 
 
 

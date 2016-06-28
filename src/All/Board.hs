@@ -68,7 +68,8 @@ getBoardR board_id = run $ do
 getBoardH :: Text -> Handler Value
 getBoardH board_name = run $ do
   user_id <- _requireAuthId
-  errorOrJSON boardToResponse $ getBoardMH user_id board_name
+  sp      <- lookupStandardParams
+  errorOrJSON boardToResponse $ getBoardMH (pure sp) user_id board_name
 
 
 
@@ -192,30 +193,31 @@ getBoards_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId 
 getBoards_ByOrganizationIdM m_sp user_id org_id = do
 
   -- TODO FIXME: move this to esqueleto
-   forums <- getForums_ByOrganizationIdM m_sp user_id org_id
-   boards <- rights <$> mapM (\(Entity forum_id _) -> getBoards_ByForumIdM m_sp user_id forum_id) forums
-   right $ concat boards
+   e_forums <- getForums_ByOrganizationIdM m_sp user_id org_id
+   rehtie e_forums left $ \forums -> do
+     boards <- rights <$> mapM (\(Entity forum_id _) -> getBoards_ByForumIdM m_sp user_id forum_id) forums
+     right $ concat boards
 
 
 
 getBoards_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity Board]
 getBoards_ByForumIdM m_sp _ forum_id = do
 
-  selectListDbMay m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
+  selectListDbEither m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
 getBoards_ByForumId_KeysM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Key Board]
 getBoards_ByForumId_KeysM m_sp _ forum_id = do
 
-  selectKeysListDbMay m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
+  selectKeysListDbEither m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
 getBoards_ByBoardParentIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Board]
 getBoards_ByBoardParentIdM m_sp _ board_parent_id = do
 
-  selectListDbMay m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
+  selectListDbEither m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
 
 
 
@@ -260,7 +262,7 @@ insertBoard_ByForumId user_id forum_id board_request = do
   case e_forum of
     Left err                   -> left err
     Right (Entity _ Forum{..}) -> do
-      insertEntityDb $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
+      insertEntityDbEither $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -271,7 +273,7 @@ insertBoard_ByBoardId user_id board_id board_request = do
   case e_board of
     Left err                          -> left err
     Right (Entity board_id Board{..}) -> do
-      insertEntityDb $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
+      insertEntityDbEither $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
 
 
 
