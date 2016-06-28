@@ -38,10 +38,6 @@ import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import           System.Log.FastLogger                (defaultBufSize,
                                                        newStdoutLoggerSet,
                                                        toLogStr)
-
-import           Network.Wai                          (Middleware)
--- import           Network.Wai.Middleware.Cors          (simpleCors)
-
 import qualified Database.Redis                       as R
 
 
@@ -68,7 +64,6 @@ import           All.Pack.Team
 import           All.Pack.TeamMember
 import           All.Pack.Thread
 import           All.Pack.ThreadPost
-import           All.Pack.User
 import           All.Pm
 import           All.PmIn
 import           All.PmOut
@@ -84,7 +79,6 @@ import           All.ThreadPost
 import           All.User
 
 import           Handler.Common
-import           Handler.Root
 
 
 -- This line actually creates our YesodDispatch instance. It is the second half
@@ -203,12 +197,12 @@ getApplicationDev = do
 
 
 getAppSettings :: IO AppSettings
-getAppSettings = loadAppSettings [configSettingsYml] [] useEnv
+getAppSettings = loadYamlSettings [configSettingsYml] [] useEnv
 
 
 
 getAppSettingsLN :: IO AppSettingsLN
-getAppSettingsLN = loadAppSettings [configSettingsYml] [] useEnv
+getAppSettingsLN = loadYamlSettings [configSettingsYml] [] useEnv
 
 
 
@@ -222,14 +216,14 @@ develMain = develMainHelper getApplicationDev
 appMain :: IO ()
 appMain = do
     -- Get the settings from all relevant sources
-    settings <- loadAppSettingsArgs
+    settings <- loadYamlSettingsArgs
         -- fall back to compile-time values, set to [] to require values at runtime
         [configSettingsYmlValue]
 
         -- allow environment variables to override
         useEnv
 
-    ln_settings <- loadAppSettingsArgs
+    ln_settings <- loadYamlSettingsArgs
         [configSettingsYmlValue]
         useEnv
 
