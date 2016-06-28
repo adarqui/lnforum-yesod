@@ -47,59 +47,61 @@ import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 getResourcesR :: Handler Value
 getResourcesR = run $ do
   user_id <- _requireAuthId
-  (toJSON . resourcesToResponses) <$> getResourcesM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON resourcesToResponses $ getResourcesM (pure sp) user_id
 
 
 
 postResourceR0 :: Handler Value
 postResourceR0 = run $ do
-  user_id <- _requireAuthId
-  resource_request <- requireJsonBody :: HandlerEff ResourceRequest
-  (toJSON . resourceToResponse) <$> insertResourceM user_id resource_request
+  user_id          <- _requireAuthId
+  resource_request <- requireJsonBody
+  errorOrJSON resourceToResponse $ insertResourceM user_id resource_request
 
 
 
 getResourceR :: ResourceId -> Handler Value
 getResourceR resource_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . resourceToResponse) <$> getResourceM user_id resource_id
+  errorOrJSON resourceToResponse $ getResourceM user_id resource_id
 
 
 
 putResourceR :: ResourceId -> Handler Value
 putResourceR resource_id = run $ do
-  user_id <- _requireAuthId
+  user_id          <- _requireAuthId
   resource_request <- requireJsonBody
-  (toJSON . resourceToResponse) <$> updateResourceM user_id resource_id resource_request
+  errorOrJSON resourceToResponse $ updateResourceM user_id resource_id resource_request
 
 
 
 deleteResourceR :: ResourceId -> Handler Value
 deleteResourceR resource_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteResourceM user_id resource_id
-  pure $ toJSON ()
+  errorOrJSON id $ deleteResourceM user_id resource_id
 
 
 
 getResourcesCountR :: Handler Value
 getResourcesCountR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> countResourcesM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ countResourcesM (pure sp) user_id
 
 
 
 getResourceStatsR :: Handler Value
 getResourceStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getResourceStatsM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getResourceStatsM (pure sp) user_id
 
 
 
 getResourceStatR :: ResourceId -> Handler Value
 getResourceStatR thread_post_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getResourceStatM user_id thread_post_id
+  errorOrJSON id $ getResourceStatM user_id thread_post_id
 
 
 
@@ -178,39 +180,35 @@ resourcesToResponses resources = ResourceResponses {
 -- Model/Internal
 --
 
-getResourcesM :: UserId -> HandlerEff [Entity Resource]
-getResourcesM user_id = do
-  sp@StandardParams{..} <- lookupStandardParams
+getResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
+getResourcesM m_sp user_id = do
 
-  case spUserId of
+  case (lookupSpMay m_sp spUserId) of
 
-    Just lookup_user_id -> getResources_ByUserIdM user_id lookup_user_id sp
-
-    _                   -> getResources_ByEverythingM user_id sp
-
---    (_, Just resource_ids)   -> getResource_ByResourceIds user_id resource_ids sp
+    Just lookup_user_id -> getResources_ByUserIdM m_sp user_id lookup_user_id
+    _                   -> getResources_ByEverythingM m_sp user_id
 
 
 
-getResources_ByEverythingM :: UserId -> StandardParams -> HandlerEff [Entity Resource]
-getResources_ByEverythingM _ sp = do
-  selectListDb sp [] [] ResourceId
+getResources_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
+getResources_ByEverythingM m_sp _ = do
+  selectListDbEither m_sp [ResourceActive ==. True] [] ResourceId
 
 
 
-getResources_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Resource]
-getResources_ByUserIdM _ lookup_user_id sp = do
-  selectListDb sp [ ResourceUserId ==. lookup_user_id ] [] ResourceId
+getResources_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Resource]
+getResources_ByUserIdM m_sp _ lookup_user_id = do
+  selectListDbEither m_sp [ResourceUserId ==. lookup_user_id, ResourceActive ==. True] [] ResourceId
 
 
 
-getResourceM :: UserId -> ResourceId -> HandlerEff (Entity Resource)
+getResourceM :: UserId -> ResourceId -> HandlerErrorEff (Entity Resource)
 getResourceM _ resource_id = do
-  notFoundMaybe =<< selectFirstDb [ ResourceId ==. resource_id ] []
+  selectFirstDbEither [ResourceId ==. resource_id, ResourceActive ==. True] []
 
 
 
-insertResourceM :: UserId -> ResourceRequest -> HandlerEff (Entity Resource)
+insertResourceM :: UserId -> ResourceRequest -> HandlerErrorEff (Entity Resource)
 insertResourceM user_id resource_request = do
 
   ts <- timestampH'
@@ -218,11 +216,11 @@ insertResourceM user_id resource_request = do
   let
     resource = (resourceRequestToResource user_id resource_request) { resourceCreatedAt = Just ts }
 
-  insertEntityDb resource
+  insertEntityDbEither resource
 
 
 
-updateResourceM :: UserId -> ResourceId -> ResourceRequest -> HandlerEff (Entity Resource)
+updateResourceM :: UserId -> ResourceId -> ResourceRequest -> HandlerErrorEff (Entity Resource)
 updateResourceM user_id resource_id resource_request = do
 
   ts <- timestampH'
@@ -231,7 +229,7 @@ updateResourceM user_id resource_id resource_request = do
     Resource{..} = (resourceRequestToResource user_id resource_request) { resourceModifiedAt = Just ts }
 
   updateWhereDb
-    [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
+    [ ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True ]
     [ ResourceModifiedAt    =. resourceModifiedAt
     , ResourceName          =. resourceName
     , ResourceDisplayName   =. resourceDisplayName
@@ -249,57 +247,49 @@ updateResourceM user_id resource_id resource_request = do
     , ResourceGuard        +=. 1
     ]
 
-  notFoundMaybe =<< selectFirstDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ] []
+  selectFirstDbEither [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
 
 
 
-deleteResourceM :: UserId -> ResourceId -> HandlerEff ()
+deleteResourceM :: UserId -> ResourceId -> HandlerErrorEff ()
 deleteResourceM user_id resource_id = do
-  deleteWhereDb [ ResourceUserId ==. user_id, ResourceId ==. resource_id ]
+  deleteWhereDbEither [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True]
 
 
 
-countResourcesM :: UserId -> HandlerEff CountResponses
-countResourcesM _ = do
+countResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
+countResourcesM m_sp _ = do
 
-  StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spUserId, lookupSpMay m_sp spUserIds) of
 
-  case (spUserId, spUserIds) of
-
-    (_, _) -> do
-      n <- countDb [ ResourceActive ==. True ]
-      return $ CountResponses [CountResponse 0 (fromIntegral n)]
-
-
-
-getResourceStatsM :: UserId -> HandlerEff ResourceStatResponse
-getResourceStatsM _ = do
-
-  StandardParams{..} <- lookupStandardParams
-
-  case spThreadId of
-
-    Just _  -> notFound
-    Nothing -> notFound
+    -- TODO FIXME: not handling argument properly
+    _ -> do
+      n <- countDb [ResourceActive ==. True]
+      right $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
-getResourceStatM :: UserId -> ResourceId -> HandlerEff ResourceStatResponse
+getResourceStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourceStatResponse
+getResourceStatsM _ _ = left Error_NotImplemented
+
+
+
+getResourceStatM :: UserId -> ResourceId -> HandlerErrorEff ResourceStatResponse
 getResourceStatM _ resource_id = do
 
   -- leuron counts
-  leuron_count <- countDb [ LeuronResourceId ==. resource_id ]
+  leuron_count <- countDb [LeuronResourceId ==. resource_id, LeuronActive ==. True]
 
   -- get like counts
-  likes <- selectListDb defaultStandardParams [ LikeEntId ==. keyToInt64 resource_id ] [] LikeId
+  likes <- selectListDbMay Nothing [LikeEntId ==. keyToInt64 resource_id, LikeActive ==. True] [] LikeId
 
   -- get star counts
--- TODO FIXME  stars <- selectListDb defaultStandardParams [ ResourceStarResourceId ==. resource_id ] [] ResourceStarId
+-- TODO FIXME  stars <- selectListDbEither defaultStandardParams [ ResourceStarResourceId ==. resource_id ] [] ResourceStarId
 
   let
     likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes
 
-  return $ ResourceStatResponse {
+  right $ ResourceStatResponse {
     resourceStatResponseResourceId = keyToInt64 resource_id,
     resourceStatResponseLeurons    = fromIntegral leuron_count,
     resourceStatResponseLikes      = fromIntegral $ length $ filter (==L.Like) likes_flat,
