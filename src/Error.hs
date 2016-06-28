@@ -1,3 +1,7 @@
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators  #-}
+
 module Error (
   notFoundMaybe,
   errorOrJSON,
@@ -7,8 +11,8 @@ module Error (
 
 
 
-import Import
-import LN.T.Error (ApplicationError)
+import           Import
+import           LN.T.Error (ApplicationError)
 
 
 
@@ -16,7 +20,7 @@ notFoundMaybe :: forall (m :: * -> *) a. MonadHandler m => Maybe a -> m a
 notFoundMaybe mentity = do
   case mentity of
     Nothing       -> notFound
-    (Just entity) -> return entity
+    (Just entity) -> pure entity
 
 
 
@@ -40,4 +44,4 @@ permissionDeniedEither :: forall (m :: * -> *) b. MonadHandler m => Either Text 
 permissionDeniedEither lr = do
   case lr of
     Left err -> permissionDenied err
-    Right b  -> return b
+    Right b  -> pure b
