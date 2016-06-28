@@ -222,7 +222,7 @@ getOrganizationM user_id org_id = do
 
 
 getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerErrorEff (Maybe (Entity Organization))
-getWithOrganizationM False _ _           = left Error_Empty
+getWithOrganizationM False _ _           = right Nothing
 getWithOrganizationM True user_id org_id = fmap Just <$> getOrganizationM user_id org_id
 
 

@@ -50,7 +50,7 @@ getThreadsR :: Handler Value
 getThreadsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
-  (toJSON . threadsToResponses) <$> getThreadsM (pure sp) user_id
+  errorOrJSON threadsToResponses $ getThreadsM (pure sp) user_id
 
 
 
@@ -88,7 +88,7 @@ putThreadR thread_id = run $ do
 deleteThreadR :: ThreadId -> Handler Value
 deleteThreadR thread_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> deleteThreadM user_id thread_id
+  errorOrJSON id $ deleteThreadM user_id thread_id
 
 
 
@@ -103,14 +103,14 @@ getThreadsCountR = run $ do
 getThreadStatsR :: Handler Value
 getThreadStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getThreadStatsM user_id
+  errorOrJSON id $ getThreadStatsM user_id
 
 
 
 getThreadStatR :: ThreadId -> Handler Value
 getThreadStatR thread_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getThreadStatM user_id thread_id
+  errorOrJSON id $ getThreadStatM user_id thread_id
 
 
 
@@ -201,37 +201,37 @@ orderByToField (Just order) =
 
 
 
-getThreadsM :: Maybe StandardParams -> UserId -> HandlerEff [Entity Thread]
+getThreadsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Thread]
 getThreadsM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spBoardId, lookupSpMay m_sp spUserId) of
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM m_sp user_id lookup_user_id
-    (_, _, _)                   -> pure []
+    _                           -> left Error_NotImplemented
 
 
 
-getThreads_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerEff [Entity Thread]
+getThreads_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Thread]
 getThreads_ByOrganizationIdM m_sp _ org_id = do
-  selectListDbMay m_sp [ThreadOrgId ==. org_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbEither m_sp [ThreadOrgId ==. org_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerEff [Entity Thread]
+getThreads_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Thread]
 getThreads_ByBoardIdM m_sp _ board_id = do
-  selectListDbMay m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbEither m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByBoardId_KeysM :: Maybe StandardParams -> UserId -> BoardId -> HandlerEff [Key Thread]
+getThreads_ByBoardId_KeysM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Key Thread]
 getThreads_ByBoardId_KeysM m_sp _ board_id = do
-  selectKeysListDbMay m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectKeysListDbEither m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerEff [Entity Thread]
+getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Thread]
 getThreads_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbMay m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
+  selectListDbEither m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
 
 
 

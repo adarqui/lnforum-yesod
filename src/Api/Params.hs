@@ -24,6 +24,7 @@ module Api.Params (
   spToSelectE,
   selectListDb,
   selectListDbMay,
+  selectListDbEither,
   selectListDb',
   selectListDb'',
   selectKeysListDb,
@@ -475,6 +476,20 @@ selectListDbMay :: forall site val typ.
   -> ControlMA (HandlerT site IO) [Entity val]
 selectListDbMay m_sp query filt field = do
   _runDB $ selectList query ((spToSelectMay m_sp field) <> filt)
+
+
+
+selectListDbEither :: forall site val typ.
+  (PersistEntity val, PersistQuery (PersistEntityBackend val),
+  YesodPersist site,
+  PersistEntityBackend val ~ YesodPersistBackend site) =>
+  Maybe StandardParams
+  -> [Filter val]
+  -> [SelectOpt val]
+  -> EntityField val typ
+  -> ControlMA (HandlerT site IO) (ErrorEff [Entity val])
+selectListDbEither m_sp query filt field = do
+  Right <$> (_runDB $ selectList query ((spToSelectMay m_sp field) <> filt))
 
 
 

@@ -49,7 +49,7 @@ import           All.User
 getForumsR :: Handler Value
 getForumsR = run $ do
   user_id <- _requireAuthId
-  (toJSON . forumsToResponses) <$> getForumsM user_id
+  errorOrJSON forumsToResponses $ getForumsM user_id
 
 
 
@@ -57,21 +57,21 @@ postForumR0 :: Handler Value
 postForumR0 = run $ do
   user_id <- _requireAuthId
   forum_request <- requireJsonBody :: HandlerEff ForumRequest
-  (toJSON . forumToResponse) <$> insertForumM user_id forum_request
+  errorOrJSON forumToResponse $ insertForumM user_id forum_request
 
 
 
 getForumR :: ForumId -> Handler Value
 getForumR forum_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . forumToResponse) <$> getForumM user_id forum_id
+  errorOrJSON forumToResponse $ getForumM user_id forum_id
 
 
 
 getForumH :: Text -> Handler Value
 getForumH forum_name = run $ do -- getForumR' getForumMH forum_name
   user_id <- _requireAuthId
-  (toJSON . forumToResponse) <$> getForumMH user_id forum_name
+  errorOrJSON forumToResponse $ getForumMH user_id forum_name
 
 
 
@@ -79,36 +79,35 @@ putForumR :: ForumId -> Handler Value
 putForumR forum_id = run $ do
   user_id <- _requireAuthId
   forum_request <- requireJsonBody
-  (toJSON . forumToResponse) <$> updateForumM user_id forum_id forum_request
+  errorOrJSON forumToResponse $ updateForumM user_id forum_id forum_request
 
 
 
 deleteForumR :: ForumId -> Handler Value
 deleteForumR forum_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteForumM user_id forum_id
-  pure $ toJSON ()
+  errorOrJSON id $ deleteForumM user_id forum_id
 
 
 
 getForumCountsR :: Handler Value
 getForumCountsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> countForumsM user_id
+  errorOrJSON id $ countForumsM user_id
 
 
 
 getForumStatsR :: Handler Value
 getForumStatsR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getForumStatsM user_id
+  errorOrJSON id $ getForumStatsM user_id
 
 
 
 getForumStatR :: ForumId -> Handler Value
 getForumStatR forum_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getForumStatM user_id forum_id
+  errorOrJSON id $ getForumStatM user_id forum_id
 
 
 
@@ -185,87 +184,81 @@ forumsToResponses forums = ForumResponses {
 -- Model/Internal
 --
 
-getForumsM :: UserId -> HandlerEff [Entity Forum]
-getForumsM user_id = do
+getForumsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Forum]
+getForumsM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId) of
 
-  case (spOrganizationId, spUserId) of
+    (Just org_id, _)         -> getForums_ByOrganizationIdM m_sp user_id org_id
 
-    (Just org_id, _)         -> getForums_ByOrganizationIdM user_id org_id sp
+    (_, Just lookup_user_id) -> getForums_ByUserIdM m_sp user_id lookup_user_id
 
-    (_, Just lookup_user_id) -> getForums_ByUserIdM user_id lookup_user_id sp
-
-    (_, _)                   -> notFound
+    _                        -> left Error_NotImplemented
 
 
 
-getForums_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Forum]
-getForums_ByOrganizationIdM _ org_id sp = do
+getForums_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Forum]
+getForums_ByOrganizationIdM m_sp _ org_id = do
 
-  selectListDb sp [ForumOrgId ==. org_id] [] ForumId
+  selectListDbMay m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
-getForums_ByOrganizationId_KeysM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Key Forum]
-getForums_ByOrganizationId_KeysM _ org_id sp = do
+getForums_ByOrganizationId_KeysM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Key Forum]
+getForums_ByOrganizationId_KeysM m_sp _ org_id = do
 
-  selectKeysListDb sp [ForumOrgId ==. org_id] [] ForumId
+  selectKeysListDbMay m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
 
-getForums_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff [Entity Forum]
-getForums_ByUserIdM _ lookup_user_id sp = do
+getForums_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Forum]
+getForums_ByUserIdM m_sp _ lookup_user_id = do
 
-  selectListDb sp [ForumUserId ==. lookup_user_id] [] ForumId
-
-
-
-getForum_ByOrganizationIdMH :: UserId -> Text -> OrganizationId -> StandardParams -> HandlerEff (Entity Forum)
-getForum_ByOrganizationIdMH user_id forum_name org_id sp = do
-
-  notFoundMaybe =<< selectFirstDb [ ForumOrgId ==. org_id, ForumName ==. forum_name ] []
+  selectListDbMay m_sp [ForumUserId ==. lookup_user_id, ForumActive ==. True] [] ForumId
 
 
 
-getForumM :: UserId -> ForumId -> HandlerEff (Entity Forum)
+getForum_ByOrganizationIdMH :: Maybe StandardParams -> UserId -> Text -> OrganizationId -> HandlerErrorEff (Entity Forum)
+getForum_ByOrganizationIdMH m_sp user_id forum_name org_id = do
+
+  selectFirstDbMay m_sp [ForumOrgId ==. org_id, ForumName ==. forum_name, ForumActive ==. True] []
+
+
+
+getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
 getForumM _ forum_id = do
-  notFoundMaybe =<< selectFirstDb [ ForumId ==. forum_id ] []
+
+  selectFirstDbMay [ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
-getForumMH :: UserId -> Text -> HandlerEff (Entity Forum)
-getForumMH user_id forum_name = do
+getForumMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff (Entity Forum)
+getForumMH m_sp user_id forum_name = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spOrganizationId) of
 
-  case spOrganizationId of
-
-    Just org_id -> getForum_ByOrganizationIdMH user_id forum_name org_id sp
-    _           -> notFound
+    Just org_id -> getForum_ByOrganizationIdMH m_sp user_id forum_name org_id
+    _           -> left Error_NotImplemented
 
 
 
-getWithForumM :: Bool -> UserId -> ForumId -> HandlerEff (Maybe (Entity Forum))
-getWithForumM False _ _ = pure Nothing
-getWithForumM True user_id forum_id  = do
-  selectFirstDb [ForumId ==. forum_id] []
+getWithForumM :: Bool -> UserId -> ForumId -> HandlerErrorEff (Maybe (Entity Forum))
+getWithForumM False _ _              = right Nothing
+getWithForumM True user_id forum_id  = fmap Just <$> getForumM user_id forum_id
 
 
 
-insertForumM :: UserId -> ForumRequest -> HandlerEff (Entity Forum)
-insertForumM user_id forum_request = do
+insertForumM :: Maybe StandardParams -> UserId -> ForumRequest -> HandlerErrorEff (Entity Forum)
+insertForumM m_sp user_id forum_request = do
 
-  sp@StandardParams{..} <- lookupStandardParams
-
-  case spOrganizationId of
-    Just org_id -> insertForum_ByOrganizationIdM user_id org_id forum_request
-    _                    -> permissionDenied "Must supply an org_id"
+  case (lookupSpMay m_sp spOrganizationId) of
+    Just org_id -> insertForum_ByOrganizationIdM m_sp user_id org_id forum_request
+    _           -> left Error_NotImplemented
 
 
 
-insertForum_ByOrganizationIdM :: UserId -> OrganizationId -> ForumRequest -> HandlerEff (Entity Forum)
+insertForum_ByOrganizationIdM :: UserId -> OrganizationId -> ForumRequest -> HandlerErrorEff (Entity Forum)
 insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
   ts <- timestampH'
@@ -277,7 +270,7 @@ insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
 
 
-updateForumM :: UserId -> ForumId -> ForumRequest -> HandlerEff (Entity Forum)
+updateForumM :: UserId -> ForumId -> ForumRequest -> HandlerErrorEff (Entity Forum)
 updateForumM user_id forum_id forum_request = do
 
   ts <- timestampH'
@@ -303,45 +296,35 @@ updateForumM user_id forum_id forum_request = do
     , ForumGuard               +=. 1
     ]
 
-  notFoundMaybe =<< selectFirstDb [ ForumUserId ==. user_id, ForumId ==. forum_id ] []
+  selectFirstDbEither [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
-deleteForumM :: UserId -> ForumId -> HandlerEff ()
+deleteForumM :: UserId -> ForumId -> HandlerErrorEff ()
 deleteForumM user_id forum_id = do
-  deleteWhereDb [ ForumUserId ==. user_id, ForumId ==. forum_id ]
+  deleteWhereDbEither [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True]
 
 
 
-countForumsM :: UserId -> HandlerEff CountResponses
-countForumsM _ = do
+countForumsM :: Maybe StandardParams -> UserId -> HandlerEff CountResponses
+countForumsM m_sp _ = do
 
-  StandardParams{..} <- lookupStandardParams
-
-  case spOrganizationId of
-
-    Nothing -> notFound
+  case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id -> do
-      n <- countDb [ ForumOrgId ==. org_id ]
-      return $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
+      n <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
+      right $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
+
+    _ -> left Error_NotImplemented
 
 
 
-getForumStatsM :: UserId -> HandlerEff ForumStatResponses
-getForumStatsM _ = do
-
-  StandardParams{..} <- lookupStandardParams
-
-  case spBoardId of
-
-    Just _  -> notFound
-    Nothing -> notFound
+getForumStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumStatResponses
+getForumStatsM m_sp _ = left Error_NotImplemented
 
 
 
-
-getForumStatM :: UserId -> ForumId -> HandlerEff ForumStatResponse
+getForumStatM :: UserId -> ForumId -> HandlerErrorEff ForumStatResponse
 getForumStatM _ forum_id = do
 
   num_forum_boards  <- countDb [BoardForumId ==. forum_id, BoardActive ==. True]
