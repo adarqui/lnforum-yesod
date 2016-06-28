@@ -255,9 +255,8 @@ getThreadMH m_sp _ thread_name = do
 
 
 getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerErrorEff (Maybe (Entity Thread))
-getWithThreadM False _ _              = left Error_Empty
-getWithThreadM True user_id thread_id = do
-  fmap Just <$> getThreadM user_id thread_id
+getWithThreadM False _ _              = right Nothing
+getWithThreadM True user_id thread_id = fmap Just <$> getThreadM user_id thread_id
 
 
 
