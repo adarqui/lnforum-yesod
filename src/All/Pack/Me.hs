@@ -9,11 +9,10 @@ module All.Pack.Me (
 
 import           All.Pack.User
 import           All.Prelude
-import           All.User
 
 
 
 getMePackR :: Handler Value
 getMePackR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUserPack_ByUserIdM user_id user_id defaultStandardParams
+  errorOrJSON id $ getUserPack_ByUserIdM user_id user_id
