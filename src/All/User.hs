@@ -26,6 +26,7 @@ module All.User (
   getUsersM,
   getUsers_ByUserIdsM,
   getUsers_ByEverythingM,
+  getUsers_ByEverything_KeysM,
   insertUsersM,
   insertUsers_TasksM,
   getUserM,
@@ -249,6 +250,13 @@ getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Ent
 getUsers_ByEverythingM m_sp _ = do
 
   selectListDbEither m_sp [] [] UserId
+
+
+
+getUsers_ByEverything_KeysM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Key User]
+getUsers_ByEverything_KeysM m_sp _ = do
+
+  selectKeysListDbEither m_sp [] [] UserId
 
 
 

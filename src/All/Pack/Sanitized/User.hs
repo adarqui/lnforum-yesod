@@ -27,21 +27,22 @@ import           All.User
 getUserSanitizedPacksR :: Handler Value
 getUserSanitizedPacksR = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUsersSanitizedPacksM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ getUsersSanitizedPacksM (pure sp) user_id
 
 
 
 getUserSanitizedPackR :: UserId -> Handler Value
 getUserSanitizedPackR lookup_user_id = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUserSanitizedPackM user_id lookup_user_id
+  errorOrJSON id $ getUserSanitizedPackM user_id lookup_user_id
 
 
 
 getUserSanitizedPackH :: Text -> Handler Value
 getUserSanitizedPackH lookup_user_nick = run $ do
   user_id <- _requireAuthId
-  toJSON <$> getUserSanitizedPackMH user_id lookup_user_nick
+  errorOrJSON id $ getUserSanitizedPackMH user_id lookup_user_nick
 
 
 
@@ -53,92 +54,87 @@ getUserSanitizedPackH lookup_user_nick = run $ do
 -- Model
 --
 
-getUsersSanitizedPacksM :: UserId -> HandlerEff UserSanitizedPackResponses
-getUsersSanitizedPacksM user_id = do
+getUsersSanitizedPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacksM m_sp user_id = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  case (lookupSpMay m_sp spUserIds) of
 
-  case spUserIds of
-
-    Just user_ids  -> getUsersSanitizedPacks_ByUserIdsM user_id user_ids sp
-    _              -> getUsersSanitizedPacks_ByEverythingM user_id sp
+    Just user_ids  -> getUsersSanitizedPacks_ByUserIdsM m_sp user_id user_ids
+    _              -> getUsersSanitizedPacks_ByEverythingM m_sp user_id
 
 
 
-getUsersSanitizedPacks_ByEverythingM :: UserId -> StandardParams -> HandlerEff UserSanitizedPackResponses
-getUsersSanitizedPacks_ByEverythingM user_id sp = do
+getUsersSanitizedPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
-  users_ids <- selectKeysListDb sp [] [] UserId
-  users_packs <- mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key sp) users_ids
-  return $ UserSanitizedPackResponses {
+  e_user_ids <- getUsers_ByEverything_KeysM m_sp user_id
+  rehtie e_user_ids left $ \user_ids -> do
+    user_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
+    right $ UserSanitizedPackResponses {
+      userSanitizedPackResponses = user_packs
+    }
+
+
+
+
+getUserSanitizedPackM :: UserId -> UserId -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPackM user_id lookup_user_id = getUserSanitizedPack_ByUserIdM user_id lookup_user_id
+
+
+
+
+getUserSanitizedPackMH :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPackMH user_id lookup_user_nick = getUserSanitizedPack_ByUserNickM user_id lookup_user_nick
+
+
+
+getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
+  users_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
+  right $ UserSanitizedPackResponses {
     userSanitizedPackResponses = users_packs
   }
 
 
 
 
-getUserSanitizedPackM :: UserId -> UserId -> HandlerEff UserSanitizedPackResponse
-getUserSanitizedPackM user_id lookup_user_id = do
+getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserIdM user_id lookup_user_id = do
 
-  sp <- lookupStandardParams
-
-  getUserSanitizedPack_ByUserIdM user_id lookup_user_id (sp { spLimit = Just 1 })
-
-
-
-
-getUserSanitizedPackMH :: UserId -> Text -> HandlerEff UserSanitizedPackResponse
-getUserSanitizedPackMH user_id lookup_user_nick = do
-
-  sp <- lookupStandardParams
-
-  getUserSanitizedPack_ByUserNickM user_id lookup_user_nick (sp { spLimit = Just 1 })
-
-
-
-getUsersSanitizedPacks_ByUserIdsM :: UserId -> [UserId] -> StandardParams -> HandlerEff UserSanitizedPackResponses
-getUsersSanitizedPacks_ByUserIdsM user_id user_ids sp = do
-  users_packs <- mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key sp) user_ids
-  return $ UserSanitizedPackResponses {
-    userSanitizedPackResponses = users_packs
-  }
+  e_lookup_user <- getUserM user_id lookup_user_id
+  rehtie e_lookup_user left $ getUserSanitizedPack_ByUserM user_id
 
 
 
 
-getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> StandardParams -> HandlerEff UserSanitizedPackResponse
-getUserSanitizedPack_ByUserIdM user_id lookup_user_id sp = do
+getUserSanitizedPack_ByUserNickM :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserNickM user_id lookup_user_nick = do
 
-  lookup_user <- getUserM user_id lookup_user_id
-  getUserSanitizedPack_ByUserM user_id lookup_user sp
-
-
-
-
-getUserSanitizedPack_ByUserNickM :: UserId -> Text -> StandardParams -> HandlerEff UserSanitizedPackResponse
-getUserSanitizedPack_ByUserNickM user_id lookup_user_nick sp = do
-
-  lookup_user <- getUserMH user_id lookup_user_nick
-  getUserSanitizedPack_ByUserM user_id lookup_user sp
+  e_lookup_user <- getUserMH user_id lookup_user_nick
+  rehtie e_lookup_user left $ getUserSanitizedPack_ByUserM user_id
 
 
 
 
-getUserSanitizedPack_ByUserM :: UserId -> Entity User -> StandardParams -> HandlerEff UserSanitizedPackResponse
-getUserSanitizedPack_ByUserM user_id lookup_user _ = do
+getUserSanitizedPack_ByUserM :: UserId -> Entity User -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserM user_id lookup_user = do
 
-  stats       <- getUserStatM user_id lookup_user_id
-  profile     <- getProfile_ByUserIdM user_id lookup_user_id
+  lr <- runEitherT $ do
+    stats   <- isT $ getUserStatM user_id lookup_user_id
+    profile <- isT $ getProfile_ByUserIdM user_id lookup_user_id
+    pure (stats, profile)
 
-  return $ UserSanitizedPackResponse {
-    userSanitizedPackResponseUser      = userToSanitizedResponse lookup_user,
-    userSanitizedPackResponseUserId    = keyToInt64 lookup_user_id,
-    userSanitizedPackResponseStat      = stats,
-    userSanitizedPackResponseLike      = Nothing,
-    userSanitizedPackResponseStar      = Nothing,
-    userSanitizedPackResponseProfile   = profileToResponse profile,
-    userSanitizedPackResponseProfileId = entityKeyToInt64 profile
-  }
+  rehtie lr left $ \(stats, profile) -> do
+
+    right $ UserSanitizedPackResponse {
+      userSanitizedPackResponseUser      = userToSanitizedResponse lookup_user,
+      userSanitizedPackResponseUserId    = keyToInt64 lookup_user_id,
+      userSanitizedPackResponseStat      = stats,
+      userSanitizedPackResponseLike      = Nothing,
+      userSanitizedPackResponseStar      = Nothing,
+      userSanitizedPackResponseProfile   = profileToResponse profile,
+      userSanitizedPackResponseProfileId = entityKeyToInt64 profile
+    }
 
   where
   lookup_user_id  = entityKey lookup_user

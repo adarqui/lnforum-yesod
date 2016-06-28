@@ -37,7 +37,7 @@ getUserPackM user_id lookup_user_id = do
 
 
 getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
-getUserPacks_ByUserIdsM m_sp user_id user_ids = do
+getUserPacks_ByUserIdsM _ user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
   right $ UserPackResponses {
     userPackResponses = users_packs
