@@ -100,11 +100,17 @@ getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 getThreadPack_ByThreadM :: Maybe StandardParams -> UserId -> Entity Thread -> HandlerErrorEff ThreadPackResponse
 getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
 
+  let sp = defaultStandardParams {
+      spSortOrder = Just SortOrderBy_Dsc,
+      spOrder = Just OrderBy_CreatedAt,
+      spLimit = Just 1
+    }
+
   lr <- runEitherT $ do
 
     thread_user  <- isT $ getUserM user_id threadUserId
     thread_stats <- isT $ getThreadStatM user_id thread_id
-    thread_posts <- isT $ getThreadPosts_ByThreadIdM m_sp user_id thread_id
+    thread_posts <- isT $ getThreadPosts_ByThreadIdM (Just sp) user_id thread_id
     m_user       <- case (headMay thread_posts) of
       Nothing                        -> pure Nothing
       Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
