@@ -25,8 +25,7 @@ notFoundMaybe mentity = do
 
 
 
-errorOrJSON
-  :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Either ApplicationError a) -> m Value
+errorOrJSON :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Either ApplicationError a) -> m Value
 errorOrJSON trfm go = do
   e <- (fmap (toJSON . trfm)) <$> go
   case e of
