@@ -68,23 +68,17 @@ findUsers' = fmap (map entityVal) . findUsers
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
 
-  liftIO $ print credsPlugin
-  liftIO $ print credsIdent
-  liftIO $ print credsExtra
-
-  liftIO $ putStrLn "ATTEMPTING AUTHENTICATION"
-
   mapM_ updateByEmail
     $ fmap profileEmail
     $ extraToProfileX credsPlugin credsExtra
 
-  muser <- getBy $ UniqueUser credsPlugin credsIdent
+  m_user <- getBy $ UniqueUser credsPlugin credsIdent
 
   now <- liftIO $ getCurrentTime
 
   let
     e_user = credsToUser now creds
-    m_user_id = entityKey <$> muser
+    m_user_id = entityKey <$> m_user
 
   maybe (authNew e_user) (authExisting e_user) $ m_user_id
 
@@ -106,9 +100,9 @@ authenticateUser creds@Creds{..} = do
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
-    user@(Entity user_id User{..}) <- insertEntity user
+    returned_user@(Entity user_id User{..}) <- insertEntity user
     liftIO $ mkJob_CreateUserProfile user_id defaultProfileRequest
-    pure $ Authenticated (entityKey user)
+    pure $ Authenticated (entityKey returned_user)
 
 
 

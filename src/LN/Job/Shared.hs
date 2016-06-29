@@ -12,14 +12,8 @@ module LN.Job.Shared (
 
 
 
-import           Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import           Data.Aeson
-import qualified Data.ByteString.Lazy.Char8 as BL
-import           Data.List                  (nub)
-import           Data.Text                  (Text)
 import           LN.Import.NoFoundation
-import           LN.Misc.Codec              (int64ToKey')
-import           LN.T.Internal.Types
 import           LN.T.Job
 import           Network.AMQP
 
@@ -52,7 +46,7 @@ bgRunEnq :: Queue -> ReaderT BgReader IO a -> IO ()
 bgRunEnq q go = do
   bg_reader@BgReader{..} <- bgConnect q
 
-  declareQueue bgChan $ newQueue {queueName = tshow bgQueue}
+  void $ declareQueue bgChan $ newQueue {queueName = tshow bgQueue}
   declareExchange bgChan $ newExchange {exchangeName = bgExchg, exchangeType = "direct"}
   bindQueue bgChan (tshow bgQueue) bgExchg (tshow bgQueue)
 
