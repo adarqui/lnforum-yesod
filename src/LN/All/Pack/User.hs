@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.User (
-  -- LN.Model
+  -- Model
   getUserPacksM,
   getUserPackM,
   getUserPack_ByUserIdM
@@ -16,7 +16,7 @@ import           LN.All.User
 
 
 --
--- LN.Model
+-- Model
 --
 
 getUserPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserPackResponses
@@ -25,7 +25,7 @@ getUserPacksM m_sp user_id = do
   case (lookupSpMay m_sp spUserIds) of
 
     Just user_ids  -> getUserPacks_ByUserIdsM m_sp user_id user_ids
-    _              -> left $ LN.Error_InvalidArguments "user_ids"
+    _              -> left $ Error_InvalidArguments "user_ids"
 
 
 

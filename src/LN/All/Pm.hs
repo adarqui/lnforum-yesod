@@ -2,19 +2,19 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module LN.All.Pm (
-  -- LN.Handler
+  -- Handler
   getPmsR,
   postPmR0,
   getPmR,
   putPmR,
   deletePmR,
 
-  -- LN.Model/Function
+  -- Model/Function
   pmRequestToPm,
   pmToResponse,
   pmsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getPmsM,
   getPmM,
   insertPmM,
@@ -29,7 +29,7 @@ import           LN.All.Prelude
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getPmsR :: Handler Value
@@ -75,7 +75,7 @@ deletePmR pm_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 pmRequestToPm :: UserId -> UserId -> PmRequest -> Pm
@@ -120,7 +120,7 @@ pmsToResponses pms = PmResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getPmsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Pm]
@@ -145,7 +145,7 @@ insertPmM m_sp user_id pm_request = do
 
         then do
           -- can't send a pm to yourself
-          left $ LN.Error_PermissionDenied -- TODO FIXME: PermissionDeniedReason "Can't send a PM to yourself"
+          left $ Error_PermissionDenied -- TODO FIXME: PermissionDeniedReason "Can't send a PM to yourself"
 
         else do
           ts <- timestampH'
@@ -153,7 +153,7 @@ insertPmM m_sp user_id pm_request = do
             pm = (pmRequestToPm user_id to_user_id pm_request) { pmCreatedAt = Just ts }
           insertEntityDbE pm
 
-    _               -> left $ LN.Error_InvalidArguments "user_id"
+    _               -> left $ Error_InvalidArguments "user_id"
 
 
 
@@ -177,4 +177,4 @@ updatePmM user_id pm_id pm_request = do
 
 
 deletePmM :: UserId -> PmId -> HandlerErrorEff ()
-deletePmM _ _ = left LN.Error_NotImplemented
+deletePmM _ _ = left Error_NotImplemented

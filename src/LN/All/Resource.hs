@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Resource (
-  -- LN.Handler
+  -- Handler
   getResourcesR,
   postResourceR0,
   getResourceR,
@@ -11,12 +11,12 @@ module LN.All.Resource (
   getResourceStatsR,
   getResourceStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   resourceRequestToResource,
   resourceToResponse,
   resourcesToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getResourcesM,
   getResources_ByEverythingM,
   getResources_ByUserIdM,
@@ -32,15 +32,12 @@ module LN.All.Resource (
 
 
 import           LN.All.Prelude
-import           LN.Lib.Url        (toPrettyUrl)
-import           LN.T              hiding (LikeOpt(..))
-import qualified LN.T.Like         as L
-import           LN.Misc.Codec        (decodeText, encodeText, keyToInt64)
+import qualified LN.T.Like      as L
 
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getResourcesR :: Handler Value
@@ -109,7 +106,7 @@ getResourceStatR thread_post_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 resourceRequestToResource :: UserId -> ResourceRequest -> Resource
@@ -176,7 +173,7 @@ resourcesToResponses resources = ResourceResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
@@ -269,7 +266,7 @@ countResourcesM m_sp _ = do
 
 
 getResourceStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourceStatResponse
-getResourceStatsM _ _ = left LN.Error_NotImplemented
+getResourceStatsM _ _ = left Error_NotImplemented
 
 
 

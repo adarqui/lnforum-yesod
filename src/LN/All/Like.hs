@@ -35,7 +35,7 @@ import qualified LN.T.Like   as L
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getLikesR :: Handler Value
@@ -96,7 +96,7 @@ getLikeStatR like_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 likeRequestToLike :: UserId -> Ent -> Int64 -> LikeRequest -> Like
@@ -140,7 +140,7 @@ likesToResponses likes = LikeResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getLikesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Like]
@@ -160,7 +160,7 @@ insertLikeM m_sp user_id like_request = do
 
       insertEntityDbE like
 
-    _ -> left $ LN.Error_InvalidArguments "ent, ent_id"
+    _ -> left $ Error_InvalidArguments "ent, ent_id"
 
 
 
@@ -208,7 +208,7 @@ deleteLikeM user_id like_id = do
 
 
 getLikeStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LikeStatResponses
-getLikeStatsM _ _ = left LN.Error_NotImplemented
+getLikeStatsM _ _ = left Error_NotImplemented
 
 
 
@@ -218,12 +218,12 @@ getLikeStatM m_sp user_id _ = do
 
   case (lookupSpMay m_sp spThreadPostId) of
     Just thread_post_id -> getLikeStat_ByThreadPostIdM user_id thread_post_id
-    _                   -> left $ LN.Error_InvalidArguments "thread_post_id"
+    _                   -> left $ Error_InvalidArguments "thread_post_id"
 
 
 
 getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff LikeStatResponse
-getLikeStat_ByThreadPostIdM user_id thread_post_id = do
+getLikeStat_ByThreadPostIdM _ thread_post_id = do
 
   likes <- selectListDb Nothing [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64, LikeActive ==. True] [] LikeId
   let
@@ -235,7 +235,8 @@ getLikeStat_ByThreadPostIdM user_id thread_post_id = do
     likeStatResponseEntId   = i64,
     likeStatResponseScore   = fromIntegral $ sum scores,
     likeStatResponseLike    = fromIntegral $ length $ filter (==L.Like) opts,
-    likeStatResponseDislike = fromIntegral $ length $ filter (==L.Dislike) opts
+    likeStatResponseDislike = fromIntegral $ length $ filter (==L.Dislike) opts,
+    likeStatResponseNeutral = 0 -- TODO FIXME
   }
   where
   i64 = keyToInt64 thread_post_id

@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators   #-}
 
 module LN.All.User (
-  -- LN.Handler
+  -- Handler
   getUsersR,
   postUserR0,
   getUserR,
@@ -17,7 +17,7 @@ module LN.All.User (
   getUserStatR,
 
 
-  -- LN.Model/Function
+  -- Model/Function
   profileNameToNick,
   userRequestToUser,
   userToResponse,
@@ -26,7 +26,7 @@ module LN.All.User (
   usersToSanitizedResponses,
   validateUserRequest,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getUsersM,
   getUsers_ByUserIdsM,
   getUsers_ByEverythingM,
@@ -44,17 +44,17 @@ module LN.All.User (
 
 
 
-import           LN.All.Prelude
-import           LN.All.Profile
 import           Data.Char          (isAlphaNum)
 import qualified Data.Text          as T (filter, toLower)
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
+import           LN.All.Prelude
+import           LN.All.Profile
 
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getUsersR :: Handler Value
@@ -89,7 +89,7 @@ getUserH _ = run $ do
   where
   go :: HandlerErrorEff ()
   go = do
-    left LN.Error_NotImplemented
+    left Error_NotImplemented
 
 
 
@@ -137,7 +137,7 @@ getUserStatR lookup_user_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 profileNameToNick :: Text -> Text
@@ -229,7 +229,7 @@ validateUserRequest z@UserRequest{..} = do
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
@@ -283,7 +283,7 @@ insertUsersM user_id user_request = do
       void $ insertUsers_TasksM user_id new_user
       right $ new_user
 
-    else left LN.Error_PermissionDenied
+    else left Error_PermissionDenied
 
 
 
@@ -355,7 +355,7 @@ deleteUserM user_id lookup_user_id = do
       deleteDbE lookup_user_id
 
     else
-      left LN.Error_PermissionDenied
+      left Error_PermissionDenied
 
 
 
@@ -365,7 +365,7 @@ countUsersM m_sp _ = do
 
   case (lookupSpMay m_sp spOrganizationId) of
 
-    Just _ -> left LN.Error_NotImplemented
+    Just _ -> left Error_NotImplemented
 
     _      -> do
       n <- countDb [UserActive ==. True]
@@ -375,7 +375,7 @@ countUsersM m_sp _ = do
 
 
 getUserStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedStatResponses
-getUserStatsM _ _ = left LN.Error_NotImplemented
+getUserStatsM _ _ = left Error_NotImplemented
 
 
 
@@ -401,7 +401,7 @@ getUserStatM _ lookup_user_id = do
 qUserStats
   :: forall site.  (YesodPersist site, YesodPersistBackend site ~ SqlBackend)
   => Key User
-  -> LN.ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
+  -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
 qUserStats user_id = do
   _runDB $ do
     (leurons:[]) <- E.select

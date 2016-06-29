@@ -1,19 +1,19 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.PmOut (
-  -- LN.Handler
+  -- Handler
   getPmOutsR,
   postPmOutsR,
   getPmOutR,
   putPmOutR,
   deletePmOutR,
 
-  -- LN.Model/Function
+  -- Model/Function
   pmOutRequestToPmOut,
   pmOutToResponse,
   pmOutsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getPmOutsM,
   getPmOutM,
   insertPmOutM,
@@ -28,7 +28,7 @@ import           LN.All.Prelude
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getPmOutsR :: Handler Value
@@ -73,7 +73,7 @@ deletePmOutR pm_out_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 pmOutRequestToPmOut :: UserId -> PmId -> PmOutRequest -> PmOut
@@ -117,7 +117,7 @@ pmOutsToResponses pmOuts = PmOutResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 
@@ -144,7 +144,7 @@ insertPmOutM m_sp user_id pm_out_request = do
         pm_out = (pmOutRequestToPmOut user_id pm_id pm_out_request) { pmOutCreatedAt = Just ts }
       insertEntityDbE pm_out
 
-    _          -> left $ LN.Error_InvalidArguments "pm_id"
+    _          -> left $ Error_InvalidArguments "pm_id"
 
 
 
