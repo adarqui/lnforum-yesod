@@ -1,10 +1,10 @@
 module LN.All.Pack.Forum (
-  -- LN.Handler
+  -- Handler
   getForumPacksR,
   getForumPackR,
   getForumPackH,
 
-  -- LN.Model
+  -- Model
   getForumPacksM,
   getForumPackM,
   getForumPackMH,
@@ -18,7 +18,7 @@ import           LN.All.Forum
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getForumPacksR :: Handler Value
@@ -48,7 +48,7 @@ getForumPackH forum_name = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 
 getForumPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumPackResponses
@@ -57,7 +57,7 @@ getForumPacksM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id   -> getForumPacks_ByOrganizationIdM m_sp user_id org_id
-    _             -> left $ LN.Error_InvalidArguments "organization_id"
+    _             -> left $ Error_InvalidArguments "organization_id"
 
 
 

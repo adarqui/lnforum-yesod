@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Leuron (
-  -- LN.Handler
+  -- Handler
   getLeuronsR,
   postLeuronR0,
   getLeuronR,
@@ -11,12 +11,12 @@ module LN.All.Leuron (
   getLeuronStatsR,
   getLeuronStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   leuronRequestToLeuron,
   leuronToResponse,
   leuronsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getLeuronsM,
   getLeurons_ByResourceIdM,
   getLeurons_ByResourceId_RandomM,
@@ -42,7 +42,7 @@ import qualified Database.Redis     as R
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getLeuronsR :: Handler Value
@@ -114,7 +114,7 @@ getLeuronStatR leuron_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 leuronRequestToLeuron :: UserId -> ResourceId -> LeuronRequest -> Leuron
@@ -178,7 +178,7 @@ leuronsToResponses leurons = LeuronResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Leuron]
@@ -282,7 +282,7 @@ insertLeuronM m_sp user_id leuron_request = do
 
       m_resource <- selectFirstDb [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
       case m_resource of
-        Nothing -> left LN.Error_NotFound
+        Nothing -> left Error_NotFound
         Just _  -> do
           entity@(Entity leuron_id _) <- insertEntityDb leuron
           -- background job
@@ -295,7 +295,7 @@ insertLeuronM m_sp user_id leuron_request = do
           -- end background job
           right entity
 
-    _ -> left $ LN.Error_InvalidArguments "resource_id"
+    _ -> left $ Error_InvalidArguments "resource_id"
 
 
 
@@ -412,7 +412,7 @@ countLeuronsM _ _ = do
 
 
 getLeuronStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronStatResponses
-getLeuronStatsM _ _ = left LN.Error_NotImplemented
+getLeuronStatsM _ _ = left Error_NotImplemented
 
 
 

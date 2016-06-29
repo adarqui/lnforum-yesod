@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Like (
-  -- LN.Handler
+  -- Handler
   getLikesR,
   postLikeR0,
   getLikeR,
@@ -10,12 +10,12 @@ module LN.All.Like (
   getLikeStatsR,
   getLikeStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   likeRequestToLike,
   likeToResponse,
   likesToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getLikesM,
   insertLikeM,
   getLikeM,
