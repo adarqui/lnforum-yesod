@@ -6,20 +6,30 @@
 {-# LANGUAGE TypeOperators         #-}
 
 module Db (
+  selectListDb,
   selectListDb',
-  selectListDbEither,
-  selectKeysListDbEither,
-  selectFirstDbEither,
+  selectKeysListDb,
+  selectKeysListDb',
+  selectFirstDb,
   selectFirstDb',
-  insertDbEither,
-  insertEntityDbEither,
+  insertDb,
+  insertDb',
+  insertEntityDb,
+  insertEntityDb',
   updateDb,
+  updateDb',
   updateWhereDb,
-  deleteWhereDbEither,
-  deleteCascadeDbEither,
-  deleteCascadeWhereDbEither,
-  deleteDbEither,
-  countDb
+  updateWhereDb',
+  deleteWhereDb,
+  deleteWhereDb',
+  deleteCascadeDb,
+  deleteCascadeDb',
+  deleteCascadeWhereDb,
+  deleteCascadeWhereDb',
+  deleteDb,
+  deleteDb',
+  countDb,
+  countDb'
 ) where
 
 
@@ -41,11 +51,9 @@ import           LN.T.Param
 
 -- | selectList query helper
 --
-selectListDb' :: forall site val typ.
-  (PersistEntity val, PersistQuery (PersistEntityBackend val),
-  YesodPersist site,
-  PersistEntityBackend val ~ YesodPersistBackend site) =>
-  Maybe StandardParams
+selectListDb
+  :: forall site val typ. (PersistEntity val, PersistQuery (PersistEntityBackend val), YesodPersist site, PersistEntityBackend val ~ YesodPersistBackend site)
+  => Maybe StandardParams
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
@@ -55,51 +63,32 @@ selectListDb' m_sp query filt field = do
 
 
 
-selectListDbEither :: forall site val typ.
-  (PersistEntity val, PersistQuery (PersistEntityBackend val),
-  YesodPersist site,
-  PersistEntityBackend val ~ YesodPersistBackend site) =>
-  Maybe StandardParams
+selectListDb'
+  :: forall site val typ. (PersistEntity val, PersistQuery (PersistEntityBackend val), YesodPersist site, PersistEntityBackend val ~ YesodPersistBackend site)
+  => Maybe StandardParams
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
   -> ControlMA (HandlerT site IO) (ErrorEff [Entity val])
-selectListDbEither m_sp query filt field = do
-  Right <$> selectListDb' m_sp query filt field
+selectListDb' m_sp query filt field = Right <$> selectListDb m_sp query filt field
 
 
 
 -- | selectKeysList query helper
 --
-selectKeysListDb :: forall site val typ.
-                    (PersistEntity val, YesodPersist site,
-                     PersistQuery (PersistEntityBackend val),
-                     PersistEntityBackend val ~ YesodPersistBackend site) =>
-                    StandardParams
-                    -> [Filter val]
-                    -> [SelectOpt val]
-                    -> EntityField val typ
-                    -> ControlMA (HandlerT site IO) [Key val]
-selectKeysListDb sp query filt field = do
-  _runDB $ selectKeysList query ((spToSelect sp field) <> filt)
-
-
-
-selectKeysListDbMay :: forall site val typ.
-                    (PersistEntity val, YesodPersist site,
-                     PersistQuery (PersistEntityBackend val),
-                     PersistEntityBackend val ~ YesodPersistBackend site) =>
-                    Maybe StandardParams
-                    -> [Filter val]
-                    -> [SelectOpt val]
-                    -> EntityField val typ
-                    -> ControlMA (HandlerT site IO) [Key val]
-selectKeysListDbMay m_sp query filt field = do
+selectKeysListDb
+  :: forall site val typ. (PersistEntity val, YesodPersist site, PersistQuery (PersistEntityBackend val), PersistEntityBackend val ~ YesodPersistBackend site)
+  => Maybe StandardParams
+  -> [Filter val]
+  -> [SelectOpt val]
+  -> EntityField val typ
+  -> ControlMA (HandlerT site IO) [Key val]
+selectKeysListDb m_sp query filt field = do
   _runDB $ selectKeysList query ((spToSelectMay m_sp field) <> filt)
 
 
 
-selectKeysListDbEither :: forall site val typ.
+selectKeysListDb' :: forall site val typ.
                     (PersistEntity val, YesodPersist site,
                      PersistQuery (PersistEntityBackend val),
                      PersistEntityBackend val ~ YesodPersistBackend site) =>
@@ -108,46 +97,29 @@ selectKeysListDbEither :: forall site val typ.
                     -> [SelectOpt val]
                     -> EntityField val typ
                     -> ControlMA (HandlerT site IO) (ErrorEff [Key val])
-selectKeysListDbEither m_sp query filt field = do
-  Right <$> (_runDB $ selectKeysList query ((spToSelectMay m_sp field) <> filt))
+selectKeysListDb' m_sp query filt field = Right <$> selectKeysListDb m_sp query filt
 
-
-
--- | selectKeysListDb' helper
---
-selectKeysListDb' :: forall val typ.
-                     (PersistEntity val, PersistQuery (PersistEntityBackend val),
-                      PersistEntityBackend val ~ SqlBackend) =>
-                     [Filter val]
-                     -> [SelectOpt val]
-                     -> EntityField val typ
-                     -> ControlMA (HandlerT App IO) [Key val]
-selectKeysListDb' query filt field = do
-  sp <- lookupStandardParams
-  selectKeysListDb sp query filt field
 
 
 
 -- | selectFirst query helper
 --
-selectFirstDb' :: forall site val.
-                 (PersistEntity val, YesodPersist site,
-                  PersistQuery (YesodPersistBackend site),
-                  YesodPersistBackend site ~ PersistEntityBackend val) =>
-                 [Filter val]
-                 -> [SelectOpt val] -> ControlMA (HandlerT site IO) (Maybe (Entity val))
-selectFirstDb' query filt = _runDB $ selectFirst query filt
+selectFirstDb
+  :: forall site val. (PersistEntity val, YesodPersist site, PersistQuery (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend val)
+  => [Filter val]
+  -> [SelectOpt val]
+  -> ControlMA (HandlerT site IO) (Maybe (Entity val))
+selectFirstDb query filt = _runDB $ selectFirst query filt
 
 
 
-selectFirstDbEither :: forall site val.
-                 (PersistEntity val, YesodPersist site,
-                  PersistQuery (YesodPersistBackend site),
-                  YesodPersistBackend site ~ PersistEntityBackend val) =>
-                 [Filter val]
-                 -> [SelectOpt val] -> ControlMA (HandlerT site IO) (ErrorEff (Entity val))
-selectFirstDbEither query filt = do
-  m <- selectFirstDb' query filt
+selectFirstDb'
+  :: forall site val. (PersistEntity val, YesodPersist site, PersistQuery (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend val)
+  => [Filter val]
+  -> [SelectOpt val]
+  -> ControlMA (HandlerT site IO) (ErrorEff (Entity val))
+selectFirstDb' query filt = do
+  m <- selectFirstDb query filt
   case m of
     Nothing -> pure $ Left Error_NotFound
     Just v  -> pure $ Right v
@@ -156,52 +128,58 @@ selectFirstDbEither query filt = do
 
 -- | insert helper
 --
-insertDb :: forall a site.
-            (PersistEntity a, YesodPersist site,
-             PersistStore (PersistEntityBackend a),
-             PersistEntityBackend a ~ YesodPersistBackend site) =>
-            a -> ControlMA (HandlerT site IO) (Key a)
+insertDb
+  :: forall a site. (PersistEntity a, YesodPersist site, PersistStore (PersistEntityBackend a), PersistEntityBackend a ~ YesodPersistBackend site)
+  => a
+  -> ControlMA (HandlerT site IO) (Key a)
 insertDb = _runDB . insert
 
 
 
-insertDbEither :: forall a site.
+insertDb' :: forall a site.
             (PersistEntity a, YesodPersist site,
              PersistStore (PersistEntityBackend a),
              PersistEntityBackend a ~ YesodPersistBackend site) =>
             a -> ControlMA (HandlerT site IO) (ErrorEff (Key a))
-insertDbEither ent = Right <$> (_runDB $ insert ent)
+insertDb' ent = Right <$> insertDb ent
 
 
 
 -- | insertEntity helper
 --
-insertEntityDb' :: forall site e.
-                  (PersistEntity e, YesodPersist site,
-                   PersistStore (YesodPersistBackend site),
-                   YesodPersistBackend site ~ PersistEntityBackend e) =>
-                  e -> ControlMA (HandlerT site IO) (Entity e)
-insertEntityDb' entity = _runDB $ insertEntity entity
+insertEntityDb
+  :: forall site e. (PersistEntity e, YesodPersist site, PersistStore (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend e)
+  => e
+  -> ControlMA (HandlerT site IO) (Entity e)
+insertEntityDb entity = _runDB $ insertEntity entity
 
 
 
-insertEntityDbEither :: forall site e.
-                  (PersistEntity e, YesodPersist site,
-                   PersistStore (YesodPersistBackend site),
-                   YesodPersistBackend site ~ PersistEntityBackend e) =>
-                  e -> ControlMA (HandlerT site IO) (ErrorEff (Entity e))
-insertEntityDbEither entity = Right <$> insertEntityDb' entity
+insertEntityDb'
+  :: forall site e. (PersistEntity e, YesodPersist site, PersistStore (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend e)
+  => e
+  -> ControlMA (HandlerT site IO) (ErrorEff (Entity e))
+insertEntityDb' entity = Right <$> insertEntityDb' entity
 
 
 
 -- | update helper
 --
-updateDb :: forall site val.
-            (PersistEntity val, YesodPersist site,
-             PersistStore (YesodPersistBackend site),
-             YesodPersistBackend site ~ PersistEntityBackend val) =>
-            Key val -> [Update val] -> ControlMA (HandlerT site IO) ()
+updateDb
+  :: forall site val. (PersistEntity val, YesodPersist site, PersistStore (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend val)
+  => Key val
+  -> [Update val]
+  -> ControlMA (HandlerT site IO) ()
 updateDb key update_values = _runDB $ update key update_values
+
+
+
+updateDb'
+  :: forall site val. (PersistEntity val, YesodPersist site, PersistStore (YesodPersistBackend site), YesodPersistBackend site ~ PersistEntityBackend val)
+  => Key val
+  -> [Update val]
+  -> ControlMA (HandlerT site IO) ()
+updateDb' key update_values = Right <$> updateDb key update_values
 
 
 
@@ -227,12 +205,12 @@ deleteWhereDb filt = _runDB $ deleteWhere filt
 
 
 
-deleteWhereDbEither :: forall site val.
+deleteWhereDb' :: forall site val.
                  (PersistEntity val, YesodPersist site,
                   PersistQuery (YesodPersistBackend site),
                   YesodPersistBackend site ~ PersistEntityBackend val) =>
                  [Filter val] -> ControlMA (HandlerT site IO) (ErrorEff ())
-deleteWhereDbEither filt = Right <$> (_runDB $ deleteWhere filt)
+deleteWhereDb' filt = Right <$> (_runDB $ deleteWhere filt)
 
 
 
@@ -247,12 +225,12 @@ deleteCascadeDb entity = _runDB $ deleteCascade entity
 
 
 
-deleteCascadeDbEither :: forall site record.
+deleteCascadeDb' :: forall site record.
                   (YesodPersist site,
                    DeleteCascade record (PersistEntityBackend record),
                    PersistEntityBackend record ~ YesodPersistBackend site) =>
                   Key record -> ControlMA (HandlerT site IO) (ErrorEff ())
-deleteCascadeDbEither entity = Right <$> (_runDB $ deleteCascade entity)
+deleteCascadeDb' entity = Right <$> (_runDB $ deleteCascade entity)
 
 
 
@@ -269,20 +247,20 @@ deleteCascadeWhereDb = _runDB . deleteCascadeWhere
 
 
 
-deleteCascadeWhereDbEither :: forall site record.
+deleteCascadeWhereDb' :: forall site record.
   (PersistQuery (PersistEntityBackend record),
   DeleteCascade record (PersistEntityBackend record),
   YesodPersist site,
   PersistEntityBackend record ~ YesodPersistBackend site) =>
   [Filter record]
   -> ControlMA (HandlerT site IO) (ErrorEff ())
-deleteCascadeWhereDbEither filt = Right <$> (_runDB $ deleteCascadeWhere filt)
+deleteCascadeWhereDb' filt = Right <$> (_runDB $ deleteCascadeWhere filt)
 
 
 
 deleteDb = _runDB . delete
 
-deleteDbEither k = Right <$> deleteDb k
+deleteDb' k = Right <$> deleteDb k
 
 
 
