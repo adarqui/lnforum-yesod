@@ -19,6 +19,7 @@ module LN.All.ThreadPost (
   -- Model/Internal
   getThreadPostsM,
   getThreadPosts_ByForumIdM,
+  getThreadPosts_ByBoardIdM,
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
   getThreadPostM,
@@ -181,17 +182,27 @@ orderByToField (Just order) =
 
 getThreadPostsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPostsM m_sp user_id = do
-  case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spThreadId, lookupSpMay m_sp spThreadPostId) of
-    (Just forum_id, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
-    (_, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
-    (_, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-    _                           -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+  case (lookupSpMay m_sp spForumId
+       ,lookupSpMay m_sp spBoardId
+       ,lookupSpMay m_sp spThreadId
+       ,lookupSpMay m_sp spThreadPostId) of
+    (Just forum_id, _, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
+    (_, Just board_id, _, _)       -> getThreadPosts_ByBoardIdM m_sp user_id board_id
+    (_, _, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
+    (_, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
+    _                              -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
 getThreadPosts_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByForumIdM m_sp _ forum_id = do
   selectListDbE m_sp [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+
+
+
+getThreadPosts_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity ThreadPost]
+getThreadPosts_ByBoardIdM m_sp _ board_id = do
+  selectListDbE m_sp [ThreadPostBoardId ==. board_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 

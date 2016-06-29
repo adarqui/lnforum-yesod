@@ -89,38 +89,39 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
   let sp = defaultStandardParams {
       spSortOrder = Just SortOrderBy_Dsc,
-      spOrder = Just OrderBy_ActivityAt,
-      spLimit = Just 1
+      spOrder     = Just OrderBy_ActivityAt,
+      spLimit     = Just 1
     }
 
   lr <- runEitherT $ do
 
     board_stats         <- isT $ getBoardStatM user_id board_id
-    threads             <- isT $ getThreads_ByBoardIdM (Just sp) user_id board_id
 
-    m_thread_posts      <- case (headMay threads) of
-      Nothing                   -> pure []
-      Just (Entity thread_id _) -> isT $ getThreadPosts_ByThreadIdM (Just sp) user_id thread_id
+    thread_posts        <- isT $ getThreadPosts_ByBoardIdM (Just sp) user_id board_id
 
-    m_user              <- case (headMay m_thread_posts) of
-      Nothing                        -> pure Nothing
-      Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
+    m_thread            <- case (headMay thread_posts) of
+                                Nothing                       -> pure Nothing
+                                Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getThreadM user_id threadPostThreadId)
+
+    m_user              <- case (headMay thread_posts) of
+                                Nothing                        -> pure Nothing
+                                Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
 
     user_perms_by_board <- lift $ userPermissions_ByBoardIdM user_id (entityKey board)
 
     pure (board_stats
-         ,threads
-         ,m_thread_posts
+         ,thread_posts
+         ,m_thread
          ,m_user
          ,user_perms_by_board)
 
-  rehtie lr left $ \(board_stats, threads, m_thread_posts, m_user, user_perms_by_board) -> do
+  rehtie lr left $ \(board_stats, thread_posts, m_thread, m_user, user_perms_by_board) -> do
     right $ BoardPackResponse {
       boardPackResponseBoard                = boardToResponse board,
       boardPackResponseBoardId              = keyToInt64 board_id,
       boardPackResponseStat                 = board_stats,
-      boardPackResponseLatestThread         = fmap threadToResponse $ headMay threads,
-      boardPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay m_thread_posts,
+      boardPackResponseLatestThread         = fmap threadToResponse m_thread,
+      boardPackResponseLatestThreadPost     = fmap threadPostToResponse $ headMay thread_posts,
       boardPackResponseLatestThreadPostUser = fmap userToSanitizedResponse m_user,
       boardPackResponseLike                 = Nothing,
       boardPackResponseStar                 = Nothing,
