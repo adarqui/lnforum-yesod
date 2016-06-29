@@ -162,7 +162,7 @@ sanitizeLimit limit
 
 
 minOffset :: Int
-minOffset = 1
+minOffset = 0
 
 sanitizeOffset :: Int -> Int
 sanitizeOffset offset
