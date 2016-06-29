@@ -161,7 +161,7 @@ instance Yesod App where
           let (code, brief, full) = errorText errorResponse
           sendResponseStatus
               (mkStatus code brief)
-              $ RepPlain $ toContent $ T.append "Error: " full
+              $ RepPlain $ toContent full
       defaultErrorHandler errorResponse
 
 
