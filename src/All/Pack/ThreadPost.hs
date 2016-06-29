@@ -60,7 +60,7 @@ getThreadPostPacksM m_sp user_id = do
 
     (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id
 
-    (_, _, _)                   -> left Error_NotImplemented
+    (_, _, _)                   -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 

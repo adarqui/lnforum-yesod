@@ -196,7 +196,7 @@ getForumsM m_sp user_id = do
 
     (_, Just lookup_user_id) -> getForums_ByUserIdM m_sp user_id lookup_user_id
 
-    _                        -> left Error_NotImplemented
+    _                        -> left $ Error_InvalidArguments "org_id, user_id"
 
 
 
@@ -242,7 +242,7 @@ getForumMH m_sp user_id forum_name = do
   case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id -> getForum_ByOrganizationIdMH m_sp user_id forum_name org_id
-    _           -> left Error_NotImplemented
+    _           -> left $ Error_InvalidArguments "org_id"
 
 
 
@@ -257,7 +257,7 @@ insertForumM m_sp user_id forum_request = do
 
   case (lookupSpMay m_sp spOrganizationId) of
     Just org_id -> insertForum_ByOrganizationIdM user_id org_id forum_request
-    _           -> left Error_NotImplemented
+    _           -> left $ Error_InvalidArguments "org_id"
 
 
 
@@ -318,7 +318,7 @@ countForumsM m_sp _ = do
       n <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
       right $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
 
-    _ -> left Error_NotImplemented
+    _           -> left $ Error_InvalidArguments "org_id"
 
 
 

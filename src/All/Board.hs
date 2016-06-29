@@ -235,7 +235,7 @@ getBoardMH m_sp _ board_name = do
     Just forum_id -> do
       selectFirstDbE [BoardName ==. board_name, BoardForumId ==. forum_id, BoardActive ==. True] []
 
-    _ -> left Error_NotImplemented
+    _             -> left $ Error_InvalidArguments "forum_id"
 
 
 
@@ -251,7 +251,7 @@ insertBoardM m_sp user_id board_request = do
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
     (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
     (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
-    _                  -> left Error_NotImplemented
+    _                  -> left $ Error_InvalidArguments "forum_id, board_id"
 
 
 

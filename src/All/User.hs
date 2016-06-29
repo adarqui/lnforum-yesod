@@ -84,7 +84,12 @@ getUserR lookup_user_id = run $ do
 
 
 getUserH :: Text -> Handler Value
-getUserH _ = pure $ toJSON Error_NotImplemented
+getUserH _ = run $ do
+  errorOrJSON id $ go
+  where
+  go :: HandlerErrorEff ()
+  go = do
+    left Error_NotImplemented
 
 
 
@@ -362,7 +367,7 @@ countUsersM m_sp _ = do
 
     Just _ -> left Error_NotImplemented
 
-    _ -> do
+    _      -> do
       n <- countDb [UserActive ==. True]
       right $ CountResponses [CountResponse 0 (fromIntegral n)]
 

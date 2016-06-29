@@ -63,7 +63,7 @@ getThreadPacksM m_sp user_id = do
   case (lookupSpMay m_sp spBoardId) of
 
     Just board_id -> getThreadPacks_ByBoardIdM m_sp user_id board_id
-    _             -> left Error_NotImplemented
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 

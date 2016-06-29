@@ -208,7 +208,7 @@ getThreadsM m_sp user_id = do
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM m_sp user_id lookup_user_id
-    _                           -> left Error_NotImplemented
+    _                           -> left $ Error_InvalidArguments "org_id, user_id, board_id"
 
 
 
@@ -264,7 +264,7 @@ insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerError
 insertThreadM m_sp user_id thread_request = do
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
-    _             -> left Error_NotImplemented
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 
@@ -323,7 +323,7 @@ countThreadsM m_sp _ = do
       n <- countDb [ ThreadBoardId ==. board_id ]
       right $ CountResponses [CountResponse (keyToInt64 board_id) (fromIntegral n)]
 
-    _ -> left Error_NotImplemented
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 

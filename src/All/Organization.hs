@@ -332,8 +332,7 @@ countOrganizationsM m_sp _ = do
 
 
 getOrganizationStatsM :: UserId -> HandlerErrorEff OrganizationStatResponses
-getOrganizationStatsM _ = do
-  left Error_NotImplemented
+getOrganizationStatsM _ = left Error_NotImplemented
 
 
 
