@@ -153,7 +153,7 @@ instance Yesod App where
           errorText (InternalError msg) = (400, "Bad Req", msg)
           errorText (InvalidArgs m) = (400, "Bad Req", unwords m)
           errorText (PermissionDenied msg) = (403, "Forbidden", msg)
-          errorText (BadMethod _) = (405, "Method Not LN.All.wed",
+          errorText (BadMethod _) = (405, "Method not allowed",
                                           "Method not supported")
           errorText _             = (400, "Bad Request", "Boop")
       when isApiRequest $ do
@@ -232,7 +232,7 @@ instance YesodAuth App where
 
 myMaybeAuthId
   :: (YesodAuthPersist master, Typeable (AuthEntity master))
-  => LN.HandlerT master IO (Maybe (AuthId master))
+  => HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
   req <- waiRequest
 -- DEBUG:  liftIO $ print req

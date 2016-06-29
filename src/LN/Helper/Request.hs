@@ -9,7 +9,7 @@ module LN.Helper.Request (
 
 
 import           LN.Control
-import           Import
+import           LN.Import
 
 
 

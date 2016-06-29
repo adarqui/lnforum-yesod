@@ -1,5 +1,5 @@
 module LN.Misc.Codec (
-  module LN.A,
+  module A,
   textToKey,
   textToKey',
   textToKeys,
@@ -16,14 +16,14 @@ module LN.Misc.Codec (
 
 
 
-import qualified Data.ByteString            as BS
-import qualified Data.ByteString.Char8      as BSC
-import           Data.Either                (rights)
-import           Data.Int                   (Int64)
-import           Data.Text                  (Text)
+import qualified Data.ByteString       as BS
+import qualified Data.ByteString.Char8 as BSC
+import           Data.Either           (rights)
+import           Data.Int              (Int64)
+import           Data.Text             (Text)
 import           Database.Persist
-import           Database.Persist.Sql       (unSqlBackendKey)
-import           LN.Lib.Codec               as A
+import           Database.Persist.Sql  (unSqlBackendKey)
+import           LN.Lib.Codec          as A
 import           Prelude
 
 

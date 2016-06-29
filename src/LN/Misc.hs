@@ -1,3 +1,6 @@
+{-# LANAUGE ExplicitForAll #-}
+{-# LANUAGE KindSignatures #-}
+
 module LN.Misc (
   lookupGetParamId,
   cs
@@ -6,7 +9,7 @@ module LN.Misc (
 
 
 import           Data.String.Conversions (ConvertibleStrings, convertString)
-import           Import
+import           LN.Import
 import           LN.Misc.Codec
 
 

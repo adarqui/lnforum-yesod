@@ -5,8 +5,8 @@ module LN.Lifted (
 
 
 
-import Import
-import LN.Control
+import           LN.Control
+import           LN.Import
 
 
 

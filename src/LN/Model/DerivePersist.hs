@@ -1,11 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module LN.Model.DerivePersist (
-  module LN.A,
+  module A,
   Membership,
   Visibility,
-  LikeOpt,
-  ProfileGender
+  LikeOpt
 ) where
 
 
@@ -16,8 +15,8 @@ import           LN.T.LeuronTraining as A
 import           LN.T.Like
 import           LN.T.Membership
 import           LN.T.Profile        as A
-import           LN.T.Visibility
 import           LN.T.Team           as A
+import           LN.T.Visibility
 
 
 

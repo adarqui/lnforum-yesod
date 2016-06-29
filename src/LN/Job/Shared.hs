@@ -17,10 +17,10 @@ import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.List                  (nub)
 import           Data.Text                  (Text)
-import           Import.NoFoundation
+import           LN.Import.NoFoundation
+import           LN.Misc.Codec              (int64ToKey')
 import           LN.T.Internal.Types
 import           LN.T.Job
-import           LN.Misc.Codec                 (int64ToKey')
 import           Network.AMQP
 
 

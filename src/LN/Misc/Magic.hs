@@ -5,7 +5,7 @@ module LN.Misc.Magic (
 
 
 import           Database.Persist.Sql (fromSqlKey)
-import           Import
+import           LN.Import
 
 
 

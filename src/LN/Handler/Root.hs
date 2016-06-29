@@ -1,10 +1,12 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module LN.Handler.Root (
   getRootR
 ) where
 
 
 
-import Import
+import           LN.Import
 
 
 
