@@ -10,8 +10,10 @@ module Error (
 
 
 
+import           Data.Aeson (encode)
 import           Import
 import           LN.T.Error (ApplicationError)
+import           Misc       (cs)
 
 
 
@@ -28,7 +30,7 @@ errorOrJSON
 errorOrJSON trfm go = do
   e <- (fmap (toJSON . trfm)) <$> go
   case e of
-    Left err -> permissionDenied $ tshow $ toJSON err
+    Left err -> permissionDenied $ cs $ encode err
     Right v  -> pure v
 
 

@@ -1,9 +1,11 @@
 module Misc (
-  lookupGetParamId
+  lookupGetParamId,
+  cs
 ) where
 
 
 
+import           Data.String.Conversions (ConvertibleStrings, convertString)
 import           Import
 import           Misc.Codec
 
@@ -19,3 +21,8 @@ lookupGetParamId t = do
   case v of
     Nothing -> pure $ Nothing
     Just v' -> pure $ int64ToKeyMaybe (textToInt64 v')
+
+
+
+cs :: ConvertibleStrings a b => a -> b
+cs = convertString
