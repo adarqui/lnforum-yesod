@@ -1,24 +1,24 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Team (
-  -- LN.Handler
+  -- Handler
   getTeamPacksR,
   getTeamPackR,
   getTeamPackH,
 
-  -- LN.Model
+  -- Model
 ) where
 
 
 
-import           LN.All.Team
 import           LN.All.Prelude
+import           LN.All.Team
 import           LN.All.User
 
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getTeamPacksR :: Handler Value
@@ -48,7 +48,7 @@ getTeamPackH team_name = run $ do
 
 
 
--- LN.Model
+-- Model
 
 getTeamPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff TeamPackResponses
 getTeamPacksM m_sp user_id = do
@@ -57,7 +57,7 @@ getTeamPacksM m_sp user_id = do
 
     (Just org_id, _, _)          -> getTeamPacks_ByOrganizationIdM m_sp user_id org_id
     (_, Just lookup_user_id, _)  -> getTeamPacks_ByUserIdM m_sp user_id lookup_user_id
-    _                            -> left $ LN.Error_InvalidArguments "org_id, user_id, self"
+    _                            -> left $ Error_InvalidArguments "org_id, user_id, self"
 
 
 
@@ -78,7 +78,7 @@ getTeamPackMH m_sp user_id team_name = do
       e_team <- getTeamMH user_id team_name org_id
       rehtie e_team left $ getTeamPack_ByTeamM user_id
 
-    _           -> left $ LN.Error_InvalidArguments "org_id"
+    _           -> left $ Error_InvalidArguments "org_id"
 
 
 

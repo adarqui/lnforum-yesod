@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Organization (
-  -- LN.Handler
+  -- Handler
   getOrganizationsR,
   postOrganizationR0,
   getOrganizationR,
@@ -12,13 +12,13 @@ module LN.All.Organization (
   getOrganizationStatsR,
   getOrganizationStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   organizationRequestToOrganization,
   organizationToResponse,
   organizationsToResponses,
   validateOrganizationRequest,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getOrganizationsM,
   getOrganizations_ByUserIdM,
   getOrganizations_ByEverythingM,
@@ -38,10 +38,7 @@ module LN.All.Organization (
 
 
 import           LN.All.Prelude
-import           LN.All.TeamMember
 import           LN.All.Team
-import           LN.T.Membership
-import           LN.T.Visibility
 
 
 
@@ -119,7 +116,7 @@ getOrganizationStatR org_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
@@ -192,7 +189,7 @@ validateOrganizationRequest z@OrganizationRequest{..} = do
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getOrganizationsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
@@ -205,19 +202,19 @@ getOrganizationsM m_sp user_id = do
 
 getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbE m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
+  selectListDbE m_sp [OrganizationUserId ==. lookup_user_id, OrganizationActive ==. True] [] OrganizationId
 
 
 
 getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByEverythingM m_sp _ = do
-  selectListDbE m_sp [] [] OrganizationId
+  selectListDbE m_sp [OrganizationActive ==. True] [] OrganizationId
 
 
 
 getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
-getOrganizationM user_id org_id = do
-  selectFirstDbE [OrganizationId ==. org_id] []
+getOrganizationM _ org_id = do
+  selectFirstDbE [OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 
@@ -244,7 +241,7 @@ insertOrganizationM user_id organization_request = do
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ LN.Error_Validation "TODO FIXME"
+    Left _  -> left $ Error_Validation "TODO FIXME"
     Right _ -> do
       ts <- timestampH'
 
@@ -268,7 +265,7 @@ updateOrganizationM user_id org_id organization_request = do
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ LN.Error_Validation "TODO FIXME"
+    Left _  -> left $ Error_Validation "TODO FIXME"
     Right _ -> do
 
       ts <- timestampH'
@@ -324,7 +321,7 @@ deleteOrganizationTeamsM _ org_id = do
 countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countOrganizationsM m_sp _ = do
   case (lookupSpMay m_sp spUserId) of
-    Just _  -> left LN.Error_NotImplemented
+    Just _  -> left Error_NotImplemented
     Nothing -> do
       n <- countDb [OrganizationActive ==. True]
       right $ CountResponses [CountResponse 0 (fromIntegral n)]
@@ -332,7 +329,7 @@ countOrganizationsM m_sp _ = do
 
 
 getOrganizationStatsM :: UserId -> HandlerErrorEff OrganizationStatResponses
-getOrganizationStatsM _ = left LN.Error_NotImplemented
+getOrganizationStatsM _ = left Error_NotImplemented
 
 
 
