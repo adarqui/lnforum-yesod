@@ -1,17 +1,17 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Team (
-  -- LN.Handler
+  -- Handler
   getTeamsR,
   getTeamR,
   putTeamR,
 
-  -- LN.Model/Function
+  -- Model/Function
   teamRequestToTeam,
   teamToResponse,
   teamsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getTeamsM,
   getTeams_ByOrganizationIdM,
   getTeams_ByUserIdM,
@@ -27,17 +27,16 @@ module LN.All.Team (
 
 
 
+import qualified Data.Text         as T
 import           LN.All.Prelude
 import           LN.All.TeamMember
-import qualified Data.Text       as T
 import           LN.T.Membership
-import           LN.T.Team
 import           LN.T.Visibility
 
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getTeamsR :: Handler Value
@@ -68,7 +67,7 @@ putTeamR team_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
@@ -125,7 +124,7 @@ teamsToResponses teams = TeamResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getTeamsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Team]
@@ -134,7 +133,7 @@ getTeamsM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId) of
     (Just org_id, Nothing)         -> getTeams_ByOrganizationIdM m_sp user_id org_id
     (Nothing, Just lookup_user_id) -> getTeams_ByUserIdM m_sp user_id lookup_user_id
-    _                              -> left $ LN.Error_InvalidArguments "org_id, user_id"
+    _                              -> left $ Error_InvalidArguments "org_id, user_id"
 
 
 
@@ -185,11 +184,11 @@ insert_SystemTeamsM user_id org_id = do
 
   void $ runEitherT $ do
     -- bg job: Insert owners team
-    (Entity owners_id team) <- isT $ insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
+    (Entity owners_id _)  <- isT $ insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
     void $ isT $ insertTeamMember_BypassM user_id org_id owners_id (TeamMemberRequest 0)
 
     -- bg job: Insert members team
-    (Entity members_id team) <- isT $ insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
+    (Entity members_id _) <- isT $ insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
     void $ isT $ insertTeamMember_BypassM user_id org_id members_id (TeamMemberRequest 0)
 
     pure ()
@@ -233,7 +232,7 @@ getTeamCountM = right 2
 
 
 getTeamStatM :: UserId -> TeamId -> HandlerErrorEff TeamStatResponse
-getTeamStatM _ team_id = do
+getTeamStatM _ _ = do
   right $ TeamStatResponse {
     teamStatResponseMembers = 0 -- TODO FIXME
   }

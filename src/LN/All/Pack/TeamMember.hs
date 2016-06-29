@@ -1,11 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.TeamMember (
-  -- LN.Handler
+  -- Handler
   getTeamMemberPacksR,
   getTeamMemberPackR,
 
-  -- LN.Model
+  -- Model
 ) where
 
 
@@ -17,7 +17,7 @@ import           LN.All.User
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getTeamMemberPacksR :: Handler Value
@@ -37,7 +37,7 @@ getTeamMemberPackR team_member_id = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 
 getTeamMemberPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff TeamMemberPackResponses
@@ -46,7 +46,7 @@ getTeamMemberPacksM m_sp user_id = do
   case (lookupSpMay m_sp spTeamId) of
 
     Just team_id -> getTeamMemberPacks_ByTeamIdM m_sp user_id team_id
-    _            -> left $ LN.Error_InvalidArguments "team_id"
+    _            -> left $ Error_InvalidArguments "team_id"
 
 
 

@@ -1,5 +1,5 @@
 module LN.All.TeamMember (
-  -- LN.Handler
+  -- Handler
   getTeamMembersR,
   postTeamMemberR0,
   getTeamMemberR,
@@ -7,12 +7,12 @@ module LN.All.TeamMember (
   deleteTeamMemberR,
   getTeamMembersCountR,
 
-  -- LN.Model/Function
+  -- Model/Function
   teamMemberRequestToTeamMember,
   teamMemberToResponse,
   teamMembersToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getTeamMembersM,
   getTeamMembers_ByTeamIdM,
   getTeamMemberM,
@@ -31,7 +31,7 @@ import           LN.T.Membership
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getTeamMembersR :: Handler Value
@@ -86,7 +86,7 @@ getTeamMembersCountR = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 teamMemberRequestToTeamMember :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> TeamMember
@@ -140,7 +140,7 @@ teamMembersToResponses teamMembers = TeamMemberResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getTeamMembersM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity TeamMember]
@@ -148,7 +148,7 @@ getTeamMembersM m_sp user_id = do
 
   case (lookupSpMay m_sp spTeamId) of
     Just team_id -> getTeamMembers_ByTeamIdM m_sp user_id team_id
-    _            -> left $ LN.Error_InvalidArguments "team_id"
+    _            -> left $ Error_InvalidArguments "team_id"
 
 
 
@@ -173,7 +173,7 @@ insertTeamMemberM m_sp user_id team_member_request = do
     (Just org_id, _)   -> insertTeamMember_JoinM user_id org_id team_member_request
     -- TODO FIXME
     -- (_, Just team_id)  -> insertTeamMember_InternalM user_id team_id team_member_request
-    _                  -> left $ LN.Error_InvalidArguments "org_id, team_id"
+    _                  -> left $ Error_InvalidArguments "org_id, team_id"
 
 
 
@@ -197,7 +197,7 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
       case teamMembership of
         Membership_Join -> insertEntityDbE team_member
-        _               -> left $ LN.Error_PermissionDenied
+        _               -> left $ Error_PermissionDenied
 
 
 
@@ -219,7 +219,7 @@ insertTeamMember_InternalM user_id org_id team_id team_member_request = do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
       Membership_Join -> insertEntityDbE team_member
-      _               -> left $ LN.Error_PermissionDenied
+      _               -> left $ Error_PermissionDenied
 
 
 
@@ -273,4 +273,4 @@ countTeamMembersM m_sp _ = do
       n <- countDb [TeamMemberUserId ==. lookup_user_id, TeamMemberActive ==. True]
       right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ LN.Error_InvalidArguments "user_id"
+    _                   -> left $ Error_InvalidArguments "user_id"
