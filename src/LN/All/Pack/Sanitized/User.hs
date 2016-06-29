@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Sanitized.User (
-  -- LN.Handler
+  -- Handler
   getUserSanitizedPacksR,
   getUserSanitizedPackR,
   getUserSanitizedPackH,
 
-  -- LN.Model
+  -- Model
   getUsersSanitizedPacksM,
   getUserSanitizedPackM,
   getUserSanitizedPackMH,
@@ -21,7 +21,7 @@ import           LN.All.User
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getUserSanitizedPacksR :: Handler Value
@@ -51,7 +51,7 @@ getUserSanitizedPackH lookup_user_nick = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 
 getUsersSanitizedPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
