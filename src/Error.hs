@@ -5,7 +5,6 @@
 module Error (
   notFoundMaybe,
   errorOrJSON,
-  errorOrJSONMay,
   permissionDeniedEither,
 ) where
 
@@ -21,12 +20,6 @@ notFoundMaybe mentity = do
   case mentity of
     Nothing       -> notFound
     (Just entity) -> pure entity
-
-
-
-errorOrJSONMay
-  :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Maybe a) -> m Value
-errorOrJSONMay trfm go = notFoundMaybe =<< (fmap (toJSON . trfm)) <$> go
 
 
 
