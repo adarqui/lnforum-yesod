@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.GlobalGroup (
-  -- LN.Handler
+  -- Handler
   getGlobalGroupsR,
   postGlobalGroupR0,
   getGlobalGroupR,
@@ -12,12 +12,12 @@ module LN.All.GlobalGroup (
   getGlobalGroupStatsR,
   getGlobalGroupStatR,
 
-  -- LN.Model/Functions
+  -- Model/Functions
   globalGroupRequestToGlobalGroup,
   globalGroupToResponse,
   globalGroupsToResponses,
 
-  -- LN.Model/internal
+  -- Model/internal
   getGlobalGroupsM,
   getGlobalGroups_ByUserIdM,
   getGlobalGroups_ByEverythingM,
@@ -108,7 +108,7 @@ getGlobalGroupStatR global_group_id = run $ do
 
 
 
--- LN.Model/Function
+-- Model/Function
 
 globalGroupRequestToGlobalGroup :: UserId -> GlobalGroupRequest -> GlobalGroup
 globalGroupRequestToGlobalGroup user_id GlobalGroupRequest{..} = GlobalGroup {
@@ -163,14 +163,14 @@ globalGroupsToResponses globalGroups = GlobalGroupResponses {
 
 
 
--- LN.Model/Internal
+-- Model/Internal
 
 getGlobalGroupsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroupsM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
     Just lookup_user_id -> getGlobalGroups_ByUserIdM m_sp user_id lookup_user_id
-    _                   -> left $ LN.Error_InvalidArguments "user_id"
+    _                   -> left $ Error_InvalidArguments "user_id"
 
 
 
@@ -247,12 +247,12 @@ countGlobalGroupsM m_sp _ = do
       n <- countDb [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True]
       right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ LN.Error_InvalidArguments "user_id"
+    _                   -> left $ Error_InvalidArguments "user_id"
 
 
 
 getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupStatResponses
-getGlobalGroupStatsM _ _ = left $ LN.Error_NotImplemented
+getGlobalGroupStatsM _ _ = left $ Error_NotImplemented
 
 
 

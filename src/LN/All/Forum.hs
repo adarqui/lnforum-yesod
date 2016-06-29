@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Forum (
-  -- LN.Handler
+  -- Handler
   getForumsR,
   postForumR0,
   getForumR,
@@ -12,12 +12,12 @@ module LN.All.Forum (
   getForumStatsR,
   getForumStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   forumRequestToForum,
   forumToResponse,
   forumsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getForumsM,
   getForums_ByOrganizationIdM,
   getForums_ByOrganizationId_KeysM,

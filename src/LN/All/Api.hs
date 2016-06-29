@@ -7,12 +7,12 @@ module LN.All.Api (
   putApiR,
   deleteApiR,
 
-  -- LN.Model/Function
+  -- Model/Function
   apiRequestToApi,
   apiToResponse,
   apisToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getApisM,
   getApiM,
   insertApiM,

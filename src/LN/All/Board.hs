@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards     #-}
 
 module LN.All.Board (
-  -- LN.Handler
+  -- Handler
   getBoardsR,
   postBoardR0,
   getBoardR,
@@ -12,12 +12,12 @@ module LN.All.Board (
   getBoardStatsR,
   getBoardStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   boardRequestToBoard,
   boardToResponse,
   boardsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getBoardsM,
   getBoards_ByOrganizationIdM,
   getBoards_ByForumIdM,
@@ -40,6 +40,10 @@ import           LN.All.Prelude
 import           LN.All.Forum
 
 
+
+--
+-- Handler
+--
 
 getBoardsR :: Handler Value
 getBoardsR = run $ do
@@ -106,7 +110,7 @@ getBoardStatR board_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 boardRequestToBoard :: UserId -> OrganizationId -> ForumId -> Maybe BoardId -> BoardRequest -> Board
@@ -170,7 +174,7 @@ boardsToResponses boards = BoardResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 getBoardsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Board]
@@ -184,7 +188,7 @@ getBoardsM m_sp user_id = do
 
     (N, N, J board_parent_id)     -> getBoards_ByBoardParentIdM m_sp user_id (int64ToKey' board_parent_id)
 
-    _                             -> left $ LN.Error_InvalidArguments "org_id, forum_id, parent_id"
+    _                             -> left $ Error_InvalidArguments "org_id, forum_id, parent_id"
 
 
 
@@ -235,7 +239,7 @@ getBoardMH m_sp _ board_name = do
     Just forum_id -> do
       selectFirstDbE [BoardName ==. board_name, BoardForumId ==. forum_id, BoardActive ==. True] []
 
-    _             -> left $ LN.Error_InvalidArguments "forum_id"
+    _             -> left $ Error_InvalidArguments "forum_id"
 
 
 
@@ -251,7 +255,7 @@ insertBoardM m_sp user_id board_request = do
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
     (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
     (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
-    _                  -> left $ LN.Error_InvalidArguments "forum_id, board_id"
+    _                  -> left $ Error_InvalidArguments "forum_id, board_id"
 
 
 
@@ -314,7 +318,7 @@ deleteBoardM user_id board_id = do
 
 
 getBoardStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff Value
-getBoardStatsM _ _ = left LN.Error_NotImplemented
+getBoardStatsM _ _ = left Error_NotImplemented
 
 
 
