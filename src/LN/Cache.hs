@@ -9,48 +9,48 @@ module LN.Cache (
 
 
 
-import           Import
-import Control.Monad.Trans.RWS
+import           Control.Monad.Trans.RWS
+import qualified Data.Map                as M
 import           LN.Model.Misc
 import           LN.T.Membership
 import           LN.T.Visibility
-import qualified Data.Map as M
 
 
 
-data LN.CacheEntry a
-  = LN.CacheEntry a
-  | LN.CacheMissing
+data CacheEntry a
+  = CacheEntry a
+  | CacheMissing
 
 
 
-type LN.CacheMap a b = M.Map a (CacheEntry b)
+type CacheMap a b = M.Map a (CacheEntry b)
 
 
-data LN.Cache = LN.Cache {
+
+data Cache = Cache {
   cacheMe            :: Maybe User,
-  cacheOrganizations  :: LN.CacheMap OrganizationId Organization,
-  cacheUsers          :: LN.CacheMap UserId User,
-  cacheForums         :: LN.CacheMap ForumId Forum,
-  cacheBoards         :: LN.CacheMap BoardId Board,
-  cacheThreads        :: LN.CacheMap ThreadId Thread,
-  cacheThreadPosts    :: LN.CacheMap ThreadPostId ThreadPost
+  cacheOrganizations :: CacheMap OrganizationId Organization,
+  cacheUsers         :: CacheMap UserId User,
+  cacheForums        :: CacheMap ForumId Forum,
+  cacheBoards        :: CacheMap BoardId Board,
+  cacheThreads       :: CacheMap ThreadId Thread,
+  cacheThreadPosts   :: CacheMap ThreadPostId ThreadPost
 }
 
 
 
-emptyCache :: forall a b. LN.CacheMap a b
+emptyCache :: forall a b. CacheMap a b
 emptyCache = M.empty
 
 
 
-defaultCache :: LN.Cache
-defaultCache = LN.Cache {
-  cacheMe = Nothing,
+defaultCache :: Cache
+defaultCache = Cache {
+  cacheMe            = Nothing,
   cacheOrganizations = emptyCache,
-  cacheUsers = emptyCache,
-  cacheForums = emptyCache,
-  cacheBoards = emptyCache,
-  cacheThreads = emptyCache,
-  cacheThreadPosts = emptyCache
+  cacheUsers         = emptyCache,
+  cacheForums        = emptyCache,
+  cacheBoards        = emptyCache,
+  cacheThreads       = emptyCache,
+  cacheThreadPosts   = emptyCache
 }
