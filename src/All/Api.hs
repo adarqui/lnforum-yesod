@@ -25,45 +25,44 @@ module All.Api (
 import           All.Prelude
 import           Data.UUID    (toText)
 import           Data.UUID.V4 (nextRandom)
-import           Import
 
 
 
 getApisR :: Handler Value
 getApisR = run $ do
   user_id <- _requireAuthId
-  (toJSON . apisToResponses) <$> getApisM user_id
+  sp      <- lookupStandardParams
+  errorOrJSON apisToResponses $ getApisM (pure sp) user_id
 
 
 
 postApisR :: Handler Value
 postApisR = run $ do
-  user_id <- _requireAuthId
+  user_id     <- _requireAuthId
   api_request <- requireJsonBody
-  (toJSON . apiToResponse) <$> insertApiM user_id api_request
+  errorOrJSON apiToResponse $ insertApiM user_id api_request
 
 
 
 getApiR :: ApiId -> Handler Value
 getApiR api_id = run $ do
   user_id <- _requireAuthId
-  (toJSON . apiToResponse) <$> getApiM user_id api_id
+  errorOrJSON apiToResponse $ getApiM user_id api_id
 
 
 
 putApiR :: ApiId -> Handler Value
 putApiR api_id = run $ do
-  user_id <- _requireAuthId
+  user_id     <- _requireAuthId
   api_request <- requireJsonBody
-  (toJSON . apiToResponse) <$> updateApiM user_id api_id api_request
+  errorOrJSON apiToResponse $ updateApiM user_id api_id api_request
 
 
 
 deleteApiR :: ApiId -> Handler Value
 deleteApiR api_id = run $ do
   user_id <- _requireAuthId
-  void $ deleteApiM user_id api_id
-  pure $ toJSON ()
+  errorOrJSON id $ deleteApiM user_id api_id
 
 
 
@@ -110,39 +109,39 @@ apisToResponses apis = ApiResponses {
 -- Model/Internal
 --
 
-getApisM :: UserId -> HandlerEff [Entity Api]
-getApisM user_id = do
-  selectListDb' [ ApiUserId ==. user_id ] [] ApiId
+getApisM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Api]
+getApisM m_sp user_id = do
+  selectListDbE m_sp [ApiUserId ==. user_id, ApiActive ==. True] [] ApiId
 
 
 
-getApiM :: UserId -> ApiId -> HandlerEff (Entity Api)
+getApiM :: UserId -> ApiId -> HandlerErrorEff (Entity Api)
 getApiM user_id api_id = do
-  notFoundMaybe =<< selectFirstDb [ ApiUserId ==. user_id, ApiId ==. api_id ] []
+  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True] []
 
 
 
-insertApiM :: UserId -> ApiRequest -> HandlerEff (Entity Api)
+insertApiM :: UserId -> ApiRequest -> HandlerErrorEff (Entity Api)
 insertApiM user_id api_request = do
   ts <- timestampH'
   uuid1 <- liftIO nextRandom
   uuid2 <- liftIO nextRandom
   -- TODO: uuid5? namespace to user?
   let api = (apiRequestToApi user_id api_request) { apiKey = (toText uuid1 <> toText uuid2), apiCreatedAt = Just ts }
-  insertEntityDb api
+  insertEntityDbE api
 
 
 
-updateApiM :: UserId -> ApiId -> ApiRequest -> HandlerEff (Entity Api)
+updateApiM :: UserId -> ApiId -> ApiRequest -> HandlerErrorEff (Entity Api)
 updateApiM user_id api_id api_request = do
   ts <- timestampH'
   updateWhereDb
-    [ ApiUserId ==. user_id, ApiId ==. api_id ]
+    [ ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True ]
     [ ApiComment =. (apiRequestComment api_request), ApiModifiedAt =. Just ts ]
-  notFoundMaybe =<< selectFirstDb [ ApiUserId ==. user_id, ApiId ==. api_id ] []
+  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True] []
 
 
 
-deleteApiM :: UserId -> ApiId -> HandlerEff ()
+deleteApiM :: UserId -> ApiId -> HandlerErrorEff ()
 deleteApiM user_id api_id = do
-  deleteWhereDb [ ApiUserId ==. user_id, ApiId ==. api_id ]
+  deleteWhereDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True]
