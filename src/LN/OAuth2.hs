@@ -168,10 +168,10 @@ googleProfileX extra = ProfileX
             _ -> Left "user has no name"
 
     handleLogin :: Text -> Either Text Text
-    handleLogin login = Left "TODO FIXME"
+    handleLogin _ = Left "TODO FIXME"
 
     handleEmails :: [Email] -> Either Text Text
-    handleEmails [] = Left "user has no emails"
+    handleEmails []        = Left "user has no emails"
     handleEmails (email:_) = Right $ emailValue email
 
 

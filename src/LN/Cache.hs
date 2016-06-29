@@ -9,12 +9,8 @@ module LN.Cache (
 
 
 
-import           Control.Monad.Trans.RWS
 import qualified Data.Map                as M
 import           LN.Import
-import           LN.Model.Misc
-import           LN.T.Membership
-import           LN.T.Visibility
 
 
 
