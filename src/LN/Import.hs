@@ -4,5 +4,5 @@ module LN.Import (
 
 
 
-import           Foundation          as Import
-import           Import.NoFoundation as Import
+import           LN.Foundation          as Import
+import           LN.Import.NoFoundation as Import

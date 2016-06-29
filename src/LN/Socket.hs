@@ -6,7 +6,7 @@ module LN.Socket (
 
 
 
-import           Import
+import           LN.Import
 import           Yesod.WebSockets
 
 

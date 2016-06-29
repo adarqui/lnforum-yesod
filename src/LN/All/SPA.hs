@@ -6,7 +6,7 @@ module LN.All.SPA (
 
 import           LN.All.Prelude
 import           LN.Misc.Widget
-import           Socket
+import           LN.Socket
 import           Yesod.WebSockets
 
 
