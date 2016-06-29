@@ -95,7 +95,7 @@ defaultStandardParams :: StandardParams
 defaultStandardParams = StandardParams {
 
   spOffset           = Nothing,
-  spLimit            = Nothing,
+  spLimit            = defLimit,
   spSortOrder        = Nothing,
   spOrder            = Nothing,
   spTs               = Nothing,
@@ -140,6 +140,32 @@ defaultStandardParams = StandardParams {
   spWithThread       = False,
   spWithResource     = False
 }
+
+
+
+defLimit :: Maybe Int
+defLimit = Just 10
+
+minLimit :: Int
+minLimit = 1
+
+maxLimit :: Int
+maxLimit = 50
+
+
+sanitizeLimit :: Int -> Int
+sanitizeLimit limit
+  | limit < minLimit = minLimit
+  | limit > maxLimit = maxLimit
+  | otherwise        = limit
+
+
+
+defOffset :: Maybe Int
+defOffset = Nothing
+
+minOffset :: Int
+minOffset = 1
 
 
 
@@ -195,7 +221,7 @@ lookupStandardParams = do
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
   pure $ StandardParams {
     spOffset           = fmap tread offset,
-    spLimit            = fmap (abs . tread) limit,
+    spLimit            = fmap (sanitizeLimit . tread) limit,
     spSortOrder        = fmap tread sort_order,
     spOrder            = fmap tread order,
     spTs               = fmap tread ts,
