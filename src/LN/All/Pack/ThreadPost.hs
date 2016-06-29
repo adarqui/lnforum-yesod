@@ -1,11 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.ThreadPost (
-  -- LN.Handler
+  -- Handler
   getThreadPostPacksR,
   getThreadPostPackR,
 
-  -- LN.Model
+  -- Model
   getThreadPostPacksM,
   getThreadPostPackM
 ) where
@@ -24,7 +24,7 @@ import           LN.All.User
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getThreadPostPacksR :: Handler Value
@@ -47,7 +47,7 @@ getThreadPostPackR thread_post_id = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 getThreadPostPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacksM m_sp user_id = do
@@ -60,7 +60,7 @@ getThreadPostPacksM m_sp user_id = do
 
     (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id
 
-    (_, _, _)                   -> left $ LN.Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+    (_, _, _)                   -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 

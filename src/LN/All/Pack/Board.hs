@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Board (
-  -- LN.Handler
+  -- Handler
   getBoardPacksR,
   getBoardPackR,
   getBoardPackH,
 
-  -- LN.Model
+  -- Model
   getBoardPacksM,
   getBoardPackM,
   getBoardPackMH,
@@ -23,7 +23,7 @@ import           LN.All.User
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getBoardPacksR :: Handler Value
@@ -55,7 +55,7 @@ getBoardPackH board_name = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 
 getBoardPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff BoardPackResponses
@@ -64,7 +64,7 @@ getBoardPacksM m_sp user_id = do
   case (lookupSpMay m_sp spForumId) of
 
     Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
-    _             -> left $ LN.Error_InvalidArguments "forum_id"
+    _             -> left $ Error_InvalidArguments "forum_id"
 
 
 

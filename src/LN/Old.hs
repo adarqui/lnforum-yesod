@@ -47,7 +47,7 @@ getBoardStatM_qBoardStats _ board_id = do
 
 qBoardStats :: forall site.
      (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-     Key Board -> LN.ControlMA (HandlerT site IO) [(E.Value Int64, E.Value Int64, E.Value Int64)]
+     Key Board -> ControlMA (HandlerT site IO) [(E.Value Int64, E.Value Int64, E.Value Int64)]
 qBoardStats board_id = do
   _runDB
     $ E.select

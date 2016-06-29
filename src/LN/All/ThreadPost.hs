@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.ThreadPost (
-  -- LN.Handler
+  -- Handler
   getThreadPostsR,
   postThreadPostR0,
   getThreadPostR,
@@ -11,12 +11,12 @@ module LN.All.ThreadPost (
   getThreadPostStatsR,
   getThreadPostStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   threadPostRequestToThreadPost,
   threadPostToResponse,
   threadPostsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getThreadPostsM,
   getThreadPosts_ByForumIdM,
   getThreadPosts_ByThreadIdM,
@@ -103,7 +103,7 @@ getThreadPostStatR thread_post_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 threadPostRequestToThreadPost :: UserId -> OrganizationId -> ForumId -> BoardId -> ThreadId -> Maybe ThreadPostId -> ThreadPostRequest -> ThreadPost
@@ -164,7 +164,7 @@ threadPostsToResponses thread_posts = ThreadPostResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 -- orderByToField :: forall typ record. OrderBy -> EntityField record typ
@@ -185,7 +185,7 @@ getThreadPostsM m_sp user_id = do
     (Just forum_id, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
     (_, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
     (_, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-    _                           -> left $ LN.Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+    _                           -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
@@ -221,8 +221,8 @@ insertThreadPostM m_sp user_id thread_post_request = do
     (Just thread_id, _)      -> insertThreadPost_ByThreadIdM user_id thread_id thread_post_request
     (_, Just thread_post_id) -> insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request
 
-                             -- TODO FIXME: LN.Error_InvalidArguments "Must supply a thread_id or thread_post_id"
-    _                        -> left $ LN.Error_InvalidArguments "thread_id, thread_post_id"
+                             -- TODO FIXME: Error_InvalidArguments "Must supply a thread_id or thread_post_id"
+    _                        -> left $ Error_InvalidArguments "thread_id, thread_post_id"
 
 
 
@@ -318,12 +318,12 @@ countThreadPostsM m_sp _ = do
       n <- countDb [ ThreadPostThreadId ==. thread_id ]
       right $ CountResponses [CountResponse (keyToInt64 thread_id) (fromIntegral n)]
 
-    _              -> left $ LN.Error_InvalidArguments "thread_id"
+    _              -> left $ Error_InvalidArguments "thread_id"
 
 
 
 getThreadPostStatsM :: UserId -> HandlerErrorEff ThreadPostStatResponse
-getThreadPostStatsM _ = left LN.Error_NotImplemented
+getThreadPostStatsM _ = left Error_NotImplemented
 
 
 

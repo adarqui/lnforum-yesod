@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Thread (
-  -- LN.Handler
+  -- Handler
   getThreadPacksR,
   getThreadPackR,
   getThreadPackH,
 
-  -- LN.Model
+  -- Model
   getThreadPacksM,
   getThreadPackM,
   getThreadPackMH,
@@ -22,7 +22,7 @@ import           LN.All.User
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getThreadPacksR :: Handler Value
@@ -54,7 +54,7 @@ getThreadPackH thread_name = run $ do
 
 
 --
--- LN.Model
+-- Model
 --
 
 getThreadPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ThreadPackResponses
@@ -63,7 +63,7 @@ getThreadPacksM m_sp user_id = do
   case (lookupSpMay m_sp spBoardId) of
 
     Just board_id -> getThreadPacks_ByBoardIdM m_sp user_id board_id
-    _             -> left $ LN.Error_InvalidArguments "board_id"
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 
@@ -98,7 +98,7 @@ getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
 
 getThreadPack_ByThreadM :: Maybe StandardParams -> UserId -> Entity Thread -> HandlerErrorEff ThreadPackResponse
-getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
+getThreadPack_ByThreadM _ user_id thread@(Entity thread_id Thread{..}) = do
 
   let sp = defaultStandardParams {
       spSortOrder = Just SortOrderBy_Dsc,

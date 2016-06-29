@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Thread (
-  -- LN.Handler
+  -- Handler
   getThreadsR,
   postThreadR0,
   getThreadR,
@@ -12,12 +12,12 @@ module LN.All.Thread (
   getThreadStatsR,
   getThreadStatR,
 
-  -- LN.Model/Function
+  -- Model/Function
   threadRequestToThread,
   threadToResponse,
   threadsToResponses,
 
-  -- LN.Model/Internal
+  -- Model/Internal
   getThreadsM,
   getThreadM,
   getThreadMH,
@@ -37,13 +37,11 @@ module LN.All.Thread (
 
 
 import           LN.All.Prelude
-import           Database.Esqueleto     ((^.))
-import qualified Database.Esqueleto     as E
 
 
 
 --
--- LN.Handler
+-- Handler
 --
 
 getThreadsR :: Handler Value
@@ -121,7 +119,7 @@ getThreadStatR thread_id = run $ do
 
 
 --
--- LN.Model/Function
+-- Model/Function
 --
 
 threadRequestToThread :: UserId -> OrganizationId -> ForumId -> BoardId -> ThreadRequest -> Thread
@@ -187,7 +185,7 @@ threadsToResponses threads = ThreadResponses {
 
 
 --
--- LN.Model/Internal
+-- Model/Internal
 --
 
 -- orderByToField :: forall typ record. OrderBy -> EntityField record typ
@@ -208,7 +206,7 @@ getThreadsM m_sp user_id = do
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM m_sp user_id lookup_user_id
-    _                           -> left $ LN.Error_InvalidArguments "org_id, user_id, board_id"
+    _                           -> left $ Error_InvalidArguments "org_id, user_id, board_id"
 
 
 
@@ -250,7 +248,7 @@ getThreadMH m_sp _ thread_name = do
     Just board_id -> do
       selectFirstDbE [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
 
-    _             -> left $ LN.Error_InvalidArguments "board_id"
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 
@@ -264,7 +262,7 @@ insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerError
 insertThreadM m_sp user_id thread_request = do
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
-    _             -> left $ LN.Error_InvalidArguments "board_id"
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 
@@ -323,12 +321,12 @@ countThreadsM m_sp _ = do
       n <- countDb [ ThreadBoardId ==. board_id ]
       right $ CountResponses [CountResponse (keyToInt64 board_id) (fromIntegral n)]
 
-    _             -> left $ LN.Error_InvalidArguments "board_id"
+    _             -> left $ Error_InvalidArguments "board_id"
 
 
 
 getThreadStatsM :: UserId -> HandlerErrorEff ThreadStatResponses
-getThreadStatsM _ = left LN.Error_NotImplemented
+getThreadStatsM _ = left Error_NotImplemented
 
 
 
