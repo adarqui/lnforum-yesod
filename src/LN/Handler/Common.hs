@@ -7,7 +7,7 @@ module LN.Handler.Common (
 
 
 import           Data.FileEmbed (embedFile)
-import           Import
+import           LN.Import
 
 
 

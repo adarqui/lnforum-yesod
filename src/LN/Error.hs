@@ -11,9 +11,9 @@ module LN.Error (
 
 
 import           Data.Aeson (encode)
-import           Import
+import           LN.Import
+import           LN.Misc    (cs)
 import           LN.T.Error (ApplicationError)
-import           LN.Misc       (cs)
 
 
 

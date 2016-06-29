@@ -13,7 +13,7 @@ import qualified Data.Text                   as T (append, pack)
 import qualified Data.Text.Encoding          as T (decodeUtf8)
 import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
 import qualified Database.Redis              as R (Connection)
-import           Import.NoFoundation
+import           LN.Import.NoFoundation
 import           LN.OAuth2                   (authenticateUser)
 import qualified Network.Wai                 as W (rawPathInfo, requestHeaders)
 import           Network.Wai.Middleware.Cors ()
@@ -33,6 +33,8 @@ data AppSettingsLN = AppSettingsLN {
   appGithubClientID     :: String,
   appGithubClientSecret :: String
 }
+
+
 
 instance FromJSON AppSettingsLN where
   parseJSON = withObject "AppSettingsLN" $ \o -> do

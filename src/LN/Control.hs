@@ -24,6 +24,7 @@ import qualified Control.Monad.Trans.Either as Either
 import           Control.Monad.Trans.RWS
 import qualified Data.Map                   as M
 import           LN.Cache
+import           LN.Import
 import           LN.T.Error
 
 
