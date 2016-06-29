@@ -4,7 +4,7 @@ module Main (
 
 
 
-import           LN.Control.Monad
+import           Control.Monad
 import           LN.Job
 
 

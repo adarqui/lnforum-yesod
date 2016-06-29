@@ -86,7 +86,7 @@ instance Yesod App where
     -- simpleCors . whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
 
   defaultLayout widget = do
-      master <- getYesod
+      -- master <- getYesod
       mmsg   <- getMessage
       muser  <- maybeAuth
       -- route <- getCurrentRoute

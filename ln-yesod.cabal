@@ -89,9 +89,9 @@ library
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
-        ghc-options:   -Wall -fwarn-tabs -O0 -fno-warn-orphans
+        ghc-options:   -Wall -Werror -fwarn-tabs -O0 -fno-warn-orphans
     else
-        ghc-options:   -Wall -fwarn-tabs -O2 -fno-warn-orphans
+        ghc-options:   -Wall -Werror -fwarn-tabs -O2 -fno-warn-orphans
 
     default-extensions: TemplateHaskell
                         QuasiQuotes
@@ -128,7 +128,6 @@ library
                  , yesod-auth-oauth2 == 0.1.10
                  , yesod-static
                  , yesod-form
---                 , yesod-bootstrap
                  , yesod-test
                  , classy-prelude
                  , classy-prelude-conduit
@@ -161,7 +160,6 @@ library
                  , vector
                  , time
 
---               , esqueleto
                  , esqueleto
                  , GenericPretty
                  , gravatar
@@ -187,7 +185,6 @@ library
                  , yesod-websockets
 
                  , blaze-html
---                 , cryptonite
                  , pureMD5
                  , safe
                  , hoauth2

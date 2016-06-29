@@ -10,7 +10,8 @@ $doctype 5
   <body>
 $#    ^{pageBody nav}
 
-    $maybe Entity userId user <- muser
+    $maybe Entity _ _ <- muser
+      <div>
     $nothing
       <li .nav-item.nav-item--button>
         <a href=@{AuthR LoginR}>Sign in
