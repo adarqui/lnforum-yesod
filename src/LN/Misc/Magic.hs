@@ -1,4 +1,4 @@
-module Misc.Magic (
+module LN.Misc.Magic (
   isSuper
 ) where
 

@@ -1,4 +1,4 @@
-module Misc.Widget (
+module LN.Misc.Widget (
   addScriptRemoteBustCache
 ) where
 

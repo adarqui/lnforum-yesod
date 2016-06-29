@@ -1,4 +1,4 @@
-module All.TeamMember (
+module LN.All.TeamMember (
   -- Handler
   getTeamMembersR,
   postTeamMemberR0,
@@ -25,7 +25,7 @@ module All.TeamMember (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           LN.T.Membership
 
 

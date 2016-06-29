@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Organization (
+module LN.All.Organization (
   -- Handler
   getOrganizationsR,
   postOrganizationR0,
@@ -37,9 +37,9 @@ module All.Organization (
 
 
 
-import           All.Prelude
-import           All.TeamMember
-import           All.Team
+import           LN.All.Prelude
+import           LN.All.TeamMember
+import           LN.All.Team
 import           LN.T.Membership
 import           LN.T.Visibility
 

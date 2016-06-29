@@ -1,5 +1,5 @@
-module Job (
-  module A
+module LN.Job (
+  module LN.A
 ) where
 
 

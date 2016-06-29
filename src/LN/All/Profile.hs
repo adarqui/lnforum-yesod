@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module All.Profile (
+module LN.All.Profile (
   -- Handler
   getProfilesR,
   getProfileR,
@@ -22,7 +22,7 @@ module All.Profile (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

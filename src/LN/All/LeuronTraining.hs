@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.LeuronTraining (
+module LN.All.LeuronTraining (
   -- Model/Function
   leuronTrainingRequestToLeuronTraining,
   leuronTrainingToResponse,
@@ -12,7 +12,7 @@ module All.LeuronTraining (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Sanitized.User (
+module LN.All.Pack.Sanitized.User (
   -- Handler
   getUserSanitizedPacksR,
   getUserSanitizedPackR,
@@ -14,9 +14,9 @@ module All.Pack.Sanitized.User (
 
 
 
-import           All.Prelude
-import           All.Profile
-import           All.User
+import           LN.All.Prelude
+import           LN.All.Profile
+import           LN.All.User
 
 
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.User (
+module LN.All.Pack.User (
   -- Model
   getUserPacksM,
   getUserPackM,
@@ -9,9 +9,9 @@ module All.Pack.User (
 
 
 
-import           All.Prelude
-import           All.Profile
-import           All.User
+import           LN.All.Prelude
+import           LN.All.Profile
+import           LN.All.User
 
 
 

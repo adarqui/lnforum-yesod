@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeOperators   #-}
 {-# LANGUAGE ViewPatterns    #-}
 
-module Api.Params (
+module LN.Api.Params (
   StandardParams (..),
   defaultStandardParams,
   lookupStandardParams,

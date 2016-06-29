@@ -1,7 +1,7 @@
 -- Stolen from Carnival.
 --
 
-module Helper.Request (
+module LN.Helper.Request (
   allowCrossOrigin,
   fromMaybe404
 ) where

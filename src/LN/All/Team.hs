@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Team (
+module LN.All.Team (
   -- Handler
   getTeamsR,
   getTeamR,
@@ -27,8 +27,8 @@ module All.Team (
 
 
 
-import           All.Prelude
-import           All.TeamMember
+import           LN.All.Prelude
+import           LN.All.TeamMember
 import qualified Data.Text       as T
 import           LN.T.Membership
 import           LN.T.Team

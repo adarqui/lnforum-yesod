@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.PmOut (
+module LN.All.PmOut (
   -- Handler
   getPmOutsR,
   postPmOutsR,
@@ -23,7 +23,7 @@ module All.PmOut (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

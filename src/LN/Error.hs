@@ -2,7 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE TypeOperators  #-}
 
-module Error (
+module LN.Error (
   notFoundMaybe,
   errorOrJSON,
   permissionDeniedEither,

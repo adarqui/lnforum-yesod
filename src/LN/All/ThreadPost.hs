@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.ThreadPost (
+module LN.All.ThreadPost (
   -- Handler
   getThreadPostsR,
   postThreadPostR0,
@@ -32,7 +32,7 @@ module All.ThreadPost (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import qualified LN.T.Like                 as L
 
 

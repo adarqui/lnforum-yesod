@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Resource (
+module LN.All.Pack.Resource (
   -- Handler
   getResourcePacksR,
   getResourcePackR,
@@ -12,9 +12,9 @@ module All.Pack.Resource (
 
 
 
-import           All.Prelude
-import           All.Resource
-import           All.User
+import           LN.All.Prelude
+import           LN.All.Resource
+import           LN.All.User
 
 
 

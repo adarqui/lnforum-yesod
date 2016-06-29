@@ -1,5 +1,5 @@
-module Import.NoFoundation (
-  module Import
+module LN.Import.NoFoundation (
+  module LN.Import
 ) where
 
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Thread (
+module LN.All.Thread (
   -- Handler
   getThreadsR,
   postThreadR0,
@@ -36,7 +36,7 @@ module All.Thread (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Api (
+module LN.All.Api (
   getApisR,
   postApisR,
   getApiR,
@@ -22,7 +22,7 @@ module All.Api (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Data.UUID    (toText)
 import           Data.UUID.V4 (nextRandom)
 

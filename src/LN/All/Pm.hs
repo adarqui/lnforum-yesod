@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module All.Pm (
+module LN.All.Pm (
   -- Handler
   getPmsR,
   postPmR0,
@@ -24,7 +24,7 @@ module All.Pm (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

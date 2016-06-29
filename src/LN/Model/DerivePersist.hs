@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
-module Model.DerivePersist (
-  module A,
+module LN.Model.DerivePersist (
+  module LN.A,
   Membership,
   Visibility,
   LikeOpt,

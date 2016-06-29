@@ -1,6 +1,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 
-module Cache (
+module LN.Cache (
   Cache (..),
   CacheEntry (..),
   defaultCache,

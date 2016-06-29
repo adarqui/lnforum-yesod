@@ -8,7 +8,7 @@
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module OAuth2 (
+module LN.OAuth2 (
   User(..),
   userGravatar,
   intercomHash,

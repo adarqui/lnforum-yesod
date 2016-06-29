@@ -1,5 +1,5 @@
-module All.Prelude (
-  module A
+module LN.All.Prelude (
+  module LN.A
 ) where
 
 

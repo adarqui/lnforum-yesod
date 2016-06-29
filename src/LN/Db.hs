@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeOperators         #-}
 
-module Db (
+module LN.Db (
   selectListDb,
   selectListDbE,
   selectKeysListDb,

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Thread (
+module LN.All.Pack.Thread (
   -- Handler
   getThreadPacksR,
   getThreadPackR,
@@ -14,10 +14,10 @@ module All.Pack.Thread (
 
 
 
-import           All.Prelude
-import           All.Thread
-import           All.ThreadPost
-import           All.User
+import           LN.All.Prelude
+import           LN.All.Thread
+import           LN.All.ThreadPost
+import           LN.All.User
 
 
 

@@ -1,5 +1,5 @@
-module Misc.Codec (
-  module A,
+module LN.Misc.Codec (
+  module LN.A,
   textToKey,
   textToKey',
   textToKeys,

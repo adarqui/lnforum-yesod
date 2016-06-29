@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.GlobalGroup (
+module LN.All.Pack.GlobalGroup (
   -- Handler
   getGlobalGroupPacksR,
   getGlobalGroupPackR,
@@ -12,9 +12,9 @@ module All.Pack.GlobalGroup (
 
 
 
-import           All.GlobalGroup
-import           All.Prelude
-import           All.User
+import           LN.All.GlobalGroup
+import           LN.All.Prelude
+import           LN.All.User
 
 
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Leuron (
+module LN.All.Leuron (
   -- Handler
   getLeuronsR,
   postLeuronR0,
@@ -34,7 +34,7 @@ module All.Leuron (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import qualified Database.Redis     as R

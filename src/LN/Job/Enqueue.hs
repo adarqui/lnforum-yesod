@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Job.Enqueue (
+module LN.Job.Enqueue (
   mkJob_CreateUserProfile
 ) where
 

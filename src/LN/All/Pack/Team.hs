@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Team (
+module LN.All.Pack.Team (
   -- Handler
   getTeamPacksR,
   getTeamPackR,
@@ -11,9 +11,9 @@ module All.Pack.Team (
 
 
 
-import           All.Team
-import           All.Prelude
-import           All.User
+import           LN.All.Team
+import           LN.All.Prelude
+import           LN.All.User
 
 
 

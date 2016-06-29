@@ -1,4 +1,4 @@
-module Misc (
+module LN.Misc (
   lookupGetParamId,
   cs
 ) where

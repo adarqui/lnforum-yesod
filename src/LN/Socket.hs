@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Socket (
+module LN.Socket (
   socketHub
 ) where
 

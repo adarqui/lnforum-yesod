@@ -1,10 +1,10 @@
-module All.SPA (
+module LN.All.SPA (
   getSPAR
 ) where
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Misc.Widget
 import           Socket
 import           Yesod.WebSockets

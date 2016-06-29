@@ -1,4 +1,4 @@
-module Settings.StaticFiles where
+module LN.Settings.StaticFiles where
 
 import Settings     (appStaticDir, compileTimeAppSettings)
 import Yesod.Static (staticFiles)

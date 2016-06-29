@@ -1,4 +1,4 @@
-module Lifted (
+module LN.Lifted (
   _requireAuthId,
   _runDB
 ) where

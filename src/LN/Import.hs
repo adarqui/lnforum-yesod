@@ -1,5 +1,5 @@
-module Import (
-  module Import
+module LN.Import (
+  module LN.Import
 ) where
 
 

@@ -1,4 +1,4 @@
-module Model.Keys (
+module LN.Model.Keys (
   usersResourceKey,
   usersResourceLeuronKey,
   usersZLeuronsKey,

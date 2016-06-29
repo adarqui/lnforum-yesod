@@ -5,7 +5,7 @@
 -- Old stuff.. that I want to keep for reference
 --
 
-module Old (
+module LN.Old (
   getBoardStatM_qBoardStats,
   qBoardStats,
   getThreads_ByOrganizationIdM
@@ -14,7 +14,7 @@ module Old (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Database.Esqueleto     ((^.))
 import qualified Database.Esqueleto     as E
 

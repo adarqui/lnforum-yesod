@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Forum (
+module LN.All.Forum (
   -- Handler
   getForumsR,
   postForumR0,
@@ -36,7 +36,7 @@ module All.Forum (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

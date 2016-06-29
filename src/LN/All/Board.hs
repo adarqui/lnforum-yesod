@@ -1,7 +1,7 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards     #-}
 
-module All.Board (
+module LN.All.Board (
   -- Handler
   getBoardsR,
   postBoardR0,
@@ -36,8 +36,8 @@ module All.Board (
 
 
 
-import           All.Prelude
-import           All.Forum
+import           LN.All.Prelude
+import           LN.All.Forum
 
 
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.ThreadPost (
+module LN.All.Pack.ThreadPost (
   -- Handler
   getThreadPostPacksR,
   getThreadPostPackR,
@@ -12,14 +12,14 @@ module All.Pack.ThreadPost (
 
 
 
-import           All.Board
-import           All.Forum
-import           All.Like
-import           All.Organization
-import           All.Prelude
-import           All.Thread
-import           All.ThreadPost
-import           All.User
+import           LN.All.Board
+import           LN.All.Forum
+import           LN.All.Like
+import           LN.All.Organization
+import           LN.All.Prelude
+import           LN.All.Thread
+import           LN.All.ThreadPost
+import           LN.All.User
 
 
 

@@ -1,1 +1,1 @@
-module Application.Prelude where
+module LN.Application.Prelude where

@@ -1,4 +1,4 @@
-module Model.Misc (
+module LN.Model.Misc (
   dummyId
 ) where
 

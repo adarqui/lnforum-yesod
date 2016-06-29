@@ -1,14 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Job.Dequeue (
+module LN.Job.Dequeue (
   runJobs,
   runJob_CreateUserProfile
 ) where
 
 
 
-import           All.Profile                  (profileRequestToProfile)
+import           LN.All.Profile                  (profileRequestToProfile)
 import           Data.Aeson
 import           Import
 import           Job.Shared

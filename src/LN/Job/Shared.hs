@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 
-module Job.Shared (
+module LN.Job.Shared (
   BgReader (..),
   bgConnect,
   bgRunEnq,

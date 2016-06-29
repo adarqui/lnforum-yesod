@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.PmIn (
+module LN.All.PmIn (
   -- Handler
   getPmInsR,
   postPmInsR,
@@ -23,7 +23,7 @@ module All.PmIn (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

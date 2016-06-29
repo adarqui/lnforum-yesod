@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Reminder (
+module LN.All.Reminder (
   -- Handler
   getRemindersR,
   postRemindersR,
@@ -38,7 +38,7 @@ module All.Reminder (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 
 
 

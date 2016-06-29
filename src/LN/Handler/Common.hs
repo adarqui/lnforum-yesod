@@ -1,5 +1,5 @@
 -- | Common handler functions.
-module Handler.Common (
+module LN.Handler.Common (
   getFaviconR,
   getRobotsR
 ) where

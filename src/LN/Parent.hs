@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Parent (
+module LN.Parent (
   fatherOf_ThreadPostM,
   fatherIdOf_ThreadPostM
 --  parentOf_ThreadPostId

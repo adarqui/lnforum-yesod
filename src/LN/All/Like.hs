@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Like (
+module LN.All.Like (
   -- Handler
   getLikesR,
   postLikeR0,
@@ -29,7 +29,7 @@ module All.Like (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import qualified LN.T.Like   as L
 
 

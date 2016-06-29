@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Access (
+module LN.Access (
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,

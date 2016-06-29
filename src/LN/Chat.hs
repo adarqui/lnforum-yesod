@@ -7,7 +7,7 @@
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE TypeFamilies          #-}
-module Chat where
+module LN.Chat where
 
 import           Chat.Data
 import           Yesod

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Star (
+module LN.All.Star (
   -- handler
   getStarsR,
   postStarR0,
@@ -31,7 +31,7 @@ module All.Star (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import qualified LN.T.Star as L
 
 

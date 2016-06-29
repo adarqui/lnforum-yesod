@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Board (
+module LN.All.Pack.Board (
   -- Handler
   getBoardPacksR,
   getBoardPackR,
@@ -14,11 +14,11 @@ module All.Pack.Board (
 
 
 
-import           All.Board
-import           All.Prelude
-import           All.Thread
-import           All.ThreadPost
-import           All.User
+import           LN.All.Board
+import           LN.All.Prelude
+import           LN.All.Thread
+import           LN.All.ThreadPost
+import           LN.All.User
 
 
 

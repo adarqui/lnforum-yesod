@@ -1,2 +1,2 @@
-module Api.Auth (
+module LN.Api.Auth (
 ) where

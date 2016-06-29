@@ -1,4 +1,4 @@
-module Control (
+module LN.Control (
   HandlerEff,
   HandlerErrorEff,
   ControlM,

@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Leuron (
+module LN.All.Pack.Leuron (
   -- Handler
   getLeuronPacksR,
   getLeuronPackR,
@@ -12,10 +12,10 @@ module All.Pack.Leuron (
 
 
 
-import           All.Leuron
-import           All.LeuronTraining
-import           All.Prelude
-import           All.User
+import           LN.All.Leuron
+import           LN.All.LeuronTraining
+import           LN.All.Prelude
+import           LN.All.User
 
 
 

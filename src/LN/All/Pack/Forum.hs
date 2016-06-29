@@ -1,4 +1,4 @@
-module All.Pack.Forum (
+module LN.All.Pack.Forum (
   -- Handler
   getForumPacksR,
   getForumPackR,
@@ -12,8 +12,8 @@ module All.Pack.Forum (
 
 
 
-import           All.Prelude
-import           All.Forum
+import           LN.All.Prelude
+import           LN.All.Forum
 
 
 

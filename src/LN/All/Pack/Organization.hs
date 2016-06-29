@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Pack.Organization (
+module LN.All.Pack.Organization (
   -- Handler
   getOrganizationPacksR,
   getOrganizationPackR,
@@ -15,9 +15,9 @@ module All.Pack.Organization (
 
 
 import           Access
-import           All.Organization
-import           All.Prelude
-import           All.User
+import           LN.All.Organization
+import           LN.All.Prelude
+import           LN.All.User
 
 
 

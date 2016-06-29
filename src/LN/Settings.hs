@@ -8,7 +8,7 @@
 -- by overriding methods in the Yesod typeclass. That instance is
 -- declared in the Foundation.hs file.
 
-module Settings (
+module LN.Settings (
   DB,
   OAuthKeys (..),
   AppSettings (..),

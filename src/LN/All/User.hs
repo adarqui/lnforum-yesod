@@ -4,7 +4,7 @@
 {-# LANGUAGE TypeFamilies    #-}
 {-# LANGUAGE TypeOperators   #-}
 
-module All.User (
+module LN.All.User (
   -- Handler
   getUsersR,
   postUserR0,
@@ -44,8 +44,8 @@ module All.User (
 
 
 
-import           All.Prelude
-import           All.Profile
+import           LN.All.Prelude
+import           LN.All.Profile
 import           Data.Char          (isAlphaNum)
 import qualified Data.Text          as T (filter, toLower)
 import           Database.Esqueleto ((^.))

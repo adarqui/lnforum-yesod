@@ -1,6 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module All.Resource (
+module LN.All.Resource (
   -- Handler
   getResourcesR,
   postResourceR0,
@@ -31,7 +31,7 @@ module All.Resource (
 
 
 
-import           All.Prelude
+import           LN.All.Prelude
 import           Import
 import           LN.Lib.Url        (toPrettyUrl)
 import           LN.T              hiding (LikeOpt(..))

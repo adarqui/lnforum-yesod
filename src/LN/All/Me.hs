@@ -1,4 +1,4 @@
-module All.Me (
+module LN.All.Me (
   -- Handler
   getMeR,
 
@@ -8,8 +8,8 @@ module All.Me (
 
 
 
-import           All.Prelude
-import           All.User
+import           LN.All.Prelude
+import           LN.All.User
 
 
 

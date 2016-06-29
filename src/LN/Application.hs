@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Application (
+module LN.Application (
   getApplicationDev,
   appMain,
   develMain,
@@ -42,41 +42,41 @@ import           System.Log.FastLogger                (defaultBufSize,
 
 
 
-import           All.Api
-import           All.Board
-import           All.Forum
-import           All.GlobalGroup
-import           All.Leuron
-import           All.Like
-import           All.Me
-import           All.Organization
-import           All.Pack.Board
-import           All.Pack.Forum
-import           All.Pack.GlobalGroup
-import           All.Pack.Leuron
-import           All.Pack.Me
-import           All.Pack.Organization
-import           All.Pack.PmIn
-import           All.Pack.PmOut
-import           All.Pack.Resource
-import           All.Pack.Sanitized.User
-import           All.Pack.Team
-import           All.Pack.TeamMember
-import           All.Pack.Thread
-import           All.Pack.ThreadPost
-import           All.Pm
-import           All.PmIn
-import           All.PmOut
-import           All.Profile
-import           All.Reminder
-import           All.Resource
-import           All.SPA
-import           All.Star
-import           All.Team
-import           All.TeamMember
-import           All.Thread
-import           All.ThreadPost
-import           All.User
+import           LN.All.Api
+import           LN.All.Board
+import           LN.All.Forum
+import           LN.All.GlobalGroup
+import           LN.All.Leuron
+import           LN.All.Like
+import           LN.All.Me
+import           LN.All.Organization
+import           LN.All.Pack.Board
+import           LN.All.Pack.Forum
+import           LN.All.Pack.GlobalGroup
+import           LN.All.Pack.Leuron
+import           LN.All.Pack.Me
+import           LN.All.Pack.Organization
+import           LN.All.Pack.PmIn
+import           LN.All.Pack.PmOut
+import           LN.All.Pack.Resource
+import           LN.All.Pack.Sanitized.User
+import           LN.All.Pack.Team
+import           LN.All.Pack.TeamMember
+import           LN.All.Pack.Thread
+import           LN.All.Pack.ThreadPost
+import           LN.All.Pm
+import           LN.All.PmIn
+import           LN.All.PmOut
+import           LN.All.Profile
+import           LN.All.Reminder
+import           LN.All.Resource
+import           LN.All.SPA
+import           LN.All.Star
+import           LN.All.Team
+import           LN.All.TeamMember
+import           LN.All.Thread
+import           LN.All.ThreadPost
+import           LN.All.User
 
 import           Handler.Common
 
