@@ -36,9 +36,7 @@ module All.Forum (
 
 
 
-import           All.Organization
 import           All.Prelude
-import           All.User
 
 
 
@@ -205,14 +203,14 @@ getForumsM m_sp user_id = do
 getForums_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Forum]
 getForums_ByOrganizationIdM m_sp _ org_id = do
 
-  selectListDbEither m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
+  selectListDbE m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
 getForums_ByOrganizationId_KeysM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Key Forum]
 getForums_ByOrganizationId_KeysM m_sp _ org_id = do
 
-  selectKeysListDbEither m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
+  selectKeysListDbE m_sp [ForumOrgId ==. org_id, ForumActive ==. True] [] ForumId
 
 
 
@@ -220,21 +218,21 @@ getForums_ByOrganizationId_KeysM m_sp _ org_id = do
 getForums_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Forum]
 getForums_ByUserIdM m_sp _ lookup_user_id = do
 
-  selectListDbEither m_sp [ForumUserId ==. lookup_user_id, ForumActive ==. True] [] ForumId
+  selectListDbE m_sp [ForumUserId ==. lookup_user_id, ForumActive ==. True] [] ForumId
 
 
 
 getForum_ByOrganizationIdMH :: Maybe StandardParams -> UserId -> Text -> OrganizationId -> HandlerErrorEff (Entity Forum)
-getForum_ByOrganizationIdMH m_sp user_id forum_name org_id = do
+getForum_ByOrganizationIdMH _ _ forum_name org_id = do
 
-  selectFirstDbEither [ForumOrgId ==. org_id, ForumName ==. forum_name, ForumActive ==. True] []
+  selectFirstDbE [ForumOrgId ==. org_id, ForumName ==. forum_name, ForumActive ==. True] []
 
 
 
 getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
 getForumM _ forum_id = do
 
-  selectFirstDbEither [ForumId ==. forum_id, ForumActive ==. True] []
+  selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
@@ -301,13 +299,13 @@ updateForumM user_id forum_id forum_request = do
     , ForumGuard               +=. 1
     ]
 
-  selectFirstDbEither [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
+  selectFirstDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
 deleteForumM :: UserId -> ForumId -> HandlerErrorEff ()
 deleteForumM user_id forum_id = do
-  deleteWhereDbEither [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True]
+  deleteWhereDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True]
 
 
 
@@ -325,7 +323,7 @@ countForumsM m_sp _ = do
 
 
 getForumStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumStatResponses
-getForumStatsM m_sp _ = left Error_NotImplemented
+getForumStatsM _ _ = left Error_NotImplemented
 
 
 

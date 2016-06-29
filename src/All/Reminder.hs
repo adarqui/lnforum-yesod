@@ -39,10 +39,6 @@ module All.Reminder (
 
 
 import           All.Prelude
-import           LN.Lib.Url (toPrettyUrl)
-import           LN.T
-import           Import
-import           Misc.Codec (keyToInt64)
 
 
 
@@ -250,9 +246,9 @@ getRemindersM :: UserId -> Maybe ReminderFolderId -> HandlerEff [Entity Reminder
 getRemindersM user_id mfolder_id = do
   case mfolder_id of
     Nothing -> do
-      selectListDb' [ ReminderUserId ==. user_id ] [] ReminderId
+      selectListDb Nothing [ReminderUserId ==. user_id, ReminderActive ==. True] [] ReminderId
     Just folder_id -> do
-      selectListDb' [ ReminderUserId ==. user_id, ReminderParentFolderId ==. folder_id ] [] ReminderId
+      selectListDb Nothing [ReminderUserId ==. user_id, ReminderParentFolderId ==. folder_id, ReminderActive ==. True] [] ReminderId
 
 
 
@@ -271,7 +267,7 @@ insertRemindersM user_id mfolder_id reminder_request = do
 
 getReminderM :: UserId -> ReminderId -> HandlerEff (Entity Reminder)
 getReminderM _ reminder_id = do
-  notFoundMaybe =<< selectFirstDb [ ReminderId ==. reminder_id ] []
+  notFoundMaybe =<< selectFirstDb [ReminderId ==. reminder_id, ReminderActive ==. True] []
 
 
 
@@ -286,7 +282,7 @@ updateReminderM user_id reminder_id reminder_request = do
     Reminder{..} = (reminderRequestToReminder user_id (int64ToKey' 0) reminder_request) { reminderModifiedAt = Just ts }
 
   updateWhereDb
-    [ ReminderUserId ==. user_id, ReminderId ==. reminder_id ]
+    [ ReminderUserId ==. user_id, ReminderId ==. reminder_id, ReminderActive ==. True ]
     [ ReminderModifiedAt =. reminderModifiedAt
     , ReminderData =. reminderData
     ]
@@ -297,7 +293,7 @@ updateReminderM user_id reminder_id reminder_request = do
 
 deleteReminderM :: UserId -> ReminderId -> HandlerEff ()
 deleteReminderM user_id reminder_id = do
-  deleteWhereDb [ ReminderUserId ==. user_id, ReminderId ==. reminder_id ]
+  deleteWhereDb [ReminderUserId ==. user_id, ReminderId ==. reminder_id]
 
 
 
@@ -306,7 +302,7 @@ deleteReminderM user_id reminder_id = do
 --
 getReminderFoldersM :: UserId -> Maybe ReminderFolderId -> HandlerEff [Entity ReminderFolder]
 getReminderFoldersM user_id mfolder_id = do
-  selectListDb' [ ReminderFolderUserId ==. user_id, ReminderFolderParentId ==. mfolder_id ] [] ReminderFolderId
+  selectListDb Nothing [ReminderFolderUserId ==. user_id, ReminderFolderParentId ==. mfolder_id, ReminderFolderActive ==. True] [] ReminderFolderId
 
 
 
@@ -324,7 +320,7 @@ insertReminderFoldersM user_id mfolder_id reminder_folder_request = do
 
 getReminderFolderM :: UserId -> ReminderFolderId -> HandlerEff (Entity ReminderFolder)
 getReminderFolderM _ reminder_folder_id = do
-  notFoundMaybe =<< selectFirstDb [ ReminderFolderId ==. reminder_folder_id ] []
+  notFoundMaybe =<< selectFirstDb [ReminderFolderId ==. reminder_folder_id] []
 
 
 
@@ -351,14 +347,14 @@ updateReminderFolderM user_id reminder_folder_id reminder_folder_request = do
     ReminderFolder{..} = (reminderFolderRequestToReminderFolder user_id Nothing reminder_folder_request) { reminderFolderModifiedAt = Just ts }
 
   updateWhereDb
-    [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id ]
+    [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id, ReminderFolderActive ==. True ]
     [ ReminderFolderModifiedAt =. reminderFolderModifiedAt
     ]
 
-  notFoundMaybe =<< selectFirstDb [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id ] []
+  notFoundMaybe =<< selectFirstDb [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id, ReminderFolderActive ==. True ] []
 
 
 
 deleteReminderFolderM :: UserId -> ReminderFolderId -> HandlerEff ()
 deleteReminderFolderM user_id reminder_folder_id = do
-  deleteCascadeWhereDb [ ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id ]
+  deleteCascadeWhereDb [ReminderFolderUserId ==. user_id, ReminderFolderId ==. reminder_folder_id, ReminderFolderActive ==. True]

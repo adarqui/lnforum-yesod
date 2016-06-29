@@ -155,13 +155,13 @@ getTeamMembersM m_sp user_id = do
 getTeamMembers_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> HandlerErrorEff [Entity TeamMember]
 getTeamMembers_ByTeamIdM m_sp _ team_id = do
   -- TODO ACCESS:
-  selectListDbEither m_sp [TeamMemberTeamId ==. team_id, TeamMemberActive ==. True] [] TeamMemberId
+  selectListDbE m_sp [TeamMemberTeamId ==. team_id, TeamMemberActive ==. True] [] TeamMemberId
 
 
 
 getTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff (Entity TeamMember)
 getTeamMemberM _ team_member_id = do
-  selectFirstDbEither [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
+  selectFirstDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
 
 
 
@@ -185,18 +185,18 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
 
   ts <- timestampH'
 
-  e_team <- selectFirstDbEither [TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True] []
+  e_team <- selectFirstDbE [TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True] []
   rehtie e_team left $ \(Entity team_id team) -> do
 
     let
       team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
-    e_team' <- selectFirstDbEither [TeamId ==. team_id] []
+    e_team' <- selectFirstDbE [TeamId ==. team_id] []
 
     rehtie e_team' left $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
       case teamMembership of
-        Membership_Join -> insertEntityDbEither team_member
+        Membership_Join -> insertEntityDbE team_member
         _               -> left $ Error_PermissionDenied
 
 
@@ -213,12 +213,12 @@ insertTeamMember_InternalM user_id org_id team_id team_member_request = do
   let
     team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
-  e_team <- selectFirstDbEither [TeamId ==. team_id] []
+  e_team <- selectFirstDbE [TeamId ==. team_id] []
 
   rehtie e_team left $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
-      Membership_Join -> insertEntityDbEither team_member
+      Membership_Join -> insertEntityDbE team_member
       _               -> left $ Error_PermissionDenied
 
 
@@ -231,11 +231,11 @@ insertTeamMember_BypassM user_id org_id team_id team_member_request = do
   let
     team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
-  e_team <- selectFirstDbEither [TeamId ==. team_id] []
+  e_team <- selectFirstDbE [TeamId ==. team_id] []
   rehtie e_team left $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
-      _ -> insertEntityDbEither team_member
+      _ -> insertEntityDbE team_member
 
 
 
@@ -254,13 +254,13 @@ updateTeamMemberM user_id team_member_id team_member_request = do
     , TeamMemberGuard      +=. teamMemberGuard
     ]
 
-  selectFirstDbEither [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
+  selectFirstDbE [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
 
 
 
 deleteTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff ()
 deleteTeamMemberM user_id team_member_id = do
-  deleteWhereDbEither [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
+  deleteWhereDbE [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
 
 
 

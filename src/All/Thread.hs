@@ -214,31 +214,31 @@ getThreadsM m_sp user_id = do
 
 getThreads_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Thread]
 getThreads_ByOrganizationIdM m_sp _ org_id = do
-  selectListDbEither m_sp [ThreadOrgId ==. org_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbE m_sp [ThreadOrgId ==. org_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
 getThreads_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Thread]
 getThreads_ByBoardIdM m_sp _ board_id = do
-  selectListDbEither m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbE m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
 getThreads_ByBoardId_KeysM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Key Thread]
 getThreads_ByBoardId_KeysM m_sp _ board_id = do
-  selectKeysListDbEither m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectKeysListDbE m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
 getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Thread]
 getThreads_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbEither m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
+  selectListDbE m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
 
 
 
 getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
 getThreadM _ thread_id = do
-  selectFirstDbEither [ThreadId ==. thread_id, ThreadActive ==. True] []
+  selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 
@@ -248,7 +248,7 @@ getThreadMH m_sp _ thread_name = do
   case (lookupSpMay m_sp spBoardId) of
 
     Just board_id -> do
-      selectFirstDbEither [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
+      selectFirstDbE [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
 
     _             -> left $ Error_InvalidArguments "board_id"
 
@@ -270,7 +270,7 @@ insertThreadM m_sp user_id thread_request = do
 
 insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThread_ByBoardIdM user_id board_id thread_request = do
-  e_board <- selectFirstDbEither [BoardId ==. board_id, BoardActive ==. True] []
+  e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
   case e_board of
     Left err                   -> left err
     Right (Entity _ Board{..}) -> do
@@ -304,13 +304,13 @@ updateThreadM user_id thread_id thread_request = do
     , ThreadGuard      +=. 1
     ]
 
-  selectFirstDbEither [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
+  selectFirstDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 
 deleteThreadM :: UserId -> ThreadId -> HandlerErrorEff ()
 deleteThreadM user_id thread_id = do
-  deleteWhereDbEither [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
+  deleteWhereDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
 
 
 

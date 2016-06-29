@@ -205,19 +205,19 @@ getOrganizationsM m_sp user_id = do
 
 getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbEither m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
+  selectListDbE m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
 getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByEverythingM m_sp _ = do
-  selectListDbEither m_sp [] [] OrganizationId
+  selectListDbE m_sp [] [] OrganizationId
 
 
 
 getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
 getOrganizationM user_id org_id = do
-  selectFirstDbEither [OrganizationId ==. org_id] []
+  selectFirstDbE [OrganizationId ==. org_id] []
 
 
 
@@ -234,7 +234,7 @@ getOrganizationMH user_id org_name = getOrganization_ByOrganizationNameM user_id
 
 getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerErrorEff (Entity Organization)
 getOrganization_ByOrganizationNameM _ org_name = do
-  selectFirstDbEither [OrganizationName ==. org_name, OrganizationActive ==. True] []
+  selectFirstDbE [OrganizationName ==. org_name, OrganizationActive ==. True] []
 
 
 
@@ -295,13 +295,13 @@ updateOrganizationM user_id org_id organization_request = do
         , OrganizationGuard      +=. 1
         ]
 
-      selectFirstDbEither [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
+      selectFirstDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 
 deleteOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationM user_id org_id = do
-  deleteCascadeWhereDbEither [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True]
+  deleteCascadeWhereDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True]
 
 {-
   -- bg job: Delete owners team
@@ -317,7 +317,7 @@ deleteOrganizationM user_id org_id = do
 deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationTeamsM _ org_id = do
   -- TODO: FIXME: security
-  deleteWhereDbEither [TeamOrgId ==. org_id, TeamActive ==. True]
+  deleteWhereDbE [TeamOrgId ==. org_id, TeamActive ==. True]
 
 
 

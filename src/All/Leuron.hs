@@ -218,7 +218,7 @@ getLeuronsM m_sp user_id = do
 getLeurons_ByResourceIdM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByResourceIdM m_sp _ resource_id = do
 
-  selectListDbEither m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
+  selectListDbE m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
 
 
 
@@ -244,28 +244,28 @@ getLeurons_ByResourceId_RandomM _ _ resource_id = do
 getLeurons_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByUserIdM m_sp _ lookup_user_id = do
 
-  selectListDbEither m_sp [LeuronUserId ==. lookup_user_id, LeuronActive ==. True] [] LeuronId
+  selectListDbE m_sp [LeuronUserId ==. lookup_user_id, LeuronActive ==. True] [] LeuronId
 
 
 
 getLeurons_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByEverythingM m_sp _ = do
 
-  selectListDbEither m_sp [LeuronActive ==. True] [] LeuronId
+  selectListDbE m_sp [LeuronActive ==. True] [] LeuronId
 
 
 
 getLeuronsIdsM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [LeuronId]
 getLeuronsIdsM m_sp _ resource_id = do
 
-  selectKeysListDbEither m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
+  selectKeysListDbE m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
 
 
 
 getLeuronM :: UserId -> LeuronId -> HandlerErrorEff (Entity Leuron)
 getLeuronM _ leuron_id = do
 
-  selectFirstDbEither [LeuronId ==. leuron_id, LeuronActive ==. True] []
+  selectFirstDbE [LeuronId ==. leuron_id, LeuronActive ==. True] []
 
 
 
@@ -324,7 +324,7 @@ updateLeuronM user_id leuron_id leuron_request = do
     , LeuronStyle         =. leuronStyle
     ]
 
-  selectFirstDbEither [LeuronUserId ==. user_id, LeuronId ==. leuron_id, LeuronActive ==. True] []
+  selectFirstDbE [LeuronUserId ==. user_id, LeuronId ==. leuron_id, LeuronActive ==. True] []
 
 
 

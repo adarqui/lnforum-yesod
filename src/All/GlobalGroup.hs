@@ -176,25 +176,25 @@ getGlobalGroupsM m_sp user_id = do
 
 getGlobalGroups_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbEither m_sp [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True] [] GlobalGroupId
+  selectListDbE m_sp [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
 getGlobalGroups_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByEverythingM m_sp _ = do
-  selectListDbEither m_sp [GlobalGroupActive ==. True] [] GlobalGroupId
+  selectListDbE m_sp [GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
 getGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupM _ global_groupid = do
-  selectFirstDbEither [GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
+  selectFirstDbE [GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
 
 
 
 getGlobalGroupMH :: UserId -> Text -> HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupMH user_id global_group_name = do
-  selectFirstDbEither [GlobalGroupName ==. global_group_name, GlobalGroupActive ==. True] []
+  selectFirstDbE [GlobalGroupName ==. global_group_name, GlobalGroupActive ==. True] []
 
 
 
@@ -203,7 +203,7 @@ insertGlobalGroupM user_id global_group_request = do
   ts <- timestampH'
   let
     global_group = (globalGroupRequestToGlobalGroup user_id global_group_request) { globalGroupCreatedAt = Just ts }
-  insertEntityDbEither global_group
+  insertEntityDbE global_group
 
 
 
@@ -228,13 +228,13 @@ updateGlobalGroupM user_id global_groupid global_group_request = do
     , GlobalGroupGuard      +=. globalGroupGuard
     ]
 
-  selectFirstDbEither [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
+  selectFirstDbE [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
 
 
 
 deleteGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff ()
 deleteGlobalGroupM user_id global_groupid = do
-  deleteWhereDbEither [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True]
+  deleteWhereDbE [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True]
 
 
 

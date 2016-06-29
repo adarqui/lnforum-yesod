@@ -240,21 +240,21 @@ getUsersM m_sp user_id = do
 getUsers_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff [Entity User]
 getUsers_ByUserIdsM m_sp _ user_ids = do
 
-  selectListDbEither m_sp [UserId <-. user_ids, UserActive ==. True] [] UserId
+  selectListDbE m_sp [UserId <-. user_ids, UserActive ==. True] [] UserId
 
 
 
 getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
 getUsers_ByEverythingM m_sp _ = do
 
-  selectListDbEither m_sp [UserActive ==. True] [] UserId
+  selectListDbE m_sp [UserActive ==. True] [] UserId
 
 
 
 getUsers_ByEverything_KeysM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Key User]
 getUsers_ByEverything_KeysM m_sp _ = do
 
-  selectKeysListDbEither m_sp [] [] UserId
+  selectKeysListDbE m_sp [] [] UserId
 
 
 
@@ -273,7 +273,7 @@ insertUsersM user_id user_request = do
           , userCreatedAt = Just ts
           , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
         }
-      new_user <- insertEntityDb' user
+      new_user <- insertEntityDb user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
       void $ insertUsers_TasksM user_id new_user
       right $ new_user
@@ -300,14 +300,14 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
 getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
 getUserM _ lookup_user_id = do
 
-  selectFirstDbEither [UserId ==. lookup_user_id, UserActive ==. True] []
+  selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
 
 
 
 getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
 getUserMH _ lookup_user_nick = do
 
-  selectFirstDbEither [UserNick ==. lookup_user_nick, UserActive ==. True] []
+  selectFirstDbE [UserNick ==. lookup_user_nick, UserActive ==. True] []
 
 
 
@@ -336,7 +336,7 @@ updateUserM _ lookup_user_id user_request = do
     , UserGuard      +=. 1
     ]
 
-  selectFirstDbEither [UserId ==. lookup_user_id] []
+  selectFirstDbE [UserId ==. lookup_user_id] []
 
 
 
@@ -347,7 +347,7 @@ deleteUserM user_id lookup_user_id = do
   if (isSuper user_id) || (user_id == lookup_user_id)
 
     then
-      deleteDbEither lookup_user_id
+      deleteDbE lookup_user_id
 
     else
       left Error_PermissionDenied

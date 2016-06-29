@@ -128,13 +128,13 @@ pmInsToResponses pmIns = PmInResponses {
 
 getPmInsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmIn]
 getPmInsM m_sp user_id = do
-  selectListDbEither m_sp [PmInUserId ==. user_id, PmInActive ==. True] [] PmInId
+  selectListDbE m_sp [PmInUserId ==. user_id, PmInActive ==. True] [] PmInId
 
 
 
 getPmInM :: UserId -> PmInId -> HandlerErrorEff (Entity PmIn)
 getPmInM user_id pm_in_id = do
-  selectFirstDbEither [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
+  selectFirstDbE [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
 
 
 
@@ -149,7 +149,7 @@ insertPmInM m_sp user_id pm_in_request = do
       let
         pm_in = (pmInRequestToPmIn user_id pm_id pm_in_request) { pmInCreatedAt = Just ts }
 
-      insertEntityDbEither pm_in
+      insertEntityDbE pm_in
 
 
 
@@ -169,7 +169,7 @@ updatePmInM user_id pm_in_id pm_in_request = do
     , PmInIsStarred =. pmInIsStarred
     ]
 
-  selectFirstDbEither [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
+  selectFirstDbE [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
 
 
 

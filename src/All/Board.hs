@@ -203,27 +203,27 @@ getBoards_ByOrganizationIdM m_sp user_id org_id = do
 getBoards_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity Board]
 getBoards_ByForumIdM m_sp _ forum_id = do
 
-  selectListDbEither m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
+  selectListDbE m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
 getBoards_ByForumId_KeysM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Key Board]
 getBoards_ByForumId_KeysM m_sp _ forum_id = do
 
-  selectKeysListDbEither m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
+  selectKeysListDbE m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
 getBoards_ByBoardParentIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Board]
 getBoards_ByBoardParentIdM m_sp _ board_parent_id = do
 
-  selectListDbEither m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
+  selectListDbE m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
 
 
 
 getBoardM :: UserId -> BoardId -> HandlerErrorEff (Entity Board)
 getBoardM _ board_id = do
-  selectFirstDbEither [BoardId ==. board_id, BoardActive ==. True] []
+  selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
 
 
 
@@ -233,7 +233,7 @@ getBoardMH m_sp _ board_name = do
   case (lookupSpMay m_sp spForumId) of
 
     Just forum_id -> do
-      selectFirstDbEither [BoardName ==. board_name, BoardForumId ==. forum_id, BoardActive ==. True] []
+      selectFirstDbE [BoardName ==. board_name, BoardForumId ==. forum_id, BoardActive ==. True] []
 
     _ -> left Error_NotImplemented
 
@@ -258,22 +258,22 @@ insertBoardM m_sp user_id board_request = do
 insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoard_ByForumId user_id forum_id board_request = do
   ts      <- timestampH'
-  e_forum <- selectFirstDbEither [ForumId ==. forum_id, ForumActive ==. True] []
+  e_forum <- selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
   case e_forum of
     Left err                   -> left err
     Right (Entity _ Forum{..}) -> do
-      insertEntityDbEither $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
+      insertEntityDbE $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
 
 
 
 insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoard_ByBoardId user_id board_id board_request = do
   ts      <- timestampH'
-  e_board <- selectFirstDbEither [BoardId ==. board_id, BoardActive ==. True] []
+  e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
   case e_board of
     Left err                          -> left err
-    Right (Entity board_id Board{..}) -> do
-      insertEntityDbEither $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
+    Right (Entity _ Board{..}) -> do
+      insertEntityDbE $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -301,20 +301,20 @@ updateBoardM user_id board_id board_request = do
     , BoardGuard             +=. 1
     ]
 
-  selectFirstDbEither [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
+  selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
 
 
 
 deleteBoardM :: UserId -> BoardId -> HandlerErrorEff ()
 deleteBoardM user_id board_id = do
-  deleteWhereDbEither [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True]
+  deleteWhereDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True]
 
 
 
 
 
 getBoardStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff Value
-getBoardStatsM m_sp _ = left Error_NotImplemented
+getBoardStatsM _ _ = left Error_NotImplemented
 
 
 

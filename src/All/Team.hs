@@ -140,19 +140,19 @@ getTeamsM m_sp user_id = do
 
 getTeams_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Team]
 getTeams_ByOrganizationIdM m_sp _ org_id = do
-  selectListDbEither m_sp [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
+  selectListDbE m_sp [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
 
 
 
 getTeams_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Team]
 getTeams_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbEither m_sp [TeamUserId ==. lookup_user_id, TeamActive ==. True] [] TeamId
+  selectListDbE m_sp [TeamUserId ==. lookup_user_id, TeamActive ==. True] [] TeamId
 
 
 
 getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
 getTeamM _ team_id = do
-  selectFirstDbEither [TeamId ==. team_id, TeamActive ==. True] []
+  selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
 
 
 
@@ -161,7 +161,7 @@ getTeamMH _ team_sid org_id = do
   case m_system_team of
     Nothing          -> notFound
     Just system_team -> do
-      selectFirstDbEither [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
+      selectFirstDbE [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
 
   where
   m_system_team = readMay $ T.unpack team_sid
@@ -176,7 +176,7 @@ insertTeam_InternalM user_id org_id system_team team_request = do
   let
     team = (teamRequestToTeam user_id org_id team_request) { teamCreatedAt = Just ts }
 
-  insertEntityDbEither $ team { teamSystem = system_team }
+  insertEntityDbE $ team { teamSystem = system_team }
 
 
 
@@ -217,13 +217,13 @@ updateTeamM user_id team_id team_request = do
     , TeamGuard      +=. teamGuard
     ]
 
-  selectFirstDbEither [TeamUserId ==. user_id, TeamId ==. team_id, TeamActive ==. True] []
+  selectFirstDbE [TeamUserId ==. user_id, TeamId ==. team_id, TeamActive ==. True] []
 
 
 
 deleteTeamM :: UserId -> TeamId -> HandlerErrorEff ()
 deleteTeamM user_id team_id = do
-  deleteWhereDbEither [TeamUserId ==. user_id, TeamId ==. team_id, TeamActive ==. True]
+  deleteWhereDbE [TeamUserId ==. user_id, TeamId ==. team_id, TeamActive ==. True]
 
 
 

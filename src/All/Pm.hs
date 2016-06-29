@@ -125,13 +125,13 @@ pmsToResponses pms = PmResponses {
 
 getPmsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Pm]
 getPmsM m_sp user_id = do
-  selectListDbEither m_sp [PmUserId ==. user_id, PmActive ==. True] [] PmId
+  selectListDbE m_sp [PmUserId ==. user_id, PmActive ==. True] [] PmId
 
 
 
 getPmM :: UserId -> PmId -> HandlerErrorEff (Entity Pm)
 getPmM user_id pm_id = do
-  selectFirstDbEither [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
+  selectFirstDbE [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
 
 
 
@@ -151,7 +151,7 @@ insertPmM m_sp user_id pm_request = do
           ts <- timestampH'
           let
             pm = (pmRequestToPm user_id to_user_id pm_request) { pmCreatedAt = Just ts }
-          insertEntityDbEither pm
+          insertEntityDbE pm
 
     _               -> left $ Error_InvalidArguments "user_id"
 
@@ -172,7 +172,7 @@ updatePmM user_id pm_id pm_request = do
     , PmBody =. pmBody
     ]
 
-  selectFirstDbEither [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
+  selectFirstDbE [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
 
 
 

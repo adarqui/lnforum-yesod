@@ -114,19 +114,19 @@ profilesToResponses profiles = ProfileResponses {
 
 getProfilesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Profile]
 getProfilesM m_sp _ = do
-  selectListDbEither m_sp [] [] ProfileId
+  selectListDbE m_sp [] [] ProfileId
 
 
 
 getProfileM :: UserId -> ProfileId -> HandlerErrorEff (Entity Profile)
 getProfileM _ profile_id = do
-  selectFirstDbEither [ProfileId ==. profile_id] []
+  selectFirstDbE [ProfileId ==. profile_id] []
 
 
 
 getProfile_ByUserIdM :: UserId -> UserId -> HandlerErrorEff (Entity Profile)
 getProfile_ByUserIdM _ lookup_user_id = do
-  selectFirstDbEither [ProfileUserId ==. lookup_user_id] []
+  selectFirstDbE [ProfileUserId ==. lookup_user_id] []
 
 
 
@@ -135,7 +135,7 @@ insertProfileM user_id profile_request = do
   ts <- timestampH'
   let
     profile = (profileRequestToProfile user_id profile_request) { profileCreatedAt = Just ts }
-  insertEntityDbEither profile
+  insertEntityDbE profile
 
 
 
@@ -158,4 +158,4 @@ updateProfileM user_id profile_id profile_request = do
     , ProfileDebug      =. profileDebug
     ]
 
-  selectFirstDbEither [ProfileUserId ==. user_id, ProfileId ==. profile_id] []
+  selectFirstDbE [ProfileUserId ==. user_id, ProfileId ==. profile_id] []

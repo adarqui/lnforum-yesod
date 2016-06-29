@@ -192,19 +192,19 @@ getResourcesM m_sp user_id = do
 
 getResources_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ByEverythingM m_sp _ = do
-  selectListDbEither m_sp [ResourceActive ==. True] [] ResourceId
+  selectListDbE m_sp [ResourceActive ==. True] [] ResourceId
 
 
 
 getResources_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbEither m_sp [ResourceUserId ==. lookup_user_id, ResourceActive ==. True] [] ResourceId
+  selectListDbE m_sp [ResourceUserId ==. lookup_user_id, ResourceActive ==. True] [] ResourceId
 
 
 
 getResourceM :: UserId -> ResourceId -> HandlerErrorEff (Entity Resource)
 getResourceM _ resource_id = do
-  selectFirstDbEither [ResourceId ==. resource_id, ResourceActive ==. True] []
+  selectFirstDbE [ResourceId ==. resource_id, ResourceActive ==. True] []
 
 
 
@@ -216,7 +216,7 @@ insertResourceM user_id resource_request = do
   let
     resource = (resourceRequestToResource user_id resource_request) { resourceCreatedAt = Just ts }
 
-  insertEntityDbEither resource
+  insertEntityDbE resource
 
 
 
@@ -247,13 +247,13 @@ updateResourceM user_id resource_id resource_request = do
     , ResourceGuard        +=. 1
     ]
 
-  selectFirstDbEither [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
+  selectFirstDbE [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
 
 
 
 deleteResourceM :: UserId -> ResourceId -> HandlerErrorEff ()
 deleteResourceM user_id resource_id = do
-  deleteWhereDbEither [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True]
+  deleteWhereDbE [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True]
 
 
 
@@ -281,10 +281,10 @@ getResourceStatM _ resource_id = do
   leuron_count <- countDb [LeuronResourceId ==. resource_id, LeuronActive ==. True]
 
   -- get like counts
-  likes <- selectListDbMay Nothing [LikeEntId ==. keyToInt64 resource_id, LikeActive ==. True] [] LikeId
+  likes <- selectListDb Nothing [LikeEntId ==. keyToInt64 resource_id, LikeActive ==. True] [] LikeId
 
   -- get star counts
--- TODO FIXME  stars <- selectListDbEither defaultStandardParams [ ResourceStarResourceId ==. resource_id ] [] ResourceStarId
+-- TODO FIXME  stars <- selectListDbE defaultStandardParams [ ResourceStarResourceId ==. resource_id ] [] ResourceStarId
 
   let
     likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes

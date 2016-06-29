@@ -145,7 +145,7 @@ likesToResponses likes = LikeResponses {
 
 getLikesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Like]
 getLikesM m_sp user_id = do
-  selectListDbEither m_sp [LikeUserId ==. user_id, LikeActive ==. True] [] LikeId
+  selectListDbE m_sp [LikeUserId ==. user_id, LikeActive ==. True] [] LikeId
 
 
 
@@ -158,7 +158,7 @@ insertLikeM m_sp user_id like_request = do
       let
         like = (likeRequestToLike user_id ent ent_id like_request) { likeCreatedAt = Just ts }
 
-      insertEntityDbEither like
+      insertEntityDbE like
 
     _ -> left $ Error_InvalidArguments "ent, ent_id"
 
@@ -166,7 +166,7 @@ insertLikeM m_sp user_id like_request = do
 
 getLikeM :: UserId -> LikeId -> HandlerErrorEff (Entity Like)
 getLikeM user_id like_id = do
-  selectFirstDbEither [LikeId ==. like_id, LikeUserId ==. user_id , LikeActive ==. True] []
+  selectFirstDbE [LikeId ==. like_id, LikeUserId ==. user_id , LikeActive ==. True] []
 
 
 
@@ -177,7 +177,7 @@ getLike_ByThreadPostM user_id (Entity thread_post_id _) = getLike_ByThreadPostId
 
 getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity Like)
 getLike_ByThreadPostIdM user_id thread_post_id = do
-  selectFirstDbEither [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
+  selectFirstDbE [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
   where
   thread_post_id' = keyToInt64 thread_post_id
 
@@ -197,13 +197,13 @@ updateLikeM user_id like_id LikeRequest{..} = do
     , LikeScore      =. likeOptToScore likeRequestOpt
     ]
 
-  selectFirstDbEither [LikeId ==. like_id, LikeActive ==. True] []
+  selectFirstDbE [LikeId ==. like_id, LikeActive ==. True] []
 
 
 
 deleteLikeM :: UserId -> LikeId -> HandlerErrorEff ()
 deleteLikeM user_id like_id = do
-  deleteWhereDbEither [LikeUserId ==. user_id, LikeId ==. like_id, LikeActive ==. True]
+  deleteWhereDbE [LikeUserId ==. user_id, LikeId ==. like_id, LikeActive ==. True]
 
 
 
@@ -225,7 +225,7 @@ getLikeStatM m_sp user_id _ = do
 getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff LikeStatResponse
 getLikeStat_ByThreadPostIdM user_id thread_post_id = do
 
-  likes <- selectListDbMay Nothing [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64, LikeActive ==. True] [] LikeId
+  likes <- selectListDb Nothing [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64, LikeActive ==. True] [] LikeId
   let
     opts   = map (\(Entity _ Like{..}) -> likeOpt) likes
     scores = map (\(Entity _ Like{..}) -> likeScore) likes

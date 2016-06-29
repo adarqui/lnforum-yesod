@@ -149,7 +149,7 @@ starsToResponses stars = StarResponses {
 
 getStarsM :: UserId -> HandlerEff [Entity Star]
 getStarsM user_id = do
-  selectListDb' [ StarUserId ==. user_id ] [] StarId
+  selectListDb Nothing [StarUserId ==. user_id, StarActive ==. True] [] StarId
 
 
 
@@ -235,7 +235,7 @@ getStarStatM user_id _ = do
 getStarStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff StarStatResponse
 getStarStat_ByThreadPostIdM user_id thread_post_id = do
 --  <- countDb [ StarPostStarId ==. star_id ]
-  stars <- selectListDb' [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64] [] StarId
+  stars <- selectListDb Nothing [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64, StarActive ==. True] [] StarId
 
   pure $ StarStatResponse {
     starStatResponseEnt   = Ent_ThreadPost,

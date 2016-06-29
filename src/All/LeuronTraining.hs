@@ -70,4 +70,4 @@ insertLeuronTrainingM user_id leuron_id leuron_training_request = do
   let
     leuron_training = (leuronTrainingRequestToLeuronTraining user_id leuron_id leuron_training_request) { leuronTrainingCreatedAt = Just ts }
 
-  insertEntityDbEither leuron_training
+  insertEntityDbE leuron_training

@@ -123,13 +123,13 @@ pmOutsToResponses pmOuts = PmOutResponses {
 
 getPmOutsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmOut]
 getPmOutsM m_sp user_id = do
-  selectListDbEither m_sp [PmOutUserId ==. user_id, PmOutActive ==. True] [] PmOutId
+  selectListDbE m_sp [PmOutUserId ==. user_id, PmOutActive ==. True] [] PmOutId
 
 
 
 getPmOutM :: UserId -> PmOutId -> HandlerErrorEff (Entity PmOut)
 getPmOutM user_id pm_out_id = do
-  selectFirstDbEither [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
+  selectFirstDbE [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
 
 
 
@@ -142,7 +142,7 @@ insertPmOutM m_sp user_id pm_out_request = do
       ts <- timestampH'
       let
         pm_out = (pmOutRequestToPmOut user_id pm_id pm_out_request) { pmOutCreatedAt = Just ts }
-      insertEntityDbEither pm_out
+      insertEntityDbE pm_out
 
     _          -> left $ Error_InvalidArguments "pm_id"
 
@@ -162,7 +162,7 @@ updatePmOutM user_id pm_out_id pm_out_request = do
     , PmOutLabel =. pmOutLabel
     ]
 
-  selectFirstDbEither [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
+  selectFirstDbE [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
 
 
 

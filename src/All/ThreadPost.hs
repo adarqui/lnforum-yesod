@@ -191,25 +191,25 @@ getThreadPostsM m_sp user_id = do
 
 getThreadPosts_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByForumIdM m_sp _ forum_id = do
-  selectListDbEither m_sp [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
+  selectListDbE m_sp [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
 getThreadPosts_ByThreadIdM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByThreadIdM m_sp _ thread_id = do
-  selectListDbEither m_sp [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True] [] ThreadPostId
+  selectListDbE m_sp [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True] [] ThreadPostId
 
 
 
 getThreadPosts_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByThreadPostIdM m_sp _ parent_id = do
-  selectListDbEither m_sp [ThreadPostParentId ==. Just parent_id, ThreadPostActive ==. True] [] ThreadPostId
+  selectListDbE m_sp [ThreadPostParentId ==. Just parent_id, ThreadPostActive ==. True] [] ThreadPostId
 
 
 
 getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
 getThreadPostM _ thread_post_id = do
-  selectFirstDbEither [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+  selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
@@ -229,7 +229,7 @@ insertThreadPostM m_sp user_id thread_post_request = do
 insertThreadPost_ByThreadIdM :: UserId -> ThreadId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
-  e_thread <- selectFirstDbEither [ThreadId ==. thread_id, ThreadActive ==. True] []
+  e_thread <- selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
   case e_thread of
     Left err                    -> left err
     Right (Entity _ Thread{..}) -> do
@@ -258,7 +258,7 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
-  e_post <- selectFirstDbEither [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+  e_post <- selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
   case e_post of
     Left err                         -> left err
     Right (Entity _ ThreadPost{..}) -> do
@@ -298,13 +298,13 @@ updateThreadPostM user_id thread_post_id thread_post_request = do
     , ThreadPostGuard      +=. 1
     ]
 
-  selectFirstDbEither [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+  selectFirstDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
 deleteThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 deleteThreadPostM user_id thread_post_id = do
-  deleteWhereDbEither [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id]
+  deleteWhereDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id]
 
 
 
@@ -331,7 +331,7 @@ getThreadPostStatM :: UserId -> ThreadPostId -> HandlerErrorEff ThreadPostStatRe
 getThreadPostStatM _ thread_post_id = do
 
   -- get like counts
-  likes <- selectListDbMay Nothing [LikeEntId ==. keyToInt64 thread_post_id, LikeActive ==. True] [] LikeId
+  likes <- selectListDb Nothing [LikeEntId ==. keyToInt64 thread_post_id, LikeActive ==. True] [] LikeId
 
   -- get star counts
 -- TODO FIXME
