@@ -5,7 +5,26 @@
 
 module LN.Settings.StaticFiles (
   staticFiles,
-  css_bootstrap_css
+  css_bootstrap_css,
+  css_style_css,
+  fonts_glyphicons_halflings_regular_eot,
+  fonts_glyphicons_halflings_regular_svg,
+  fonts_glyphicons_halflings_regular_ttf,
+  fonts_glyphicons_halflings_regular_woff,
+  img_loading_1_gif,
+  img_loading_2_gif,
+  img_loading_3_gif,
+  img_loading_4_gif,
+  pure_ln_js,
+  ui_assets_favicon_16x16_png,
+  ui_assets_favicon_32x32_png,
+  ui_assets_favicon_ico,
+  ui_assets_index_html,
+  ui_assets_style_css,
+  ui_static_index_html,
+  ui_static_dist_app_js,
+  ui_static_dist_app_min_js,
+  ui_static_dist_app_raw_js
 ) where
 
 
