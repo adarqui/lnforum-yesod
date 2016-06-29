@@ -1,12 +1,12 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.LeuronTraining (
-  -- Model/Function
+  -- LN.Model/Function
   leuronTrainingRequestToLeuronTraining,
   leuronTrainingToResponse,
   leuronTrainingsToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   insertLeuronTrainingM,
 ) where
 
@@ -17,7 +17,7 @@ import           LN.All.Prelude
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 leuronTrainingRequestToLeuronTraining :: UserId -> LeuronId -> LeuronTrainingRequest -> LeuronTraining
@@ -59,10 +59,10 @@ leuronTrainingsToResponses leuronTrainings = LeuronTrainingResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> LN.HandlerErrorEff (Entity LeuronTraining)
+insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> HandlerErrorEff (Entity LeuronTraining)
 insertLeuronTrainingM user_id leuron_id leuron_training_request = do
 
   ts <- timestampH'

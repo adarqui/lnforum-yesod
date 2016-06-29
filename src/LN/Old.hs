@@ -20,7 +20,7 @@ import qualified Database.Esqueleto     as E
 
 
 
-getBoardStatM_qBoardStats :: UserId -> BoardId -> LN.HandlerEff BoardStatResponse
+getBoardStatM_qBoardStats :: UserId -> BoardId -> HandlerEff BoardStatResponse
 getBoardStatM_qBoardStats _ board_id = do
 
 {-
@@ -63,7 +63,7 @@ qBoardStats board_id = do
 
 
 
--- getThreadsM :: UserId -> LN.HandlerEff [Entity Thread]
+-- getThreadsM :: UserId -> HandlerEff [Entity Thread]
 -- getThreadsM _ = do
 --
 --   sp@StandardParams{..} <- lookupStandardParams
@@ -99,7 +99,7 @@ qBoardStats board_id = do
 
 
 
-getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> LN.HandlerEff [Entity Thread]
+getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Thread]
 getThreads_ByOrganizationIdM _ org_id sp = do
 
   _runDB

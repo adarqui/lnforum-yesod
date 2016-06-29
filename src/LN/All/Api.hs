@@ -7,12 +7,12 @@ module LN.All.Api (
   putApiR,
   deleteApiR,
 
-  -- Model/Function
+  -- LN.Model/Function
   apiRequestToApi,
   apiToResponse,
   apisToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getApisM,
   getApiM,
   insertApiM,
@@ -28,7 +28,7 @@ import           Data.UUID.V4 (nextRandom)
 
 
 
-getApisR :: LN.Handler Value
+getApisR :: Handler Value
 getApisR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -36,7 +36,7 @@ getApisR = run $ do
 
 
 
-postApisR :: LN.Handler Value
+postApisR :: Handler Value
 postApisR = run $ do
   user_id     <- _requireAuthId
   api_request <- requireJsonBody
@@ -44,14 +44,14 @@ postApisR = run $ do
 
 
 
-getApiR :: ApiId -> LN.Handler Value
+getApiR :: ApiId -> Handler Value
 getApiR api_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON apiToResponse $ getApiM user_id api_id
 
 
 
-putApiR :: ApiId -> LN.Handler Value
+putApiR :: ApiId -> Handler Value
 putApiR api_id = run $ do
   user_id     <- _requireAuthId
   api_request <- requireJsonBody
@@ -59,7 +59,7 @@ putApiR api_id = run $ do
 
 
 
-deleteApiR :: ApiId -> LN.Handler Value
+deleteApiR :: ApiId -> Handler Value
 deleteApiR api_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteApiM user_id api_id
@@ -69,11 +69,11 @@ deleteApiR api_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
-apiRequestToApi :: UserId -> ApiRequest -> Api
-apiRequestToApi user_id ApiRequest{..} = Api {
+apiRequestToApi :: UserId -> LN.ApiRequest -> LN.Api
+apiRequestToApi user_id LN.ApiRequest{..} = LN.Api {
   apiUserId     = user_id,
   apiComment    = apiRequestComment,
   apiKey        = "",
@@ -85,8 +85,8 @@ apiRequestToApi user_id ApiRequest{..} = Api {
 
 
 
-apiToResponse :: Entity Api -> ApiResponse
-apiToResponse (Entity api_id Api{..}) = ApiResponse {
+apiToResponse :: Entity LN.Api -> LN.ApiResponse
+apiToResponse (Entity api_id LN.Api{..}) = LN.ApiResponse {
   apiResponseId         = keyToInt64 api_id,
   apiResponseUserId     = keyToInt64 apiUserId,
   apiResponseComment    = apiComment,
@@ -98,30 +98,30 @@ apiToResponse (Entity api_id Api{..}) = ApiResponse {
 
 
 
-apisToResponses :: [Entity Api] -> ApiResponses
-apisToResponses apis = ApiResponses {
+apisToResponses :: [Entity LN.Api] -> LN.ApiResponses
+apisToResponses apis = LN.ApiResponses {
   apiResponses = map apiToResponse apis
 }
 
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getApisM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Api]
+getApisM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity LN.Api]
 getApisM m_sp user_id = do
-  selectListDbE m_sp [ApiUserId ==. user_id, ApiActive ==. True] [] ApiId
+  selectListDbE m_sp [ApiUserId ==. user_id, LN.ApiActive ==. True] [] ApiId
 
 
 
-getApiM :: UserId -> ApiId -> LN.HandlerErrorEff (Entity Api)
+getApiM :: UserId -> ApiId -> HandlerErrorEff (Entity LN.Api)
 getApiM user_id api_id = do
-  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True] []
+  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, LN.ApiActive ==. True] []
 
 
 
-insertApiM :: UserId -> ApiRequest -> LN.HandlerErrorEff (Entity Api)
+insertApiM :: UserId -> LN.ApiRequest -> HandlerErrorEff (Entity LN.Api)
 insertApiM user_id api_request = do
   ts <- timestampH'
   uuid1 <- liftIO nextRandom
@@ -132,16 +132,16 @@ insertApiM user_id api_request = do
 
 
 
-updateApiM :: UserId -> ApiId -> ApiRequest -> LN.HandlerErrorEff (Entity Api)
+updateApiM :: UserId -> ApiId -> LN.ApiRequest -> HandlerErrorEff (Entity LN.Api)
 updateApiM user_id api_id api_request = do
   ts <- timestampH'
   updateWhereDb
-    [ ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True ]
-    [ ApiComment =. (apiRequestComment api_request), ApiModifiedAt =. Just ts ]
-  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True] []
+    [ LN.ApiUserId ==. user_id, ApiId ==. api_id, LN.ApiActive ==. True ]
+    [ LN.ApiComment =. (apiRequestComment api_request), LN.ApiModifiedAt =. Just ts ]
+  selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, LN.ApiActive ==. True] []
 
 
 
-deleteApiM :: UserId -> ApiId -> LN.HandlerErrorEff ()
+deleteApiM :: UserId -> ApiId -> HandlerErrorEff ()
 deleteApiM user_id api_id = do
-  deleteWhereDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True]
+  deleteWhereDbE [ApiUserId ==. user_id, ApiId ==. api_id, LN.ApiActive ==. True]

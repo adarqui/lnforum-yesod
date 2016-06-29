@@ -6,7 +6,7 @@ module LN.All.Pack.Board (
   getBoardPackR,
   getBoardPackH,
 
-  -- Model
+  -- LN.Model
   getBoardPacksM,
   getBoardPackM,
   getBoardPackMH,
@@ -26,7 +26,7 @@ import           LN.All.User
 -- LN.Handler
 --
 
-getBoardPacksR :: LN.Handler Value
+getBoardPacksR :: Handler Value
 getBoardPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -34,14 +34,14 @@ getBoardPacksR = run $ do
 
 
 
-getBoardPackR :: BoardId -> LN.Handler Value
+getBoardPackR :: BoardId -> Handler Value
 getBoardPackR board_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getBoardPackM user_id board_id
 
 
 
-getBoardPackH :: Text -> LN.Handler Value
+getBoardPackH :: Text -> Handler Value
 getBoardPackH board_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -55,20 +55,20 @@ getBoardPackH board_name = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getBoardPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff BoardPackResponses
+getBoardPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff BoardPackResponses
 getBoardPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spForumId) of
 
     Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
-    _             -> left $ Error_InvalidArguments "forum_id"
+    _             -> left $ LN.Error_InvalidArguments "forum_id"
 
 
 
-getBoardPackM :: UserId -> BoardId -> LN.HandlerErrorEff BoardPackResponse
+getBoardPackM :: UserId -> BoardId -> HandlerErrorEff BoardPackResponse
 getBoardPackM user_id board_id = do
 
   e_board <- getBoardM user_id board_id
@@ -76,7 +76,7 @@ getBoardPackM user_id board_id = do
 
 
 
-getBoardPackMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff BoardPackResponse
+getBoardPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff BoardPackResponse
 getBoardPackMH m_sp user_id board_name = do
 
   e_board <- getBoardMH m_sp user_id board_name
@@ -84,7 +84,7 @@ getBoardPackMH m_sp user_id board_name = do
 
 
 
-getBoardPack_ByBoardM :: UserId -> Entity Board -> LN.HandlerErrorEff BoardPackResponse
+getBoardPack_ByBoardM :: UserId -> Entity Board -> HandlerErrorEff BoardPackResponse
 getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
   let sp = defaultStandardParams {
@@ -131,7 +131,7 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
 
 
-getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> LN.HandlerErrorEff BoardPackResponses
+getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
 getBoardPacks_ByForumIdM m_sp user_id forum_id = do
 
   e_board_keys <- getBoards_ByForumId_KeysM m_sp user_id forum_id

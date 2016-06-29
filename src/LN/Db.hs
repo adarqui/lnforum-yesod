@@ -35,14 +35,14 @@ module LN.Db (
 
 
 import           LN.Control
-import           Api.Params            (StandardParams, spToSelect, spToSelectMay, lookupStandardParams)
+import           LN.Api.Params            (StandardParams, spToSelect, spToSelectMay, lookupStandardParams)
 import           Data.List             (nub)
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Database.Esqueleto    as E
 import           Import
-import           Lifted
-import           Misc.Codec
+import           LN.Lifted
+import           LN.Misc.Codec
 import           LN.T.Ent              (Ent (..))
 import           LN.T.Error            (ApplicationError (..))
 import           LN.T.Param
@@ -143,7 +143,7 @@ selectFirstDbE
 selectFirstDbE query filt = do
   m <- selectFirstDb query filt
   case m of
-    Nothing -> pure $ Left Error_NotFound
+    Nothing -> pure $ Left LN.Error_NotFound
     Just v  -> pure $ Right v
 
 

@@ -22,11 +22,11 @@ module LN.OAuth2 (
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
 import           Import.NoFoundation
-import           Job.Enqueue
+import           LN.Job.Enqueue
 import           LN.Lib.Url              (toPrettyName)
 import           LN.T.Profile            (ProfileX (..))
 import           LN.T.Profile.Request    (defaultProfileRequest)
-import           Misc.Codec
+import           LN.Misc.Codec
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
 

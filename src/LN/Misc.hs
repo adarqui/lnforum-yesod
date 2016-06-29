@@ -7,7 +7,7 @@ module LN.Misc (
 
 import           Data.String.Conversions (ConvertibleStrings, convertString)
 import           Import
-import           Misc.Codec
+import           LN.Misc.Codec
 
 
 

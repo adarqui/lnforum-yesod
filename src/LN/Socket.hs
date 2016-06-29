@@ -11,6 +11,6 @@ import           Yesod.WebSockets
 
 
 
-socketHub :: WebSocketsT LN.Handler ()
+socketHub :: WebSocketsT Handler ()
 socketHub = do
   sendTextData ("Welcome" :: Text)

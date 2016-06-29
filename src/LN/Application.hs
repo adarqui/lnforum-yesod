@@ -17,7 +17,7 @@ module LN.Application (
 
 
 
-import           LN.Control.Monad.Logger                 (liftLoc, runLoggingT)
+import           Control.Monad.Logger                 (liftLoc, runLoggingT)
 import qualified Data.Text                            as T (pack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
@@ -263,7 +263,7 @@ shutdownApp _ = pure ()
 ---------------------------------------------
 
 -- | Run a handler
-handler :: LN.Handler a -> IO a
+handler :: Handler a -> IO a
 handler h = do
   settings    <- getAppSettings
   ln_settings <- getAppSettingsLN

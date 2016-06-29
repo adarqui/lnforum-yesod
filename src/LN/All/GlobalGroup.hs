@@ -12,12 +12,12 @@ module LN.All.GlobalGroup (
   getGlobalGroupStatsR,
   getGlobalGroupStatR,
 
-  -- Model/Functions
+  -- LN.Model/Functions
   globalGroupRequestToGlobalGroup,
   globalGroupToResponse,
   globalGroupsToResponses,
 
-  -- Model/internal
+  -- LN.Model/internal
   getGlobalGroupsM,
   getGlobalGroups_ByUserIdM,
   getGlobalGroups_ByEverythingM,
@@ -36,7 +36,7 @@ import           LN.All.Prelude
 
 
 
-getGlobalGroupsR :: LN.Handler Value
+getGlobalGroupsR :: Handler Value
 getGlobalGroupsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -44,7 +44,7 @@ getGlobalGroupsR = run $ do
 
 
 
-postGlobalGroupR0 :: LN.Handler Value
+postGlobalGroupR0 :: Handler Value
 postGlobalGroupR0 = run $ do
   user_id              <- _requireAuthId
   global_group_request <- requireJsonBody
@@ -52,21 +52,21 @@ postGlobalGroupR0 = run $ do
 
 
 
-getGlobalGroupR :: GlobalGroupId -> LN.Handler Value
+getGlobalGroupR :: GlobalGroupId -> Handler Value
 getGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON globalGroupToResponse $ getGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupH :: Text -> LN.Handler Value
+getGlobalGroupH :: Text -> Handler Value
 getGlobalGroupH group_name = run $ do
   user_id <- _requireAuthId
   errorOrJSON globalGroupToResponse $ getGlobalGroupMH user_id group_name
 
 
 
-putGlobalGroupR :: GlobalGroupId -> LN.Handler Value
+putGlobalGroupR :: GlobalGroupId -> Handler Value
 putGlobalGroupR global_group_id = run $ do
   user_id              <- _requireAuthId
   global_group_request <- requireJsonBody
@@ -74,14 +74,14 @@ putGlobalGroupR global_group_id = run $ do
 
 
 
-deleteGlobalGroupR :: GlobalGroupId -> LN.Handler Value
+deleteGlobalGroupR :: GlobalGroupId -> Handler Value
 deleteGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupsCountR :: LN.Handler Value
+getGlobalGroupsCountR :: Handler Value
 getGlobalGroupsCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -89,7 +89,7 @@ getGlobalGroupsCountR = run $ do
 
 
 
-getGlobalGroupStatsR :: LN.Handler Value
+getGlobalGroupStatsR :: Handler Value
 getGlobalGroupStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -97,7 +97,7 @@ getGlobalGroupStatsR = run $ do
 
 
 
-getGlobalGroupStatR :: GlobalGroupId -> LN.Handler Value
+getGlobalGroupStatR :: GlobalGroupId -> Handler Value
 getGlobalGroupStatR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getGlobalGroupStatM user_id global_group_id
@@ -108,7 +108,7 @@ getGlobalGroupStatR global_group_id = run $ do
 
 
 
--- Model/Function
+-- LN.Model/Function
 
 globalGroupRequestToGlobalGroup :: UserId -> GlobalGroupRequest -> GlobalGroup
 globalGroupRequestToGlobalGroup user_id GlobalGroupRequest{..} = GlobalGroup {
@@ -163,42 +163,42 @@ globalGroupsToResponses globalGroups = GlobalGroupResponses {
 
 
 
--- Model/Internal
+-- LN.Model/Internal
 
-getGlobalGroupsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroupsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroupsM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
     Just lookup_user_id -> getGlobalGroups_ByUserIdM m_sp user_id lookup_user_id
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> left $ LN.Error_InvalidArguments "user_id"
 
 
 
-getGlobalGroups_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroups_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
-getGlobalGroups_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroups_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByEverythingM m_sp _ = do
   selectListDbE m_sp [GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
-getGlobalGroupM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff (Entity GlobalGroup)
+getGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupM _ global_groupid = do
   selectFirstDbE [GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
 
 
 
-getGlobalGroupMH :: UserId -> Text -> LN.HandlerErrorEff (Entity GlobalGroup)
+getGlobalGroupMH :: UserId -> Text -> HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupMH user_id global_group_name = do
   selectFirstDbE [GlobalGroupName ==. global_group_name, GlobalGroupActive ==. True] []
 
 
 
-insertGlobalGroupM :: UserId -> GlobalGroupRequest -> LN.HandlerErrorEff (Entity GlobalGroup)
+insertGlobalGroupM :: UserId -> GlobalGroupRequest -> HandlerErrorEff (Entity GlobalGroup)
 insertGlobalGroupM user_id global_group_request = do
   ts <- timestampH'
   let
@@ -207,7 +207,7 @@ insertGlobalGroupM user_id global_group_request = do
 
 
 
-updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> LN.HandlerErrorEff (Entity GlobalGroup)
+updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> HandlerErrorEff (Entity GlobalGroup)
 updateGlobalGroupM user_id global_groupid global_group_request = do
 
   ts <- timestampH'
@@ -232,13 +232,13 @@ updateGlobalGroupM user_id global_groupid global_group_request = do
 
 
 
-deleteGlobalGroupM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff ()
+deleteGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff ()
 deleteGlobalGroupM user_id global_groupid = do
   deleteWhereDbE [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True]
 
 
 
-countGlobalGroupsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countGlobalGroupsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countGlobalGroupsM m_sp _ = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -247,16 +247,16 @@ countGlobalGroupsM m_sp _ = do
       n <- countDb [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True]
       right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> left $ LN.Error_InvalidArguments "user_id"
 
 
 
-getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff GlobalGroupStatResponses
-getGlobalGroupStatsM _ _ = left $ Error_NotImplemented
+getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupStatResponses
+getGlobalGroupStatsM _ _ = left $ LN.Error_NotImplemented
 
 
 
-getGlobalGroupStatM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff GlobalGroupStatResponse
+getGlobalGroupStatM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupStatResponse
 getGlobalGroupStatM _ global_group_id = do
   right $ GlobalGroupStatResponse {
     globalGroupStatResponseGroups = 0 -- TODO FIXME

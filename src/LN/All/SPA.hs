@@ -5,13 +5,13 @@ module LN.All.SPA (
 
 
 import           LN.All.Prelude
-import           Misc.Widget
+import           LN.Misc.Widget
 import           Socket
 import           Yesod.WebSockets
 
 
 
-getSPAR :: LN.Handler Html
+getSPAR :: Handler Html
 getSPAR = do
 
   void $ requireAuthId

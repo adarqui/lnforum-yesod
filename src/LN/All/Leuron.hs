@@ -11,12 +11,12 @@ module LN.All.Leuron (
   getLeuronStatsR,
   getLeuronStatR,
 
-  -- Model/Function
+  -- LN.Model/Function
   leuronRequestToLeuron,
   leuronToResponse,
   leuronsToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getLeuronsM,
   getLeurons_ByResourceIdM,
   getLeurons_ByResourceId_RandomM,
@@ -45,7 +45,7 @@ import qualified Database.Redis     as R
 -- LN.Handler
 --
 
-getLeuronsR :: LN.Handler Value
+getLeuronsR :: Handler Value
 getLeuronsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -53,7 +53,7 @@ getLeuronsR = run $ do
 
 
 
-postLeuronR0 :: LN.Handler Value
+postLeuronR0 :: Handler Value
 postLeuronR0 = run $ do
   user_id        <- _requireAuthId
   sp             <- lookupStandardParams
@@ -63,14 +63,14 @@ postLeuronR0 = run $ do
 
 
 
-getLeuronR :: LeuronId -> LN.Handler Value
+getLeuronR :: LeuronId -> Handler Value
 getLeuronR leuron_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON leuronToResponse $ getLeuronM user_id leuron_id
 
 
 
-putLeuronR :: LeuronId -> LN.Handler Value
+putLeuronR :: LeuronId -> Handler Value
 putLeuronR leuron_id = run $ do
   user_id        <- _requireAuthId
   leuron_request <- requireJsonBody
@@ -78,14 +78,14 @@ putLeuronR leuron_id = run $ do
 
 
 
-deleteLeuronR :: LeuronId -> LN.Handler Value
+deleteLeuronR :: LeuronId -> Handler Value
 deleteLeuronR leuron_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteLeuronM user_id leuron_id
 
 
 
-getLeuronsCountR :: LN.Handler Value
+getLeuronsCountR :: Handler Value
 getLeuronsCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -93,7 +93,7 @@ getLeuronsCountR = run $ do
 
 
 
-getLeuronStatsR :: LN.Handler Value
+getLeuronStatsR :: Handler Value
 getLeuronStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -101,7 +101,7 @@ getLeuronStatsR = run $ do
 
 
 
-getLeuronStatR :: LeuronId -> LN.Handler Value
+getLeuronStatR :: LeuronId -> Handler Value
 getLeuronStatR leuron_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getLeuronStatM user_id leuron_id
@@ -114,7 +114,7 @@ getLeuronStatR leuron_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 leuronRequestToLeuron :: UserId -> ResourceId -> LeuronRequest -> Leuron
@@ -178,10 +178,10 @@ leuronsToResponses leurons = LeuronResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getLeuronsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Leuron]
+getLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeuronsM m_sp user_id = do
 
   case (lookupSpMay m_sp spSortOrder) of
@@ -215,7 +215,7 @@ getLeuronsM m_sp user_id = do
 
 
 
-getLeurons_ByResourceIdM :: Maybe StandardParams -> UserId -> ResourceId -> LN.HandlerErrorEff [Entity Leuron]
+getLeurons_ByResourceIdM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByResourceIdM m_sp _ resource_id = do
 
   selectListDbE m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
@@ -223,7 +223,7 @@ getLeurons_ByResourceIdM m_sp _ resource_id = do
 
 
 -- ESQUELETO-QUERY
-getLeurons_ByResourceId_RandomM :: Maybe StandardParams -> UserId -> ResourceId -> LN.HandlerErrorEff [Entity Leuron]
+getLeurons_ByResourceId_RandomM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByResourceId_RandomM _ _ resource_id = do
 
 -- SELECT * FROM leuron OFFSET floor(random() * (select count(*) from leuron)) LIMIT 1;
@@ -241,35 +241,35 @@ getLeurons_ByResourceId_RandomM _ _ resource_id = do
 
 
 
-getLeurons_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity Leuron]
+getLeurons_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByUserIdM m_sp _ lookup_user_id = do
 
   selectListDbE m_sp [LeuronUserId ==. lookup_user_id, LeuronActive ==. True] [] LeuronId
 
 
 
-getLeurons_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Leuron]
+getLeurons_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Leuron]
 getLeurons_ByEverythingM m_sp _ = do
 
   selectListDbE m_sp [LeuronActive ==. True] [] LeuronId
 
 
 
-getLeuronsIdsM :: Maybe StandardParams -> UserId -> ResourceId -> LN.HandlerErrorEff [LeuronId]
+getLeuronsIdsM :: Maybe StandardParams -> UserId -> ResourceId -> HandlerErrorEff [LeuronId]
 getLeuronsIdsM m_sp _ resource_id = do
 
   selectKeysListDbE m_sp [LeuronResourceId ==. resource_id, LeuronActive ==. True] [] LeuronId
 
 
 
-getLeuronM :: UserId -> LeuronId -> LN.HandlerErrorEff (Entity Leuron)
+getLeuronM :: UserId -> LeuronId -> HandlerErrorEff (Entity Leuron)
 getLeuronM _ leuron_id = do
 
   selectFirstDbE [LeuronId ==. leuron_id, LeuronActive ==. True] []
 
 
 
-insertLeuronM :: Maybe StandardParams -> UserId -> LeuronRequest -> LN.HandlerErrorEff (Entity Leuron)
+insertLeuronM :: Maybe StandardParams -> UserId -> LeuronRequest -> HandlerErrorEff (Entity Leuron)
 insertLeuronM m_sp user_id leuron_request = do
 
   case (lookupSpMay m_sp spResourceId) of
@@ -282,7 +282,7 @@ insertLeuronM m_sp user_id leuron_request = do
 
       m_resource <- selectFirstDb [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
       case m_resource of
-        Nothing -> left Error_NotFound
+        Nothing -> left LN.Error_NotFound
         Just _  -> do
           entity@(Entity leuron_id _) <- insertEntityDb leuron
           -- background job
@@ -295,11 +295,11 @@ insertLeuronM m_sp user_id leuron_request = do
           -- end background job
           right entity
 
-    _ -> left $ Error_InvalidArguments "resource_id"
+    _ -> left $ LN.Error_InvalidArguments "resource_id"
 
 
 
-updateLeuronM :: UserId -> LeuronId -> LeuronRequest -> LN.HandlerErrorEff (Entity Leuron)
+updateLeuronM :: UserId -> LeuronId -> LeuronRequest -> HandlerErrorEff (Entity Leuron)
 updateLeuronM user_id leuron_id leuron_request = do
 
   ts <- timestampH'
@@ -328,7 +328,7 @@ updateLeuronM user_id leuron_id leuron_request = do
 
 
 
-deleteLeuronM :: UserId -> LeuronId -> LN.HandlerErrorEff ()
+deleteLeuronM :: UserId -> LeuronId -> HandlerErrorEff ()
 deleteLeuronM user_id leuron_id = do
   e_leuron <- getLeuronM user_id leuron_id
   rehtie e_leuron left $ \(Entity _ Leuron{..}) -> do
@@ -344,7 +344,7 @@ deleteLeuronM user_id leuron_id = do
 
 
 
-insertLeuronCategoriesM :: LeuronId -> ResourceId -> LeuronRequest -> LN.HandlerErrorEff ()
+insertLeuronCategoriesM :: LeuronId -> ResourceId -> LeuronRequest -> HandlerErrorEff ()
 insertLeuronCategoriesM leuron_id resource_id LeuronRequest{..} = do
   red <- getsYesod appRed
 
@@ -372,7 +372,7 @@ insertLeuronCategoriesM leuron_id resource_id LeuronRequest{..} = do
 
 -- | When a user inserts a leuron, add it to the proper sets
 --
-insertLeuronRedis :: UserId -> ResourceId -> LeuronId -> LN.HandlerErrorEff ()
+insertLeuronRedis :: UserId -> ResourceId -> LeuronId -> HandlerErrorEff ()
 insertLeuronRedis user_id resource_id leuron_id = do
   red <- getsYesod appRed
   void $ liftIO $ R.runRedis red $ do
@@ -391,7 +391,7 @@ insertLeuronRedis user_id resource_id leuron_id = do
 
 -- | Undo insertLeuronR
 --
-deleteLeuronRedis :: UserId -> ResourceId -> LeuronId -> LN.HandlerErrorEff ()
+deleteLeuronRedis :: UserId -> ResourceId -> LeuronId -> HandlerErrorEff ()
 deleteLeuronRedis user_id resource_id leuron_id = do
   red <- getsYesod appRed
   void $ liftIO $ R.runRedis red $ do
@@ -403,7 +403,7 @@ deleteLeuronRedis user_id resource_id leuron_id = do
 
 
 
-countLeuronsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countLeuronsM _ _ = do
 
   n <- countDb [LeuronActive ==. True]
@@ -411,12 +411,12 @@ countLeuronsM _ _ = do
 
 
 
-getLeuronStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff LeuronStatResponses
-getLeuronStatsM _ _ = left Error_NotImplemented
+getLeuronStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronStatResponses
+getLeuronStatsM _ _ = left LN.Error_NotImplemented
 
 
 
-getLeuronStatM :: UserId -> LeuronId -> LN.HandlerErrorEff LeuronStatResponse
+getLeuronStatM :: UserId -> LeuronId -> HandlerErrorEff LeuronStatResponse
 getLeuronStatM _ leuron_id = do
 
   right $ LeuronStatResponse {

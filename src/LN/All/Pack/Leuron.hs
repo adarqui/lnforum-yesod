@@ -5,7 +5,7 @@ module LN.All.Pack.Leuron (
   getLeuronPacksR,
   getLeuronPackR,
 
-  -- Model
+  -- LN.Model
   getLeuronPacksM,
   getLeuronPackM
 ) where
@@ -23,7 +23,7 @@ import           LN.All.User
 -- LN.Handler
 --
 
-getLeuronPacksR :: LN.Handler Value
+getLeuronPacksR :: Handler Value
 getLeuronPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -31,7 +31,7 @@ getLeuronPacksR = run $ do
 
 
 
-getLeuronPackR :: LeuronId -> LN.Handler Value
+getLeuronPackR :: LeuronId -> Handler Value
 getLeuronPackR leuron_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getLeuronPackM user_id leuron_id
@@ -43,10 +43,10 @@ getLeuronPackR leuron_id = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getLeuronPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff LeuronPackResponses
+getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackResponses
 getLeuronPacksM m_sp user_id = do
 
   e_leurons <- getLeuronsM m_sp user_id
@@ -60,7 +60,7 @@ getLeuronPacksM m_sp user_id = do
 
 
 
-getLeuronPackM :: UserId -> LeuronId -> LN.HandlerErrorEff LeuronPackResponse
+getLeuronPackM :: UserId -> LeuronId -> HandlerErrorEff LeuronPackResponse
 getLeuronPackM user_id leuron_id = do
 
   e_leuron <- getLeuronM user_id leuron_id
@@ -68,7 +68,7 @@ getLeuronPackM user_id leuron_id = do
 
 
 
-getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> LN.HandlerErrorEff LeuronPackResponse
+getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> HandlerErrorEff LeuronPackResponse
 getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) = do
 
   lr <- runEitherT $ do

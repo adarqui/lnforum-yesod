@@ -7,12 +7,12 @@ module LN.All.TeamMember (
   deleteTeamMemberR,
   getTeamMembersCountR,
 
-  -- Model/Function
+  -- LN.Model/Function
   teamMemberRequestToTeamMember,
   teamMemberToResponse,
   teamMembersToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getTeamMembersM,
   getTeamMembers_ByTeamIdM,
   getTeamMemberM,
@@ -34,7 +34,7 @@ import           LN.T.Membership
 -- LN.Handler
 --
 
-getTeamMembersR :: LN.Handler Value
+getTeamMembersR :: Handler Value
 getTeamMembersR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -42,23 +42,23 @@ getTeamMembersR = run $ do
 
 
 
-postTeamMemberR0 :: LN.Handler Value
+postTeamMemberR0 :: Handler Value
 postTeamMemberR0 = run $ do
   user_id             <- _requireAuthId
-  team_member_request <- requireJsonBody :: LN.HandlerEff TeamMemberRequest
+  team_member_request <- requireJsonBody :: HandlerEff TeamMemberRequest
   sp                  <- lookupStandardParams
   errorOrJSON teamMemberToResponse $ insertTeamMemberM (pure sp) user_id team_member_request
 
 
 
-getTeamMemberR :: TeamMemberId -> LN.Handler Value
+getTeamMemberR :: TeamMemberId -> Handler Value
 getTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON teamMemberToResponse $ getTeamMemberM user_id team_member_id
 
 
 
-putTeamMemberR :: TeamMemberId -> LN.Handler Value
+putTeamMemberR :: TeamMemberId -> Handler Value
 putTeamMemberR team_member_id = run $ do
   user_id             <- _requireAuthId
   team_member_request <- requireJsonBody
@@ -66,14 +66,14 @@ putTeamMemberR team_member_id = run $ do
 
 
 
-deleteTeamMemberR :: TeamMemberId -> LN.Handler Value
+deleteTeamMemberR :: TeamMemberId -> Handler Value
 deleteTeamMemberR team_member_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteTeamMemberM user_id team_member_id
 
 
 
-getTeamMembersCountR :: LN.Handler Value
+getTeamMembersCountR :: Handler Value
 getTeamMembersCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -86,7 +86,7 @@ getTeamMembersCountR = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 teamMemberRequestToTeamMember :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> TeamMember
@@ -140,47 +140,47 @@ teamMembersToResponses teamMembers = TeamMemberResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getTeamMembersM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity TeamMember]
+getTeamMembersM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity TeamMember]
 getTeamMembersM m_sp user_id = do
 
   case (lookupSpMay m_sp spTeamId) of
     Just team_id -> getTeamMembers_ByTeamIdM m_sp user_id team_id
-    _            -> left $ Error_InvalidArguments "team_id"
+    _            -> left $ LN.Error_InvalidArguments "team_id"
 
 
 
-getTeamMembers_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> LN.HandlerErrorEff [Entity TeamMember]
+getTeamMembers_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> HandlerErrorEff [Entity TeamMember]
 getTeamMembers_ByTeamIdM m_sp _ team_id = do
   -- TODO ACCESS:
   selectListDbE m_sp [TeamMemberTeamId ==. team_id, TeamMemberActive ==. True] [] TeamMemberId
 
 
 
-getTeamMemberM :: UserId -> TeamMemberId -> LN.HandlerErrorEff (Entity TeamMember)
+getTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff (Entity TeamMember)
 getTeamMemberM _ team_member_id = do
   selectFirstDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
 
 
 
 
-insertTeamMemberM :: Maybe StandardParams -> UserId -> TeamMemberRequest -> LN.HandlerErrorEff (Entity TeamMember)
+insertTeamMemberM :: Maybe StandardParams -> UserId -> TeamMemberRequest -> HandlerErrorEff (Entity TeamMember)
 insertTeamMemberM m_sp user_id team_member_request = do
 
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spTeamId) of
     (Just org_id, _)   -> insertTeamMember_JoinM user_id org_id team_member_request
     -- TODO FIXME
     -- (_, Just team_id)  -> insertTeamMember_InternalM user_id team_id team_member_request
-    _                  -> left $ Error_InvalidArguments "org_id, team_id"
+    _                  -> left $ LN.Error_InvalidArguments "org_id, team_id"
 
 
 
 -- | Simple JOIN
 -- Find Team_Members and insert this user into that team
 --
-insertTeamMember_JoinM :: UserId -> OrganizationId -> TeamMemberRequest -> LN.HandlerErrorEff (Entity TeamMember)
+insertTeamMember_JoinM :: UserId -> OrganizationId -> TeamMemberRequest -> HandlerErrorEff (Entity TeamMember)
 insertTeamMember_JoinM user_id org_id team_member_request = do
 
   ts <- timestampH'
@@ -197,7 +197,7 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
       case teamMembership of
         Membership_Join -> insertEntityDbE team_member
-        _               -> left $ Error_PermissionDenied
+        _               -> left $ LN.Error_PermissionDenied
 
 
 
@@ -205,7 +205,7 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
 -- 1. Can only add to owners, by an owner
 -- 2. Restrictions based on Membership
 --
-insertTeamMember_InternalM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> LN.HandlerErrorEff (Entity TeamMember)
+insertTeamMember_InternalM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> HandlerErrorEff (Entity TeamMember)
 insertTeamMember_InternalM user_id org_id team_id team_member_request = do
 
   ts <- timestampH'
@@ -219,11 +219,11 @@ insertTeamMember_InternalM user_id org_id team_id team_member_request = do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
       Membership_Join -> insertEntityDbE team_member
-      _               -> left $ Error_PermissionDenied
+      _               -> left $ LN.Error_PermissionDenied
 
 
 
-insertTeamMember_BypassM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> LN.HandlerErrorEff (Entity TeamMember)
+insertTeamMember_BypassM :: UserId -> OrganizationId -> TeamId -> TeamMemberRequest -> HandlerErrorEff (Entity TeamMember)
 insertTeamMember_BypassM user_id org_id team_id team_member_request = do
 
   ts <- timestampH'
@@ -240,7 +240,7 @@ insertTeamMember_BypassM user_id org_id team_id team_member_request = do
 
 
 
-updateTeamMemberM :: UserId -> TeamMemberId -> TeamMemberRequest -> LN.HandlerErrorEff (Entity TeamMember)
+updateTeamMemberM :: UserId -> TeamMemberId -> TeamMemberRequest -> HandlerErrorEff (Entity TeamMember)
 updateTeamMemberM user_id team_member_id team_member_request = do
 
   ts <- timestampH'
@@ -258,13 +258,13 @@ updateTeamMemberM user_id team_member_id team_member_request = do
 
 
 
-deleteTeamMemberM :: UserId -> TeamMemberId -> LN.HandlerErrorEff ()
+deleteTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff ()
 deleteTeamMemberM user_id team_member_id = do
   deleteWhereDbE [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
 
 
 
-countTeamMembersM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countTeamMembersM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countTeamMembersM m_sp _ = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -273,4 +273,4 @@ countTeamMembersM m_sp _ = do
       n <- countDb [TeamMemberUserId ==. lookup_user_id, TeamMemberActive ==. True]
       right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> left $ LN.Error_InvalidArguments "user_id"

@@ -6,12 +6,12 @@ module LN.All.Team (
   getTeamR,
   putTeamR,
 
-  -- Model/Function
+  -- LN.Model/Function
   teamRequestToTeam,
   teamToResponse,
   teamsToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getTeamsM,
   getTeams_ByOrganizationIdM,
   getTeams_ByUserIdM,
@@ -40,7 +40,7 @@ import           LN.T.Visibility
 -- LN.Handler
 --
 
-getTeamsR :: LN.Handler Value
+getTeamsR :: Handler Value
 getTeamsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -48,14 +48,14 @@ getTeamsR = run $ do
 
 
 
-getTeamR :: TeamId -> LN.Handler Value
+getTeamR :: TeamId -> Handler Value
 getTeamR team_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON teamToResponse $ getTeamM user_id team_id
 
 
 
-putTeamR :: TeamId -> LN.Handler Value
+putTeamR :: TeamId -> Handler Value
 putTeamR team_id = run $ do
   user_id      <- _requireAuthId
   team_request <- requireJsonBody
@@ -68,7 +68,7 @@ putTeamR team_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 teamRequestToTeam :: UserId -> OrganizationId -> TeamRequest -> Team
@@ -125,38 +125,38 @@ teamsToResponses teams = TeamResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getTeamsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Team]
+getTeamsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Team]
 getTeamsM m_sp user_id = do
 
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId) of
     (Just org_id, Nothing)         -> getTeams_ByOrganizationIdM m_sp user_id org_id
     (Nothing, Just lookup_user_id) -> getTeams_ByUserIdM m_sp user_id lookup_user_id
-    _                              -> left $ Error_InvalidArguments "org_id, user_id"
+    _                              -> left $ LN.Error_InvalidArguments "org_id, user_id"
 
 
 
-getTeams_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> LN.HandlerErrorEff [Entity Team]
+getTeams_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Team]
 getTeams_ByOrganizationIdM m_sp _ org_id = do
   selectListDbE m_sp [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
 
 
 
-getTeams_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity Team]
+getTeams_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Team]
 getTeams_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [TeamUserId ==. lookup_user_id, TeamActive ==. True] [] TeamId
 
 
 
-getTeamM :: UserId -> TeamId -> LN.HandlerErrorEff (Entity Team)
+getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
 getTeamM _ team_id = do
   selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
 
 
 
-getTeamMH :: UserId -> Text -> OrganizationId -> LN.HandlerErrorEff (Entity Team)
+getTeamMH :: UserId -> Text -> OrganizationId -> HandlerErrorEff (Entity Team)
 getTeamMH _ team_sid org_id = do
   case m_system_team of
     Nothing          -> notFound
@@ -168,7 +168,7 @@ getTeamMH _ team_sid org_id = do
 
 
 
-insertTeam_InternalM :: UserId -> OrganizationId -> SystemTeam -> TeamRequest -> LN.HandlerErrorEff (Entity Team)
+insertTeam_InternalM :: UserId -> OrganizationId -> SystemTeam -> TeamRequest -> HandlerErrorEff (Entity Team)
 insertTeam_InternalM user_id org_id system_team team_request = do
 
   ts <- timestampH'
@@ -180,7 +180,7 @@ insertTeam_InternalM user_id org_id system_team team_request = do
 
 
 
-insert_SystemTeamsM :: UserId -> OrganizationId -> LN.HandlerErrorEff ()
+insert_SystemTeamsM :: UserId -> OrganizationId -> HandlerErrorEff ()
 insert_SystemTeamsM user_id org_id = do
 
   void $ runEitherT $ do
@@ -199,7 +199,7 @@ insert_SystemTeamsM user_id org_id = do
 
 
 
-updateTeamM :: UserId -> TeamId -> TeamRequest -> LN.HandlerErrorEff (Entity Team)
+updateTeamM :: UserId -> TeamId -> TeamRequest -> HandlerErrorEff (Entity Team)
 updateTeamM user_id team_id team_request = do
 
   ts <- timestampH'
@@ -221,18 +221,18 @@ updateTeamM user_id team_id team_request = do
 
 
 
-deleteTeamM :: UserId -> TeamId -> LN.HandlerErrorEff ()
+deleteTeamM :: UserId -> TeamId -> HandlerErrorEff ()
 deleteTeamM user_id team_id = do
   deleteWhereDbE [TeamUserId ==. user_id, TeamId ==. team_id, TeamActive ==. True]
 
 
 
-getTeamCountM :: LN.HandlerErrorEff Int
+getTeamCountM :: HandlerErrorEff Int
 getTeamCountM = right 2
 
 
 
-getTeamStatM :: UserId -> TeamId -> LN.HandlerErrorEff TeamStatResponse
+getTeamStatM :: UserId -> TeamId -> HandlerErrorEff TeamStatResponse
 getTeamStatM _ team_id = do
   right $ TeamStatResponse {
     teamStatResponseMembers = 0 -- TODO FIXME

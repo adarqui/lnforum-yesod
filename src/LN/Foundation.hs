@@ -263,7 +263,7 @@ instance RenderMessage App FormMessage where
 
 
 
-unsafeHandler :: App -> LN.Handler a -> IO a
+unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 
 -- getsYesod :: MonadHandler m => m (HandlerSite m)

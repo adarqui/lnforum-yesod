@@ -13,7 +13,7 @@ module LN.Error (
 import           Data.Aeson (encode)
 import           Import
 import           LN.T.Error (ApplicationError)
-import           Misc       (cs)
+import           LN.Misc       (cs)
 
 
 

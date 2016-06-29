@@ -28,12 +28,12 @@ module LN.Api.Params (
 
 
 import           LN.Control
-import           Lifted
+import           LN.Lifted
 import           Data.List             (nub)
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import           Import
-import           Misc.Codec
+import           LN.Misc.Codec
 import qualified Database.Esqueleto      as E
 import           LN.T.Param
 import           LN.T.Ent (Ent(..))
@@ -169,7 +169,7 @@ minOffset = 1
 
 
 
-lookupStandardParams :: LN.HandlerEff StandardParams
+lookupStandardParams :: HandlerEff StandardParams
 lookupStandardParams = do
 
   offset             <- lookupGetParam $ tshow ParamTag_Offset
@@ -281,21 +281,21 @@ lookupSpBool (Just sp) f = f sp
 
 
 
-lookupGetParam400 :: Text -> LN.HandlerEff Text
+lookupGetParam400 :: Text -> HandlerEff Text
 lookupGetParam400 = lookupGetParamStatus 400
 
-lookupGetParam401 :: Text -> LN.HandlerEff Text
+lookupGetParam401 :: Text -> HandlerEff Text
 lookupGetParam401 = lookupGetParamStatus 401
 
-lookupGetParam403 :: Text -> LN.HandlerEff Text
+lookupGetParam403 :: Text -> HandlerEff Text
 lookupGetParam403 = lookupGetParamStatus 403
 
-lookupGetParam404 :: Text -> LN.HandlerEff Text
+lookupGetParam404 :: Text -> HandlerEff Text
 lookupGetParam404 = lookupGetParamStatus 404
 
 
 
-lookupGetParamStatus :: Int -> Text -> LN.HandlerEff Text
+lookupGetParamStatus :: Int -> Text -> HandlerEff Text
 lookupGetParamStatus status param = do
   r <- lookupGetParam param
   case r of
@@ -309,7 +309,7 @@ lookupGetParamStatus status param = do
 
 
 
--- ** Errors
+-- ** LN.Errors
 -- , notFound
 -- , badMethod
 -- , notAuthenticated
@@ -469,11 +469,11 @@ timestamp sp = do
 
 
 
-timestampH :: StandardParams -> LN.HandlerEff UTCTime
+timestampH :: StandardParams -> HandlerEff UTCTime
 timestampH sp = do
   liftIO $ timestamp sp
 
 
 
-timestampH' :: LN.HandlerEff UTCTime
+timestampH' :: HandlerEff UTCTime
 timestampH' = lookupStandardParams >>= timestampH

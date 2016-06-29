@@ -12,7 +12,7 @@ module LN.Job.Shared (
 
 
 
-import           LN.Control.Monad.Trans.Reader (ReaderT, runReaderT)
+import           Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.List                  (nub)
@@ -20,7 +20,7 @@ import           Data.Text                  (Text)
 import           Import.NoFoundation
 import           LN.T.Internal.Types
 import           LN.T.Job
-import           Misc.Codec                 (int64ToKey')
+import           LN.Misc.Codec                 (int64ToKey')
 import           Network.AMQP
 
 

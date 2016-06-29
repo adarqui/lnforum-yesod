@@ -5,7 +5,7 @@ module LN.All.Pack.PmOut (
   getPmOutPacksR,
   getPmOutPackR,
 
-  -- Model
+  -- LN.Model
   getPmOutPacksM,
   getPmOutPackM
 ) where
@@ -22,7 +22,7 @@ import           LN.All.User
 -- LN.Handler
 --
 
-getPmOutPacksR :: LN.Handler Value
+getPmOutPacksR :: Handler Value
 getPmOutPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -30,7 +30,7 @@ getPmOutPacksR = run $ do
 
 
 
-getPmOutPackR :: PmOutId -> LN.Handler Value
+getPmOutPackR :: PmOutId -> Handler Value
 getPmOutPackR thread_post_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getPmOutPackM user_id thread_post_id
@@ -41,10 +41,10 @@ getPmOutPackR thread_post_id = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getPmOutPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff PmOutPackResponses
+getPmOutPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff PmOutPackResponses
 getPmOutPacksM m_sp user_id = do
   e_pm_outs <- getPmOutsM m_sp user_id
   rehtie e_pm_outs left $ \pm_outs -> do
@@ -55,14 +55,14 @@ getPmOutPacksM m_sp user_id = do
 
 
 
-getPmOutPackM :: UserId -> PmOutId -> LN.HandlerErrorEff PmOutPackResponse
+getPmOutPackM :: UserId -> PmOutId -> HandlerErrorEff PmOutPackResponse
 getPmOutPackM user_id pm_out_id = do
   e_pm_out <- getPmOutM user_id pm_out_id
   rehtie e_pm_out left $ getPmOutPack_ByPmOutM user_id
 
 
 
-getPmOutPack_ByPmOutM :: UserId -> Entity PmOut -> LN.HandlerErrorEff PmOutPackResponse
+getPmOutPack_ByPmOutM :: UserId -> Entity PmOut -> HandlerErrorEff PmOutPackResponse
 getPmOutPack_ByPmOutM user_id pmOut@(Entity pm_out_id PmOut{..}) = do
 
   e_pm_out_user <- getUserM user_id pmOutUserId

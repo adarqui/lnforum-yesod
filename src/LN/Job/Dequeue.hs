@@ -11,7 +11,7 @@ module LN.Job.Dequeue (
 import           LN.All.Profile                  (profileRequestToProfile)
 import           Data.Aeson
 import           Import
-import           Job.Shared
+import           LN.Job.Shared
 import           LN.T.Internal.Types
 import           LN.T.Job
 import           Network.AMQP
@@ -19,7 +19,7 @@ import qualified Prelude                      as Prelude
 
 
 
-import           LN.Control.Monad.Logger         (runStdoutLoggingT)
+import           Control.Monad.Logger         (runStdoutLoggingT)
 import           Data.Yaml
 import qualified Database.Persist
 import           Database.Persist.Postgresql  as P

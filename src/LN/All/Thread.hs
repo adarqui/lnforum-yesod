@@ -12,12 +12,12 @@ module LN.All.Thread (
   getThreadStatsR,
   getThreadStatR,
 
-  -- Model/Function
+  -- LN.Model/Function
   threadRequestToThread,
   threadToResponse,
   threadsToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getThreadsM,
   getThreadM,
   getThreadMH,
@@ -46,7 +46,7 @@ import qualified Database.Esqueleto     as E
 -- LN.Handler
 --
 
-getThreadsR :: LN.Handler Value
+getThreadsR :: Handler Value
 getThreadsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -54,23 +54,23 @@ getThreadsR = run $ do
 
 
 
-postThreadR0 :: LN.Handler Value
+postThreadR0 :: Handler Value
 postThreadR0 = run $ do
   user_id        <- _requireAuthId
-  thread_request <- requireJsonBody :: LN.HandlerEff ThreadRequest
+  thread_request <- requireJsonBody
   sp             <- lookupStandardParams
   errorOrJSON threadToResponse $ insertThreadM (pure sp) user_id thread_request
 
 
 
-getThreadR :: ThreadId -> LN.Handler Value
+getThreadR :: ThreadId -> Handler Value
 getThreadR thread_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON threadToResponse $ getThreadM user_id thread_id
 
 
 
-getThreadH :: Text -> LN.Handler Value
+getThreadH :: Text -> Handler Value
 getThreadH thread_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -78,7 +78,7 @@ getThreadH thread_name = run $ do
 
 
 
-putThreadR :: ThreadId -> LN.Handler Value
+putThreadR :: ThreadId -> Handler Value
 putThreadR thread_id = run $ do
   user_id        <- _requireAuthId
   thread_request <- requireJsonBody
@@ -86,14 +86,14 @@ putThreadR thread_id = run $ do
 
 
 
-deleteThreadR :: ThreadId -> LN.Handler Value
+deleteThreadR :: ThreadId -> Handler Value
 deleteThreadR thread_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteThreadM user_id thread_id
 
 
 
-getThreadsCountR :: LN.Handler Value
+getThreadsCountR :: Handler Value
 getThreadsCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -101,14 +101,14 @@ getThreadsCountR = run $ do
 
 
 
-getThreadStatsR :: LN.Handler Value
+getThreadStatsR :: Handler Value
 getThreadStatsR = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getThreadStatsM user_id
 
 
 
-getThreadStatR :: ThreadId -> LN.Handler Value
+getThreadStatR :: ThreadId -> Handler Value
 getThreadStatR thread_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getThreadStatM user_id thread_id
@@ -121,7 +121,7 @@ getThreadStatR thread_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 threadRequestToThread :: UserId -> OrganizationId -> ForumId -> BoardId -> ThreadRequest -> Thread
@@ -187,7 +187,7 @@ threadsToResponses threads = ThreadResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
 -- orderByToField :: forall typ record. OrderBy -> EntityField record typ
@@ -202,47 +202,47 @@ orderByToField (Just order) =
 
 
 
-getThreadsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Thread]
+getThreadsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Thread]
 getThreadsM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spBoardId, lookupSpMay m_sp spUserId) of
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM m_sp user_id lookup_user_id
-    _                           -> left $ Error_InvalidArguments "org_id, user_id, board_id"
+    _                           -> left $ LN.Error_InvalidArguments "org_id, user_id, board_id"
 
 
 
-getThreads_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> LN.HandlerErrorEff [Entity Thread]
+getThreads_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Thread]
 getThreads_ByOrganizationIdM m_sp _ org_id = do
   selectListDbE m_sp [ThreadOrgId ==. org_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> LN.HandlerErrorEff [Entity Thread]
+getThreads_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Thread]
 getThreads_ByBoardIdM m_sp _ board_id = do
   selectListDbE m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByBoardId_KeysM :: Maybe StandardParams -> UserId -> BoardId -> LN.HandlerErrorEff [Key Thread]
+getThreads_ByBoardId_KeysM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Key Thread]
 getThreads_ByBoardId_KeysM m_sp _ board_id = do
   selectKeysListDbE m_sp [ThreadBoardId ==. board_id, ThreadActive ==. True] [] (orderByToField $ lookupSpMay m_sp spOrder)
 
 
 
-getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity Thread]
+getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Thread]
 getThreads_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
 
 
 
-getThreadM :: UserId -> ThreadId -> LN.HandlerErrorEff (Entity Thread)
+getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
 getThreadM _ thread_id = do
   selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 
-getThreadMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff (Entity Thread)
+getThreadMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff (Entity Thread)
 getThreadMH m_sp _ thread_name = do
 
   case (lookupSpMay m_sp spBoardId) of
@@ -250,25 +250,25 @@ getThreadMH m_sp _ thread_name = do
     Just board_id -> do
       selectFirstDbE [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
 
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> left $ LN.Error_InvalidArguments "board_id"
 
 
 
-getWithThreadM :: Bool -> UserId -> ThreadId -> LN.HandlerErrorEff (Maybe (Entity Thread))
+getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerErrorEff (Maybe (Entity Thread))
 getWithThreadM False _ _              = right Nothing
 getWithThreadM True user_id thread_id = fmap Just <$> getThreadM user_id thread_id
 
 
 
-insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> LN.HandlerErrorEff (Entity Thread)
+insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThreadM m_sp user_id thread_request = do
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> left $ LN.Error_InvalidArguments "board_id"
 
 
 
-insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> LN.HandlerErrorEff (Entity Thread)
+insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThread_ByBoardIdM user_id board_id thread_request = do
   e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
   case e_board of
@@ -281,7 +281,7 @@ insertThread_ByBoardIdM user_id board_id thread_request = do
 
 
 
-updateThreadM :: UserId -> ThreadId -> ThreadRequest -> LN.HandlerErrorEff (Entity Thread)
+updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 updateThreadM user_id thread_id thread_request = do
 
   ts <- timestampH'
@@ -308,13 +308,13 @@ updateThreadM user_id thread_id thread_request = do
 
 
 
-deleteThreadM :: UserId -> ThreadId -> LN.HandlerErrorEff ()
+deleteThreadM :: UserId -> ThreadId -> HandlerErrorEff ()
 deleteThreadM user_id thread_id = do
   deleteWhereDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
 
 
 
-countThreadsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countThreadsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countThreadsM m_sp _ = do
 
   case (lookupSpMay m_sp spBoardId) of
@@ -323,16 +323,16 @@ countThreadsM m_sp _ = do
       n <- countDb [ ThreadBoardId ==. board_id ]
       right $ CountResponses [CountResponse (keyToInt64 board_id) (fromIntegral n)]
 
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> left $ LN.Error_InvalidArguments "board_id"
 
 
 
-getThreadStatsM :: UserId -> LN.HandlerErrorEff ThreadStatResponses
-getThreadStatsM _ = left Error_NotImplemented
+getThreadStatsM :: UserId -> HandlerErrorEff ThreadStatResponses
+getThreadStatsM _ = left LN.Error_NotImplemented
 
 
 
-getThreadStatM :: UserId -> ThreadId -> LN.HandlerErrorEff ThreadStatResponse
+getThreadStatM :: UserId -> ThreadId -> HandlerErrorEff ThreadStatResponse
 getThreadStatM _ thread_id = do
   num_thread_posts <- countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
   right $ ThreadStatResponse {

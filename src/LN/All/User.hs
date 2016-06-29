@@ -17,7 +17,7 @@ module LN.All.User (
   getUserStatR,
 
 
-  -- Model/Function
+  -- LN.Model/Function
   profileNameToNick,
   userRequestToUser,
   userToResponse,
@@ -26,7 +26,7 @@ module LN.All.User (
   usersToSanitizedResponses,
   validateUserRequest,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getUsersM,
   getUsers_ByUserIdsM,
   getUsers_ByEverythingM,
@@ -57,7 +57,7 @@ import qualified Database.Esqueleto as E
 -- LN.Handler
 --
 
-getUsersR :: LN.Handler Value
+getUsersR :: Handler Value
 getUsersR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -65,15 +65,15 @@ getUsersR = run $ do
 
 
 
-postUserR0 :: LN.Handler Value
+postUserR0 :: Handler Value
 postUserR0 = run $ do
   user_id      <- _requireAuthId
-  user_request <- requireJsonBody :: LN.HandlerEff UserRequest
+  user_request <- requireJsonBody :: HandlerEff UserRequest
   errorOrJSON userToResponse $ insertUsersM user_id user_request
 
 
 
-getUserR :: UserId -> LN.Handler Value
+getUserR :: UserId -> Handler Value
 getUserR lookup_user_id = run $ do
   user_id <- _requireAuthId
   e_user <- getUserM user_id lookup_user_id
@@ -83,32 +83,32 @@ getUserR lookup_user_id = run $ do
 
 
 
-getUserH :: Text -> LN.Handler Value
+getUserH :: Text -> Handler Value
 getUserH _ = run $ do
   errorOrJSON id $ go
   where
-  go :: LN.HandlerErrorEff ()
+  go :: HandlerErrorEff ()
   go = do
-    left Error_NotImplemented
+    left LN.Error_NotImplemented
 
 
 
-putUserR :: UserId -> LN.Handler Value
+putUserR :: UserId -> Handler Value
 putUserR lookup_user_id = run $ do
   user_id       <- _requireAuthId
-  user_request <- requireJsonBody :: LN.HandlerEff UserRequest
+  user_request <- requireJsonBody :: HandlerEff UserRequest
   errorOrJSON userToResponse $ updateUserM user_id lookup_user_id user_request
 
 
 
-deleteUserR :: UserId -> LN.Handler Value
+deleteUserR :: UserId -> Handler Value
 deleteUserR lookup_user_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteUserM user_id lookup_user_id
 
 
 
-getUsersCountR :: LN.Handler Value
+getUsersCountR :: Handler Value
 getUsersCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -116,7 +116,7 @@ getUsersCountR = run $ do
 
 
 
-getUserStatsR :: LN.Handler Value
+getUserStatsR :: Handler Value
 getUserStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -124,7 +124,7 @@ getUserStatsR = run $ do
 
 
 
-getUserStatR :: UserId -> LN.Handler Value
+getUserStatR :: UserId -> Handler Value
 getUserStatR lookup_user_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getUserStatM user_id lookup_user_id
@@ -137,7 +137,7 @@ getUserStatR lookup_user_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 profileNameToNick :: Text -> Text
@@ -229,10 +229,10 @@ validateUserRequest z@UserRequest{..} = do
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getUsersM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity User]
+getUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
 getUsersM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserIds) of
@@ -242,28 +242,28 @@ getUsersM m_sp user_id = do
 
 
 
-getUsers_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> LN.HandlerErrorEff [Entity User]
+getUsers_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff [Entity User]
 getUsers_ByUserIdsM m_sp _ user_ids = do
 
   selectListDbE m_sp [UserId <-. user_ids, UserActive ==. True] [] UserId
 
 
 
-getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity User]
+getUsers_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity User]
 getUsers_ByEverythingM m_sp _ = do
 
   selectListDbE m_sp [UserActive ==. True] [] UserId
 
 
 
-getUsers_ByEverything_KeysM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Key User]
+getUsers_ByEverything_KeysM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Key User]
 getUsers_ByEverything_KeysM m_sp _ = do
 
   selectKeysListDbE m_sp [] [] UserId
 
 
 
-insertUsersM :: UserId -> UserRequest -> LN.HandlerErrorEff (Entity User)
+insertUsersM :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
 insertUsersM user_id user_request = do
 
   -- TODO: FIXME: Fix this
@@ -283,11 +283,11 @@ insertUsersM user_id user_request = do
       void $ insertUsers_TasksM user_id new_user
       right $ new_user
 
-    else left Error_PermissionDenied
+    else left LN.Error_PermissionDenied
 
 
 
-insertUsers_TasksM :: UserId -> Entity User -> LN.HandlerErrorEff ()
+insertUsers_TasksM :: UserId -> Entity User -> HandlerErrorEff ()
 insertUsers_TasksM _ (Entity new_user_id _) = do
 
   -- Create a default profile
@@ -302,14 +302,14 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
 
 
 
-getUserM :: UserId -> UserId -> LN.HandlerErrorEff (Entity User)
+getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
 getUserM _ lookup_user_id = do
 
   selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
 
 
 
-getUserMH :: UserId -> Text -> LN.HandlerErrorEff (Entity User)
+getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
 getUserMH _ lookup_user_nick = do
 
   selectFirstDbE [UserNick ==. lookup_user_nick, UserActive ==. True] []
@@ -317,7 +317,7 @@ getUserMH _ lookup_user_nick = do
 
 
 
-updateUserM :: UserId -> UserId -> UserRequest -> LN.HandlerErrorEff (Entity User)
+updateUserM :: UserId -> UserId -> UserRequest -> HandlerErrorEff (Entity User)
 updateUserM _ lookup_user_id user_request = do
 
   ts <- timestampH'
@@ -345,7 +345,7 @@ updateUserM _ lookup_user_id user_request = do
 
 
 
-deleteUserM :: UserId -> UserId -> LN.HandlerErrorEff ()
+deleteUserM :: UserId -> UserId -> HandlerErrorEff ()
 deleteUserM user_id lookup_user_id = do
 
   -- TODO: ACCESS: SECURITY: Fix this
@@ -355,17 +355,17 @@ deleteUserM user_id lookup_user_id = do
       deleteDbE lookup_user_id
 
     else
-      left Error_PermissionDenied
+      left LN.Error_PermissionDenied
 
 
 
 
-countUsersM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countUsersM m_sp _ = do
 
   case (lookupSpMay m_sp spOrganizationId) of
 
-    Just _ -> left Error_NotImplemented
+    Just _ -> left LN.Error_NotImplemented
 
     _      -> do
       n <- countDb [UserActive ==. True]
@@ -374,12 +374,12 @@ countUsersM m_sp _ = do
 
 
 
-getUserStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff UserSanitizedStatResponses
-getUserStatsM _ _ = left Error_NotImplemented
+getUserStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedStatResponses
+getUserStatsM _ _ = left LN.Error_NotImplemented
 
 
 
-getUserStatM :: UserId -> UserId -> LN.HandlerErrorEff UserSanitizedStatResponse
+getUserStatM :: UserId -> UserId -> HandlerErrorEff UserSanitizedStatResponse
 getUserStatM _ lookup_user_id = do
 
   (a,b,c,d) <- qUserStats lookup_user_id

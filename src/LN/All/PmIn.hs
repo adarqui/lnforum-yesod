@@ -8,12 +8,12 @@ module LN.All.PmIn (
   putPmInR,
   deletePmInR,
 
-  -- Model/Function
+  -- LN.Model/Function
   pmInRequestToPmIn,
   pmInToResponse,
   pmInsToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getPmInsM,
   getPmInM,
   insertPmInM,
@@ -31,7 +31,7 @@ import           LN.All.Prelude
 -- LN.Handler
 --
 
-getPmInsR :: LN.Handler Value
+getPmInsR :: Handler Value
 getPmInsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -39,7 +39,7 @@ getPmInsR = run $ do
 
 
 
-postPmInsR :: LN.Handler Value
+postPmInsR :: Handler Value
 postPmInsR = run $ do
   user_id <- _requireAuthId
   sp <- lookupStandardParams
@@ -48,14 +48,14 @@ postPmInsR = run $ do
 
 
 
-getPmInR :: PmInId -> LN.Handler Value
+getPmInR :: PmInId -> Handler Value
 getPmInR pm_in_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON pmInToResponse $ getPmInM user_id pm_in_id
 
 
 
-putPmInR :: PmInId -> LN.Handler Value
+putPmInR :: PmInId -> Handler Value
 putPmInR pm_in_id = run $ do
   user_id       <- _requireAuthId
   pm_in_request <- requireJsonBody
@@ -63,7 +63,7 @@ putPmInR pm_in_id = run $ do
 
 
 
-deletePmInR :: PmInId -> LN.Handler Value
+deletePmInR :: PmInId -> Handler Value
 deletePmInR pm_in_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deletePmInM user_id pm_in_id
@@ -74,7 +74,7 @@ deletePmInR pm_in_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 pmInRequestToPmIn :: UserId -> PmId -> PmInRequest -> PmIn
@@ -123,22 +123,22 @@ pmInsToResponses pmIns = PmInResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getPmInsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity PmIn]
+getPmInsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmIn]
 getPmInsM m_sp user_id = do
   selectListDbE m_sp [PmInUserId ==. user_id, PmInActive ==. True] [] PmInId
 
 
 
-getPmInM :: UserId -> PmInId -> LN.HandlerErrorEff (Entity PmIn)
+getPmInM :: UserId -> PmInId -> HandlerErrorEff (Entity PmIn)
 getPmInM user_id pm_in_id = do
   selectFirstDbE [PmInUserId ==. user_id, PmInId ==. pm_in_id, PmInActive ==. True] []
 
 
 
-insertPmInM :: Maybe StandardParams -> UserId -> PmInRequest -> LN.HandlerErrorEff (Entity PmIn)
+insertPmInM :: Maybe StandardParams -> UserId -> PmInRequest -> HandlerErrorEff (Entity PmIn)
 insertPmInM m_sp user_id pm_in_request = do
 
   case (lookupSpMay m_sp spPmId) of
@@ -153,7 +153,7 @@ insertPmInM m_sp user_id pm_in_request = do
 
 
 
-updatePmInM :: UserId -> PmInId -> PmInRequest -> LN.HandlerErrorEff (Entity PmIn)
+updatePmInM :: UserId -> PmInId -> PmInRequest -> HandlerErrorEff (Entity PmIn)
 updatePmInM user_id pm_in_id pm_in_request = do
 
   ts <- timestampH'
@@ -173,5 +173,5 @@ updatePmInM user_id pm_in_id pm_in_request = do
 
 
 
-deletePmInM :: UserId -> PmInId -> LN.HandlerErrorEff ()
+deletePmInM :: UserId -> PmInId -> HandlerErrorEff ()
 deletePmInM _ _ = right ()

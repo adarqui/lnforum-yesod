@@ -1,8 +1,8 @@
 {-# LANGUAGE ExplicitForAll #-}
 
 module LN.Cache (
-  Cache (..),
-  CacheEntry (..),
+  LN.Cache (..),
+  LN.CacheEntry (..),
   defaultCache,
   emptyCache
 ) where
@@ -10,42 +10,42 @@ module LN.Cache (
 
 
 import           Import
-import LN.Control.Monad.Trans.RWS
-import           Model.Misc
+import Control.Monad.Trans.RWS
+import           LN.Model.Misc
 import           LN.T.Membership
 import           LN.T.Visibility
 import qualified Data.Map as M
 
 
 
-data CacheEntry a
-  = CacheEntry a
-  | CacheMissing
+data LN.CacheEntry a
+  = LN.CacheEntry a
+  | LN.CacheMissing
 
 
 
-type CacheMap a b = M.Map a (CacheEntry b)
+type LN.CacheMap a b = M.Map a (CacheEntry b)
 
 
-data Cache = Cache {
+data LN.Cache = LN.Cache {
   cacheMe            :: Maybe User,
-  cacheOrganizations  :: CacheMap OrganizationId Organization,
-  cacheUsers          :: CacheMap UserId User,
-  cacheForums         :: CacheMap ForumId Forum,
-  cacheBoards         :: CacheMap BoardId Board,
-  cacheThreads        :: CacheMap ThreadId Thread,
-  cacheThreadPosts    :: CacheMap ThreadPostId ThreadPost
+  cacheOrganizations  :: LN.CacheMap OrganizationId Organization,
+  cacheUsers          :: LN.CacheMap UserId User,
+  cacheForums         :: LN.CacheMap ForumId Forum,
+  cacheBoards         :: LN.CacheMap BoardId Board,
+  cacheThreads        :: LN.CacheMap ThreadId Thread,
+  cacheThreadPosts    :: LN.CacheMap ThreadPostId ThreadPost
 }
 
 
 
-emptyCache :: forall a b. CacheMap a b
+emptyCache :: forall a b. LN.CacheMap a b
 emptyCache = M.empty
 
 
 
-defaultCache :: Cache
-defaultCache = Cache {
+defaultCache :: LN.Cache
+defaultCache = LN.Cache {
   cacheMe = Nothing,
   cacheOrganizations = emptyCache,
   cacheUsers = emptyCache,

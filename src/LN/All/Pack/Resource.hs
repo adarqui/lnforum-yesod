@@ -5,7 +5,7 @@ module LN.All.Pack.Resource (
   getResourcePacksR,
   getResourcePackR,
 
-  -- Model
+  -- LN.Model
   getResourcePacksM,
   getResourcePackM
 ) where
@@ -22,7 +22,7 @@ import           LN.All.User
 -- LN.Handler
 --
 
-getResourcePacksR :: LN.Handler Value
+getResourcePacksR :: Handler Value
 getResourcePacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -30,7 +30,7 @@ getResourcePacksR = run $ do
 
 
 
-getResourcePackR :: ResourceId -> LN.Handler Value
+getResourcePackR :: ResourceId -> Handler Value
 getResourcePackR thread_post_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getResourcePackM user_id thread_post_id
@@ -41,10 +41,10 @@ getResourcePackR thread_post_id = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getResourcePacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff ResourcePackResponses
+getResourcePacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourcePackResponses
 getResourcePacksM m_sp user_id = do
 
   e_resources <- getResourcesM m_sp user_id
@@ -58,7 +58,7 @@ getResourcePacksM m_sp user_id = do
 
 
 
-getResourcePackM :: UserId -> ResourceId -> LN.HandlerErrorEff ResourcePackResponse
+getResourcePackM :: UserId -> ResourceId -> HandlerErrorEff ResourcePackResponse
 getResourcePackM user_id resource_id = do
 
   e_resource <- getResourceM user_id resource_id
@@ -66,7 +66,7 @@ getResourcePackM user_id resource_id = do
 
 
 
-getResourcePack_ByResourceM :: UserId -> Entity Resource -> LN.HandlerErrorEff ResourcePackResponse
+getResourcePack_ByResourceM :: UserId -> Entity Resource -> HandlerErrorEff ResourcePackResponse
 getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) = do
 
   lr <- runEitherT $ do

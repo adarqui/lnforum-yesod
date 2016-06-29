@@ -4,5 +4,5 @@ module LN.Job (
 
 
 
-import           Job.Dequeue as A
-import           Job.Enqueue as A
+import           LN.Job.Dequeue as A
+import           LN.Job.Enqueue as A

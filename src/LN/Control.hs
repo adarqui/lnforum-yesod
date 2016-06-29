@@ -1,6 +1,6 @@
 module LN.Control (
-  LN.HandlerEff,
-  LN.HandlerErrorEff,
+  HandlerEff,
+  HandlerErrorEff,
   LN.ControlM,
   LN.ControlMA,
   LN.ControlReader,
@@ -8,7 +8,7 @@ module LN.Control (
   LN.ControlState,
   InternalControlState (..),
   run,
-  ErrorEff,
+  LN.ErrorEff,
   left,
   right,
   unknownError,
@@ -20,19 +20,19 @@ module LN.Control (
 
 
 
-import qualified LN.Control.Monad.Trans.Either as Either
-import           LN.Control.Monad.Trans.RWS
+import qualified Control.Monad.Trans.Either as Either
+import           Control.Monad.Trans.RWS
 import qualified Data.Map                as M
 
 import           Import
 
-import           Cache
+import           LN.Cache
 import           LN.T.Error
 
 
 
-type LN.HandlerEff a = LN.ControlMA LN.Handler a
-type LN.HandlerErrorEff a = LN.HandlerEff (ErrorEff a)
+type HandlerEff a = LN.ControlMA Handler a
+type HandlerErrorEff a = HandlerEff (ErrorEff a)
 
 
 
@@ -46,7 +46,7 @@ type LN.ControlState  = InternalControlState
 
 
 data InternalControlState = InternalControlState {
-  cache :: Cache
+  cache :: LN.Cache
 }
 
 
@@ -63,14 +63,14 @@ run op = fst <$> evalRWST op () defaultControlState
 
 
 
-type ErrorEff = Either ApplicationError
+type LN.ErrorEff = Either ApplicationError
 
 
 
 left  = pure . Left
 right = pure . Right
 
-unknownError = left Error_Unexpected
+unknownError = left LN.Error_Unexpected
 
 
 

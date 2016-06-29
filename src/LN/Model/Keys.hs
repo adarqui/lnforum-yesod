@@ -13,7 +13,7 @@ module LN.Model.Keys (
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.Text             as T
 import           Import
-import           Misc.Codec
+import           LN.Misc.Codec
 
 
 

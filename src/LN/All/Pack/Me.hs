@@ -12,7 +12,7 @@ import           LN.All.Prelude
 
 
 
-getMePackR :: LN.Handler Value
+getMePackR :: Handler Value
 getMePackR = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getUserPack_ByUserIdM user_id user_id

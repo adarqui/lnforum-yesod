@@ -6,7 +6,7 @@ module LN.All.Pack.Sanitized.User (
   getUserSanitizedPackR,
   getUserSanitizedPackH,
 
-  -- Model
+  -- LN.Model
   getUsersSanitizedPacksM,
   getUserSanitizedPackM,
   getUserSanitizedPackMH,
@@ -24,7 +24,7 @@ import           LN.All.User
 -- LN.Handler
 --
 
-getUserSanitizedPacksR :: LN.Handler Value
+getUserSanitizedPacksR :: Handler Value
 getUserSanitizedPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -32,14 +32,14 @@ getUserSanitizedPacksR = run $ do
 
 
 
-getUserSanitizedPackR :: UserId -> LN.Handler Value
+getUserSanitizedPackR :: UserId -> Handler Value
 getUserSanitizedPackR lookup_user_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getUserSanitizedPackM user_id lookup_user_id
 
 
 
-getUserSanitizedPackH :: Text -> LN.Handler Value
+getUserSanitizedPackH :: Text -> Handler Value
 getUserSanitizedPackH lookup_user_nick = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getUserSanitizedPackMH user_id lookup_user_nick
@@ -51,10 +51,10 @@ getUserSanitizedPackH lookup_user_nick = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getUsersSanitizedPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserIds) of
@@ -64,7 +64,7 @@ getUsersSanitizedPacksM m_sp user_id = do
 
 
 
-getUsersSanitizedPacks_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
   e_user_ids <- getUsers_ByEverything_KeysM m_sp user_id
@@ -77,18 +77,18 @@ getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
 
 
-getUserSanitizedPackM :: UserId -> UserId -> LN.HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPackM :: UserId -> UserId -> HandlerErrorEff UserSanitizedPackResponse
 getUserSanitizedPackM user_id lookup_user_id = getUserSanitizedPack_ByUserIdM user_id lookup_user_id
 
 
 
 
-getUserSanitizedPackMH :: UserId -> Text -> LN.HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPackMH :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
 getUserSanitizedPackMH user_id lookup_user_nick = getUserSanitizedPack_ByUserNickM user_id lookup_user_nick
 
 
 
-getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> LN.HandlerErrorEff UserSanitizedPackResponses
+getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
   right $ UserSanitizedPackResponses {
@@ -98,7 +98,7 @@ getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
 
 
 
-getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> LN.HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserIdM user_id lookup_user_id = do
 
   e_lookup_user <- getUserM user_id lookup_user_id
@@ -107,7 +107,7 @@ getUserSanitizedPack_ByUserIdM user_id lookup_user_id = do
 
 
 
-getUserSanitizedPack_ByUserNickM :: UserId -> Text -> LN.HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserNickM :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserNickM user_id lookup_user_nick = do
 
   e_lookup_user <- getUserMH user_id lookup_user_nick
@@ -116,7 +116,7 @@ getUserSanitizedPack_ByUserNickM user_id lookup_user_nick = do
 
 
 
-getUserSanitizedPack_ByUserM :: UserId -> Entity User -> LN.HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserM :: UserId -> Entity User -> HandlerErrorEff UserSanitizedPackResponse
 getUserSanitizedPack_ByUserM user_id lookup_user = do
 
   lr <- runEitherT $ do

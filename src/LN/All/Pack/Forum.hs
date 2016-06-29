@@ -4,7 +4,7 @@ module LN.All.Pack.Forum (
   getForumPackR,
   getForumPackH,
 
-  -- Model
+  -- LN.Model
   getForumPacksM,
   getForumPackM,
   getForumPackMH,
@@ -21,7 +21,7 @@ import           LN.All.Forum
 -- LN.Handler
 --
 
-getForumPacksR :: LN.Handler Value
+getForumPacksR :: Handler Value
 getForumPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -29,14 +29,14 @@ getForumPacksR = run $ do
 
 
 
-getForumPackR :: ForumId -> LN.Handler Value
+getForumPackR :: ForumId -> Handler Value
 getForumPackR forum_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getForumPackM user_id forum_id
 
 
 
-getForumPackH :: Text -> LN.Handler Value
+getForumPackH :: Text -> Handler Value
 getForumPackH forum_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -48,20 +48,20 @@ getForumPackH forum_name = run $ do
 
 
 --
--- Model
+-- LN.Model
 --
 
-getForumPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff ForumPackResponses
+getForumPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumPackResponses
 getForumPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id   -> getForumPacks_ByOrganizationIdM m_sp user_id org_id
-    _             -> left $ Error_InvalidArguments "organization_id"
+    _             -> left $ LN.Error_InvalidArguments "organization_id"
 
 
 
-getForumPackM :: UserId -> ForumId -> LN.HandlerErrorEff ForumPackResponse
+getForumPackM :: UserId -> ForumId -> HandlerErrorEff ForumPackResponse
 getForumPackM user_id forum_id = do
 
   e_forum <- getForumM user_id forum_id
@@ -69,7 +69,7 @@ getForumPackM user_id forum_id = do
 
 
 
-getForumPackMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff ForumPackResponse
+getForumPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff ForumPackResponse
 getForumPackMH m_sp user_id forum_name = do
 
   e_forum <- getForumMH m_sp user_id forum_name
@@ -77,7 +77,7 @@ getForumPackMH m_sp user_id forum_name = do
 
 
 
-getForumPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> LN.HandlerErrorEff ForumPackResponses
+getForumPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff ForumPackResponses
 getForumPacks_ByOrganizationIdM m_sp user_id org_id = do
 
   e_forums       <- getForums_ByOrganizationIdM m_sp user_id org_id
@@ -89,7 +89,7 @@ getForumPacks_ByOrganizationIdM m_sp user_id org_id = do
 
 
 
-getForumPack_ByForumM :: UserId -> Entity Forum -> LN.HandlerErrorEff ForumPackResponse
+getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerErrorEff ForumPackResponse
 getForumPack_ByForumM user_id forum@(Entity _ Forum{..}) = do
 
   e_forum_stats       <- getForumStatM user_id (entityKey forum)

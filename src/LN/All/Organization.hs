@@ -12,13 +12,13 @@ module LN.All.Organization (
   getOrganizationStatsR,
   getOrganizationStatR,
 
-  -- Model/Function
+  -- LN.Model/Function
   organizationRequestToOrganization,
   organizationToResponse,
   organizationsToResponses,
   validateOrganizationRequest,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getOrganizationsM,
   getOrganizations_ByUserIdM,
   getOrganizations_ByEverythingM,
@@ -46,7 +46,7 @@ import           LN.T.Visibility
 
 
 
-getOrganizationsR :: LN.Handler Value
+getOrganizationsR :: Handler Value
 getOrganizationsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -54,29 +54,29 @@ getOrganizationsR = run $ do
 
 
 
-postOrganizationR0 :: LN.Handler Value
+postOrganizationR0 :: Handler Value
 postOrganizationR0 = run $ do
   user_id              <- _requireAuthId
-  organization_request <- requireJsonBody :: LN.HandlerEff OrganizationRequest
+  organization_request <- requireJsonBody :: HandlerEff OrganizationRequest
   errorOrJSON organizationToResponse $ insertOrganizationM user_id organization_request
 
 
 
-getOrganizationR :: OrganizationId -> LN.Handler Value
+getOrganizationR :: OrganizationId -> Handler Value
 getOrganizationR org_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON organizationToResponse $ getOrganizationM user_id org_id
 
 
 
-getOrganizationH :: Text -> LN.Handler Value
+getOrganizationH :: Text -> Handler Value
 getOrganizationH org_name = run $ do
   user_id <- _requireAuthId
   errorOrJSON organizationToResponse $ getOrganizationMH user_id org_name
 
 
 
-putOrganizationR :: OrganizationId -> LN.Handler Value
+putOrganizationR :: OrganizationId -> Handler Value
 putOrganizationR org_id = run $ do
   user_id              <- _requireAuthId
   organization_request <- requireJsonBody
@@ -84,14 +84,14 @@ putOrganizationR org_id = run $ do
 
 
 
-deleteOrganizationR :: OrganizationId -> LN.Handler Value
+deleteOrganizationR :: OrganizationId -> Handler Value
 deleteOrganizationR org_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteOrganizationM user_id org_id
 
 
 
-getOrganizationsCountR :: LN.Handler Value
+getOrganizationsCountR :: Handler Value
 getOrganizationsCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -99,14 +99,14 @@ getOrganizationsCountR = run $ do
 
 
 
-getOrganizationStatsR :: LN.Handler Value
+getOrganizationStatsR :: Handler Value
 getOrganizationStatsR = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getOrganizationStatsM user_id
 
 
 
-getOrganizationStatR :: OrganizationId -> LN.Handler Value
+getOrganizationStatR :: OrganizationId -> Handler Value
 getOrganizationStatR org_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getOrganizationStatM user_id org_id
@@ -119,7 +119,7 @@ getOrganizationStatR org_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
@@ -192,10 +192,10 @@ validateOrganizationRequest z@OrganizationRequest{..} = do
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getOrganizationsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Organization]
+getOrganizationsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizationsM m_sp user_id = do
   case (lookupSpMay m_sp spUserId) of
     Just lookup_user_id -> getOrganizations_ByUserIdM m_sp user_id lookup_user_id
@@ -203,48 +203,48 @@ getOrganizationsM m_sp user_id = do
 
 
 
-getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity Organization]
+getOrganizations_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [OrganizationUserId ==. lookup_user_id] [] OrganizationId
 
 
 
-getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Organization]
+getOrganizations_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Organization]
 getOrganizations_ByEverythingM m_sp _ = do
   selectListDbE m_sp [] [] OrganizationId
 
 
 
-getOrganizationM :: UserId -> OrganizationId -> LN.HandlerErrorEff (Entity Organization)
+getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
 getOrganizationM user_id org_id = do
   selectFirstDbE [OrganizationId ==. org_id] []
 
 
 
-getWithOrganizationM :: Bool -> UserId -> OrganizationId -> LN.HandlerErrorEff (Maybe (Entity Organization))
+getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerErrorEff (Maybe (Entity Organization))
 getWithOrganizationM False _ _           = right Nothing
 getWithOrganizationM True user_id org_id = fmap Just <$> getOrganizationM user_id org_id
 
 
 
-getOrganizationMH :: UserId -> Text -> LN.HandlerErrorEff (Entity Organization)
+getOrganizationMH :: UserId -> Text -> HandlerErrorEff (Entity Organization)
 getOrganizationMH user_id org_name = getOrganization_ByOrganizationNameM user_id org_name
 
 
 
-getOrganization_ByOrganizationNameM :: UserId -> Text -> LN.HandlerErrorEff (Entity Organization)
+getOrganization_ByOrganizationNameM :: UserId -> Text -> HandlerErrorEff (Entity Organization)
 getOrganization_ByOrganizationNameM _ org_name = do
   selectFirstDbE [OrganizationName ==. org_name, OrganizationActive ==. True] []
 
 
 
-insertOrganizationM :: UserId -> OrganizationRequest -> LN.HandlerErrorEff (Entity Organization)
+insertOrganizationM :: UserId -> OrganizationRequest -> HandlerErrorEff (Entity Organization)
 insertOrganizationM user_id organization_request = do
 
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ Error_Validation "TODO FIXME"
+    Left _  -> left $ LN.Error_Validation "TODO FIXME"
     Right _ -> do
       ts <- timestampH'
 
@@ -262,13 +262,13 @@ insertOrganizationM user_id organization_request = do
 
 
 
-updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> LN.HandlerErrorEff (Entity Organization)
+updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerErrorEff (Entity Organization)
 updateOrganizationM user_id org_id organization_request = do
 
 --  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
 
   case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ Error_Validation "TODO FIXME"
+    Left _  -> left $ LN.Error_Validation "TODO FIXME"
     Right _ -> do
 
       ts <- timestampH'
@@ -299,7 +299,7 @@ updateOrganizationM user_id org_id organization_request = do
 
 
 
-deleteOrganizationM :: UserId -> OrganizationId -> LN.HandlerErrorEff ()
+deleteOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationM user_id org_id = do
   deleteCascadeWhereDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True]
 
@@ -314,29 +314,29 @@ deleteOrganizationM user_id org_id = do
 
 
 
-deleteOrganizationTeamsM :: UserId -> OrganizationId -> LN.HandlerErrorEff ()
+deleteOrganizationTeamsM :: UserId -> OrganizationId -> HandlerErrorEff ()
 deleteOrganizationTeamsM _ org_id = do
   -- TODO: FIXME: security
   deleteWhereDbE [TeamOrgId ==. org_id, TeamActive ==. True]
 
 
 
-countOrganizationsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countOrganizationsM m_sp _ = do
   case (lookupSpMay m_sp spUserId) of
-    Just _  -> left Error_NotImplemented
+    Just _  -> left LN.Error_NotImplemented
     Nothing -> do
       n <- countDb [OrganizationActive ==. True]
       right $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
-getOrganizationStatsM :: UserId -> LN.HandlerErrorEff OrganizationStatResponses
-getOrganizationStatsM _ = left Error_NotImplemented
+getOrganizationStatsM :: UserId -> HandlerErrorEff OrganizationStatResponses
+getOrganizationStatsM _ = left LN.Error_NotImplemented
 
 
 
-getOrganizationStatM :: UserId -> OrganizationId -> LN.HandlerErrorEff OrganizationStatResponse
+getOrganizationStatM :: UserId -> OrganizationId -> HandlerErrorEff OrganizationStatResponse
 getOrganizationStatM _ org_id = do
 
   num_org_forums  <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]

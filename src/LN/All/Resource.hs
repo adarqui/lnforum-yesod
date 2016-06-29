@@ -11,12 +11,12 @@ module LN.All.Resource (
   getResourceStatsR,
   getResourceStatR,
 
-  -- Model/Function
+  -- LN.Model/Function
   resourceRequestToResource,
   resourceToResponse,
   resourcesToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getResourcesM,
   getResources_ByEverythingM,
   getResources_ByUserIdM,
@@ -36,7 +36,7 @@ import           Import
 import           LN.Lib.Url        (toPrettyUrl)
 import           LN.T              hiding (LikeOpt(..))
 import qualified LN.T.Like         as L
-import           Misc.Codec        (decodeText, encodeText, keyToInt64)
+import           LN.Misc.Codec        (decodeText, encodeText, keyToInt64)
 
 
 
@@ -44,7 +44,7 @@ import           Misc.Codec        (decodeText, encodeText, keyToInt64)
 -- LN.Handler
 --
 
-getResourcesR :: LN.Handler Value
+getResourcesR :: Handler Value
 getResourcesR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -52,7 +52,7 @@ getResourcesR = run $ do
 
 
 
-postResourceR0 :: LN.Handler Value
+postResourceR0 :: Handler Value
 postResourceR0 = run $ do
   user_id          <- _requireAuthId
   resource_request <- requireJsonBody
@@ -60,14 +60,14 @@ postResourceR0 = run $ do
 
 
 
-getResourceR :: ResourceId -> LN.Handler Value
+getResourceR :: ResourceId -> Handler Value
 getResourceR resource_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON resourceToResponse $ getResourceM user_id resource_id
 
 
 
-putResourceR :: ResourceId -> LN.Handler Value
+putResourceR :: ResourceId -> Handler Value
 putResourceR resource_id = run $ do
   user_id          <- _requireAuthId
   resource_request <- requireJsonBody
@@ -75,14 +75,14 @@ putResourceR resource_id = run $ do
 
 
 
-deleteResourceR :: ResourceId -> LN.Handler Value
+deleteResourceR :: ResourceId -> Handler Value
 deleteResourceR resource_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteResourceM user_id resource_id
 
 
 
-getResourcesCountR :: LN.Handler Value
+getResourcesCountR :: Handler Value
 getResourcesCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -90,7 +90,7 @@ getResourcesCountR = run $ do
 
 
 
-getResourceStatsR :: LN.Handler Value
+getResourceStatsR :: Handler Value
 getResourceStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -98,7 +98,7 @@ getResourceStatsR = run $ do
 
 
 
-getResourceStatR :: ResourceId -> LN.Handler Value
+getResourceStatR :: ResourceId -> Handler Value
 getResourceStatR thread_post_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getResourceStatM user_id thread_post_id
@@ -110,7 +110,7 @@ getResourceStatR thread_post_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 resourceRequestToResource :: UserId -> ResourceRequest -> Resource
@@ -177,10 +177,10 @@ resourcesToResponses resources = ResourceResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getResourcesM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Resource]
+getResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
 getResourcesM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -190,25 +190,25 @@ getResourcesM m_sp user_id = do
 
 
 
-getResources_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Resource]
+getResources_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ByEverythingM m_sp _ = do
   selectListDbE m_sp [ResourceActive ==. True] [] ResourceId
 
 
 
-getResources_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity Resource]
+getResources_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [ResourceUserId ==. lookup_user_id, ResourceActive ==. True] [] ResourceId
 
 
 
-getResourceM :: UserId -> ResourceId -> LN.HandlerErrorEff (Entity Resource)
+getResourceM :: UserId -> ResourceId -> HandlerErrorEff (Entity Resource)
 getResourceM _ resource_id = do
   selectFirstDbE [ResourceId ==. resource_id, ResourceActive ==. True] []
 
 
 
-insertResourceM :: UserId -> ResourceRequest -> LN.HandlerErrorEff (Entity Resource)
+insertResourceM :: UserId -> ResourceRequest -> HandlerErrorEff (Entity Resource)
 insertResourceM user_id resource_request = do
 
   ts <- timestampH'
@@ -220,7 +220,7 @@ insertResourceM user_id resource_request = do
 
 
 
-updateResourceM :: UserId -> ResourceId -> ResourceRequest -> LN.HandlerErrorEff (Entity Resource)
+updateResourceM :: UserId -> ResourceId -> ResourceRequest -> HandlerErrorEff (Entity Resource)
 updateResourceM user_id resource_id resource_request = do
 
   ts <- timestampH'
@@ -251,13 +251,13 @@ updateResourceM user_id resource_id resource_request = do
 
 
 
-deleteResourceM :: UserId -> ResourceId -> LN.HandlerErrorEff ()
+deleteResourceM :: UserId -> ResourceId -> HandlerErrorEff ()
 deleteResourceM user_id resource_id = do
   deleteWhereDbE [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True]
 
 
 
-countResourcesM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
+countResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countResourcesM m_sp _ = do
 
   case (lookupSpMay m_sp spUserId, lookupSpMay m_sp spUserIds) of
@@ -269,12 +269,12 @@ countResourcesM m_sp _ = do
 
 
 
-getResourceStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff ResourceStatResponse
-getResourceStatsM _ _ = left Error_NotImplemented
+getResourceStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourceStatResponse
+getResourceStatsM _ _ = left LN.Error_NotImplemented
 
 
 
-getResourceStatM :: UserId -> ResourceId -> LN.HandlerErrorEff ResourceStatResponse
+getResourceStatM :: UserId -> ResourceId -> HandlerErrorEff ResourceStatResponse
 getResourceStatM _ resource_id = do
 
   -- leuron counts

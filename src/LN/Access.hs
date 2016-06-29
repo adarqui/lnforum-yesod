@@ -27,23 +27,23 @@ import           LN.T.Membership
 import           LN.T.Permission
 import           LN.T.Team
 import           LN.T.Visibility
-import           Model.Misc
+import           LN.Model.Misc
 
 
 
-isOwnerOf_OrganizationIdM :: UserId -> OrganizationId -> LN.HandlerEff Bool
+isOwnerOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff Bool
 isOwnerOf_OrganizationIdM user_id org_id = do
   isMemberOf_OrganizationId_TeamM user_id org_id Team_Owners
 
 
 
-isMemberOf_OrganizationIdM :: UserId -> OrganizationId -> LN.HandlerEff Bool
+isMemberOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff Bool
 isMemberOf_OrganizationIdM user_id org_id =
   isMemberOf_OrganizationId_TeamM user_id org_id Team_Members
 
 
 
-isMemberOf_OrganizationId_TeamM :: UserId -> OrganizationId -> SystemTeam -> LN.HandlerEff Bool
+isMemberOf_OrganizationId_TeamM :: UserId -> OrganizationId -> SystemTeam -> HandlerEff Bool
 isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
   m_team <- selectFirstDb [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
@@ -52,7 +52,7 @@ isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
 
 
-userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> LN.HandlerEff [Entity Team]
+userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff [Entity Team]
 userTeamsOf_OrganizationIdM user_id org_id = do
 
   teams <- selectListDb Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
@@ -89,7 +89,7 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 -- | Calculates permissions based on a user's membership of an Organization.
 -- If a user is not a member, calculates permissions based on the Organization's Visibility
 --
-userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> LN.HandlerEff Permissions
+userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
 userPermissions_ByOrganizationIdM user_id org_id = do
   m_org <- selectFirstDb [OrganizationId ==. org_id, OrganizationActive ==. True] []
   ebyam m_org (pure []) $ \(Entity org_id Organization{..}) -> do
@@ -100,7 +100,7 @@ userPermissions_ByOrganizationIdM user_id org_id = do
 
 
 
-userPermissions_ByForumIdM :: UserId -> ForumId -> LN.HandlerEff Permissions
+userPermissions_ByForumIdM :: UserId -> ForumId -> HandlerEff Permissions
 userPermissions_ByForumIdM user_id forum_id = do
   m_forum <- selectFirstDb [ForumId ==. forum_id, ForumActive ==. True] []
   ebyam m_forum (pure []) $ \(Entity _ Forum{..}) -> do
@@ -108,7 +108,7 @@ userPermissions_ByForumIdM user_id forum_id = do
 
 
 
-userPermissions_ByBoardIdM :: UserId -> BoardId -> LN.HandlerEff Permissions
+userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff Permissions
 userPermissions_ByBoardIdM user_id board_id = do
   m_board <- selectFirstDb [BoardId ==. board_id, BoardActive ==. True] []
   ebyam m_board (pure []) $ \(Entity _ Board{..}) -> do
@@ -116,7 +116,7 @@ userPermissions_ByBoardIdM user_id board_id = do
 
 
 
-userPermissions_ByThreadIdM :: UserId -> ThreadId -> LN.HandlerEff Permissions
+userPermissions_ByThreadIdM :: UserId -> ThreadId -> HandlerEff Permissions
 userPermissions_ByThreadIdM user_id thread_id = do
   m_thread <- selectFirstDb [ThreadId ==. thread_id, ThreadActive ==. True] []
   ebyam m_thread (pure []) $ \(Entity _ Thread{..}) -> do
@@ -124,7 +124,7 @@ userPermissions_ByThreadIdM user_id thread_id = do
 
 
 
-userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> LN.HandlerEff Permissions
+userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff Permissions
 userPermissions_ByThreadPostIdM user_id thread_post_id = do
   m_thread_post <- selectFirstDb [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
   ebyam m_thread_post (pure []) $ \(Entity _ ThreadPost{..}) -> do

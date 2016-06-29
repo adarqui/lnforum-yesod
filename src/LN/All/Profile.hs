@@ -7,12 +7,12 @@ module LN.All.Profile (
   getProfileR,
   putProfileR,
 
-  -- Model/Function
+  -- LN.Model/Function
   profileRequestToProfile,
   profileToResponse,
   profilesToResponses,
 
-  -- Model/Internal
+  -- LN.Model/Internal
   getProfilesM,
   getProfileM,
   getProfile_ByUserIdM,
@@ -30,7 +30,7 @@ import           LN.All.Prelude
 -- LN.Handler
 --
 
-getProfilesR :: LN.Handler Value
+getProfilesR :: Handler Value
 getProfilesR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -38,14 +38,14 @@ getProfilesR = run $ do
 
 
 
-getProfileR :: ProfileId -> LN.Handler Value
+getProfileR :: ProfileId -> Handler Value
 getProfileR profile_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON profileToResponse $ getProfileM user_id profile_id
 
 
 
-putProfileR :: ProfileId -> LN.Handler Value
+putProfileR :: ProfileId -> Handler Value
 putProfileR profile_id = run $ do
   user_id         <- _requireAuthId
   profile_request <- requireJsonBody
@@ -57,7 +57,7 @@ putProfileR profile_id = run $ do
 
 
 --
--- Model/Function
+-- LN.Model/Function
 --
 
 profileRequestToProfile :: UserId -> ProfileRequest -> Profile
@@ -109,28 +109,28 @@ profilesToResponses profiles = ProfileResponses {
 
 
 --
--- Model/Internal
+-- LN.Model/Internal
 --
 
-getProfilesM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Profile]
+getProfilesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Profile]
 getProfilesM m_sp _ = do
   selectListDbE m_sp [] [] ProfileId
 
 
 
-getProfileM :: UserId -> ProfileId -> LN.HandlerErrorEff (Entity Profile)
+getProfileM :: UserId -> ProfileId -> HandlerErrorEff (Entity Profile)
 getProfileM _ profile_id = do
   selectFirstDbE [ProfileId ==. profile_id] []
 
 
 
-getProfile_ByUserIdM :: UserId -> UserId -> LN.HandlerErrorEff (Entity Profile)
+getProfile_ByUserIdM :: UserId -> UserId -> HandlerErrorEff (Entity Profile)
 getProfile_ByUserIdM _ lookup_user_id = do
   selectFirstDbE [ProfileUserId ==. lookup_user_id] []
 
 
 
-insertProfileM :: UserId -> ProfileRequest -> LN.HandlerErrorEff (Entity Profile)
+insertProfileM :: UserId -> ProfileRequest -> HandlerErrorEff (Entity Profile)
 insertProfileM user_id profile_request = do
   ts <- timestampH'
   let
@@ -139,7 +139,7 @@ insertProfileM user_id profile_request = do
 
 
 
-updateProfileM :: UserId -> ProfileId -> ProfileRequest -> LN.HandlerErrorEff (Entity Profile)
+updateProfileM :: UserId -> ProfileId -> ProfileRequest -> HandlerErrorEff (Entity Profile)
 updateProfileM user_id profile_id profile_request = do
 
   ts <- timestampH'

@@ -4,7 +4,7 @@ module LN.Model where
 
 import           ClassyPrelude.Yesod
 import           Database.Persist.Quasi
-import           Model.DerivePersist
+import           LN.Model.DerivePersist
 
 
 

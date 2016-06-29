@@ -171,7 +171,7 @@ configSettingsYmlValue = either throw id $ decodeEither' configSettingsYmlBS
 compileTimeAppSettings :: AppSettings
 compileTimeAppSettings =
   case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
-      Error e -> error e
+      LN.Error e -> error e
       Success settings -> settings
 
 
