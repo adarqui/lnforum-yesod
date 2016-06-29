@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.GlobalGroup (
-  -- Handler
+  -- LN.Handler
   getGlobalGroupPacksR,
   getGlobalGroupPackR,
   getGlobalGroupPackH,
@@ -19,10 +19,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getGlobalGroupPacksR :: Handler Value
+getGlobalGroupPacksR :: LN.Handler Value
 getGlobalGroupPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -30,14 +30,14 @@ getGlobalGroupPacksR = run $ do
 
 
 
-getGlobalGroupPackR :: GlobalGroupId -> Handler Value
+getGlobalGroupPackR :: GlobalGroupId -> LN.Handler Value
 getGlobalGroupPackR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getGlobalGroupPackM user_id global_group_id
 
 
 
-getGlobalGroupPackH :: Text -> Handler Value
+getGlobalGroupPackH :: Text -> LN.Handler Value
 getGlobalGroupPackH global_group_name = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getGlobalGroupPackMH user_id global_group_name
@@ -50,7 +50,7 @@ getGlobalGroupPackH global_group_name = run $ do
 
 -- Model
 
-getGlobalGroupPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff GlobalGroupPackResponses
 getGlobalGroupPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -60,7 +60,7 @@ getGlobalGroupPacksM m_sp user_id = do
 
 
 
-getGlobalGroupPackM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupPackResponse
+getGlobalGroupPackM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPackM user_id global_group_id = do
 
   e_global_group <- getGlobalGroupM user_id global_group_id
@@ -68,7 +68,7 @@ getGlobalGroupPackM user_id global_group_id = do
 
 
 
-getGlobalGroupPackMH :: UserId -> Text -> HandlerErrorEff GlobalGroupPackResponse
+getGlobalGroupPackMH :: UserId -> Text -> LN.HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPackMH user_id global_group_name = do
 
   e_global_group <- getGlobalGroupMH user_id global_group_name
@@ -76,7 +76,7 @@ getGlobalGroupPackMH user_id global_group_name = do
 
 
 
-getGlobalGroupPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacks_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff GlobalGroupPackResponses
 getGlobalGroupPacks_ByEverythingM m_sp user_id = do
   e_global_groups <- getGlobalGroups_ByEverythingM m_sp user_id
   rehtie e_global_groups left $ \global_groups -> do
@@ -87,7 +87,7 @@ getGlobalGroupPacks_ByEverythingM m_sp user_id = do
 
 
 
-getGlobalGroupPacks_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff GlobalGroupPackResponses
+getGlobalGroupPacks_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff GlobalGroupPackResponses
 getGlobalGroupPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
   e_global_groups <- getGlobalGroups_ByUserIdM m_sp user_id lookup_user_id
@@ -99,7 +99,7 @@ getGlobalGroupPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
 
 
-getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> HandlerErrorEff GlobalGroupPackResponse
+getGlobalGroupPack_ByGlobalGroupM :: UserId -> Entity GlobalGroup -> LN.HandlerErrorEff GlobalGroupPackResponse
 getGlobalGroupPack_ByGlobalGroupM user_id global_group@(Entity global_group_id GlobalGroup{..}) = do
 
   lr <- runEitherT $ do

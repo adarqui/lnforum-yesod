@@ -17,7 +17,7 @@ module LN.Application (
 
 
 
-import           Control.Monad.Logger                 (liftLoc, runLoggingT)
+import           LN.Control.Monad.Logger                 (liftLoc, runLoggingT)
 import qualified Data.Text                            as T (pack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
@@ -78,7 +78,7 @@ import           LN.All.Thread
 import           LN.All.ThreadPost
 import           LN.All.User
 
-import           Handler.Common
+import           LN.Handler.Common
 
 
 -- This line actually creates our YesodDispatch instance. It is the second half
@@ -263,7 +263,7 @@ shutdownApp _ = pure ()
 ---------------------------------------------
 
 -- | Run a handler
-handler :: Handler a -> IO a
+handler :: LN.Handler a -> IO a
 handler h = do
   settings    <- getAppSettings
   ln_settings <- getAppSettingsLN

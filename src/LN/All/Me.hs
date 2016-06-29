@@ -1,5 +1,5 @@
 module LN.All.Me (
-  -- Handler
+  -- LN.Handler
   getMeR,
 
   -- Model/Internal
@@ -14,10 +14,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getMeR :: Handler Value
+getMeR :: LN.Handler Value
 getMeR = run $ do
   user_id <- _requireAuthId
   (toJSON . userToResponse) <$> getMeM user_id
@@ -32,6 +32,6 @@ getMeR = run $ do
 -- Model/Internal
 --
 
-getMeM :: UserId -> HandlerEff (Entity User)
+getMeM :: UserId -> LN.HandlerEff (Entity User)
 getMeM user_id = do
   notFoundMaybe =<< selectFirstDb [ UserId ==. user_id ] []

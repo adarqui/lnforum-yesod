@@ -8,7 +8,7 @@ import Import
 
 
 
-getRootR :: Handler Html
+getRootR :: LN.Handler Html
 getRootR = do
   muser <- maybeAuth
   defaultLayout $ do

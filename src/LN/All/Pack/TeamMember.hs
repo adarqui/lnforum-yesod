@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.TeamMember (
-  -- Handler
+  -- LN.Handler
   getTeamMemberPacksR,
   getTeamMemberPackR,
 
@@ -17,10 +17,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getTeamMemberPacksR :: Handler Value
+getTeamMemberPacksR :: LN.Handler Value
 getTeamMemberPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -28,7 +28,7 @@ getTeamMemberPacksR = run $ do
 
 
 
-getTeamMemberPackR :: TeamMemberId -> Handler Value
+getTeamMemberPackR :: TeamMemberId -> LN.Handler Value
 getTeamMemberPackR team_member_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getTeamMemberPackM user_id team_member_id
@@ -40,7 +40,7 @@ getTeamMemberPackR team_member_id = run $ do
 -- Model
 --
 
-getTeamMemberPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff TeamMemberPackResponses
+getTeamMemberPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff TeamMemberPackResponses
 getTeamMemberPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spTeamId) of
@@ -50,7 +50,7 @@ getTeamMemberPacksM m_sp user_id = do
 
 
 
-getTeamMemberPackM :: UserId -> TeamMemberId -> HandlerErrorEff TeamMemberPackResponse
+getTeamMemberPackM :: UserId -> TeamMemberId -> LN.HandlerErrorEff TeamMemberPackResponse
 getTeamMemberPackM user_id team_member_id = do
 
   e_team_member <- getTeamMemberM user_id team_member_id
@@ -59,7 +59,7 @@ getTeamMemberPackM user_id team_member_id = do
 
 
 
-getTeamMemberPacks_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> HandlerErrorEff TeamMemberPackResponses
+getTeamMemberPacks_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> LN.HandlerErrorEff TeamMemberPackResponses
 getTeamMemberPacks_ByTeamIdM m_sp user_id team_id = do
 
   e_team_members <- getTeamMembers_ByTeamIdM m_sp user_id team_id
@@ -71,7 +71,7 @@ getTeamMemberPacks_ByTeamIdM m_sp user_id team_id = do
 
 
 
-getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> HandlerErrorEff TeamMemberPackResponse
+getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> LN.HandlerErrorEff TeamMemberPackResponse
 getTeamMemberPack_ByTeamMemberM user_id team_member@(Entity team_member_id TeamMember{..}) = do
 
   e_team_member_user <- getUserM user_id teamMemberUserId

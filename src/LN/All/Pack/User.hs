@@ -19,7 +19,7 @@ import           LN.All.User
 -- Model
 --
 
-getUserPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserPackResponses
+getUserPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff UserPackResponses
 getUserPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserIds) of
@@ -29,14 +29,14 @@ getUserPacksM m_sp user_id = do
 
 
 
-getUserPackM :: UserId -> UserId -> HandlerErrorEff UserPackResponse
+getUserPackM :: UserId -> UserId -> LN.HandlerErrorEff UserPackResponse
 getUserPackM user_id lookup_user_id = do
 
   getUserPack_ByUserIdM user_id lookup_user_id
 
 
 
-getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
+getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> LN.HandlerErrorEff UserPackResponses
 getUserPacks_ByUserIdsM _ user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
   right $ UserPackResponses {
@@ -46,7 +46,7 @@ getUserPacks_ByUserIdsM _ user_id user_ids = do
 
 
 
-getUserPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserPackResponse
+getUserPack_ByUserIdM :: UserId -> UserId -> LN.HandlerErrorEff UserPackResponse
 getUserPack_ByUserIdM user_id lookup_user_id = do
 
   lr <- runEitherT $ do

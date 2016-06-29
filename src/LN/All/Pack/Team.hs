@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Team (
-  -- Handler
+  -- LN.Handler
   getTeamPacksR,
   getTeamPackR,
   getTeamPackH,
@@ -18,10 +18,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getTeamPacksR :: Handler Value
+getTeamPacksR :: LN.Handler Value
 getTeamPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -29,14 +29,14 @@ getTeamPacksR = run $ do
 
 
 
-getTeamPackR :: TeamId -> Handler Value
+getTeamPackR :: TeamId -> LN.Handler Value
 getTeamPackR team_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getTeamPackM user_id team_id
 
 
 
-getTeamPackH :: Text -> Handler Value
+getTeamPackH :: Text -> LN.Handler Value
 getTeamPackH team_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -50,7 +50,7 @@ getTeamPackH team_name = run $ do
 
 -- Model
 
-getTeamPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff TeamPackResponses
+getTeamPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff TeamPackResponses
 getTeamPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId, lookupSpBool m_sp spSelf) of
@@ -61,7 +61,7 @@ getTeamPacksM m_sp user_id = do
 
 
 
-getTeamPackM :: UserId -> TeamId -> HandlerErrorEff TeamPackResponse
+getTeamPackM :: UserId -> TeamId -> LN.HandlerErrorEff TeamPackResponse
 getTeamPackM user_id team_id = do
 
   e_team <- getTeamM user_id team_id
@@ -69,7 +69,7 @@ getTeamPackM user_id team_id = do
 
 
 
-getTeamPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff TeamPackResponse
+getTeamPackMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff TeamPackResponse
 getTeamPackMH m_sp user_id team_name = do
 
   case (lookupSpMay m_sp spOrganizationId) of
@@ -82,7 +82,7 @@ getTeamPackMH m_sp user_id team_name = do
 
 
 
-getTeamPacks_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff TeamPackResponses
+getTeamPacks_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff TeamPackResponses
 getTeamPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
   e_teams <- getTeams_ByUserIdM m_sp user_id lookup_user_id
@@ -94,7 +94,7 @@ getTeamPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
 
 
-getTeamPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff TeamPackResponses
+getTeamPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> LN.HandlerErrorEff TeamPackResponses
 getTeamPacks_ByOrganizationIdM m_sp user_id org_id = do
   e_teams <- getTeams_ByOrganizationIdM m_sp user_id org_id
   rehtie e_teams left $ \teams -> do
@@ -106,7 +106,7 @@ getTeamPacks_ByOrganizationIdM m_sp user_id org_id = do
 
 
 
-getTeamPack_ByTeamM :: UserId -> Entity Team -> HandlerErrorEff TeamPackResponse
+getTeamPack_ByTeamM :: UserId -> Entity Team -> LN.HandlerErrorEff TeamPackResponse
 getTeamPack_ByTeamM user_id team@(Entity team_id Team{..}) = do
 
   lr <- runEitherT $ do

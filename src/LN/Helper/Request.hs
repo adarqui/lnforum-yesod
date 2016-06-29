@@ -8,17 +8,17 @@ module LN.Helper.Request (
 
 
 
-import           Control
+import           LN.Control
 import           Import
 
 
 
-lookupUtf8Header :: HeaderName -> HandlerEff (Maybe Text)
+lookupUtf8Header :: HeaderName -> LN.HandlerEff (Maybe Text)
 lookupUtf8Header headerName = pure . fmap decodeUtf8 =<< lookupHeader headerName
 
 
 
-allowCrossOrigin :: HandlerEff ()
+allowCrossOrigin :: LN.HandlerEff ()
 allowCrossOrigin = do
   mo <- lookupUtf8Header "Origin"
   mrh <- lookupUtf8Header "Access-Control-Req-Headers"
@@ -36,5 +36,5 @@ allowCrossOrigin = do
 
 
 
-fromMaybe404 :: HandlerEff (Maybe a) -> HandlerEff a
+fromMaybe404 :: LN.HandlerEff (Maybe a) -> LN.HandlerEff a
 fromMaybe404 f = maybe notFound pure =<< f

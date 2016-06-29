@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Like (
-  -- Handler
+  -- LN.Handler
   getLikesR,
   postLikeR0,
   getLikeR,
@@ -35,10 +35,10 @@ import qualified LN.T.Like   as L
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getLikesR :: Handler Value
+getLikesR :: LN.Handler Value
 getLikesR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -46,7 +46,7 @@ getLikesR = run $ do
 
 
 
-postLikeR0 :: Handler Value
+postLikeR0 :: LN.Handler Value
 postLikeR0 = run $ do
   user_id      <- _requireAuthId
   like_request <- requireJsonBody
@@ -55,14 +55,14 @@ postLikeR0 = run $ do
 
 
 
-getLikeR :: LikeId -> Handler Value
+getLikeR :: LikeId -> LN.Handler Value
 getLikeR like_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON likeToResponse $ getLikeM user_id like_id
 
 
 
-putLikeR :: LikeId -> Handler Value
+putLikeR :: LikeId -> LN.Handler Value
 putLikeR like_id = run $ do
   user_id      <- _requireAuthId
   like_request <- requireJsonBody
@@ -70,14 +70,14 @@ putLikeR like_id = run $ do
 
 
 
-deleteLikeR :: LikeId -> Handler Value
+deleteLikeR :: LikeId -> LN.Handler Value
 deleteLikeR like_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteLikeM user_id like_id
 
 
 
-getLikeStatsR :: Handler Value
+getLikeStatsR :: LN.Handler Value
 getLikeStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -85,7 +85,7 @@ getLikeStatsR = run $ do
 
 
 
-getLikeStatR :: LikeId -> Handler Value
+getLikeStatR :: LikeId -> LN.Handler Value
 getLikeStatR like_id = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -143,13 +143,13 @@ likesToResponses likes = LikeResponses {
 -- Model/Internal
 --
 
-getLikesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Like]
+getLikesM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Like]
 getLikesM m_sp user_id = do
   selectListDbE m_sp [LikeUserId ==. user_id, LikeActive ==. True] [] LikeId
 
 
 
-insertLikeM :: Maybe StandardParams -> UserId -> LikeRequest -> HandlerErrorEff (Entity Like)
+insertLikeM :: Maybe StandardParams -> UserId -> LikeRequest -> LN.HandlerErrorEff (Entity Like)
 insertLikeM m_sp user_id like_request = do
 
   case (lookupLikeEntMay m_sp) of
@@ -164,18 +164,18 @@ insertLikeM m_sp user_id like_request = do
 
 
 
-getLikeM :: UserId -> LikeId -> HandlerErrorEff (Entity Like)
+getLikeM :: UserId -> LikeId -> LN.HandlerErrorEff (Entity Like)
 getLikeM user_id like_id = do
   selectFirstDbE [LikeId ==. like_id, LikeUserId ==. user_id , LikeActive ==. True] []
 
 
 
-getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerErrorEff (Entity Like)
+getLike_ByThreadPostM :: UserId -> Entity ThreadPost -> LN.HandlerErrorEff (Entity Like)
 getLike_ByThreadPostM user_id (Entity thread_post_id _) = getLike_ByThreadPostIdM user_id thread_post_id
 
 
 
-getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity Like)
+getLike_ByThreadPostIdM :: UserId -> ThreadPostId -> LN.HandlerErrorEff (Entity Like)
 getLike_ByThreadPostIdM user_id thread_post_id = do
   selectFirstDbE [LikeUserId ==. user_id, LikeEnt ==. Ent_ThreadPost, LikeEntId ==. thread_post_id', LikeActive ==. True ] []
   where
@@ -183,7 +183,7 @@ getLike_ByThreadPostIdM user_id thread_post_id = do
 
 
 
-updateLikeM :: UserId -> LikeId -> LikeRequest -> HandlerErrorEff (Entity Like)
+updateLikeM :: UserId -> LikeId -> LikeRequest -> LN.HandlerErrorEff (Entity Like)
 updateLikeM user_id like_id LikeRequest{..} = do
 
   ts <- timestampH'
@@ -201,19 +201,19 @@ updateLikeM user_id like_id LikeRequest{..} = do
 
 
 
-deleteLikeM :: UserId -> LikeId -> HandlerErrorEff ()
+deleteLikeM :: UserId -> LikeId -> LN.HandlerErrorEff ()
 deleteLikeM user_id like_id = do
   deleteWhereDbE [LikeUserId ==. user_id, LikeId ==. like_id, LikeActive ==. True]
 
 
 
-getLikeStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LikeStatResponses
+getLikeStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff LikeStatResponses
 getLikeStatsM _ _ = left Error_NotImplemented
 
 
 
 
-getLikeStatM :: Maybe StandardParams -> UserId -> LikeId -> HandlerErrorEff LikeStatResponse
+getLikeStatM :: Maybe StandardParams -> UserId -> LikeId -> LN.HandlerErrorEff LikeStatResponse
 getLikeStatM m_sp user_id _ = do
 
   case (lookupSpMay m_sp spThreadPostId) of
@@ -222,7 +222,7 @@ getLikeStatM m_sp user_id _ = do
 
 
 
-getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff LikeStatResponse
+getLikeStat_ByThreadPostIdM :: UserId -> ThreadPostId -> LN.HandlerErrorEff LikeStatResponse
 getLikeStat_ByThreadPostIdM user_id thread_post_id = do
 
   likes <- selectListDb Nothing [LikeEnt ==. Ent_ThreadPost, LikeEntId ==. i64, LikeActive ==. True] [] LikeId

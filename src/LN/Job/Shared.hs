@@ -12,7 +12,7 @@ module LN.Job.Shared (
 
 
 
-import           Control.Monad.Trans.Reader (ReaderT, runReaderT)
+import           LN.Control.Monad.Trans.Reader (ReaderT, runReaderT)
 import           Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL
 import           Data.List                  (nub)

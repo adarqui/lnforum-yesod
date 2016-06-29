@@ -19,7 +19,7 @@ import qualified Prelude                      as Prelude
 
 
 
-import           Control.Monad.Logger         (runStdoutLoggingT)
+import           LN.Control.Monad.Logger         (runStdoutLoggingT)
 import           Data.Yaml
 import qualified Database.Persist
 import           Database.Persist.Postgresql  as P

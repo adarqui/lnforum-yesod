@@ -25,7 +25,7 @@ module LN.Settings (
 
 
 import           ClassyPrelude.Yesod
-import           Control.Exception           (throw)
+import           LN.Control.Exception           (throw)
 import           Data.Aeson                  (Result (..), fromJSON, withObject,
                                               (.!=), (.:?))
 import           Data.FileEmbed              (embedFile)

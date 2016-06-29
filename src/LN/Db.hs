@@ -34,7 +34,7 @@ module LN.Db (
 
 
 
-import           Control
+import           LN.Control
 import           Api.Params            (StandardParams, spToSelect, spToSelectMay, lookupStandardParams)
 import           Data.List             (nub)
 import           Data.Time             ()
@@ -61,7 +61,7 @@ selectListDb
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
-  -> ControlMA (HandlerT site IO) [Entity val]
+  -> LN.ControlMA (HandlerT site IO) [Entity val]
 selectListDb m_sp query filt field = do
   _runDB $ selectList query ((spToSelectMay m_sp field) <> filt)
 
@@ -77,7 +77,7 @@ selectListDbE
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
-  -> ControlMA (HandlerT site IO) (ErrorEff [Entity val])
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff [Entity val])
 selectListDbE m_sp query filt field = Right <$> selectListDb m_sp query filt field
 
 
@@ -94,7 +94,7 @@ selectKeysListDb
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
-  -> ControlMA (HandlerT site IO) [Key val]
+  -> LN.ControlMA (HandlerT site IO) [Key val]
 selectKeysListDb m_sp query filt field = do
   _runDB $ selectKeysList query ((spToSelectMay m_sp field) <> filt)
 
@@ -110,7 +110,7 @@ selectKeysListDbE
   -> [Filter val]
   -> [SelectOpt val]
   -> EntityField val typ
-  -> ControlMA (HandlerT site IO) (ErrorEff [Key val])
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff [Key val])
 selectKeysListDbE m_sp query filt field = Right <$> selectKeysListDb m_sp query filt field
 
 
@@ -126,7 +126,7 @@ selectFirstDb
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
   -> [SelectOpt val]
-  -> ControlMA (HandlerT site IO) (Maybe (Entity val))
+  -> LN.ControlMA (HandlerT site IO) (Maybe (Entity val))
 selectFirstDb query filt = _runDB $ selectFirst query filt
 
 
@@ -139,7 +139,7 @@ selectFirstDbE
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
   -> [SelectOpt val]
-  -> ControlMA (HandlerT site IO) (ErrorEff (Entity val))
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff (Entity val))
 selectFirstDbE query filt = do
   m <- selectFirstDb query filt
   case m of
@@ -157,7 +157,7 @@ insertDb
      PersistStore (PersistEntityBackend a),
      PersistEntityBackend a ~ YesodPersistBackend site)
   => a
-  -> ControlMA (HandlerT site IO) (Key a)
+  -> LN.ControlMA (HandlerT site IO) (Key a)
 insertDb = _runDB . insert
 
 
@@ -169,7 +169,7 @@ insertDbE
      PersistStore (PersistEntityBackend a),
      PersistEntityBackend a ~ YesodPersistBackend site)
      => a
-     -> ControlMA (HandlerT site IO) (ErrorEff (Key a))
+     -> LN.ControlMA (HandlerT site IO) (ErrorEff (Key a))
 insertDbE ent = Right <$> insertDb ent
 
 
@@ -183,7 +183,7 @@ insertEntityDb
      PersistStore (YesodPersistBackend site),
      YesodPersistBackend site ~ PersistEntityBackend e)
   => e
-  -> ControlMA (HandlerT site IO) (Entity e)
+  -> LN.ControlMA (HandlerT site IO) (Entity e)
 insertEntityDb entity = _runDB $ insertEntity entity
 
 
@@ -195,7 +195,7 @@ insertEntityDbE
      PersistStore (YesodPersistBackend site),
      YesodPersistBackend site ~ PersistEntityBackend e)
   => e
-  -> ControlMA (HandlerT site IO) (ErrorEff (Entity e))
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff (Entity e))
 insertEntityDbE entity = Right <$> insertEntityDb entity
 
 
@@ -210,7 +210,7 @@ updateDb
      YesodPersistBackend site ~ PersistEntityBackend val)
   => Key val
   -> [Update val]
-  -> ControlMA (HandlerT site IO) ()
+  -> LN.ControlMA (HandlerT site IO) ()
 updateDb key update_values = _runDB $ update key update_values
 
 
@@ -223,7 +223,7 @@ updateDbE
      YesodPersistBackend site ~ PersistEntityBackend val)
   => Key val
   -> [Update val]
-  -> ControlMA (HandlerT site IO) (ErrorEff ())
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff ())
 updateDbE key update_values = Right <$> updateDb key update_values
 
 
@@ -238,7 +238,7 @@ updateWhereDb
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
   -> [Update val]
-  -> ControlMA (HandlerT site IO) ()
+  -> LN.ControlMA (HandlerT site IO) ()
 updateWhereDb filt query = _runDB $ updateWhere filt query
 
 
@@ -251,7 +251,7 @@ updateWhereDbE
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
   -> [Update val]
-  -> ControlMA (HandlerT site IO) (ErrorEff ())
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff ())
 updateWhereDbE filt query = Right <$> updateWhereDb filt query
 
 
@@ -265,7 +265,7 @@ deleteWhereDb
      PersistQuery (YesodPersistBackend site),
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
-  -> ControlMA (HandlerT site IO) ()
+  -> LN.ControlMA (HandlerT site IO) ()
 deleteWhereDb filt = _runDB $ deleteWhere filt
 
 
@@ -277,7 +277,7 @@ deleteWhereDbE
      PersistQuery (YesodPersistBackend site),
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
-  -> ControlMA (HandlerT site IO) (ErrorEff ())
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff ())
 deleteWhereDbE filt = Right <$> deleteWhereDb filt
 
 
@@ -290,7 +290,7 @@ deleteCascadeDb
      DeleteCascade record (PersistEntityBackend record),
      PersistEntityBackend record ~ YesodPersistBackend site)
   => Key record
-  -> ControlMA (HandlerT site IO) ()
+  -> LN.ControlMA (HandlerT site IO) ()
 deleteCascadeDb entity = _runDB $ deleteCascade entity
 
 
@@ -301,7 +301,7 @@ deleteCascadeDbE
      DeleteCascade record (PersistEntityBackend record),
      PersistEntityBackend record ~ YesodPersistBackend site)
   => Key record
-  -> ControlMA (HandlerT site IO) (ErrorEff ())
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff ())
 deleteCascadeDbE entity = Right <$> deleteCascadeDb entity
 
 
@@ -315,7 +315,7 @@ deleteCascadeWhereDb
      YesodPersist site,
      PersistEntityBackend record ~ YesodPersistBackend site)
   => [Filter record]
-  -> ControlMA (HandlerT site IO) ()
+  -> LN.ControlMA (HandlerT site IO) ()
 deleteCascadeWhereDb = _runDB . deleteCascadeWhere
 
 
@@ -327,7 +327,7 @@ deleteCascadeWhereDbE
      YesodPersist site,
      PersistEntityBackend record ~ YesodPersistBackend site)
   => [Filter record]
-  -> ControlMA (HandlerT site IO) (ErrorEff ())
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff ())
 deleteCascadeWhereDbE filt = Right <$> deleteCascadeWhereDb filt
 
 
@@ -351,7 +351,7 @@ countDb
      YesodPersist site,
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
-  -> ControlMA (HandlerT site IO) Int
+  -> LN.ControlMA (HandlerT site IO) Int
 countDb query = _runDB $ count query
 
 
@@ -363,5 +363,5 @@ countDbE
      YesodPersist site,
      YesodPersistBackend site ~ PersistEntityBackend val)
   => [Filter val]
-  -> ControlMA (HandlerT site IO) (ErrorEff Int)
+  -> LN.ControlMA (HandlerT site IO) (ErrorEff Int)
 countDbE query = Right <$> countDb query

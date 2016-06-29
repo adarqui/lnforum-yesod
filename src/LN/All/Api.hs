@@ -28,7 +28,7 @@ import           Data.UUID.V4 (nextRandom)
 
 
 
-getApisR :: Handler Value
+getApisR :: LN.Handler Value
 getApisR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -36,7 +36,7 @@ getApisR = run $ do
 
 
 
-postApisR :: Handler Value
+postApisR :: LN.Handler Value
 postApisR = run $ do
   user_id     <- _requireAuthId
   api_request <- requireJsonBody
@@ -44,14 +44,14 @@ postApisR = run $ do
 
 
 
-getApiR :: ApiId -> Handler Value
+getApiR :: ApiId -> LN.Handler Value
 getApiR api_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON apiToResponse $ getApiM user_id api_id
 
 
 
-putApiR :: ApiId -> Handler Value
+putApiR :: ApiId -> LN.Handler Value
 putApiR api_id = run $ do
   user_id     <- _requireAuthId
   api_request <- requireJsonBody
@@ -59,7 +59,7 @@ putApiR api_id = run $ do
 
 
 
-deleteApiR :: ApiId -> Handler Value
+deleteApiR :: ApiId -> LN.Handler Value
 deleteApiR api_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteApiM user_id api_id
@@ -109,19 +109,19 @@ apisToResponses apis = ApiResponses {
 -- Model/Internal
 --
 
-getApisM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Api]
+getApisM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Api]
 getApisM m_sp user_id = do
   selectListDbE m_sp [ApiUserId ==. user_id, ApiActive ==. True] [] ApiId
 
 
 
-getApiM :: UserId -> ApiId -> HandlerErrorEff (Entity Api)
+getApiM :: UserId -> ApiId -> LN.HandlerErrorEff (Entity Api)
 getApiM user_id api_id = do
   selectFirstDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True] []
 
 
 
-insertApiM :: UserId -> ApiRequest -> HandlerErrorEff (Entity Api)
+insertApiM :: UserId -> ApiRequest -> LN.HandlerErrorEff (Entity Api)
 insertApiM user_id api_request = do
   ts <- timestampH'
   uuid1 <- liftIO nextRandom
@@ -132,7 +132,7 @@ insertApiM user_id api_request = do
 
 
 
-updateApiM :: UserId -> ApiId -> ApiRequest -> HandlerErrorEff (Entity Api)
+updateApiM :: UserId -> ApiId -> ApiRequest -> LN.HandlerErrorEff (Entity Api)
 updateApiM user_id api_id api_request = do
   ts <- timestampH'
   updateWhereDb
@@ -142,6 +142,6 @@ updateApiM user_id api_id api_request = do
 
 
 
-deleteApiM :: UserId -> ApiId -> HandlerErrorEff ()
+deleteApiM :: UserId -> ApiId -> LN.HandlerErrorEff ()
 deleteApiM user_id api_id = do
   deleteWhereDbE [ApiUserId ==. user_id, ApiId ==. api_id, ApiActive ==. True]

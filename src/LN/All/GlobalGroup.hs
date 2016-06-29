@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.GlobalGroup (
-  -- Handler
+  -- LN.Handler
   getGlobalGroupsR,
   postGlobalGroupR0,
   getGlobalGroupR,
@@ -36,7 +36,7 @@ import           LN.All.Prelude
 
 
 
-getGlobalGroupsR :: Handler Value
+getGlobalGroupsR :: LN.Handler Value
 getGlobalGroupsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -44,7 +44,7 @@ getGlobalGroupsR = run $ do
 
 
 
-postGlobalGroupR0 :: Handler Value
+postGlobalGroupR0 :: LN.Handler Value
 postGlobalGroupR0 = run $ do
   user_id              <- _requireAuthId
   global_group_request <- requireJsonBody
@@ -52,21 +52,21 @@ postGlobalGroupR0 = run $ do
 
 
 
-getGlobalGroupR :: GlobalGroupId -> Handler Value
+getGlobalGroupR :: GlobalGroupId -> LN.Handler Value
 getGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON globalGroupToResponse $ getGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupH :: Text -> Handler Value
+getGlobalGroupH :: Text -> LN.Handler Value
 getGlobalGroupH group_name = run $ do
   user_id <- _requireAuthId
   errorOrJSON globalGroupToResponse $ getGlobalGroupMH user_id group_name
 
 
 
-putGlobalGroupR :: GlobalGroupId -> Handler Value
+putGlobalGroupR :: GlobalGroupId -> LN.Handler Value
 putGlobalGroupR global_group_id = run $ do
   user_id              <- _requireAuthId
   global_group_request <- requireJsonBody
@@ -74,14 +74,14 @@ putGlobalGroupR global_group_id = run $ do
 
 
 
-deleteGlobalGroupR :: GlobalGroupId -> Handler Value
+deleteGlobalGroupR :: GlobalGroupId -> LN.Handler Value
 deleteGlobalGroupR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteGlobalGroupM user_id global_group_id
 
 
 
-getGlobalGroupsCountR :: Handler Value
+getGlobalGroupsCountR :: LN.Handler Value
 getGlobalGroupsCountR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -89,7 +89,7 @@ getGlobalGroupsCountR = run $ do
 
 
 
-getGlobalGroupStatsR :: Handler Value
+getGlobalGroupStatsR :: LN.Handler Value
 getGlobalGroupStatsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -97,7 +97,7 @@ getGlobalGroupStatsR = run $ do
 
 
 
-getGlobalGroupStatR :: GlobalGroupId -> Handler Value
+getGlobalGroupStatR :: GlobalGroupId -> LN.Handler Value
 getGlobalGroupStatR global_group_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getGlobalGroupStatM user_id global_group_id
@@ -165,7 +165,7 @@ globalGroupsToResponses globalGroups = GlobalGroupResponses {
 
 -- Model/Internal
 
-getGlobalGroupsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroupsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroupsM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -174,31 +174,31 @@ getGlobalGroupsM m_sp user_id = do
 
 
 
-getGlobalGroups_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroups_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
-getGlobalGroups_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity GlobalGroup]
+getGlobalGroups_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity GlobalGroup]
 getGlobalGroups_ByEverythingM m_sp _ = do
   selectListDbE m_sp [GlobalGroupActive ==. True] [] GlobalGroupId
 
 
 
-getGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff (Entity GlobalGroup)
+getGlobalGroupM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupM _ global_groupid = do
   selectFirstDbE [GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True] []
 
 
 
-getGlobalGroupMH :: UserId -> Text -> HandlerErrorEff (Entity GlobalGroup)
+getGlobalGroupMH :: UserId -> Text -> LN.HandlerErrorEff (Entity GlobalGroup)
 getGlobalGroupMH user_id global_group_name = do
   selectFirstDbE [GlobalGroupName ==. global_group_name, GlobalGroupActive ==. True] []
 
 
 
-insertGlobalGroupM :: UserId -> GlobalGroupRequest -> HandlerErrorEff (Entity GlobalGroup)
+insertGlobalGroupM :: UserId -> GlobalGroupRequest -> LN.HandlerErrorEff (Entity GlobalGroup)
 insertGlobalGroupM user_id global_group_request = do
   ts <- timestampH'
   let
@@ -207,7 +207,7 @@ insertGlobalGroupM user_id global_group_request = do
 
 
 
-updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> HandlerErrorEff (Entity GlobalGroup)
+updateGlobalGroupM :: UserId -> GlobalGroupId -> GlobalGroupRequest -> LN.HandlerErrorEff (Entity GlobalGroup)
 updateGlobalGroupM user_id global_groupid global_group_request = do
 
   ts <- timestampH'
@@ -232,13 +232,13 @@ updateGlobalGroupM user_id global_groupid global_group_request = do
 
 
 
-deleteGlobalGroupM :: UserId -> GlobalGroupId -> HandlerErrorEff ()
+deleteGlobalGroupM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff ()
 deleteGlobalGroupM user_id global_groupid = do
   deleteWhereDbE [GlobalGroupUserId ==. user_id, GlobalGroupId ==. global_groupid, GlobalGroupActive ==. True]
 
 
 
-countGlobalGroupsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
+countGlobalGroupsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff CountResponses
 countGlobalGroupsM m_sp _ = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -251,12 +251,12 @@ countGlobalGroupsM m_sp _ = do
 
 
 
-getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupStatResponses
+getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff GlobalGroupStatResponses
 getGlobalGroupStatsM _ _ = left $ Error_NotImplemented
 
 
 
-getGlobalGroupStatM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupStatResponse
+getGlobalGroupStatM :: UserId -> GlobalGroupId -> LN.HandlerErrorEff GlobalGroupStatResponse
 getGlobalGroupStatM _ global_group_id = do
   right $ GlobalGroupStatResponse {
     globalGroupStatResponseGroups = 0 -- TODO FIXME

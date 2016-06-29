@@ -14,10 +14,10 @@ import           Import
 -- These handlers embed files in the executable at compile time to avoid a
 -- runtime dependency, and for efficiency.
 
-getFaviconR :: Handler TypedContent
+getFaviconR :: LN.Handler TypedContent
 getFaviconR = pure $ TypedContent "image/x-icon"
                    $ toContent $(embedFile "config/favicon.ico")
 
-getRobotsR :: Handler TypedContent
+getRobotsR :: LN.Handler TypedContent
 getRobotsR = pure $ TypedContent typePlain
                   $ toContent $(embedFile "config/robots.txt")

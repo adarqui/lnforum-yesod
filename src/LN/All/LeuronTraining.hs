@@ -62,7 +62,7 @@ leuronTrainingsToResponses leuronTrainings = LeuronTrainingResponses {
 -- Model/Internal
 --
 
-insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> HandlerErrorEff (Entity LeuronTraining)
+insertLeuronTrainingM :: UserId -> LeuronId -> LeuronTrainingRequest -> LN.HandlerErrorEff (Entity LeuronTraining)
 insertLeuronTrainingM user_id leuron_id leuron_training_request = do
 
   ts <- timestampH'

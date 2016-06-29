@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Thread (
-  -- Handler
+  -- LN.Handler
   getThreadPacksR,
   getThreadPackR,
   getThreadPackH,
@@ -22,10 +22,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getThreadPacksR :: Handler Value
+getThreadPacksR :: LN.Handler Value
 getThreadPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -33,7 +33,7 @@ getThreadPacksR = run $ do
 
 
 
-getThreadPackR :: ThreadId -> Handler Value
+getThreadPackR :: ThreadId -> LN.Handler Value
 getThreadPackR thread_id = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -41,7 +41,7 @@ getThreadPackR thread_id = run $ do
 
 
 
-getThreadPackH :: Text -> Handler Value
+getThreadPackH :: Text -> LN.Handler Value
 getThreadPackH thread_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -57,7 +57,7 @@ getThreadPackH thread_name = run $ do
 -- Model
 --
 
-getThreadPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ThreadPackResponses
+getThreadPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff ThreadPackResponses
 getThreadPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spBoardId) of
@@ -67,7 +67,7 @@ getThreadPacksM m_sp user_id = do
 
 
 
-getThreadPackM :: Maybe StandardParams -> UserId -> ThreadId -> HandlerErrorEff ThreadPackResponse
+getThreadPackM :: Maybe StandardParams -> UserId -> ThreadId -> LN.HandlerErrorEff ThreadPackResponse
 getThreadPackM m_sp user_id thread_id = do
 
   e_thread <- getThreadM user_id thread_id
@@ -76,7 +76,7 @@ getThreadPackM m_sp user_id thread_id = do
 
 
 
-getThreadPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff ThreadPackResponse
+getThreadPackMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff ThreadPackResponse
 getThreadPackMH m_sp user_id thread_name = do
 
   e_thread <- getThreadMH m_sp user_id thread_name
@@ -85,7 +85,7 @@ getThreadPackMH m_sp user_id thread_name = do
 
 
 
-getThreadPacks_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff ThreadPackResponses
+getThreadPacks_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> LN.HandlerErrorEff ThreadPackResponses
 getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
   e_threads_keys <- getThreads_ByBoardId_KeysM m_sp user_id board_id
@@ -97,7 +97,7 @@ getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
 
 
-getThreadPack_ByThreadM :: Maybe StandardParams -> UserId -> Entity Thread -> HandlerErrorEff ThreadPackResponse
+getThreadPack_ByThreadM :: Maybe StandardParams -> UserId -> Entity Thread -> LN.HandlerErrorEff ThreadPackResponse
 getThreadPack_ByThreadM m_sp user_id thread@(Entity thread_id Thread{..}) = do
 
   let sp = defaultStandardParams {

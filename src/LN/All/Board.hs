@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards     #-}
 
 module LN.All.Board (
-  -- Handler
+  -- LN.Handler
   getBoardsR,
   postBoardR0,
   getBoardR,
@@ -41,7 +41,7 @@ import           LN.All.Forum
 
 
 
-getBoardsR :: Handler Value
+getBoardsR :: LN.Handler Value
 getBoardsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -49,23 +49,23 @@ getBoardsR = run $ do
 
 
 
-postBoardR0 :: Handler Value
+postBoardR0 :: LN.Handler Value
 postBoardR0 = run $ do
   user_id       <- _requireAuthId
-  board_request <- requireJsonBody :: HandlerEff BoardRequest
+  board_request <- requireJsonBody :: LN.HandlerEff BoardRequest
   sp            <- lookupStandardParams
   errorOrJSON boardToResponse $ insertBoardM (pure sp) user_id board_request
 
 
 
-getBoardR :: BoardId -> Handler Value
+getBoardR :: BoardId -> LN.Handler Value
 getBoardR board_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON boardToResponse $ getBoardM user_id board_id
 
 
 
-getBoardH :: Text -> Handler Value
+getBoardH :: Text -> LN.Handler Value
 getBoardH board_name = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -73,7 +73,7 @@ getBoardH board_name = run $ do
 
 
 
-putBoardR :: BoardId -> Handler Value
+putBoardR :: BoardId -> LN.Handler Value
 putBoardR board_id = run $ do
   user_id       <- _requireAuthId
   board_request <- requireJsonBody
@@ -81,19 +81,19 @@ putBoardR board_id = run $ do
 
 
 
-deleteBoardR :: BoardId -> Handler Value
+deleteBoardR :: BoardId -> LN.Handler Value
 deleteBoardR board_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteBoardM user_id board_id
 
 
 
-getBoardStatsR :: Handler Value
+getBoardStatsR :: LN.Handler Value
 getBoardStatsR = notFound
 
 
 
-getBoardStatR :: BoardId -> Handler Value
+getBoardStatR :: BoardId -> LN.Handler Value
 getBoardStatR board_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getBoardStatM user_id board_id
@@ -173,7 +173,7 @@ boardsToResponses boards = BoardResponses {
 -- Model/Internal
 --
 
-getBoardsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Board]
+getBoardsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Board]
 getBoardsM m_sp user_id = do
 
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spForumId, lookupSpMay m_sp spParentId) of
@@ -189,7 +189,7 @@ getBoardsM m_sp user_id = do
 
 
 
-getBoards_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> HandlerErrorEff [Entity Board]
+getBoards_ByOrganizationIdM :: Maybe StandardParams -> UserId -> OrganizationId -> LN.HandlerErrorEff [Entity Board]
 getBoards_ByOrganizationIdM m_sp user_id org_id = do
 
   -- TODO FIXME: move this to esqueleto
@@ -200,34 +200,34 @@ getBoards_ByOrganizationIdM m_sp user_id org_id = do
 
 
 
-getBoards_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Entity Board]
+getBoards_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> LN.HandlerErrorEff [Entity Board]
 getBoards_ByForumIdM m_sp _ forum_id = do
 
   selectListDbE m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
-getBoards_ByForumId_KeysM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff [Key Board]
+getBoards_ByForumId_KeysM :: Maybe StandardParams -> UserId -> ForumId -> LN.HandlerErrorEff [Key Board]
 getBoards_ByForumId_KeysM m_sp _ forum_id = do
 
   selectKeysListDbE m_sp [BoardForumId ==. forum_id, BoardActive ==. True] [] BoardId
 
 
 
-getBoards_ByBoardParentIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff [Entity Board]
+getBoards_ByBoardParentIdM :: Maybe StandardParams -> UserId -> BoardId -> LN.HandlerErrorEff [Entity Board]
 getBoards_ByBoardParentIdM m_sp _ board_parent_id = do
 
   selectListDbE m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
 
 
 
-getBoardM :: UserId -> BoardId -> HandlerErrorEff (Entity Board)
+getBoardM :: UserId -> BoardId -> LN.HandlerErrorEff (Entity Board)
 getBoardM _ board_id = do
   selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
 
 
 
-getBoardMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff (Entity Board)
+getBoardMH :: Maybe StandardParams -> UserId -> Text -> LN.HandlerErrorEff (Entity Board)
 getBoardMH m_sp _ board_name = do
 
   case (lookupSpMay m_sp spForumId) of
@@ -239,13 +239,13 @@ getBoardMH m_sp _ board_name = do
 
 
 
-getWithBoardM :: Bool -> UserId -> BoardId -> HandlerErrorEff (Maybe (Entity Board))
+getWithBoardM :: Bool -> UserId -> BoardId -> LN.HandlerErrorEff (Maybe (Entity Board))
 getWithBoardM False _ _             = right Nothing
 getWithBoardM True user_id board_id = fmap Just <$> getBoardM user_id board_id
 
 
 
-insertBoardM :: Maybe StandardParams -> UserId -> BoardRequest -> HandlerErrorEff (Entity Board)
+insertBoardM :: Maybe StandardParams -> UserId -> BoardRequest -> LN.HandlerErrorEff (Entity Board)
 insertBoardM m_sp user_id board_request = do
 
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
@@ -255,7 +255,7 @@ insertBoardM m_sp user_id board_request = do
 
 
 
-insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerErrorEff (Entity Board)
+insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> LN.HandlerErrorEff (Entity Board)
 insertBoard_ByForumId user_id forum_id board_request = do
   ts      <- timestampH'
   e_forum <- selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
@@ -266,7 +266,7 @@ insertBoard_ByForumId user_id forum_id board_request = do
 
 
 
-insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (Entity Board)
+insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> LN.HandlerErrorEff (Entity Board)
 insertBoard_ByBoardId user_id board_id board_request = do
   ts      <- timestampH'
   e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
@@ -277,7 +277,7 @@ insertBoard_ByBoardId user_id board_id board_request = do
 
 
 
-updateBoardM :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (Entity Board)
+updateBoardM :: UserId -> BoardId -> BoardRequest -> LN.HandlerErrorEff (Entity Board)
 updateBoardM user_id board_id board_request = do
 
   ts <- timestampH'
@@ -305,7 +305,7 @@ updateBoardM user_id board_id board_request = do
 
 
 
-deleteBoardM :: UserId -> BoardId -> HandlerErrorEff ()
+deleteBoardM :: UserId -> BoardId -> LN.HandlerErrorEff ()
 deleteBoardM user_id board_id = do
   deleteWhereDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True]
 
@@ -313,12 +313,12 @@ deleteBoardM user_id board_id = do
 
 
 
-getBoardStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff Value
+getBoardStatsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff Value
 getBoardStatsM _ _ = left Error_NotImplemented
 
 
 
-getBoardStatM :: UserId -> BoardId -> HandlerErrorEff BoardStatResponse
+getBoardStatM :: UserId -> BoardId -> LN.HandlerErrorEff BoardStatResponse
 getBoardStatM _ board_id = do
 
   num_threads      <- countDb [ThreadBoardId ==. board_id, ThreadActive ==. True]

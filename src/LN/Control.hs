@@ -1,11 +1,11 @@
 module LN.Control (
-  HandlerEff,
-  HandlerErrorEff,
-  ControlM,
-  ControlMA,
-  ControlReader,
-  ControlWriter,
-  ControlState,
+  LN.HandlerEff,
+  LN.HandlerErrorEff,
+  LN.ControlM,
+  LN.ControlMA,
+  LN.ControlReader,
+  LN.ControlWriter,
+  LN.ControlState,
   InternalControlState (..),
   run,
   ErrorEff,
@@ -20,8 +20,8 @@ module LN.Control (
 
 
 
-import qualified Control.Monad.Trans.Either as Either
-import           Control.Monad.Trans.RWS
+import qualified LN.Control.Monad.Trans.Either as Either
+import           LN.Control.Monad.Trans.RWS
 import qualified Data.Map                as M
 
 import           Import
@@ -31,17 +31,17 @@ import           LN.T.Error
 
 
 
-type HandlerEff a = ControlMA Handler a
-type HandlerErrorEff a = HandlerEff (ErrorEff a)
+type LN.HandlerEff a = LN.ControlMA LN.Handler a
+type LN.HandlerErrorEff a = LN.HandlerEff (ErrorEff a)
 
 
 
 
-type ControlM      = RWST
-type ControlMA m a = ControlM ControlReader ControlWriter ControlState m a
-type ControlReader = ()
-type ControlWriter = ()
-type ControlState  = InternalControlState
+type LN.ControlM      = RWST
+type LN.ControlMA m a = LN.ControlM LN.ControlReader LN.ControlWriter LN.ControlState m a
+type LN.ControlReader = ()
+type LN.ControlWriter = ()
+type LN.ControlState  = InternalControlState
 
 
 

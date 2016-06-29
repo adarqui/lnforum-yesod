@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Leuron (
-  -- Handler
+  -- LN.Handler
   getLeuronPacksR,
   getLeuronPackR,
 
@@ -20,10 +20,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getLeuronPacksR :: Handler Value
+getLeuronPacksR :: LN.Handler Value
 getLeuronPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -31,7 +31,7 @@ getLeuronPacksR = run $ do
 
 
 
-getLeuronPackR :: LeuronId -> Handler Value
+getLeuronPackR :: LeuronId -> LN.Handler Value
 getLeuronPackR leuron_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getLeuronPackM user_id leuron_id
@@ -46,7 +46,7 @@ getLeuronPackR leuron_id = run $ do
 -- Model
 --
 
-getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackResponses
+getLeuronPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff LeuronPackResponses
 getLeuronPacksM m_sp user_id = do
 
   e_leurons <- getLeuronsM m_sp user_id
@@ -60,7 +60,7 @@ getLeuronPacksM m_sp user_id = do
 
 
 
-getLeuronPackM :: UserId -> LeuronId -> HandlerErrorEff LeuronPackResponse
+getLeuronPackM :: UserId -> LeuronId -> LN.HandlerErrorEff LeuronPackResponse
 getLeuronPackM user_id leuron_id = do
 
   e_leuron <- getLeuronM user_id leuron_id
@@ -68,7 +68,7 @@ getLeuronPackM user_id leuron_id = do
 
 
 
-getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> HandlerErrorEff LeuronPackResponse
+getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> LN.HandlerErrorEff LeuronPackResponse
 getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) = do
 
   lr <- runEitherT $ do

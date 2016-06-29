@@ -11,7 +11,7 @@ import           Yesod.WebSockets
 
 
 
-getSPAR :: Handler Html
+getSPAR :: LN.Handler Html
 getSPAR = do
 
   void $ requireAuthId

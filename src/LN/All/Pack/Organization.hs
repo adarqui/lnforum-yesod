@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Organization (
-  -- Handler
+  -- LN.Handler
   getOrganizationPacksR,
   getOrganizationPackR,
   getOrganizationPackH,
@@ -22,10 +22,10 @@ import           LN.All.User
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getOrganizationPacksR :: Handler Value
+getOrganizationPacksR :: LN.Handler Value
 getOrganizationPacksR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -33,14 +33,14 @@ getOrganizationPacksR = run $ do
 
 
 
-getOrganizationPackR :: OrganizationId -> Handler Value
+getOrganizationPackR :: OrganizationId -> LN.Handler Value
 getOrganizationPackR org_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getOrganizationPackM user_id org_id
 
 
 
-getOrganizationPackH :: Text -> Handler Value
+getOrganizationPackH :: Text -> LN.Handler Value
 getOrganizationPackH org_name = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getOrganizationPackMH user_id org_name
@@ -54,13 +54,13 @@ getOrganizationPackH org_name = run $ do
 -- Model
 --
 
-getOrganizationPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff OrganizationPackResponses
+getOrganizationPacksM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff OrganizationPackResponses
 getOrganizationPacksM m_sp user_id = do
   getOrganizationPacks_ByEverythingM m_sp user_id
 
 
 
-getOrganizationPackM :: UserId -> OrganizationId -> HandlerErrorEff OrganizationPackResponse
+getOrganizationPackM :: UserId -> OrganizationId -> LN.HandlerErrorEff OrganizationPackResponse
 getOrganizationPackM user_id org_id = do
 
   e_organization <- getOrganizationM user_id org_id
@@ -69,12 +69,12 @@ getOrganizationPackM user_id org_id = do
 
 
 
-getOrganizationPackMH :: UserId -> Text -> HandlerErrorEff OrganizationPackResponse
+getOrganizationPackMH :: UserId -> Text -> LN.HandlerErrorEff OrganizationPackResponse
 getOrganizationPackMH = getOrganizationPack_ByOrganizationName
 
 
 
-getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff OrganizationPackResponses
+getOrganizationPacks_ByEverythingM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff OrganizationPackResponses
 getOrganizationPacks_ByEverythingM m_sp user_id = do
 
   e_organizations        <- getOrganizations_ByEverythingM m_sp user_id
@@ -88,7 +88,7 @@ getOrganizationPacks_ByEverythingM m_sp user_id = do
 
 
 
-getOrganizationPack_ByOrganizationName :: UserId -> Text -> HandlerEff (ErrorEff OrganizationPackResponse)
+getOrganizationPack_ByOrganizationName :: UserId -> Text -> LN.HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPack_ByOrganizationName user_id organization_name = do
 
   e_organization <- getOrganization_ByOrganizationNameM user_id organization_name
@@ -98,7 +98,7 @@ getOrganizationPack_ByOrganizationName user_id organization_name = do
 
 
 
-getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> HandlerEff (ErrorEff OrganizationPackResponse)
+getOrganizationPack_ByOrganizationM :: UserId -> Entity Organization -> LN.HandlerEff (ErrorEff OrganizationPackResponse)
 getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organization{..}) = do
 
   lr <- runEitherT $ do

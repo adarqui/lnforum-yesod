@@ -20,7 +20,7 @@ import qualified Database.Esqueleto     as E
 
 
 
-getBoardStatM_qBoardStats :: UserId -> BoardId -> HandlerEff BoardStatResponse
+getBoardStatM_qBoardStats :: UserId -> BoardId -> LN.HandlerEff BoardStatResponse
 getBoardStatM_qBoardStats _ board_id = do
 
 {-
@@ -47,7 +47,7 @@ getBoardStatM_qBoardStats _ board_id = do
 
 qBoardStats :: forall site.
      (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-     Key Board -> ControlMA (HandlerT site IO) [(E.Value Int64, E.Value Int64, E.Value Int64)]
+     Key Board -> LN.ControlMA (HandlerT site IO) [(E.Value Int64, E.Value Int64, E.Value Int64)]
 qBoardStats board_id = do
   _runDB
     $ E.select
@@ -63,7 +63,7 @@ qBoardStats board_id = do
 
 
 
--- getThreadsM :: UserId -> HandlerEff [Entity Thread]
+-- getThreadsM :: UserId -> LN.HandlerEff [Entity Thread]
 -- getThreadsM _ = do
 --
 --   sp@StandardParams{..} <- lookupStandardParams
@@ -99,7 +99,7 @@ qBoardStats board_id = do
 
 
 
-getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> HandlerEff [Entity Thread]
+getThreads_ByOrganizationIdM :: UserId -> OrganizationId -> StandardParams -> LN.HandlerEff [Entity Thread]
 getThreads_ByOrganizationIdM _ org_id sp = do
 
   _runDB

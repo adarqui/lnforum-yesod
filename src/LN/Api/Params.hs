@@ -27,7 +27,7 @@ module LN.Api.Params (
 
 
 
-import           Control
+import           LN.Control
 import           Lifted
 import           Data.List             (nub)
 import           Data.Time             ()
@@ -169,7 +169,7 @@ minOffset = 1
 
 
 
-lookupStandardParams :: HandlerEff StandardParams
+lookupStandardParams :: LN.HandlerEff StandardParams
 lookupStandardParams = do
 
   offset             <- lookupGetParam $ tshow ParamTag_Offset
@@ -281,21 +281,21 @@ lookupSpBool (Just sp) f = f sp
 
 
 
-lookupGetParam400 :: Text -> HandlerEff Text
+lookupGetParam400 :: Text -> LN.HandlerEff Text
 lookupGetParam400 = lookupGetParamStatus 400
 
-lookupGetParam401 :: Text -> HandlerEff Text
+lookupGetParam401 :: Text -> LN.HandlerEff Text
 lookupGetParam401 = lookupGetParamStatus 401
 
-lookupGetParam403 :: Text -> HandlerEff Text
+lookupGetParam403 :: Text -> LN.HandlerEff Text
 lookupGetParam403 = lookupGetParamStatus 403
 
-lookupGetParam404 :: Text -> HandlerEff Text
+lookupGetParam404 :: Text -> LN.HandlerEff Text
 lookupGetParam404 = lookupGetParamStatus 404
 
 
 
-lookupGetParamStatus :: Int -> Text -> HandlerEff Text
+lookupGetParamStatus :: Int -> Text -> LN.HandlerEff Text
 lookupGetParamStatus status param = do
   r <- lookupGetParam param
   case r of
@@ -469,11 +469,11 @@ timestamp sp = do
 
 
 
-timestampH :: StandardParams -> HandlerEff UTCTime
+timestampH :: StandardParams -> LN.HandlerEff UTCTime
 timestampH sp = do
   liftIO $ timestamp sp
 
 
 
-timestampH' :: HandlerEff UTCTime
+timestampH' :: LN.HandlerEff UTCTime
 timestampH' = lookupStandardParams >>= timestampH

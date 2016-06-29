@@ -7,12 +7,12 @@ module LN.All.Prelude (
 import           Access                     as A
 import           Api.Params                 as A
 import           Cache                      as A
-import           Control                    as A
-import           Control.Monad.Trans.Either as A (EitherT, runEitherT)
+import           LN.Control                    as A
+import           LN.Control.Monad.Trans.Either as A (EitherT, runEitherT)
 import           Data.Ebyam                 as A (ebyam)
 import           Data.Maybe                 as A (fromJust)
 import           Data.Rehtie                as A (rehtie)
-import           Db                         as A
+import           LN.Db                         as A
 import           Error                      as A
 import           Import                     as A
 import           Lifted                     as A

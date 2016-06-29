@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Pack.Me (
-  -- Handler
+  -- LN.Handler
   getMePackR
 ) where
 
@@ -12,7 +12,7 @@ import           LN.All.Prelude
 
 
 
-getMePackR :: Handler Value
+getMePackR :: LN.Handler Value
 getMePackR = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ getUserPack_ByUserIdM user_id user_id

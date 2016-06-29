@@ -233,7 +233,7 @@ instance YesodAuth App where
 
 myMaybeAuthId
   :: (YesodAuthPersist master, Typeable (AuthEntity master))
-  => HandlerT master IO (Maybe (AuthId master))
+  => LN.HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
   req <- waiRequest
 -- DEBUG:  liftIO $ print req
@@ -263,7 +263,7 @@ instance RenderMessage App FormMessage where
 
 
 
-unsafeHandler :: App -> Handler a -> IO a
+unsafeHandler :: App -> LN.Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
 
 -- getsYesod :: MonadHandler m => m (HandlerSite m)

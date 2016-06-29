@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module LN.All.Pm (
-  -- Handler
+  -- LN.Handler
   getPmsR,
   postPmR0,
   getPmR,
@@ -29,10 +29,10 @@ import           LN.All.Prelude
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getPmsR :: Handler Value
+getPmsR :: LN.Handler Value
 getPmsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -40,7 +40,7 @@ getPmsR = run $ do
 
 
 
-postPmR0 :: Handler Value
+postPmR0 :: LN.Handler Value
 postPmR0 = run $ do
   user_id    <- _requireAuthId
   sp         <- lookupStandardParams
@@ -49,14 +49,14 @@ postPmR0 = run $ do
 
 
 
-getPmR :: PmId -> Handler Value
+getPmR :: PmId -> LN.Handler Value
 getPmR pm_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON pmToResponse $ getPmM user_id pm_id
 
 
 
-putPmR :: PmId -> Handler Value
+putPmR :: PmId -> LN.Handler Value
 putPmR pm_id = run $ do
   user_id    <- _requireAuthId
   pm_request <- requireJsonBody
@@ -64,7 +64,7 @@ putPmR pm_id = run $ do
 
 
 
-deletePmR :: PmId -> Handler Value
+deletePmR :: PmId -> LN.Handler Value
 deletePmR pm_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deletePmM user_id pm_id
@@ -123,19 +123,19 @@ pmsToResponses pms = PmResponses {
 -- Model/Internal
 --
 
-getPmsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Pm]
+getPmsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity Pm]
 getPmsM m_sp user_id = do
   selectListDbE m_sp [PmUserId ==. user_id, PmActive ==. True] [] PmId
 
 
 
-getPmM :: UserId -> PmId -> HandlerErrorEff (Entity Pm)
+getPmM :: UserId -> PmId -> LN.HandlerErrorEff (Entity Pm)
 getPmM user_id pm_id = do
   selectFirstDbE [PmUserId ==. user_id, PmId ==. pm_id, PmActive ==. True] []
 
 
 
-insertPmM :: Maybe StandardParams -> UserId -> PmRequest -> HandlerErrorEff (Entity Pm)
+insertPmM :: Maybe StandardParams -> UserId -> PmRequest -> LN.HandlerErrorEff (Entity Pm)
 insertPmM m_sp user_id pm_request = do
 
   case (lookupSpMay m_sp spUserId) of
@@ -157,7 +157,7 @@ insertPmM m_sp user_id pm_request = do
 
 
 
-updatePmM :: UserId -> PmId -> PmRequest -> HandlerErrorEff (Entity Pm)
+updatePmM :: UserId -> PmId -> PmRequest -> LN.HandlerErrorEff (Entity Pm)
 updatePmM user_id pm_id pm_request = do
 
   ts <- timestampH'
@@ -176,5 +176,5 @@ updatePmM user_id pm_id pm_request = do
 
 
 
-deletePmM :: UserId -> PmId -> HandlerErrorEff ()
+deletePmM :: UserId -> PmId -> LN.HandlerErrorEff ()
 deletePmM _ _ = left Error_NotImplemented

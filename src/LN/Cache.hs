@@ -10,7 +10,7 @@ module LN.Cache (
 
 
 import           Import
-import Control.Monad.Trans.RWS
+import LN.Control.Monad.Trans.RWS
 import           Model.Misc
 import           LN.T.Membership
 import           LN.T.Visibility

@@ -1,7 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.PmOut (
-  -- Handler
+  -- LN.Handler
   getPmOutsR,
   postPmOutsR,
   getPmOutR,
@@ -28,10 +28,10 @@ import           LN.All.Prelude
 
 
 --
--- Handler
+-- LN.Handler
 --
 
-getPmOutsR :: Handler Value
+getPmOutsR :: LN.Handler Value
 getPmOutsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
@@ -39,7 +39,7 @@ getPmOutsR = run $ do
 
 
 
-postPmOutsR :: Handler Value
+postPmOutsR :: LN.Handler Value
 postPmOutsR = run $ do
   user_id        <- _requireAuthId
   pm_out_request <- requireJsonBody
@@ -48,14 +48,14 @@ postPmOutsR = run $ do
 
 
 
-getPmOutR :: PmOutId -> Handler Value
+getPmOutR :: PmOutId -> LN.Handler Value
 getPmOutR pm_out_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON pmOutToResponse $ getPmOutM user_id pm_out_id
 
 
 
-putPmOutR :: PmOutId -> Handler Value
+putPmOutR :: PmOutId -> LN.Handler Value
 putPmOutR pm_out_id = run $ do
   user_id        <- _requireAuthId
   pm_out_request <- requireJsonBody
@@ -63,7 +63,7 @@ putPmOutR pm_out_id = run $ do
 
 
 
-deletePmOutR :: PmOutId -> Handler Value
+deletePmOutR :: PmOutId -> LN.Handler Value
 deletePmOutR pm_out_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deletePmOutM user_id pm_out_id
@@ -121,19 +121,19 @@ pmOutsToResponses pmOuts = PmOutResponses {
 --
 
 
-getPmOutsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity PmOut]
+getPmOutsM :: Maybe StandardParams -> UserId -> LN.HandlerErrorEff [Entity PmOut]
 getPmOutsM m_sp user_id = do
   selectListDbE m_sp [PmOutUserId ==. user_id, PmOutActive ==. True] [] PmOutId
 
 
 
-getPmOutM :: UserId -> PmOutId -> HandlerErrorEff (Entity PmOut)
+getPmOutM :: UserId -> PmOutId -> LN.HandlerErrorEff (Entity PmOut)
 getPmOutM user_id pm_out_id = do
   selectFirstDbE [PmOutUserId ==. user_id, PmOutId ==. pm_out_id, PmOutActive ==. True] []
 
 
 
-insertPmOutM :: Maybe StandardParams -> UserId -> PmOutRequest -> HandlerErrorEff (Entity PmOut)
+insertPmOutM :: Maybe StandardParams -> UserId -> PmOutRequest -> LN.HandlerErrorEff (Entity PmOut)
 insertPmOutM m_sp user_id pm_out_request = do
 
   case (lookupSpMay m_sp spPmId) of
@@ -148,7 +148,7 @@ insertPmOutM m_sp user_id pm_out_request = do
 
 
 
-updatePmOutM :: UserId -> PmOutId -> PmOutRequest -> HandlerErrorEff (Entity PmOut)
+updatePmOutM :: UserId -> PmOutId -> PmOutRequest -> LN.HandlerErrorEff (Entity PmOut)
 updatePmOutM user_id pm_out_id pm_out_request = do
 
   ts <- timestampH'
@@ -166,6 +166,6 @@ updatePmOutM user_id pm_out_id pm_out_request = do
 
 
 
-deletePmOutM :: UserId -> PmOutId -> HandlerErrorEff ()
+deletePmOutM :: UserId -> PmOutId -> LN.HandlerErrorEff ()
 deletePmOutM _ _ = do
   right ()
