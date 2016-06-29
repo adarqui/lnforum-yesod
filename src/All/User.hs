@@ -1,6 +1,8 @@
+{-# LANGUAGE ExplicitForAll  #-}
+{-# LANGUAGE KindSignatures  #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies    #-}
+{-# LANGUAGE TypeOperators   #-}
 
 module All.User (
   -- Handler
@@ -43,11 +45,11 @@ module All.User (
 
 
 import           All.Prelude
-import           Data.Char           (isAlphaNum)
-import qualified Data.Text           as T (filter, toLower)
-import           Database.Esqueleto     ((^.))
-import qualified Database.Esqueleto     as E
 import           All.Profile
+import           Data.Char          (isAlphaNum)
+import qualified Data.Text          as T (filter, toLower)
+import           Database.Esqueleto ((^.))
+import qualified Database.Esqueleto as E
 
 
 
@@ -271,7 +273,7 @@ insertUsersM user_id user_request = do
           , userCreatedAt = Just ts
           , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
         }
-      new_user <- insertEntityDb user
+      new_user <- insertEntityDb' user
       -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
       void $ insertUsers_TasksM user_id new_user
       right $ new_user
@@ -391,10 +393,10 @@ getUserStatM _ lookup_user_id = do
 
 
 
-qUserStats :: forall site.
-  (YesodPersist site, YesodPersistBackend site ~ SqlBackend) =>
-  Key User ->
-  ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
+qUserStats
+  :: forall site.  (YesodPersist site, YesodPersistBackend site ~ SqlBackend)
+  => Key User
+  -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
 qUserStats user_id = do
   _runDB $ do
     (leurons:[]) <- E.select

@@ -17,7 +17,7 @@ module Access (
 
 
 
-import           Api.Params
+import           Db
 import           Control
 import           Data.Ebyam      (ebyam)
 import           Data.List       (nub)
@@ -46,18 +46,18 @@ isMemberOf_OrganizationIdM user_id org_id =
 isMemberOf_OrganizationId_TeamM :: UserId -> OrganizationId -> SystemTeam -> HandlerEff Bool
 isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
-  m_team <- selectFirstDb [ TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True ] []
+  m_team <- selectFirstDb' [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
   ebyam m_team (pure False) $ \(Entity team_id Team{..}) -> do
-    maybe False (const True) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] []
+    maybe False (const True) <$> selectFirstDb' [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] []
 
 
 
 userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff [Entity Team]
 userTeamsOf_OrganizationIdM user_id org_id = do
 
-  teams <- selectListDbMay Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
+  teams <- selectListDb' Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
   catMaybes <$> mapM (\team@(Entity team_id _) -> do
-    maybe Nothing (const $ Just team) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] [])
+    maybe Nothing (const $ Just team) <$> selectFirstDb' [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] [])
     teams
 
 
@@ -91,7 +91,7 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 --
 userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
 userPermissions_ByOrganizationIdM user_id org_id = do
-  m_org <- selectFirstDb [ OrganizationId ==. org_id ] []
+  m_org <- selectFirstDb' [OrganizationId ==. org_id, OrganizationActive ==. True] []
   ebyam m_org (pure []) $ \(Entity org_id Organization{..}) -> do
     user_teams <- userTeamsOf_OrganizationIdM user_id org_id
     case user_teams of
@@ -102,7 +102,7 @@ userPermissions_ByOrganizationIdM user_id org_id = do
 
 userPermissions_ByForumIdM :: UserId -> ForumId -> HandlerEff Permissions
 userPermissions_ByForumIdM user_id forum_id = do
-  m_forum <- selectFirstDb [ ForumId ==. forum_id ] []
+  m_forum <- selectFirstDb' [ForumId ==. forum_id, ForumActive ==. True] []
   ebyam m_forum (pure []) $ \(Entity _ Forum{..}) -> do
    userPermissions_ByOrganizationIdM user_id forumOrgId
 
@@ -110,7 +110,7 @@ userPermissions_ByForumIdM user_id forum_id = do
 
 userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff Permissions
 userPermissions_ByBoardIdM user_id board_id = do
-  m_board <- selectFirstDb [ BoardId ==. board_id ] []
+  m_board <- selectFirstDb' [BoardId ==. board_id, BoardActive ==. True] []
   ebyam m_board (pure []) $ \(Entity _ Board{..}) -> do
    userPermissions_ByOrganizationIdM user_id boardOrgId
 
@@ -118,7 +118,7 @@ userPermissions_ByBoardIdM user_id board_id = do
 
 userPermissions_ByThreadIdM :: UserId -> ThreadId -> HandlerEff Permissions
 userPermissions_ByThreadIdM user_id thread_id = do
-  m_thread <- selectFirstDb [ ThreadId ==. thread_id ] []
+  m_thread <- selectFirstDb' [ThreadId ==. thread_id, ThreadActive ==. True] []
   ebyam m_thread (pure []) $ \(Entity _ Thread{..}) -> do
     userPermissions_ByOrganizationIdM user_id threadOrgId
 
@@ -126,6 +126,6 @@ userPermissions_ByThreadIdM user_id thread_id = do
 
 userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff Permissions
 userPermissions_ByThreadPostIdM user_id thread_post_id = do
-  m_thread_post <- selectFirstDb [ ThreadPostId ==. thread_post_id ] []
+  m_thread_post <- selectFirstDb' [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
   ebyam m_thread_post (pure []) $ \(Entity _ ThreadPost{..}) -> do
     userPermissions_ByOrganizationIdM user_id threadPostOrgId

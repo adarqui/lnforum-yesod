@@ -12,6 +12,7 @@ import           Control.Monad.Trans.Either as A (EitherT, runEitherT)
 import           Data.Ebyam                 as A (ebyam)
 import           Data.Maybe                 as A (fromJust)
 import           Data.Rehtie                as A (rehtie)
+import           Db                         as A
 import           Error                      as A
 import           Import                     as A
 import           Lifted                     as A
