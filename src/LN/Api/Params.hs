@@ -1,7 +1,9 @@
-{-# LANGUAGE ExplicitForAll  #-}
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeOperators   #-}
-{-# LANGUAGE ViewPatterns    #-}
+{-# LANGUAGE ExplicitForAll        #-}
+{-# LANGUAGE KindSignatures        #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RecordWildCards       #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE ViewPatterns          #-}
 
 module LN.Api.Params (
   StandardParams (..),
@@ -27,17 +29,17 @@ module LN.Api.Params (
 
 
 
-import           LN.Control
-import           LN.Lifted
 import           Data.List             (nub)
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-import           Import
+import qualified Database.Esqueleto    as E
+import           LN.Control
+import           LN.Import
+import           LN.Lifted
 import           LN.Misc.Codec
-import qualified Database.Esqueleto      as E
+import           LN.T.Ent              (Ent (..))
+import           LN.T.Error            (ApplicationError (..))
 import           LN.T.Param
-import           LN.T.Ent (Ent(..))
-import           LN.T.Error (ApplicationError(..))
 
 
 

@@ -23,25 +23,7 @@ import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
                                                        runSqlPool)
 import qualified Database.Redis                       as R
-import           Import
 import           Language.Haskell.TH.Syntax           (qLocation)
-import           Network.Wai.Handler.Warp             (Settings,
-                                                       defaultSettings, defaultShouldDisplayException,
-                                                       getPort, runSettings,
-                                                       setHost, setOnException,
-                                                       setPort)
-import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
-                                                       IPAddrSource (..),
-                                                       OutputFormat (..),
-                                                       destination,
-                                                       mkRequestLogger,
-                                                       outputFormat)
-import           System.Log.FastLogger                (defaultBufSize,
-                                                       newStdoutLoggerSet,
-                                                       toLogStr)
-
-
-
 import           LN.All.Api
 import           LN.All.Board
 import           LN.All.Forum
@@ -77,8 +59,22 @@ import           LN.All.TeamMember
 import           LN.All.Thread
 import           LN.All.ThreadPost
 import           LN.All.User
-
 import           LN.Handler.Common
+import           LN.Import
+import           Network.Wai.Handler.Warp             (Settings,
+                                                       defaultSettings, defaultShouldDisplayException,
+                                                       getPort, runSettings,
+                                                       setHost, setOnException,
+                                                       setPort)
+import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
+                                                       IPAddrSource (..),
+                                                       OutputFormat (..),
+                                                       destination,
+                                                       mkRequestLogger,
+                                                       outputFormat)
+import           System.Log.FastLogger                (defaultBufSize,
+                                                       newStdoutLoggerSet,
+                                                       toLogStr)
 
 
 -- This line actually creates our YesodDispatch instance. It is the second half

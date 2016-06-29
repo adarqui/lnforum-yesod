@@ -21,12 +21,12 @@ module LN.OAuth2 (
 
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
-import           Import.NoFoundation
+import           LN.Import.NoFoundation
 import           LN.Job.Enqueue
 import           LN.Lib.Url              (toPrettyName)
+import           LN.Misc.Codec
 import           LN.T.Profile            (ProfileX (..))
 import           LN.T.Profile.Request    (defaultProfileRequest)
-import           LN.Misc.Codec
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
 

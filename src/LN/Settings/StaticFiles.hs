@@ -1,7 +1,15 @@
-module LN.Settings.StaticFiles where
+{-# LANGUAGE TemplateHaskell #-}
 
-import Settings     (appStaticDir, compileTimeAppSettings)
-import Yesod.Static (staticFiles)
+module LN.Settings.StaticFiles (
+  staticFiles
+) where
+
+
+
+import           LN.Settings  (appStaticDir, compileTimeAppSettings)
+import           Yesod.Static (staticFiles)
+
+
 
 -- This generates easy references to files in the static directory at compile time,
 -- giving you compile-time verification that referenced files exist.

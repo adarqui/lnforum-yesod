@@ -32,7 +32,6 @@ module LN.All.Resource (
 
 
 import           LN.All.Prelude
-import           Import
 import           LN.Lib.Url        (toPrettyUrl)
 import           LN.T              hiding (LikeOpt(..))
 import qualified LN.T.Like         as L
