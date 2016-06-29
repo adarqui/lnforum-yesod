@@ -1,10 +1,12 @@
-module Main where
+module Main (
+  main
+) where
 
 
 
-import           Job
+import           LN.Job
+import           LN.Misc.Codec (int64ToKey')
 import           LN.T
-import           Misc.Codec (int64ToKey')
 
 
 
