@@ -16,7 +16,7 @@ import           ClassyPrelude.Conduit       as Import hiding (ThreadId, delete,
                                                         deleteBy)
 import           Yesod                       as Import hiding (Header,
                                                         parseTime)
-import qualified Yesod
+-- import qualified Yesod
 import           Yesod.Static                as Import
 -- import Yesod.Feed as Import
 import           Data.Default                as Import (Default (..))

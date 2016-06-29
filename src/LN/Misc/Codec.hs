@@ -1,3 +1,6 @@
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE KindSignatures #-}
+
 module LN.Misc.Codec (
   module A,
   textToKey,
@@ -16,13 +19,12 @@ module LN.Misc.Codec (
 
 
 
-import qualified Data.ByteString       as BS
 import qualified Data.ByteString.Char8 as BSC
 import           Data.Either           (rights)
 import           Data.Int              (Int64)
 import           Data.Text             (Text)
 import           Database.Persist
-import           Database.Persist.Sql  (unSqlBackendKey)
+import           Database.Persist.Sql  (SqlBackend, unSqlBackendKey)
 import           LN.Lib.Codec          as A
 import           Prelude
 
@@ -72,22 +74,20 @@ int64ToKeys = rights . map (\i64 -> keyFromValues [PersistInt64 i64])
 
 
 
--- keyToInt64 :: forall record.
---              ToBackendKey Database.Persist.Sql.Types.SqlBackend record =>
---              Key record -> Int64
+keyToInt64 :: forall record. ToBackendKey SqlBackend record => Key record -> Int64
 keyToInt64 = unSqlBackendKey . toBackendKey
 
 
 
--- keyToInt64Sbs :: forall record.
---                 ToBackendKey Database.Persist.Sql.Types.SqlBackend record =>
---                 Key record -> ByteString
+keyToInt64Sbs :: forall record. ToBackendKey SqlBackend record => Key record -> BSC.ByteString
 keyToInt64Sbs = BSC.pack . show . keyToInt64
 
 
 
+entityKeyToInt64 :: forall record. ToBackendKey SqlBackend record => Entity record -> Int64
 entityKeyToInt64 = unSqlBackendKey . toBackendKey . entityKey
 
 
 
+entityKeyToId :: forall record. ToBackendKey (PersistEntityBackend record) record => Key record -> BackendKey (PersistEntityBackend record)
 entityKeyToId = toBackendKey
