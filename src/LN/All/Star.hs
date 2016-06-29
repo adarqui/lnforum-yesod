@@ -32,7 +32,6 @@ module LN.All.Star (
 
 
 import           LN.All.Prelude
-import qualified LN.T.Star as L
 
 
 
@@ -224,7 +223,7 @@ getStarStatsM _ = do
 getStarStatM :: UserId -> StarId -> HandlerEff StarStatResponse
 getStarStatM user_id _ = do
 
-  sp@StandardParams{..} <- lookupStandardParams
+  StandardParams{..} <- lookupStandardParams
 
   case spThreadPostId of
     Just thread_post_id -> getStarStat_ByThreadPostIdM user_id thread_post_id
@@ -233,7 +232,7 @@ getStarStatM user_id _ = do
 
 
 getStarStat_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff StarStatResponse
-getStarStat_ByThreadPostIdM user_id thread_post_id = do
+getStarStat_ByThreadPostIdM _ thread_post_id = do
 --  <- countDb [ StarPostStarId ==. star_id ]
   stars <- selectListDb Nothing [StarEnt ==. Ent_ThreadPost, StarEntId ==. i64, StarActive ==. True] [] StarId
 

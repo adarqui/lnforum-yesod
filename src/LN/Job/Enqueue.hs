@@ -9,6 +9,7 @@ module LN.Job.Enqueue (
 
 import           LN.Import.NoFoundation
 import           LN.Job.Shared
+import           LN.T.Internal.JSON     ()
 import           LN.T.Internal.Types
 import           LN.T.Job
 

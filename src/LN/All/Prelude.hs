@@ -22,7 +22,6 @@ import           LN.Misc.Magic              as A
 import           LN.Model.Keys              as A
 import           LN.Model.Misc              as A
 import           LN.Parent                  as A
-import           LN.Parent                  as A
 import           LN.T                       as A hiding (LikeOpt (..),
                                                   Membership (..),
                                                   Visibility (..))

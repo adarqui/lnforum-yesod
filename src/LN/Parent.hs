@@ -15,7 +15,7 @@ import           LN.Lifted
 
 
 fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Thread))
-fatherOf_ThreadPostM user_id (Entity _ ThreadPost{..}) = do
+fatherOf_ThreadPostM _ (Entity _ ThreadPost{..}) = do
 
   _runDB $ selectFirst [ThreadId ==. threadPostThreadId, ThreadActive ==. True] [ ]
 

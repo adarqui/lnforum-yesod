@@ -186,7 +186,7 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
   ts <- timestampH'
 
   e_team <- selectFirstDbE [TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True] []
-  rehtie e_team left $ \(Entity team_id team) -> do
+  rehtie e_team left $ \(Entity team_id _) -> do
 
     let
       team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }

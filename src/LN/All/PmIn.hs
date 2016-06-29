@@ -151,6 +151,8 @@ insertPmInM m_sp user_id pm_in_request = do
 
       insertEntityDbE pm_in
 
+    _          -> left $ Error_InvalidArguments "pm_id"
+
 
 
 updatePmInM :: UserId -> PmInId -> PmInRequest -> HandlerErrorEff (Entity PmIn)

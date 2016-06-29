@@ -34,19 +34,11 @@ module LN.Db (
 
 
 
-import           Data.List             (nub)
-import           Data.Time             ()
-import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
-import qualified Database.Esqueleto    as E
-import           LN.Api.Params         (StandardParams, lookupStandardParams,
-                                        spToSelect, spToSelectMay)
+import           Data.Time     ()
+import           LN.Api.Params (StandardParams, spToSelectMay)
 import           LN.Control
 import           LN.Import
 import           LN.Lifted
-import           LN.Misc.Codec
-import           LN.T.Ent              (Ent (..))
-import           LN.T.Error            (ApplicationError (..))
-import           LN.T.Param
 
 
 
@@ -335,10 +327,22 @@ deleteCascadeWhereDbE filt = Right <$> deleteCascadeWhereDb filt
 
 -- | delete helper
 --
+deleteDb
+  :: forall site val. (PersistEntity val, PersistStore (PersistEntityBackend val), YesodPersist site, PersistEntityBackend val ~ YesodPersistBackend site)
+  => Key val
+  -> ControlMA (HandlerT site IO) ()
 deleteDb = _runDB . delete
 
 
 
+deleteDbE
+  :: forall site val.
+     (PersistEntity val,
+     PersistStore (PersistEntityBackend val),
+     YesodPersist site,
+     PersistEntityBackend val ~ YesodPersistBackend site)
+  => Key val
+  -> ControlMA (HandlerT site IO) (ErrorEff ())
 deleteDbE k = Right <$> deleteDb k
 
 

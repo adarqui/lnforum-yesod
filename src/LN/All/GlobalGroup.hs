@@ -193,7 +193,7 @@ getGlobalGroupM _ global_groupid = do
 
 
 getGlobalGroupMH :: UserId -> Text -> HandlerErrorEff (Entity GlobalGroup)
-getGlobalGroupMH user_id global_group_name = do
+getGlobalGroupMH _ global_group_name = do
   selectFirstDbE [GlobalGroupName ==. global_group_name, GlobalGroupActive ==. True] []
 
 
@@ -257,7 +257,7 @@ getGlobalGroupStatsM _ _ = left $ Error_NotImplemented
 
 
 getGlobalGroupStatM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupStatResponse
-getGlobalGroupStatM _ global_group_id = do
+getGlobalGroupStatM _ _ = do
   right $ GlobalGroupStatResponse {
     globalGroupStatResponseGroups = 0 -- TODO FIXME
   }
