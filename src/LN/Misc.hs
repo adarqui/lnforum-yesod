@@ -1,5 +1,5 @@
-{-# LANAUGE ExplicitForAll #-}
-{-# LANUAGE KindSignatures #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE KindSignatures #-}
 
 module LN.Misc (
   lookupGetParamId,

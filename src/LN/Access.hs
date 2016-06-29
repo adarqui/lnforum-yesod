@@ -19,11 +19,9 @@ module LN.Access (
 
 import           Data.Ebyam      (ebyam)
 import           Data.List       (nub)
-import           Data.Rehtie     (rehtie)
 import           LN.Control
 import           LN.Db
-import           LN.Model.Misc
-import           LN.T.Membership
+import           LN.Import
 import           LN.T.Permission
 import           LN.T.Team
 import           LN.T.Visibility
@@ -91,7 +89,7 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
 userPermissions_ByOrganizationIdM user_id org_id = do
   m_org <- selectFirstDb [OrganizationId ==. org_id, OrganizationActive ==. True] []
-  ebyam m_org (pure []) $ \(Entity org_id Organization{..}) -> do
+  ebyam m_org (pure []) $ \(Entity _ Organization{..}) -> do
     user_teams <- userTeamsOf_OrganizationIdM user_id org_id
     case user_teams of
       [] -> pure $ if organizationVisibility == Public then [Perm_Read] else []

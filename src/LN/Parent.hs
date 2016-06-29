@@ -8,20 +8,16 @@ module LN.Parent (
 
 
 
-import           LN.Api.Params
 import           LN.Control
 import           LN.Import
 import           LN.Lifted
-import           LN.Model.Misc
-import           LN.T.Membership
-import           LN.T.Visibility
 
 
 
 fatherOf_ThreadPostM :: UserId -> Entity ThreadPost -> HandlerEff (Maybe (Entity Thread))
-fatherOf_ThreadPostM user_id (Entity thread_post_id ThreadPost{..}) = do
+fatherOf_ThreadPostM user_id (Entity _ ThreadPost{..}) = do
 
-  _runDB $ selectFirst [ ThreadId ==. threadPostThreadId ] [ ]
+  _runDB $ selectFirst [ThreadId ==. threadPostThreadId, ThreadActive ==. True] [ ]
 
 
 

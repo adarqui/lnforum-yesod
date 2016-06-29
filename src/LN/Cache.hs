@@ -1,8 +1,8 @@
 {-# LANGUAGE ExplicitForAll #-}
 
 module LN.Cache (
-  LN.Cache (..),
-  LN.CacheEntry (..),
+  Cache (..),
+  CacheEntry (..),
   defaultCache,
   emptyCache
 ) where
