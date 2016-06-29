@@ -35,10 +35,8 @@ import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Database.Esqueleto    as E
 import           LN.Control
 import           LN.Import
-import           LN.Lifted
 import           LN.Misc.Codec
 import           LN.T.Ent              (Ent (..))
-import           LN.T.Error            (ApplicationError (..))
 import           LN.T.Param
 
 
@@ -163,11 +161,13 @@ sanitizeLimit limit
 
 
 
-defOffset :: Maybe Int
-defOffset = Nothing
-
 minOffset :: Int
 minOffset = 1
+
+sanitizeOffset :: Int -> Int
+sanitizeOffset offset
+  | offset < minOffset = minOffset
+  | otherwise          = offset
 
 
 
@@ -222,7 +222,7 @@ lookupStandardParams = do
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
   pure $ StandardParams {
-    spOffset           = fmap tread offset,
+    spOffset           = fmap (sanitizeOffset . tread) offset,
     spLimit            = fmap (sanitizeLimit . tread) limit,
     spSortOrder        = fmap tread sort_order,
     spOrder            = fmap tread order,
@@ -278,7 +278,7 @@ lookupSpMay (Just sp) f = f sp
 
 
 lookupSpBool :: Maybe StandardParams -> (StandardParams -> Bool) -> Bool
-lookupSpBool Nothing f   = False
+lookupSpBool Nothing _   = False
 lookupSpBool (Just sp) f = f sp
 
 
@@ -409,7 +409,7 @@ spToSelect StandardParams{..} field =
 
 
 spToSelectMay :: forall typ record. Maybe StandardParams -> EntityField record typ -> [SelectOpt record]
-spToSelectMay Nothing field = []
+spToSelectMay Nothing _ = []
 spToSelectMay (Just StandardParams{..}) field =
   offset ++ limit ++ order
   where
