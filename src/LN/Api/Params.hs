@@ -30,6 +30,7 @@ module LN.Api.Params (
 
 
 import           Data.List             (nub)
+import           Data.Monoid           ((<>))
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Database.Esqueleto    as E
@@ -391,7 +392,7 @@ lookupStarEnt _                            = Nothing
 --
 spToSelect :: forall typ record. StandardParams -> EntityField record typ -> [SelectOpt record]
 spToSelect StandardParams{..} field =
-  offset ++ limit ++ order
+  offset <> limit <> order
   where
   offset = case spOffset of
            Nothing      -> []
@@ -411,7 +412,7 @@ spToSelect StandardParams{..} field =
 spToSelectMay :: forall typ record. Maybe StandardParams -> EntityField record typ -> [SelectOpt record]
 spToSelectMay Nothing _ = []
 spToSelectMay (Just StandardParams{..}) field =
-  offset ++ limit ++ order
+  offset <> limit <> order
   where
   offset = case spOffset of
            Nothing      -> []

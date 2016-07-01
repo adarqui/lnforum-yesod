@@ -18,6 +18,7 @@ module LN.Application (
 
 
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
+import           Data.Monoid                          ((<>))
 import qualified Data.Text                            as T (pack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
@@ -175,7 +176,7 @@ warpSettings foundation =
           $(qLocation >>= liftLoc)
           "yesod"
           LevelError
-          (toLogStr $ "Exception from Warp: " ++ show e))
+          (toLogStr $ "Exception from Warp: " <> show e))
     defaultSettings
 
 

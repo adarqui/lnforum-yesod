@@ -20,6 +20,7 @@ module LN.OAuth2 (
 
 
 import           Data.Digest.Pure.SHA    (hmacSha256)
+import           Data.Monoid             ((<>))
 import qualified Data.Text               as T
 import           LN.Import.NoFoundation
 import           LN.Job.Enqueue
@@ -96,7 +97,7 @@ authenticateUser creds@Creds{..} = do
 
 
 
-  authNew (Left err)   = pure $ ServerError $ credsPlugin ++ ": " ++ err
+  authNew (Left err)   = pure $ ServerError $ credsPlugin <> ": " <> err
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
@@ -139,7 +140,7 @@ extraToProfileX :: Text -> [(Text, Text)] -> Either Text ProfileX
 extraToProfileX "dummy" extra        = githubProfileX extra
 extraToProfileX "github" extra       = githubProfileX extra
 extraToProfileX "googleemail2" extra = googleProfileX extra
-extraToProfileX plugin _             = Left $ "Invalid plugin: " ++ plugin
+extraToProfileX plugin _             = Left $ "Invalid plugin: " <> plugin
 
 
 
@@ -162,7 +163,7 @@ googleProfileX extra = ProfileX
     handleName Name{..} =
         case (nameFormatted, nameGiven, nameFamily) of
             (Just formatted, _, _) -> Right $ formatted
-            (_, Just given, Just family) -> Right $ given ++ " " ++ family
+            (_, Just given, Just family) -> Right $ given <> " " <> family
             (_, Just given, _) -> Right given
             (_, _, Just family) -> Right family
             _ -> Left "user has no name"
@@ -179,4 +180,4 @@ googleProfileX extra = ProfileX
 
 lookupExtra :: Text -> [(Text, b)] -> Either Text b
 lookupExtra k extra =
-  maybe (Left $ "missing key " ++ k) Right $ lookup k extra
+  maybe (Left $ "missing key " <> k) Right $ lookup k extra
