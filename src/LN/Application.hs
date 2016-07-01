@@ -18,7 +18,6 @@ module LN.Application (
 
 
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
-import           Data.Monoid                          ((<>))
 import qualified Data.Text                            as T (pack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,

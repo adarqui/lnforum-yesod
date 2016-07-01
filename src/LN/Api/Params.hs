@@ -30,7 +30,6 @@ module LN.Api.Params (
 
 
 import           Data.List             (nub)
-import           Data.Monoid           ((<>))
 import           Data.Time             ()
 import           Data.Time.Clock.POSIX (posixSecondsToUTCTime)
 import qualified Database.Esqueleto    as E

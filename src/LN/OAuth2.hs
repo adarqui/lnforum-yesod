@@ -20,7 +20,6 @@ module LN.OAuth2 (
 
 
 import           Data.Digest.Pure.SHA    (hmacSha256)
-import           Data.Monoid             ((<>))
 import qualified Data.Text               as T
 import           LN.Import.NoFoundation
 import           LN.Job.Enqueue
