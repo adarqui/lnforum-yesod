@@ -16,6 +16,7 @@ module LN.Db (
   insertDbE,
   insertEntityDb,
   insertEntityDbE,
+  insertEntityByDbE,
   updateDb,
   updateDbE,
   updateWhereDb,
@@ -190,6 +191,25 @@ insertEntityDbE
   => e
   -> ControlMA (HandlerT site IO) (ErrorEff (Entity e))
 insertEntityDbE entity = Right <$> insertEntityDb entity
+
+
+
+insertEntityByDbE
+  :: forall site b.
+     (PersistEntity b,
+     PersistUnique (PersistEntityBackend b),
+     YesodPersist site,
+     PersistEntityBackend b ~ YesodPersistBackend site)
+  => b
+  -> ControlMA (HandlerT site IO) (ErrorEff (Entity b))
+insertEntityByDbE entity = do
+  r <- _runDB $ insertBy entity
+  case r of
+                 -- TODO FIXME: Change to Error_AlreadyExists
+    Left _    -> pure $ Left Error_Unknown
+    Right key -> do
+      m_entity <- _runDB $ get key
+      pure $ maybe (Left Error_NotFound) (Right . Entity key) m_entity
 
 
 

@@ -29,7 +29,9 @@ errorOrJSON :: (MonadHandler m, ToJSON b) => (a -> b) -> m (Either ApplicationEr
 errorOrJSON trfm go = do
   e <- (fmap (toJSON . trfm)) <$> go
   case e of
-    Left err -> permissionDenied $ cs $ encode err
+    Left err -> do
+      addHeader "X-JSON-ERROR" (cs $ encode err)
+      permissionDenied $ cs $ encode err
     Right v  -> pure v
 
 
