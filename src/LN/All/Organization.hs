@@ -174,14 +174,6 @@ organizationsToResponses orgs = OrganizationResponses {
 
 
 
-validateOrganizationRequest :: OrganizationRequest -> Either Text OrganizationRequest
-validateOrganizationRequest z@OrganizationRequest{..} = do
---  _ <- isValidNick organizationRequestName
-  _ <- isValidName organizationRequestDisplayName
-  _ <- isValidEmail organizationRequestEmail
-  _ <- isValidNonEmptyString organizationRequestCompany
-  _ <- isValidNonEmptyString organizationRequestLocation
-  Right z
 
 
 

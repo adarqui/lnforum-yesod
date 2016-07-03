@@ -117,10 +117,6 @@ library
                         RankNTypes
 
     build-depends: base
-                 , ln-types
-                 , ln-lib
-                 , haskell-ebyam
-                 , haskell-rehtie
                  , yesod
                  , yesod-core
                  , yesod-auth
@@ -192,6 +188,14 @@ library
                  , resourcet
                  , either
                  , string-conversions
+
+                 , ln-types
+                 , ln-lib
+                 , ln-sanitize
+                 , ln-validate
+                 , haskell-ebyam
+                 , haskell-rehtie
+                 , haskell-ifte
 
 executable         ln-yesod
     default-language:  Haskell2010

@@ -213,18 +213,6 @@ usersToSanitizedResponses users = UserSanitizedResponses {
 
 
 
-validateUserRequest :: UserRequest -> Either Text UserRequest
-validateUserRequest z@UserRequest{..} = do
---  _ <- isValidNick userRequestNick
-  _ <- isValidName userRequestDisplayNick
-  _ <- isValidName userRequestName
-  _ <- isValidEmail userRequestEmail
-  _ <- isValidNonEmptyString userRequestPlugin
-  _ <- isValidNonEmptyString userRequestIdent
-  Right z
-
-
-
 
 
 
