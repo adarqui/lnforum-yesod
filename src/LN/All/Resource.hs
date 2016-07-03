@@ -112,7 +112,7 @@ getResourceStatR thread_post_id = run $ do
 resourceRequestToResource :: UserId -> ResourceRequest -> Resource
 resourceRequestToResource user_id ResourceRequest{..} = Resource {
   resourceUserId         = user_id,
-  resourceName           = toPrettyUrl resourceRequestDisplayName,
+  resourceName           = toSafeUrl resourceRequestDisplayName,
   resourceDisplayName    = resourceRequestDisplayName,
   resourceDescription    = resourceRequestDescription,
   resourceSource         = encodeText resourceRequestSource,

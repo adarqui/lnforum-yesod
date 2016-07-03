@@ -122,7 +122,7 @@ getOrganizationStatR org_id = run $ do
 organizationRequestToOrganization :: UserId -> OrganizationRequest -> Organization
 organizationRequestToOrganization user_id OrganizationRequest{..} = Organization {
   organizationUserId      = user_id,
-  organizationName        = toPrettyName organizationRequestDisplayName,
+  organizationName        = toSafeName organizationRequestDisplayName,
   organizationDisplayName = organizationRequestDisplayName,
   organizationDescription = organizationRequestDescription,
   organizationCompany     = organizationRequestCompany,
@@ -230,61 +230,56 @@ getOrganization_ByOrganizationNameM _ org_name = do
 insertOrganizationM :: UserId -> OrganizationRequest -> HandlerErrorEff (Entity Organization)
 insertOrganizationM user_id organization_request = do
 
---  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
+  runEitherT $ do
+    sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
 
-  case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ Error_Validation "TODO FIXME"
-    Right _ -> do
-      ts <- timestampH'
+    ts <- lift $ timestampH'
 
-      let
-        email_md5 = md5Text (organizationRequestEmail organization_request)
-        organization = (organizationRequestToOrganization user_id organization_request) {
-            organizationEmailMD5 = email_md5
-          , organizationCreatedAt = Just ts
-        }
-      org@(Entity org_id _) <- insertEntityDb organization
+    let
+      email_md5 = md5Text (organizationRequestEmail sanitized_organization_request)
+      organization = (organizationRequestToOrganization user_id sanitized_organization_request) {
+          organizationEmailMD5 = email_md5
+        , organizationCreatedAt = Just ts
+      }
+    org@(Entity org_id _) <- isT $ insertEntityByDbE organization
 
-      void $ insert_SystemTeamsM user_id org_id
-
-      right org
+    void $ lift $ insert_SystemTeamsM user_id org_id
+    pure org
 
 
 
 updateOrganizationM :: UserId -> OrganizationId -> OrganizationRequest -> HandlerErrorEff (Entity Organization)
 updateOrganizationM user_id org_id organization_request = do
 
---  void $ permissionDeniedEither $ validateOrganizationRequest organization_request
+  runEitherT $ do
 
-  case (validateOrganizationRequest organization_request) of
-    Left _  -> left $ Error_Validation "TODO FIXME"
-    Right _ -> do
+    sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
 
-      ts <- timestampH'
+    ts <- lift timestampH'
 
-      let
-        email_md5 = md5Text (organizationRequestEmail organization_request)
-        Organization{..} = (organizationRequestToOrganization user_id organization_request) { organizationModifiedAt = Just ts }
+    let
+      email_md5 = md5Text (organizationRequestEmail sanitized_organization_request)
+      Organization{..} = (organizationRequestToOrganization user_id sanitized_organization_request) { organizationModifiedAt = Just ts }
 
-      updateWhereDb
-        [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
-        [ OrganizationModifiedAt  =. organizationModifiedAt
-        , OrganizationActivityAt  =. Just ts
-        , OrganizationName        =. organizationName
-        , OrganizationDisplayName =. organizationDisplayName
-        , OrganizationDescription =. organizationDescription
-        , OrganizationCompany     =. organizationCompany
-        , OrganizationLocation    =. organizationLocation
-        , OrganizationEmail       =. organizationEmail
-        , OrganizationEmailMD5    =. email_md5
-        , OrganizationMembership  =. organizationMembership
-        , OrganizationIcon        =. organizationIcon
-        , OrganizationTags        =. organizationTags
-        , OrganizationVisibility  =. organizationVisibility
-        , OrganizationGuard      +=. 1
-        ]
+    isT $ updateWhereDbE
+      [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
+      [ OrganizationModifiedAt  =. organizationModifiedAt
+      , OrganizationActivityAt  =. Just ts
+      , OrganizationName        =. organizationName
+      , OrganizationDisplayName =. organizationDisplayName
+      , OrganizationDescription =. organizationDescription
+      , OrganizationCompany     =. organizationCompany
+      , OrganizationLocation    =. organizationLocation
+      , OrganizationEmail       =. organizationEmail
+      , OrganizationEmailMD5    =. email_md5
+      , OrganizationMembership  =. organizationMembership
+      , OrganizationIcon        =. organizationIcon
+      , OrganizationTags        =. organizationTags
+      , OrganizationVisibility  =. organizationVisibility
+      , OrganizationGuard      +=. 1
+      ]
 
-      selectFirstDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
+    isT $ selectFirstDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 

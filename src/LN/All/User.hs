@@ -147,7 +147,7 @@ profileNameToNick = T.toLower . T.filter isAlphaNum
 
 userRequestToUser :: UserRequest -> User
 userRequestToUser UserRequest{..} = User {
-  userNick        = toPrettyName userRequestDisplayNick,
+  userNick        = toSafeName userRequestDisplayNick,
   userDisplayNick = userRequestDisplayNick,
   userName        = userRequestName,
   userEmail       = userRequestEmail,
@@ -254,30 +254,33 @@ getUsers_ByEverything_KeysM m_sp _ = do
 
 
 insertUsersM :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
-insertUsersM user_id user_request = do
+insertUsersM user_id user_request
+  -- TODO FIXME SECURITY
+  | isSuper user_id = insertUsersM' user_id user_request
+  | otherwise       = left Error_PermissionDenied
 
-  case (validateUserRequest user_request) of
-    Left err  -> left $ Error_Validation err
-    Right _ -> do
-      -- TODO: FIXME: Fix this
-      if (isSuper user_id)
 
-        then do
-          ts <- timestampH'
-          let
-            email_md5 = md5Text (userRequestEmail user_request)
-            user = (userRequestToUser user_request) {
-                userEmailMD5  = email_md5
-              , userCreatedAt = Just ts
-              , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
-            }
-          e_new_user <- insertEntityByDbE user
-          rehtie e_new_user left $ \new_user -> do
-            -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
-            void $ insertUsers_TasksM user_id new_user
-            right $ new_user
 
-        else left Error_PermissionDenied
+insertUsersM' :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
+insertUsersM' user_id user_request = do
+
+  runEitherT $ do
+
+    sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
+
+    ts <- lift $ timestampH'
+    let
+      email_md5 = md5Text (userRequestEmail sanitized_user_request)
+      user = (userRequestToUser sanitized_user_request) {
+          userEmailMD5  = email_md5
+        , userCreatedAt = Just ts
+        , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
+      }
+
+    new_user <- isT $ insertEntityByDbE user
+    -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
+    void $ lift $ insertUsers_TasksM user_id new_user
+    pure new_user
 
 
 

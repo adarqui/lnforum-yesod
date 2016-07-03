@@ -23,8 +23,8 @@ import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
 import           LN.Import.NoFoundation
 import           LN.Job.Enqueue
-import           LN.Lib.Url              (toPrettyName)
 import           LN.Misc.Codec
+import           LN.Sanitize.Internal    (toSafeName)
 import           LN.T.Profile            (ProfileX (..))
 import           LN.T.Profile.Request    (defaultProfileRequest)
 import           Network.Gravatar
@@ -114,7 +114,7 @@ authenticateUser creds@Creds{..} = do
 
 credsToUser :: UTCTime -> Creds m -> Either Text User
 credsToUser now Creds{..} = User
-  <$> ((toPrettyName . profileName) <$> eprofile)
+  <$> ((toSafeName . profileName) <$> eprofile)
   <*> (profileName <$> eprofile)
   <*> (profileName <$> eprofile)
   <*> (profileEmail <$> eprofile)

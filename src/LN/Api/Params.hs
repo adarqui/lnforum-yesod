@@ -87,7 +87,7 @@ data StandardParams = StandardParams {
   spWithBoard        :: Bool,
   spWithThread       :: Bool,
   spWithResource     :: Bool
-} deriving (Eq, Ord, Show)
+} deriving (Eq, Show)
 
 
 

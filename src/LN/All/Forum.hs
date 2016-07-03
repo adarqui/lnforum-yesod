@@ -127,7 +127,7 @@ forumRequestToForum :: UserId -> OrganizationId -> ForumRequest -> Forum
 forumRequestToForum user_id org_id ForumRequest{..} = Forum {
   forumUserId               = user_id,
   forumOrgId                = org_id,
-  forumName                 = toPrettyUrl forumRequestDisplayName,
+  forumName                 = toSafeUrl forumRequestDisplayName,
   forumDisplayName          = forumRequestDisplayName,
   forumDescription          = forumRequestDescription,
   forumThreadsPerBoard      = forumRequestThreadsPerBoard,

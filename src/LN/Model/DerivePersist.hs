@@ -10,6 +10,7 @@ module LN.Model.DerivePersist (
 
 
 import           Database.Persist.TH
+import           LN.T.Internal.JSON  ()
 import           LN.T.Ent            as A
 import           LN.T.LeuronTraining as A
 import           LN.T.Like

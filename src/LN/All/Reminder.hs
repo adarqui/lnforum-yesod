@@ -195,7 +195,7 @@ reminderFolderRequestToReminderFolder :: UserId -> Maybe ReminderFolderId -> Rem
 reminderFolderRequestToReminderFolder user_id reminder_folder_id ReminderFolderRequest{..} = ReminderFolder {
   reminderFolderUserId      = user_id,
   reminderFolderParentId    = reminder_folder_id,
-  reminderFolderName        = toPrettyUrl reminderFolderRequestDisplayName,
+  reminderFolderName        = toSafeUrl reminderFolderRequestDisplayName,
   reminderFolderDisplayName = reminderFolderRequestDisplayName,
   reminderFolderDescription = reminderFolderRequestDescription,
   reminderFolderVisibility  = reminderFolderRequestVisibility,

@@ -113,7 +113,7 @@ getGlobalGroupStatR global_group_id = run $ do
 globalGroupRequestToGlobalGroup :: UserId -> GlobalGroupRequest -> GlobalGroup
 globalGroupRequestToGlobalGroup user_id GlobalGroupRequest{..} = GlobalGroup {
   globalGroupUserId      = user_id,
-  globalGroupName        = toPrettyUrl globalGroupRequestDisplayName,
+  globalGroupName        = toSafeUrl globalGroupRequestDisplayName,
   globalGroupDisplayName = globalGroupRequestDisplayName,
   globalGroupDescription = globalGroupRequestDescription,
   globalGroupMembership  = globalGroupRequestMembership,
