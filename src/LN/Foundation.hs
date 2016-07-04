@@ -21,8 +21,6 @@ import qualified Network.Wai                 as W (rawPathInfo, requestHeaders)
 import           Network.Wai.Middleware.Cors ()
 import           Text.Hamlet                 (hamletFile)
 import           Text.Jasmine                (minifym)
--- import           Yesod.Auth
--- import           Yesod.Auth.Dummy            (authDummy)
 import           LN.Misc.Codec               (keyToInt64)
 import           Yesod.Auth.OAuth2.Github    (oauth2Github, oauth2Url)
 import           Yesod.Auth.OAuth2.Github    ()
@@ -235,20 +233,6 @@ instance YesodAuth App where
 
 
 
--- myMaybeAuthId
---   :: (YesodAuthPersist master, Typeable (AuthEntity master))
---   => HandlerT master IO (Maybe (AuthId master))
--- myMaybeAuthId = do
---   req <- waiRequest
--- -- DEBUG:  liftIO $ print req
---   case lookup "z-authorization" (W.requestHeaders req) of
---     Nothing -> defaultMaybeAuthId
---     Just authHeader -> do
--- -- DEBUG:      liftIO $ print authHeader
---       pure $ fromPathPiece $ T.decodeUtf8 authHeader
-
-
-
 myMaybeAuthId
   :: forall master.
      (Typeable (AuthEntity master),
@@ -268,12 +252,6 @@ myMaybeAuthId = do
 
 
 
--- custom
--- addAuthBackDoor :: App -> [AuthPlugin App] -> [AuthPlugin App]
--- addAuthBackDoor app =
---   if appAllowDummyAuth (appSettings app) then (authDummy :) else id
-
-
 
 instance YesodAuthPersist App
 
@@ -288,19 +266,3 @@ instance RenderMessage App FormMessage where
 
 unsafeHandler :: App -> Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger
-
--- getsYesod :: MonadHandler m => m (HandlerSite m)
--- getsYesod = undefined
---
-
--- requireAuthId = do
---  (Entity user_id _) <- requireAuth
---  return user_id
-
--- Note: Some functionality previously present in the scaffolding has been
--- moved to documentation in the Wiki. Following are some hopefully helpful
--- links:
---
--- https://github.com/yesodweb/yesod/wiki/Sending-email
--- https://github.com/yesodweb/yesod/wiki/Serve-static-files-from-a-separate-domain
--- https://github.com/yesodweb/yesod/wiki/i18n-messages-in-the-scaffolding
