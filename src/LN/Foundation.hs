@@ -1,7 +1,9 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards  #-}
-{-# LANGUAGE TemplateHaskell  #-}
-{-# LANGUAGE TypeFamilies     #-}
+{-# LANGUAGE ExplicitForAll      #-}
+{-# LANGUAGE FlexibleContexts    #-}
+{-# LANGUAGE RecordWildCards     #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 module LN.Foundation where
 
@@ -19,7 +21,9 @@ import qualified Network.Wai                 as W (rawPathInfo, requestHeaders)
 import           Network.Wai.Middleware.Cors ()
 import           Text.Hamlet                 (hamletFile)
 import           Text.Jasmine                (minifym)
-import           Yesod.Auth.Dummy            (authDummy)
+-- import           Yesod.Auth
+-- import           Yesod.Auth.Dummy            (authDummy)
+import           LN.Misc.Codec               (keyToInt64)
 import           Yesod.Auth.OAuth2.Github    (oauth2Github, oauth2Url)
 import           Yesod.Auth.OAuth2.Github    ()
 import           Yesod.Core.Types            (Logger)
@@ -211,7 +215,7 @@ instance YesodAuth App where
   authenticate = runDB . authenticateUser
 
   -- You can add other plugins like BrowserID, email or OAuth here
-  authPlugins m = addAuthBackDoor m
+  authPlugins m = -- addAuthBackDoor m
     [
       oauth2Github (oauthKeysClientId $ appGithubOAuthKeys m) (oauthKeysClientSecret $ appGithubOAuthKeys m)
     ]
@@ -231,24 +235,43 @@ instance YesodAuth App where
 
 
 
+-- myMaybeAuthId
+--   :: (YesodAuthPersist master, Typeable (AuthEntity master))
+--   => HandlerT master IO (Maybe (AuthId master))
+-- myMaybeAuthId = do
+--   req <- waiRequest
+-- -- DEBUG:  liftIO $ print req
+--   case lookup "z-authorization" (W.requestHeaders req) of
+--     Nothing -> defaultMaybeAuthId
+--     Just authHeader -> do
+-- -- DEBUG:      liftIO $ print authHeader
+--       pure $ fromPathPiece $ T.decodeUtf8 authHeader
+
+
+
 myMaybeAuthId
-  :: (YesodAuthPersist master, Typeable (AuthEntity master))
+  :: forall master.
+     (Typeable (AuthEntity master),
+     YesodAuthPersist master,
+     YesodPersistBackend master ~ SqlBackend)
   => HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
   req <- waiRequest
--- DEBUG:  liftIO $ print req
-  case lookup "z-authorization" (W.requestHeaders req) of
-    Nothing -> defaultMaybeAuthId
+  case lookup "x-api-authorization" (W.requestHeaders req) of
+    Nothing         -> defaultMaybeAuthId
     Just authHeader -> do
--- DEBUG:      liftIO $ print authHeader
-      pure $ fromPathPiece $ T.decodeUtf8 authHeader
+      let lookup_api_key = T.decodeUtf8 authHeader
+      m_api <- runDB $ selectFirst [ApiKey ==. lookup_api_key, ApiActive ==. True] []
+      case m_api of
+        Nothing                 -> permissionDenied "invalid api key"
+        Just (Entity _ Api{..}) -> pure $ fromPathPiece $ T.pack $ show $ keyToInt64 apiUserId
 
 
 
 -- custom
-addAuthBackDoor :: App -> [AuthPlugin App] -> [AuthPlugin App]
-addAuthBackDoor app =
-  if appAllowDummyAuth (appSettings app) then (authDummy :) else id
+-- addAuthBackDoor :: App -> [AuthPlugin App] -> [AuthPlugin App]
+-- addAuthBackDoor app =
+--   if appAllowDummyAuth (appSettings app) then (authDummy :) else id
 
 
 
