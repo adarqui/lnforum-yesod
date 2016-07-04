@@ -18,6 +18,10 @@ module LN.All.User.Shared (
 import           LN.Job.Enqueue       (mkJob_CreateUserProfile)
 import           LN.T.Api.Request     (ApiRequest (..))
 import           LN.T.Profile.Request (ProfileRequest (..))
+import Prelude (($))
+import LN.T.Api.Request (defaultApiRequest)
+import LN.T.Profile.Request (defaultProfileRequest)
+import Control.Monad.IO.Class (liftIO)
 
 
 
@@ -27,4 +31,4 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
   liftIO $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
   liftIO $ mkJob_CreateUserApi new_user_id defaultApieRequest
 
-  right ()
+  pure ()

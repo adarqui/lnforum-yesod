@@ -32,7 +32,6 @@ module LN.All.User (
   getUsers_ByEverythingM,
   getUsers_ByEverything_KeysM,
   insertUsersM,
-  insertUsers_TasksM,
   getUserM,
   getUserMH,
   updateUserM,
@@ -49,6 +48,7 @@ import qualified Data.Text          as T (filter, toLower)
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import           LN.All.Prelude
+import           LN.All.User.Shared (insertUsers_TasksM)
 import           LN.Job.Enqueue     (mkJob_CreateUserProfile)
 
 
@@ -285,23 +285,6 @@ insertUsersM' user_id user_request = do
     -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
     void $ lift $ insertUsers_TasksM user_id new_user
     pure new_user
-
-
-
-insertUsers_TasksM :: UserId -> Entity User -> HandlerErrorEff ()
-insertUsers_TasksM _ (Entity new_user_id _) = do
-
-  -- Create a default profile
-  --
-  -- void $ insertEntityDb (profileRequestToProfile new_user_id defaultProfileRequest)
-
-  -- Create default settings
-  -- TODO
-  -- void $ insertEntityDb (settingsRequestToSettings new_user_id defaultSettingsRequest)
-  --
-  liftIO $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
-
-  right ()
 
 
 

@@ -25,6 +25,7 @@ import           LN.Import.NoFoundation
 import           LN.Job.Enqueue
 import           LN.Misc.Codec
 import           LN.Sanitize.Internal    (toSafeName)
+import           LN.All.User.Shared      (insertUsers_TasksM)
 import           LN.T.Profile            (ProfileX (..))
 import           LN.T.Profile.Request    (defaultProfileRequest)
 import           Network.Gravatar
@@ -100,8 +101,7 @@ authenticateUser creds@Creds{..} = do
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
-    returned_user@(Entity user_id User{..}) <- insertEntity user
-    liftIO $ mkJob_CreateUserProfile user_id defaultProfileRequest
+    void $ insertUsers_TasksM (entityKey returned_user)
     pure $ Authenticated (entityKey returned_user)
 
 

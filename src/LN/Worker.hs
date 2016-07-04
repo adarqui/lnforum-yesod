@@ -25,15 +25,15 @@ import qualified Prelude              as Prelude
 initializeWorkers :: IO ()
 initializeWorkers = do
   initializeWorker_CreateUserProfile
-  initializeWorker_CreateUserApiEntry
+  initializeWorker_CreateUserApi
 
 initializeWorker_CreateUserProfile :: IO ()
 initializeWorker_CreateUserProfile = do
   bgRunDeq QCreateUserProfile (bgDeq runWorker_CreateUserProfile)
 
-initializeWorker_CreateUserApiEntry :: IO ()
-initializeWorker_CreateUserApiEntry = do
-  bgRunDeq QCreateUserApiEntry (bgDeq runWorker_CreateUserApiEntry)
+initializeWorker_CreateUserApi :: IO ()
+initializeWorker_CreateUserApi = do
+  bgRunDeq QCreateUserApi (bgDeq runWorker_CreateUserApi)
 
 
 
@@ -52,10 +52,10 @@ runWorker_CreateUserProfile (Message{..}, env) = do
 
 
 
-runWorker_CreateUserApiEntry :: (Message, Envelope) -> IO ()
-runWorker_CreateUserApiEntry (Message{..}, env) = do
+runWorker_CreateUserApi :: (Message, Envelope) -> IO ()
+runWorker_CreateUserApi (Message{..}, env) = do
   void $ (try (handler $ do
-    liftIO $ putStrLn "runJob_CreateUserApiEntry"
+    liftIO $ putStrLn "runJob_CreateUserApi"
     let e_resp = eitherDecode msgBody :: Either String (UserId, ApiRequest)
     case e_resp of
       Left err                     -> liftIO $ Prelude.putStrLn err
