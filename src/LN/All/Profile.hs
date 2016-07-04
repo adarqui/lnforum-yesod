@@ -113,8 +113,21 @@ profilesToResponses profiles = ProfileResponses {
 --
 
 getProfilesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Profile]
-getProfilesM m_sp _ = do
+getProfilesM m_sp user_id = do
+  case (lookupSpMay m_sp spUserId) of
+    Just lookup_user_id -> getProfiles_ByUserIdM m_sp user_id lookup_user_id
+    _                   -> getProfiles_ByEverythingM m_sp user_id
+
+
+getProfiles_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Profile]
+getProfiles_ByEverythingM m_sp _ = do
   selectListDbE m_sp [] [] ProfileId
+
+
+
+getProfiles_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Profile]
+getProfiles_ByUserIdM m_sp _ lookup_user_id = do
+  selectListDbE m_sp [ProfileUserId ==. lookup_user_id] [] ProfileId
 
 
 
