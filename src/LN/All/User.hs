@@ -49,7 +49,6 @@ import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import           LN.All.Prelude
 import           LN.All.User.Shared (insertUsers_TasksM)
-import           LN.Job.Enqueue     (mkJob_CreateUserProfile)
 
 
 
@@ -266,7 +265,7 @@ insertUsersM user_id user_request = do
 
 
 insertUsersM' :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
-insertUsersM' user_id user_request = do
+insertUsersM' _ user_request = do
 
   runEitherT $ do
 
@@ -283,7 +282,7 @@ insertUsersM' user_id user_request = do
 
     new_user <- isT $ insertEntityByDbE user
     -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
-    void $ lift $ insertUsers_TasksM user_id new_user
+    void $ liftIO $ insertUsers_TasksM new_user
     pure new_user
 
 

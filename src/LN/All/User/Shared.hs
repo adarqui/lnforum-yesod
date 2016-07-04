@@ -15,20 +15,21 @@ module LN.All.User.Shared (
 
 
 
-import           LN.Job.Enqueue       (mkJob_CreateUserProfile)
-import           LN.T.Api.Request     (ApiRequest (..))
-import           LN.T.Profile.Request (ProfileRequest (..))
-import Prelude (($))
-import LN.T.Api.Request (defaultApiRequest)
-import LN.T.Profile.Request (defaultProfileRequest)
-import Control.Monad.IO.Class (liftIO)
+import           Control.Monad          (void)
+import           Database.Persist.Types (Entity (..))
+import           LN.Job.Enqueue         (mkJob_CreateUserApi,
+                                         mkJob_CreateUserProfile)
+import           LN.Model
+import           LN.T.Api.Request       (defaultApiRequest)
+import           LN.T.Profile.Request   (defaultProfileRequest)
+import           Prelude                (IO, pure, ($))
 
 
 
-insertUsers_TasksM :: UserId -> Entity User -> HandlerEff ()
-insertUsers_TasksM _ (Entity new_user_id _) = do
+insertUsers_TasksM :: Entity User -> IO ()
+insertUsers_TasksM (Entity new_user_id _) = do
 
-  liftIO $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
-  liftIO $ mkJob_CreateUserApi new_user_id defaultApieRequest
+  void $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
+  void $ mkJob_CreateUserApi new_user_id defaultApiRequest
 
   pure ()

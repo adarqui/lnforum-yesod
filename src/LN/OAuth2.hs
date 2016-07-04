@@ -22,14 +22,12 @@ module LN.OAuth2 (
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
 import           LN.Import.NoFoundation
-import           LN.Job.Enqueue
 import           LN.Misc.Codec
 import           LN.Sanitize.Internal    (toSafeName)
-import           LN.All.User.Shared      (insertUsers_TasksM)
 import           LN.T.Profile            (ProfileX (..))
-import           LN.T.Profile.Request    (defaultProfileRequest)
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
+import LN.All.User.Shared (insertUsers_TasksM)
 
 
 
@@ -101,7 +99,8 @@ authenticateUser creds@Creds{..} = do
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
-    void $ insertUsers_TasksM (entityKey returned_user)
+    returned_user <- insertEntity user
+    void $ liftIO $ insertUsers_TasksM returned_user
     pure $ Authenticated (entityKey returned_user)
 
 
