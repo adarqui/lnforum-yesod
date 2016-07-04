@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.Access (
+  isSuperM,
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,
@@ -25,6 +26,16 @@ import           LN.Import
 import           LN.T.Permission
 import           LN.T.Team
 import           LN.T.Visibility
+
+
+
+-- | Queries appSuperUsers (from Foundation)
+-- If our user_id is found within this list, consider us a super user.
+--
+isSuperM :: UserId -> HandlerEff Bool
+isSuperM user_id = do
+  super_users <- getsYesod appSuperUsers
+  pure $ any (\(Entity _ Super{..}) -> user_id == superUserId) super_users
 
 
 

@@ -40,9 +40,9 @@ getUserSanitizedPackR lookup_user_id = run $ do
 
 
 getUserSanitizedPackH :: Text -> Handler Value
-getUserSanitizedPackH lookup_user_nick = run $ do
+getUserSanitizedPackH lookup_user_name = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ getUserSanitizedPackMH user_id lookup_user_nick
+  errorOrJSON id $ getUserSanitizedPackMH user_id lookup_user_name
 
 
 
@@ -84,7 +84,7 @@ getUserSanitizedPackM user_id lookup_user_id = getUserSanitizedPack_ByUserIdM us
 
 
 getUserSanitizedPackMH :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
-getUserSanitizedPackMH user_id lookup_user_nick = getUserSanitizedPack_ByUserNickM user_id lookup_user_nick
+getUserSanitizedPackMH user_id lookup_user_name = getUserSanitizedPack_ByUserNameM user_id lookup_user_name
 
 
 
@@ -107,10 +107,10 @@ getUserSanitizedPack_ByUserIdM user_id lookup_user_id = do
 
 
 
-getUserSanitizedPack_ByUserNickM :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
-getUserSanitizedPack_ByUserNickM user_id lookup_user_nick = do
+getUserSanitizedPack_ByUserNameM :: UserId -> Text -> HandlerErrorEff UserSanitizedPackResponse
+getUserSanitizedPack_ByUserNameM user_id lookup_user_name = do
 
-  e_lookup_user <- getUserMH user_id lookup_user_nick
+  e_lookup_user <- getUserMH user_id lookup_user_name
   rehtie e_lookup_user left $ getUserSanitizedPack_ByUserM user_id
 
 

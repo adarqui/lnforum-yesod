@@ -74,7 +74,7 @@ data StandardParams = StandardParams {
   -- names
   spOrganizationName :: Maybe Text,
   spTeamName         :: Maybe Text,
-  spUserNick         :: Maybe Text,
+  spUserName         :: Maybe Text,
   spForumName        :: Maybe Text,
   spBoardName        :: Maybe Text,
   spThreadName       :: Maybe Text,
@@ -126,7 +126,7 @@ defaultStandardParams = StandardParams {
   -- names
   spOrganizationName = Nothing,
   spTeamName         = Nothing,
-  spUserNick         = Nothing,
+  spUserName         = Nothing,
   spForumName        = Nothing,
   spBoardName        = Nothing,
   spThreadName       = Nothing,
@@ -206,7 +206,7 @@ lookupStandardParams = do
   -- names
   org_name           <- lookupGetParam $ tshow ParamTag_ByOrganizationName
   team_name          <- lookupGetParam $ tshow ParamTag_ByTeamName
-  user_nick          <- lookupGetParam $ tshow ParamTag_ByUserNick
+  user_name          <- lookupGetParam $ tshow ParamTag_ByUserName
   forum_name         <- lookupGetParam $ tshow ParamTag_ByForumName
   board_name         <- lookupGetParam $ tshow ParamTag_ByBoardName
   thread_name        <- lookupGetParam $ tshow ParamTag_ByThreadName
@@ -254,7 +254,7 @@ lookupStandardParams = do
     --- names
     spOrganizationName = org_name,
     spTeamName         = team_name,
-    spUserNick         = user_nick,
+    spUserName         = user_name,
     spForumName        = forum_name,
     spBoardName        = board_name,
     spThreadName       = thread_name,

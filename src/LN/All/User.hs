@@ -18,7 +18,7 @@ module LN.All.User (
 
 
   -- Model/Function
-  profileNameToNick,
+  profileNameToName,
   userRequestToUser,
   userToResponse,
   usersToResponses,
@@ -140,16 +140,16 @@ getUserStatR lookup_user_id = run $ do
 -- Model/Function
 --
 
-profileNameToNick :: Text -> Text
-profileNameToNick = T.toLower . T.filter isAlphaNum
+profileNameToName :: Text -> Text
+profileNameToName = T.toLower . T.filter isAlphaNum
 
 
 
 userRequestToUser :: UserRequest -> User
 userRequestToUser UserRequest{..} = User {
-  userNick        = toSafeName userRequestDisplayNick,
-  userDisplayNick = userRequestDisplayNick,
-  userName        = userRequestName,
+  userName        = toSafeName userRequestDisplayName,
+  userDisplayName = userRequestDisplayName,
+  userFullName        = userRequestFullName,
   userEmail       = userRequestEmail,
   userEmailMD5    = "md5",
   userPlugin      = userRequestPlugin,
@@ -167,9 +167,9 @@ userRequestToUser UserRequest{..} = User {
 userToResponse :: Entity User -> UserResponse
 userToResponse (Entity user_id User{..}) = UserResponse {
   userResponseId            = keyToInt64 user_id,
-  userResponseNick          = userNick,
-  userResponseDisplayNick   = userDisplayNick,
   userResponseName          = userName,
+  userResponseDisplayName   = userDisplayName,
+  userResponseFullName      = userFullName,
   userResponseEmail         = userEmail,
   userResponseEmailMD5      = userEmailMD5,
   userResponsePlugin        = userPlugin,
@@ -195,8 +195,8 @@ usersToResponses users = UserResponses {
 userToSanitizedResponse :: Entity User -> UserSanitizedResponse
 userToSanitizedResponse (Entity user_id User{..}) = UserSanitizedResponse {
   userSanitizedResponseId          = keyToInt64 user_id,
-  userSanitizedResponseNick        = userNick,
-  userSanitizedResponseDisplayNick = userDisplayNick,
+  userSanitizedResponseName        = userName,
+  userSanitizedResponseDisplayName = userDisplayName,
   userSanitizedResponseEmailMD5    = userEmailMD5,
   userSanitizedResponseActive      = userActive,
   userSanitizedResponseGuard       = userGuard,
@@ -254,10 +254,14 @@ getUsers_ByEverything_KeysM m_sp _ = do
 
 
 insertUsersM :: UserId -> UserRequest -> HandlerErrorEff (Entity User)
-insertUsersM user_id user_request
+insertUsersM user_id user_request = do
   -- TODO FIXME SECURITY
-  | isSuper user_id = insertUsersM' user_id user_request
-  | otherwise       = left Error_PermissionDenied
+  -- User Super table, loaded into appSuperUsers
+  --
+  is_super_user <- isSuperM user_id
+  if is_super_user
+    then insertUsersM' user_id user_request
+    else left Error_PermissionDenied
 
 
 
@@ -307,9 +311,9 @@ getUserM _ lookup_user_id = do
 
 
 getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
-getUserMH _ lookup_user_nick = do
+getUserMH _ lookup_user_name = do
 
-  selectFirstDbE [UserNick ==. lookup_user_nick, UserActive ==. True] []
+  selectFirstDbE [UserName ==. lookup_user_name, UserActive ==. True] []
 
 
 
@@ -330,9 +334,9 @@ updateUserM _ lookup_user_id user_request = do
     [ UserId ==. lookup_user_id, UserActive ==. True ]
 
     [ UserModifiedAt =. userModifiedAt
-    , UserNick        =. userNick
-    , UserDisplayNick =. userDisplayNick
     , UserName        =. userName
+    , UserDisplayName =. userDisplayName
+    , UserFullName    =. userFullName
     , UserEmail       =. userEmail
     , UserEmailMD5    =. userEmailMD5
     , UserGuard      +=. 1
@@ -346,7 +350,12 @@ deleteUserM :: UserId -> UserId -> HandlerErrorEff ()
 deleteUserM user_id lookup_user_id = do
 
   -- TODO: ACCESS: SECURITY: Fix this
-  if (isSuper user_id) || (user_id == lookup_user_id)
+  -- At least we use a Super table now
+  -- Any userId found within this table, is considered a super user
+  -- This table gets loaded when we start ln-yesod, into appSuperUsers within Foundation
+  --
+  is_super_user <- isSuperM user_id
+  if is_super_user || user_id == lookup_user_id
 
     then
       deleteDbE lookup_user_id

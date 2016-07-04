@@ -76,7 +76,6 @@ library
                      LN.OAuth2
                      LN.Misc
                      LN.Misc.Codec
-                     LN.Misc.Magic
                      LN.Misc.Widget
                      LN.Model
                      LN.Model.DerivePersist

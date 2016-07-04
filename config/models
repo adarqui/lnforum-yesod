@@ -3,8 +3,15 @@
 
 
 
-Organization
+Super
   userId UserId
+  UniqueSuperUser userId
+  deriving Eq Show Typeable
+
+
+
+Organization
+  userId       UserId
   name         Text
   displayName  Text default='null'
   description  Text Maybe
@@ -140,9 +147,9 @@ GroupMember
 
 
 User
-  nick        Text
-  displayNick Text
   name        Text
+  displayName Text default='null'
+  fullName    Text default='null'
   email       Text
   emailMD5    Text
   plugin      Text
@@ -156,8 +163,8 @@ User
   modifiedAt  UTCTime Maybe
   activityAt  UTCTime Maybe
 
-  UniqueNick        nick
-  UniqueDisplayNick displayNick
+  UniqueName        name
+  UniqueDisplayName displayName
   UniqueUser        plugin ident
   UniqueEmail       email
 
@@ -603,8 +610,8 @@ Thread
   modifiedAt   UTCTime Maybe
   activityAt   UTCTime Maybe
 
-  UniqueThread userId boardId name
-  UniqueThreadDisplayName userId boardId displayName
+  UniqueThread boardId name
+  UniqueThreadDisplayName boardId displayName
 
   deriving Eq Show Typeable
 

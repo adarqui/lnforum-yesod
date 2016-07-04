@@ -57,7 +57,8 @@ data App = App {
   appGithubOAuthKeys :: OAuthKeys,
   -- appGoogleOAuthKeys :: OAuthKeys
   appRed             :: R.Connection,
-  appZChat           :: TChan Text
+  appZChat           :: TChan Text,
+  appSuperUsers      :: [Entity Super]
 }
 
 

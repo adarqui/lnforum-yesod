@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module LN.Application (
@@ -108,6 +109,8 @@ makeFoundation appSettings appSettingsLN = do
   -- custom
   appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsLN) (T.pack $ appGithubClientSecret appSettingsLN)
 
+  let appSuperUsers = []
+
   -- We need a log function to create a connection pool. We need a connection
   -- pool to create our foundation. And we need our foundation to get a
   -- logging function. To get out of this loop, we initially create a
@@ -128,8 +131,14 @@ makeFoundation appSettings appSettingsLN = do
   -- Perform database migration using our application's logging settings.
   runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
+  -- Patchwork
+  let app = mkFoundation pool
+  (app_super_users :: [Entity Super]) <- db' app (selectList [] [])
+
   -- Return the foundation
-  pure $ mkFoundation pool
+  pure $ app {
+    appSuperUsers = app_super_users
+  }
 
 
 
@@ -270,3 +279,20 @@ handler h = do
 -- | Run DB queries
 db :: ReaderT SqlBackend (HandlerT App IO) a -> IO a
 db = handler . runDB
+
+
+
+-- | Custom handler for pre-built App
+--
+-- Created initially for user with appSuperUsers
+--
+handler' :: App -> Handler a -> IO a
+handler' app h = do
+  unsafeHandler app h
+
+-- | Custom db query runner for pre-built App
+--
+-- Created initially for user with appSuperUsers
+--
+db' :: App -> ReaderT SqlBackend (HandlerT App IO) a -> IO a
+db' app = handler' app . runDB

@@ -18,7 +18,6 @@ import           LN.Import                  as A
 import           LN.Lib                     as A
 import           LN.Lifted                  as A
 import           LN.Misc.Codec              as A
-import           LN.Misc.Magic              as A
 import           LN.Model.Keys              as A
 import           LN.Model.Misc              as A
 import           LN.Parent                  as A
