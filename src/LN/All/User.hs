@@ -49,7 +49,7 @@ import qualified Data.Text          as T (filter, toLower)
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import           LN.All.Prelude
-import           LN.All.Profile
+import           LN.Job.Enqueue     (mkJob_CreateUserProfile)
 
 
 
@@ -293,11 +293,13 @@ insertUsers_TasksM _ (Entity new_user_id _) = do
 
   -- Create a default profile
   --
-  void $ insertEntityDb (profileRequestToProfile new_user_id defaultProfileRequest)
+  -- void $ insertEntityDb (profileRequestToProfile new_user_id defaultProfileRequest)
 
   -- Create default settings
   -- TODO
   -- void $ insertEntityDb (settingsRequestToSettings new_user_id defaultSettingsRequest)
+  --
+  liftIO $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
 
   right ()
 

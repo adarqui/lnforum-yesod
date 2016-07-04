@@ -71,6 +71,7 @@ library
                      LN.Job.Shared
                      LN.Job.Enqueue
                      LN.Job.Dequeue
+                     LN.Worker
                      LN.Lifted
                      LN.Parent
                      LN.OAuth2
@@ -269,10 +270,10 @@ executable         ln-bg
         Buildable: False
 
     main-is:           main.hs
-    hs-source-dirs:    bg
+    hs-source-dirs:    ln-bg
     build-depends:     base, ln-yesod, ln-types
 
-    ghc-options:       -Wall -threaded -O0 -fobject-code -j
+    ghc-options:       -Wall -Werror -threaded -O2 -rtsopts -with-rtsopts=-N  -fobject-code -j
 
 
 
@@ -283,7 +284,7 @@ executable         ln-bg-test
         Buildable: False
 
     main-is:           main.hs
-    hs-source-dirs:    bg-test
+    hs-source-dirs:    ln-bg-test
     build-depends:     base, ln-yesod, ln-types
 
     ghc-options:       -Wall -threaded -O0 -fobject-code -j

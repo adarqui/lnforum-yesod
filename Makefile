@@ -14,7 +14,7 @@ exec_dev_sudo:
 	sudo stack exec --allow-different-user -- yesod devel -p 80 --tls-port 443
 
 ghci:
-	stack ghci ln-yesod
+	sudo stack ghci ln-yesod --main-is none --fast --allow-different-user
 
 install:
 	stack install --local-bin-path=./bin
