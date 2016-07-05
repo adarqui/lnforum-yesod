@@ -17,7 +17,6 @@ import qualified Data.ByteString.Char8       as BSC (isPrefixOf)
 import qualified Data.Text                   as T (append, pack)
 import qualified Data.Text.Encoding          as T (decodeUtf8)
 import qualified Data.Text as T (splitAt)
-import qualified Data.Text.IO as TIO
 import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
 import qualified Database.Redis              as R (Connection)
 import           LN.Import.NoFoundation
