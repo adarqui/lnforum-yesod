@@ -258,9 +258,29 @@ updateTeamMemberM user_id team_member_id team_member_request = do
 
 
 
+-- | A user can delete a team_member from an organization if:
+-- 1. A user is an owner and a team_member is not an owner
+-- 2. A user owns the organization completely, and this is not the user as the team_member
+-- 3. A user is not an owner, and the user is the same as the team_member
+--
 deleteTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff ()
 deleteTeamMemberM user_id team_member_id = do
-  deleteWhereDbE [TeamMemberUserId ==. user_id, TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
+  lr <- runEitherT $ do
+    (Entity _ TeamMember{..})         <- isT $ selectFirstDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
+    (Entity org_id Organization{..})  <- isT $ selectFirstDbE [OrganizationId ==. teamMemberOrgId, OrganizationActive ==. True] []
+    is_owner                          <- lift $ isOwnerOf_OrganizationIdM user_id org_id
+    is_team_member_owner              <- lift $ isOwnerOf_OrganizationIdM teamMemberUserId org_id
+    liftIO $ print (organizationUserId == user_id, is_owner, is_team_member_owner, user_id == teamMemberUserId)
+    case (organizationUserId == user_id, is_owner, is_team_member_owner, user_id == teamMemberUserId) of
+      (True, _,    _,     False) -> isT $ del
+      (_,   True,  False, _)     -> isT $ del
+      (_,   False, False, True)  -> isT $ del
+      _                          -> leftT Error_PermissionDenied
+    pure ()
+
+  rehtie lr left (const $ right ())
+  where
+  del = deleteWhereDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
 
 
 
