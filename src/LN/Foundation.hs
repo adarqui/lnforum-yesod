@@ -9,10 +9,15 @@ module LN.Foundation where
 
 
 
+import           Control.Monad.Trans.Maybe   (runMaybeT)
+import Control.Monad.Trans.Maybe (MaybeT(..))
+import Data.Ebyam (ebyam)
 import           Data.Aeson                  (withObject)
 import qualified Data.ByteString.Char8       as BSC (isPrefixOf)
 import qualified Data.Text                   as T (append, pack)
 import qualified Data.Text.Encoding          as T (decodeUtf8)
+import qualified Data.Text as T (splitAt)
+import qualified Data.Text.IO as TIO
 import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
 import qualified Database.Redis              as R (Connection)
 import           LN.Import.NoFoundation
@@ -240,16 +245,41 @@ myMaybeAuthId
      YesodPersistBackend master ~ SqlBackend)
   => HandlerT master IO (Maybe (AuthId master))
 myMaybeAuthId = do
-  req <- waiRequest
-  case lookup "x-api-authorization" (W.requestHeaders req) of
-    Nothing         -> defaultMaybeAuthId
-    Just authHeader -> do
-      let lookup_api_key = T.decodeUtf8 authHeader
-      m_api <- runDB $ selectFirst [ApiKey ==. lookup_api_key, ApiActive ==. True] []
-      case m_api of
-        Nothing                 -> permissionDenied "invalid api key"
-        Just (Entity _ Api{..}) -> pure $ fromPathPiece $ T.pack $ show $ keyToInt64 apiUserId
 
+  req <- waiRequest
+
+  -- API Requests are made by:
+  -- 1. normal: setting x-api-authorization to a key found in Api[]
+  -- 2. hijack: setting x-as-user to a <<key><user_id>> to become this user.
+  --    API KEY MUST BE A SUPER KEY
+
+  case (lookup "x-api-authorization" $ W.requestHeaders req, lookup "x-as-user" $ W.requestHeaders req) of
+    (Just api_auth, _)      -> try_api_authorization api_auth
+    (_, Just as_user_auth)  -> try_as_user_authorization as_user_auth
+    _                       -> defaultMaybeAuthId
+
+  where
+  -- | Traditional API authorization via X-API-AUTHORIZATION header
+  --
+  try_api_authorization authHeader = do
+    let lookup_api_key = T.decodeUtf8 authHeader
+    m_api <- runDB $ selectFirst [ApiKey ==. lookup_api_key, ApiActive ==. True] []
+    case m_api of
+      Nothing                 -> permissionDenied "invalid api key"
+      Just (Entity _ Api{..}) -> do
+        pure $ fromPathPiece $ T.pack $ show $ keyToInt64 apiUserId
+
+  -- | Allows us to become any user .. only super users can do this
+  -- I hate this but, right now, it's essential for automated testing.
+  -- Format: <key>:<user_id>
+  --
+  try_as_user_authorization authHeader = do
+    let (lookup_api_key, lookup_user_id) = T.splitAt 72 $ T.decodeUtf8 authHeader
+    m_super <- runMaybeT $ do
+      (Entity _ Api{..}) <- MaybeT (runDB $ selectFirst [ApiKey ==. lookup_api_key, ApiActive ==. True] [])
+      _                  <- MaybeT (runDB $ selectFirst [SuperUserId ==. apiUserId] [])
+      pure ()
+    ebyam m_super defaultMaybeAuthId $ const $ pure $ fromPathPiece lookup_user_id
 
 
 

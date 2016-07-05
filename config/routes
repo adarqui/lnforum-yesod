@@ -15,7 +15,7 @@
 
 
 
-/api/api ApisR GET POST
+/api/apis ApisR GET POST
 /api/api/#ApiId ApiR GET PUT DELETE
 
 
