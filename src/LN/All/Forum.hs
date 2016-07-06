@@ -264,42 +264,49 @@ insertForumM m_sp user_id forum_request = do
 insertForum_ByOrganizationIdM :: UserId -> OrganizationId -> ForumRequest -> HandlerErrorEff (Entity Forum)
 insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
 
-  let
-    forum = (forumRequestToForum user_id org_id forum_request) { forumCreatedAt = Just ts }
+    sanitized_forum_request <- isT $ isValidAppM $ validateForumRequest forum_request
 
-  Right <$> insertEntityDb forum
+    ts <- lift timestampH'
+
+    let
+      forum = (forumRequestToForum user_id org_id sanitized_forum_request) { forumCreatedAt = Just ts }
+
+    isT $ insertEntityDbE forum
 
 
 
 updateForumM :: UserId -> ForumId -> ForumRequest -> HandlerErrorEff (Entity Forum)
 updateForumM user_id forum_id forum_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
 
-  let
-    Forum{..} = (forumRequestToForum user_id dummyId forum_request) { forumModifiedAt = Just ts }
+    sanitized_forum_response <- isT $ isValidAppM $ validateForumRequest forum_request
+    ts <- lift timestampH'
 
-  updateWhereDb
-    [ ForumUserId ==. user_id, ForumId ==. forum_id ]
-    [ ForumModifiedAt           =. forumModifiedAt
-    , ForumActivityAt           =. Just ts
-    , ForumName                 =. forumName
-    , ForumDisplayName          =. forumDisplayName
-    , ForumDescription          =. forumDescription
-    , ForumThreadsPerBoard      =. forumThreadsPerBoard
-    , ForumThreadPostsPerThread =. forumThreadPostsPerThread
-    , ForumRecentThreadsLimit   =. forumRecentThreadsLimit
-    , ForumRecentPostsLimit     =. forumRecentPostsLimit
-    , ForumMotwLimit            =. forumMotwLimit
-    , ForumIcon                 =. forumIcon
-    , ForumTags                 =. forumTags
-    , ForumVisibility           =. forumVisibility
-    , ForumGuard               +=. 1
-    ]
+    let
+      Forum{..} = (forumRequestToForum user_id dummyId sanitized_forum_request) { forumModifiedAt = Just ts }
 
-  selectFirstDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
+    isT $ updateWhereDbE
+      [ ForumUserId ==. user_id, ForumId ==. forum_id ]
+      [ ForumModifiedAt           =. forumModifiedAt
+      , ForumActivityAt           =. Just ts
+      , ForumName                 =. forumName
+      , ForumDisplayName          =. forumDisplayName
+      , ForumDescription          =. forumDescription
+      , ForumThreadsPerBoard      =. forumThreadsPerBoard
+      , ForumThreadPostsPerThread =. forumThreadPostsPerThread
+      , ForumRecentThreadsLimit   =. forumRecentThreadsLimit
+      , ForumRecentPostsLimit     =. forumRecentPostsLimit
+      , ForumMotwLimit            =. forumMotwLimit
+      , ForumIcon                 =. forumIcon
+      , ForumTags                 =. forumTags
+      , ForumVisibility           =. forumVisibility
+      , ForumGuard               +=. 1
+      ]
+
+    isT $ selectFirstDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
