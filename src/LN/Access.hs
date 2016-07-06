@@ -2,6 +2,8 @@
 
 module LN.Access (
   isSuperM,
+  mustBe_OwnerOf_OrganizationIdM,
+  mustBe_OwnerOf_ForumIdM,
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,
@@ -20,6 +22,7 @@ module LN.Access (
 
 import           Data.Ebyam      (ebyam)
 import           Data.List       (nub)
+import Control.Monad.Trans.Either (runEitherT)
 import           LN.Control
 import           LN.Db
 import           LN.Import
@@ -36,6 +39,23 @@ isSuperM :: UserId -> HandlerEff Bool
 isSuperM user_id = do
   super_users <- getsYesod appSuperUsers
   pure $ any (\(Entity _ Super{..}) -> user_id == superUserId) super_users
+
+
+
+mustBe_OwnerOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerErrorEff ()
+mustBe_OwnerOf_OrganizationIdM user_id org_id = do
+  is_owner <- isOwnerOf_OrganizationIdM user_id org_id
+  if is_owner
+    then right ()
+    else left Error_PermissionDenied
+
+
+
+mustBe_OwnerOf_ForumIdM :: UserId -> ForumId -> HandlerErrorEff ()
+mustBe_OwnerOf_ForumIdM user_id forum_id = do
+  runEitherT $ do
+    (Entity _ Forum{..}) <- isT $ selectFirstDbE [ForumId ==. forum_id] []
+    isT $ mustBe_OwnerOf_OrganizationIdM user_id forumOrgId
 
 
 

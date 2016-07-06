@@ -193,9 +193,7 @@ getForumsM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId) of
 
     (Just org_id, _)         -> getForums_ByOrganizationIdM m_sp user_id org_id
-
     (_, Just lookup_user_id) -> getForums_ByUserIdM m_sp user_id lookup_user_id
-
     _                        -> left $ Error_InvalidArguments "org_id, user_id"
 
 
@@ -266,9 +264,9 @@ insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
   runEitherT $ do
 
+    isT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
     sanitized_forum_request <- isT $ isValidAppM $ validateForumRequest forum_request
-
-    ts <- lift timestampH'
+    ts                      <- lift timestampH'
 
     let
       forum = (forumRequestToForum user_id org_id sanitized_forum_request) { forumCreatedAt = Just ts }
@@ -282,14 +280,15 @@ updateForumM user_id forum_id forum_request = do
 
   runEitherT $ do
 
-    sanitized_forum_response <- isT $ isValidAppM $ validateForumRequest forum_request
-    ts <- lift timestampH'
+    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
+    sanitized_forum_request <- isT $ isValidAppM $ validateForumRequest forum_request
+    ts                      <- lift timestampH'
 
     let
       Forum{..} = (forumRequestToForum user_id dummyId sanitized_forum_request) { forumModifiedAt = Just ts }
 
     isT $ updateWhereDbE
-      [ ForumUserId ==. user_id, ForumId ==. forum_id ]
+      [ ForumId ==. forum_id ]
       [ ForumModifiedAt           =. forumModifiedAt
       , ForumActivityAt           =. Just ts
       , ForumName                 =. forumName

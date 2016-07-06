@@ -252,6 +252,8 @@ updateOrganizationM user_id org_id organization_request = do
 
   runEitherT $ do
 
+    isT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
+
     sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
     ts                             <- lift timestampH'
 
@@ -260,7 +262,7 @@ updateOrganizationM user_id org_id organization_request = do
       Organization{..} = (organizationRequestToOrganization user_id sanitized_organization_request) { organizationModifiedAt = Just ts }
 
     isT $ updateWhereDbE
-      [ OrganizationUserId ==. user_id, OrganizationId ==. org_id ]
+      [ OrganizationId ==. org_id ]
       [ OrganizationModifiedAt  =. organizationModifiedAt
       , OrganizationActivityAt  =. Just ts
       , OrganizationName        =. organizationName
