@@ -202,6 +202,7 @@ orderByToField (Just order) =
 
 getThreadsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Thread]
 getThreadsM m_sp user_id = do
+
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spBoardId, lookupSpMay m_sp spUserId) of
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
@@ -260,6 +261,7 @@ getWithThreadM True user_id thread_id = fmap Just <$> getThreadM user_id thread_
 
 insertThreadM :: Maybe StandardParams -> UserId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThreadM m_sp user_id thread_request = do
+
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
     _             -> left $ Error_InvalidArguments "board_id"
@@ -268,41 +270,45 @@ insertThreadM m_sp user_id thread_request = do
 
 insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 insertThread_ByBoardIdM user_id board_id thread_request = do
-  e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
-  case e_board of
-    Left err                   -> left err
-    Right (Entity _ Board{..}) -> do
-      ts <- timestampH'
-      let
-        thread = (threadRequestToThread user_id boardOrgId boardForumId board_id thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
-      Right <$> insertEntityDb thread
+
+  runEitherT $ do
+
+    sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
+    (Entity _ Board{..})     <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
+    ts                       <- lift timestampH'
+    let
+      thread = (threadRequestToThread user_id boardOrgId boardForumId board_id sanitized_thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
+
+    isT $ insertEntityDbE thread
 
 
 
 updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerErrorEff (Entity Thread)
 updateThreadM user_id thread_id thread_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
+    sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
+    ts                       <- lift timestampH'
 
-  let
-    Thread{..} = (threadRequestToThread user_id dummyId dummyId dummyId thread_request) { threadModifiedAt = Just ts, threadActivityAt = Just ts }
+    let
+      Thread{..} = (threadRequestToThread user_id dummyId dummyId dummyId sanitized_thread_request) { threadModifiedAt = Just ts, threadActivityAt = Just ts }
 
-  updateWhereDb
-    [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
-    [ ThreadModifiedAt  =. threadModifiedAt
-    , ThreadActivityAt  =. threadActivityAt
-    , ThreadName        =. threadName
-    , ThreadDisplayName =. threadDisplayName
-    , ThreadDescription =. threadDescription
-    , ThreadSticky      =. threadSticky
-    , ThreadLocked      =. threadLocked
-    , ThreadPoll        =. threadPoll
-    , ThreadIcon        =. threadIcon
-    , ThreadTags        =. threadTags
-    , ThreadGuard      +=. 1
-    ]
+    isT $ updateWhereDbE
+      [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
+      [ ThreadModifiedAt  =. threadModifiedAt
+      , ThreadActivityAt  =. threadActivityAt
+      , ThreadName        =. threadName
+      , ThreadDisplayName =. threadDisplayName
+      , ThreadDescription =. threadDescription
+      , ThreadSticky      =. threadSticky
+      , ThreadLocked      =. threadLocked
+      , ThreadPoll        =. threadPoll
+      , ThreadIcon        =. threadIcon
+      , ThreadTags        =. threadTags
+      , ThreadGuard      +=. 1
+      ]
 
-  selectFirstDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
+    isT $ selectFirstDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 

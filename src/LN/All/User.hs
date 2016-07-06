@@ -270,8 +270,7 @@ insertUsersM' _ user_request = do
   runEitherT $ do
 
     sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
-
-    ts <- lift timestampH'
+    ts                     <- lift timestampH'
     let
       email_md5 = md5Text (userRequestEmail sanitized_user_request)
       user = (userRequestToUser sanitized_user_request) {
@@ -308,8 +307,7 @@ updateUserM _ lookup_user_id user_request = do
   runEitherT $ do
 
     sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
-
-    ts <- lift timestampH'
+    ts                     <- lift timestampH'
 
     let
       -- TODO FIXME SECURITY: Can't just let user change their email

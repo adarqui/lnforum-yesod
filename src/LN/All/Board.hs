@@ -252,34 +252,32 @@ getWithBoardM True user_id board_id = fmap Just <$> getBoardM user_id board_id
 insertBoardM :: Maybe StandardParams -> UserId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoardM m_sp user_id board_request = do
 
-  e_sanitized_board_request <- isValidAppM $ validateBoardRequest board_request
-  rehtie e_sanitized_board_request left $ \sanitized_board_request -> do
-    case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
-      (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id sanitized_board_request
-      (_, Just board_id) -> insertBoard_ByBoardId user_id board_id sanitized_board_request
-      _                  -> left $ Error_InvalidArguments "forum_id, board_id"
+  case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
+    (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
+    (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
+    _                  -> left $ Error_InvalidArguments "forum_id, board_id"
 
 
 
 insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoard_ByForumId user_id forum_id board_request = do
-  ts      <- timestampH'
-  e_forum <- selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
-  case e_forum of
-    Left err                   -> left err
-    Right (Entity _ Forum{..}) -> do
-      insertEntityDbE $ (boardRequestToBoard user_id forumOrgId forum_id Nothing board_request) { boardCreatedAt = Just ts }
+
+  runEitherT $ do
+    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
+    ts                      <- lift timestampH'
+    (Entity _ Forum{..})    <- isT $ selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
+    isT $ insertEntityDbE $ (boardRequestToBoard user_id forumOrgId forum_id Nothing sanitized_board_request) { boardCreatedAt = Just ts }
 
 
 
 insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoard_ByBoardId user_id board_id board_request = do
-  ts      <- timestampH'
-  e_board <- selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
-  case e_board of
-    Left err                          -> left err
-    Right (Entity _ Board{..}) -> do
-      insertEntityDbE $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) board_request) { boardCreatedAt = Just ts }
+
+  runEitherT $ do
+    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
+    ts                      <- lift timestampH'
+    (Entity _ Board{..})    <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
+    isT $ insertEntityDbE $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) sanitized_board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -289,8 +287,7 @@ updateBoardM user_id board_id board_request = do
   runEitherT $ do
 
     sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
-
-    ts <- lift timestampH'
+    ts                      <- lift timestampH'
 
     let
       Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing sanitized_board_request) { boardModifiedAt = Just ts }
