@@ -233,7 +233,7 @@ insertOrganizationM user_id organization_request = do
   runEitherT $ do
     sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
 
-    ts <- lift $ timestampH'
+    ts <- lift timestampH'
 
     let
       email_md5 = md5Text (organizationRequestEmail sanitized_organization_request)

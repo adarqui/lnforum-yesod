@@ -252,10 +252,12 @@ getWithBoardM True user_id board_id = fmap Just <$> getBoardM user_id board_id
 insertBoardM :: Maybe StandardParams -> UserId -> BoardRequest -> HandlerErrorEff (Entity Board)
 insertBoardM m_sp user_id board_request = do
 
-  case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
-    (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
-    (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
-    _                  -> left $ Error_InvalidArguments "forum_id, board_id"
+  e_sanitized_board_request <- isValidAppM $ validateBoardRequest board_request
+  rehtie e_sanitized_board_request left $ \sanitized_board_request -> do
+    case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
+      (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id sanitized_board_request
+      (_, Just board_id) -> insertBoard_ByBoardId user_id board_id sanitized_board_request
+      _                  -> left $ Error_InvalidArguments "forum_id, board_id"
 
 
 
@@ -284,28 +286,32 @@ insertBoard_ByBoardId user_id board_id board_request = do
 updateBoardM :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (Entity Board)
 updateBoardM user_id board_id board_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
 
-  let
-    Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing board_request) { boardModifiedAt = Just ts }
+    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
 
-  updateWhereDb
-    [ BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True ]
-    [ BoardModifiedAt         =. boardModifiedAt
-    , BoardActivityAt         =. Just ts
-    , BoardName               =. boardName
-    , BoardDisplayName        =. boardDisplayName
-    , BoardDescription        =. boardDescription
-    , BoardIsAnonymous        =. boardIsAnonymous
-    , BoardCanCreateSubBoards =. boardCanCreateSubBoards
-    , BoardCanCreateThreads   =. boardCanCreateThreads
-    , BoardSuggestedTags      =. boardSuggestedTags
-    , BoardIcon               =. boardIcon
-    , BoardTags               =. boardTags
-    , BoardGuard             +=. 1
-    ]
+    ts <- lift timestampH'
 
-  selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
+    let
+      Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing sanitized_board_request) { boardModifiedAt = Just ts }
+
+    isT $ updateWhereDbE
+      [ BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True ]
+      [ BoardModifiedAt         =. boardModifiedAt
+      , BoardActivityAt         =. Just ts
+      , BoardName               =. boardName
+      , BoardDisplayName        =. boardDisplayName
+      , BoardDescription        =. boardDescription
+      , BoardIsAnonymous        =. boardIsAnonymous
+      , BoardCanCreateSubBoards =. boardCanCreateSubBoards
+      , BoardCanCreateThreads   =. boardCanCreateThreads
+      , BoardSuggestedTags      =. boardSuggestedTags
+      , BoardIcon               =. boardIcon
+      , BoardTags               =. boardTags
+      , BoardGuard             +=. 1
+      ]
+
+    isT $ selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
 
 
 

@@ -271,7 +271,7 @@ insertUsersM' _ user_request = do
 
     sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
 
-    ts <- lift $ timestampH'
+    ts <- lift timestampH'
     let
       email_md5 = md5Text (userRequestEmail sanitized_user_request)
       user = (userRequestToUser sanitized_user_request) {
