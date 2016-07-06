@@ -7,6 +7,7 @@ module LN.Access (
   mustBe_OwnerOf_ForumIdM,
   mustBe_OwnerOf_BoardIdM,
   mustBe_OwnerOf_ThreadIdM,
+  mustBe_OwnerOf_ThreadPostIdM,
   mustBe_MemberOf_OrganizationIdM,
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
@@ -97,6 +98,18 @@ mustBe_OwnerOf_ThreadIdM user_id thread_id = do
       v1 <- mustBe_SameUserM user_id user_id
       -- TODO FIXME: very ugly .. wanted to just use: case1 <|> case2
       either (const $ mustBe_OwnerOf_OrganizationIdM user_id threadOrgId) (right) v1
+
+
+
+mustBe_OwnerOf_ThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff ()
+mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id = do
+  -- TODO FIXME: Possibly broken? untested
+  runEitherT $ do
+    (Entity _ ThreadPost{..}) <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
+    isT $ do
+      v1 <- mustBe_SameUserM user_id user_id
+      -- TODO FIXME: very ugly .. wanted to just use: case1 <|> case2
+      either (const $ mustBe_OwnerOf_OrganizationIdM user_id threadPostOrgId) (right) v1
 
 
 

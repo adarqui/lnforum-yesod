@@ -241,9 +241,10 @@ insertThreadPost_ByThreadIdM :: UserId -> ThreadId -> ThreadPostRequest -> Handl
 insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
   runEitherT $ do
-
+    --  see mustBe_MemberOf_OrganizationIdM below
     sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
     (Entity _ Thread{..})         <- isT $ selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
+    isT $ mustBe_MemberOf_OrganizationIdM user_id threadOrgId
     ts                            <- lift timestampH'
 
     let
@@ -269,8 +270,10 @@ insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest 
 insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
   runEitherT $ do
+    -- see mustBe_MemberOf_OrganizationIdM below
     sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
     (Entity _ ThreadPost{..})     <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+    isT $ mustBe_MemberOf_OrganizationIdM user_id threadPostOrgId
     ts                            <- lift timestampH'
 
     let
@@ -293,6 +296,7 @@ updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerError
 updateThreadPostM user_id thread_post_id thread_post_request = do
 
   runEitherT $ do
+    isT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
     sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
     ts                            <- lift timestampH'
 
@@ -314,7 +318,9 @@ updateThreadPostM user_id thread_post_id thread_post_request = do
 
 deleteThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 deleteThreadPostM user_id thread_post_id = do
-  deleteWhereDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id]
+  runEitherT $ do
+    isT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
+    isT $ deleteWhereDbE [ThreadPostId ==. thread_post_id]
 
 
 

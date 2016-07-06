@@ -272,7 +272,7 @@ insertThread_ByBoardIdM :: UserId -> BoardId -> ThreadRequest -> HandlerErrorEff
 insertThread_ByBoardIdM user_id board_id thread_request = do
 
   runEitherT $ do
-
+    -- see mustBe_MemberOf_OrganizationIdM below:
     sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
     (Entity _ Board{..})     <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
     isT $ mustBe_MemberOf_OrganizationIdM user_id boardOrgId
@@ -316,7 +316,9 @@ updateThreadM user_id thread_id thread_request = do
 
 deleteThreadM :: UserId -> ThreadId -> HandlerErrorEff ()
 deleteThreadM user_id thread_id = do
-  deleteWhereDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True]
+  runEitherT $ do
+    isT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
+    isT $ deleteWhereDbE [ThreadId ==. thread_id, ThreadActive ==. True]
 
 
 
