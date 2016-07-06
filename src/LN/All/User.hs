@@ -305,28 +305,34 @@ getUserMH _ lookup_user_name = do
 updateUserM :: UserId -> UserId -> UserRequest -> HandlerErrorEff (Entity User)
 updateUserM _ lookup_user_id user_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
 
-  let
-    email_md5 = md5Text $ (userRequestEmail user_request)
-    User{..} = (userRequestToUser user_request) {
-        userEmailMD5 = email_md5
-      , userModifiedAt = Just ts
-    }
+    sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
 
-  void $ updateWhereDb
-    [ UserId ==. lookup_user_id, UserActive ==. True ]
+    ts <- lift timestampH'
 
-    [ UserModifiedAt =. userModifiedAt
-    , UserName        =. userName
-    , UserDisplayName =. userDisplayName
-    , UserFullName    =. userFullName
-    , UserEmail       =. userEmail
-    , UserEmailMD5    =. userEmailMD5
-    , UserGuard      +=. 1
-    ]
+    let
+      -- TODO FIXME SECURITY: Can't just let user change their email
+      --
+      email_md5 = md5Text $ (userRequestEmail sanitized_user_request)
+      User{..} = (userRequestToUser sanitized_user_request) {
+          userEmailMD5 = email_md5
+        , userModifiedAt = Just ts
+      }
 
-  selectFirstDbE [UserId ==. lookup_user_id] []
+    isT $ updateWhereDbE
+      [ UserId ==. lookup_user_id, UserActive ==. True ]
+
+      [ UserModifiedAt =. userModifiedAt
+      , UserName        =. userName
+      , UserDisplayName =. userDisplayName
+      , UserFullName    =. userFullName
+      , UserEmail       =. userEmail
+      , UserEmailMD5    =. userEmailMD5
+      , UserGuard      +=. 1
+      ]
+
+    isT $ selectFirstDbE [UserId ==. lookup_user_id] []
 
 
 
