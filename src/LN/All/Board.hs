@@ -263,6 +263,7 @@ insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerErrorEff (E
 insertBoard_ByForumId user_id forum_id board_request = do
 
   runEitherT $ do
+    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
     sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
     (Entity _ Forum{..})    <- isT $ selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
@@ -274,6 +275,7 @@ insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (E
 insertBoard_ByBoardId user_id board_id board_request = do
 
   runEitherT $ do
+    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
     sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
     (Entity _ Board{..})    <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
@@ -286,6 +288,7 @@ updateBoardM user_id board_id board_request = do
 
   runEitherT $ do
 
+    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
     sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
 
@@ -293,19 +296,19 @@ updateBoardM user_id board_id board_request = do
       Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing sanitized_board_request) { boardModifiedAt = Just ts }
 
     isT $ updateWhereDbE
-      [ BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True ]
-      [ BoardModifiedAt         =. boardModifiedAt
-      , BoardActivityAt         =. Just ts
-      , BoardName               =. boardName
-      , BoardDisplayName        =. boardDisplayName
-      , BoardDescription        =. boardDescription
-      , BoardIsAnonymous        =. boardIsAnonymous
-      , BoardCanCreateSubBoards =. boardCanCreateSubBoards
-      , BoardCanCreateThreads   =. boardCanCreateThreads
-      , BoardSuggestedTags      =. boardSuggestedTags
-      , BoardIcon               =. boardIcon
-      , BoardTags               =. boardTags
-      , BoardGuard             +=. 1
+      [BoardId ==. board_id, BoardActive ==. True]
+      [BoardModifiedAt         =. boardModifiedAt
+      ,BoardActivityAt         =. Just ts
+      ,BoardName               =. boardName
+      ,BoardDisplayName        =. boardDisplayName
+      ,BoardDescription        =. boardDescription
+      ,BoardIsAnonymous        =. boardIsAnonymous
+      ,BoardCanCreateSubBoards =. boardCanCreateSubBoards
+      ,BoardCanCreateThreads   =. boardCanCreateThreads
+      ,BoardSuggestedTags      =. boardSuggestedTags
+      ,BoardIcon               =. boardIcon
+      ,BoardTags               =. boardTags
+      ,BoardGuard             +=. 1
       ]
 
     isT $ selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
@@ -314,7 +317,9 @@ updateBoardM user_id board_id board_request = do
 
 deleteBoardM :: UserId -> BoardId -> HandlerErrorEff ()
 deleteBoardM user_id board_id = do
-  deleteWhereDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True]
+  runEitherT $ do
+    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
+    isT $ deleteWhereDbE [BoardId ==. board_id, BoardActive ==. True]
 
 
 

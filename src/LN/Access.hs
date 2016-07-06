@@ -4,6 +4,7 @@ module LN.Access (
   isSuperM,
   mustBe_OwnerOf_OrganizationIdM,
   mustBe_OwnerOf_ForumIdM,
+  mustBe_OwnerOf_BoardIdM,
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,
@@ -56,6 +57,14 @@ mustBe_OwnerOf_ForumIdM user_id forum_id = do
   runEitherT $ do
     (Entity _ Forum{..}) <- isT $ selectFirstDbE [ForumId ==. forum_id] []
     isT $ mustBe_OwnerOf_OrganizationIdM user_id forumOrgId
+
+
+
+mustBe_OwnerOf_BoardIdM :: UserId -> BoardId -> HandlerErrorEff ()
+mustBe_OwnerOf_BoardIdM user_id board_id = do
+  runEitherT $ do
+    (Entity _ Board{..}) <- isT $ selectFirstDbE [BoardId ==. board_id] []
+    isT $ mustBe_OwnerOf_OrganizationIdM user_id boardOrgId
 
 
 
