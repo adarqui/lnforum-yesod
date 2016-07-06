@@ -240,54 +240,51 @@ insertThreadPostM m_sp user_id thread_post_request = do
 insertThreadPost_ByThreadIdM :: UserId -> ThreadId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
-  e_thread <- selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
-  case e_thread of
-    Left err                    -> left err
-    Right (Entity _ Thread{..}) -> do
+  runEitherT $ do
 
-      ts <- timestampH'
+    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    (Entity _ Thread{..})         <- isT $ selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
+    ts                            <- lift timestampH'
 
-      let
-        thread_post =
-          (threadPostRequestToThreadPost user_id threadOrgId threadForumId threadBoardId thread_id Nothing thread_post_request)
-            { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
+    let
+      thread_post =
+        (threadPostRequestToThreadPost user_id threadOrgId threadForumId threadBoardId thread_id Nothing sanitized_thread_post_request)
+          { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-      thread_post_entity <- insertEntityDb thread_post
+    thread_post_entity <- isT $ insertEntityDbE thread_post
 
-      updateWhereDb
-        [ ThreadId ==. thread_id ]
-        [ ThreadActivityAt =. Just ts ]
+    isT $ updateWhereDbE
+      [ ThreadId ==. thread_id ]
+      [ ThreadActivityAt =. Just ts ]
 
-      right thread_post_entity
+    rightT thread_post_entity
 
 
-      -- IMPORTANT: NEED TO UPDATE THREAD'S MODIFIED_AT
-      --
+    -- IMPORTANT: NEED TO UPDATE THREAD'S MODIFIED_AT
+    --
 
 
 
 insertThreadPost_ByThreadPostIdM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
-  e_post <- selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
-  case e_post of
-    Left err                         -> left err
-    Right (Entity _ ThreadPost{..}) -> do
+  runEitherT $ do
+    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    (Entity _ ThreadPost{..})     <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+    ts                            <- lift timestampH'
 
-      ts <- timestampH'
+    let
+      thread_post =
+        (threadPostRequestToThreadPost user_id threadPostOrgId threadPostForumId threadPostBoardId threadPostThreadId (Just thread_post_id) sanitized_thread_post_request)
+          { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-      let
-        thread_post =
-          (threadPostRequestToThreadPost user_id threadPostOrgId threadPostForumId threadPostBoardId threadPostThreadId (Just thread_post_id) thread_post_request)
-            { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
+    thread_post_entity <- isT $ insertEntityDbE thread_post
 
-      thread_post_entity <- insertEntityDb thread_post
+    isT $ updateWhereDbE
+      [ ThreadId ==. threadPostThreadId ]
+      [ ThreadActivityAt =. Just ts ]
 
-      updateWhereDb
-        [ ThreadId ==. threadPostThreadId ]
-        [ ThreadActivityAt =. Just ts ]
-
-      right thread_post_entity
+    rightT thread_post_entity
 
 
 
@@ -295,21 +292,23 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerErrorEff (Entity ThreadPost)
 updateThreadPostM user_id thread_post_id thread_post_request = do
 
-  ts <- timestampH'
+  runEitherT $ do
+    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    ts                            <- lift timestampH'
 
-  let
-    ThreadPost{..} = (threadPostRequestToThreadPost user_id dummyId dummyId dummyId dummyId Nothing thread_post_request) { threadPostModifiedAt = Just ts }
-  updateWhereDb
-    [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ]
-    [ ThreadPostModifiedAt  =. threadPostModifiedAt
-    , ThreadPostTitle       =. threadPostTitle
-    , ThreadPostBody        =. threadPostBody
-    , ThreadPostTags        =. threadPostTags
-    , ThreadPostPrivateTags =. threadPostPrivateTags
-    , ThreadPostGuard      +=. 1
-    ]
+    let
+      ThreadPost{..} = (threadPostRequestToThreadPost user_id dummyId dummyId dummyId dummyId Nothing sanitized_thread_post_request) { threadPostModifiedAt = Just ts }
+    isT $ updateWhereDbE
+      [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ]
+      [ ThreadPostModifiedAt  =. threadPostModifiedAt
+      , ThreadPostTitle       =. threadPostTitle
+      , ThreadPostBody        =. threadPostBody
+      , ThreadPostTags        =. threadPostTags
+      , ThreadPostPrivateTags =. threadPostPrivateTags
+      , ThreadPostGuard      +=. 1
+      ]
 
-  selectFirstDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+    isT $ selectFirstDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
