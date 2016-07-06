@@ -311,7 +311,9 @@ updateForumM user_id forum_id forum_request = do
 
 deleteForumM :: UserId -> ForumId -> HandlerErrorEff ()
 deleteForumM user_id forum_id = do
-  deleteWhereDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True]
+  runEitherT $ do
+    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
+    isT $ deleteWhereDbE [ForumId ==. forum_id, ForumActive ==. True]
 
 
 
