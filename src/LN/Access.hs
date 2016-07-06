@@ -94,10 +94,8 @@ mustBe_OwnerOf_ThreadIdM user_id thread_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
     (Entity _ Thread{..}) <- isT $ selectFirstDbE [ThreadId ==. thread_id] []
-    isT $ do
-      v1 <- mustBe_SameUserM user_id user_id
-      -- TODO FIXME: very ugly .. wanted to just use: case1 <|> case2
-      either (const $ mustBe_OwnerOf_OrganizationIdM user_id threadOrgId) (right) v1
+    void $ isT $ do
+      choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadOrgId]
 
 
 
@@ -106,10 +104,8 @@ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
     (Entity _ ThreadPost{..}) <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
-    isT $ do
-      v1 <- mustBe_SameUserM user_id user_id
-      -- TODO FIXME: very ugly .. wanted to just use: case1 <|> case2
-      either (const $ mustBe_OwnerOf_OrganizationIdM user_id threadPostOrgId) (right) v1
+    void $ isT $
+      choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadPostOrgId]
 
 
 

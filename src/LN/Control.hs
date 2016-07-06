@@ -18,13 +18,16 @@ module LN.Control (
   ApplicationError (..),-- re-export
   leftT,
   rightT,
-  isT
+  isT,
+  choiceEitherM
 ) where
 
 
 
+import           Control.Monad.Loops        (firstM)
 import qualified Control.Monad.Trans.Either as Either
 import           Control.Monad.Trans.RWS
+import           Data.Either                (isRight)
 import           LN.Cache
 import           LN.Import
 import           LN.T.Error
@@ -99,3 +102,13 @@ isT go = do
   case x of
     Left err -> leftT err
     Right v  -> rightT v
+
+
+
+
+choiceEitherM :: forall (m :: * -> *) a b def. Monad m => def -> [m (Either a b)] -> m (Either def (m (Either a b)))
+choiceEitherM err acts = do
+  m <- firstM (fmap isRight) acts
+  case m of
+    Nothing -> left err
+    Just r  -> right r
