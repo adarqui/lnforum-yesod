@@ -275,6 +275,7 @@ insertThread_ByBoardIdM user_id board_id thread_request = do
 
     sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
     (Entity _ Board{..})     <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
+    isT $ mustBe_MemberOf_OrganizationIdM user_id boardOrgId
     ts                       <- lift timestampH'
     let
       thread = (threadRequestToThread user_id boardOrgId boardForumId board_id sanitized_thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
@@ -287,6 +288,7 @@ updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerErrorEff (Entity 
 updateThreadM user_id thread_id thread_request = do
 
   runEitherT $ do
+    isT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
     sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
     ts                       <- lift timestampH'
 

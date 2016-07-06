@@ -31,7 +31,7 @@ import           LN.T.Error
 
 
 
-type HandlerEff a = ControlMA Handler a
+type HandlerEff a      = ControlMA Handler a
 type HandlerErrorEff a = HandlerEff (ErrorEff a)
 
 

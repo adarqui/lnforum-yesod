@@ -2,9 +2,12 @@
 
 module LN.Access (
   isSuperM,
+  mustBe_SameUserM,
   mustBe_OwnerOf_OrganizationIdM,
   mustBe_OwnerOf_ForumIdM,
   mustBe_OwnerOf_BoardIdM,
+  mustBe_OwnerOf_ThreadIdM,
+  mustBe_MemberOf_OrganizationIdM,
   isOwnerOf_OrganizationIdM,
   isMemberOf_OrganizationIdM,
   isMemberOf_OrganizationId_TeamM,
@@ -21,9 +24,9 @@ module LN.Access (
 
 
 
-import           Data.Ebyam      (ebyam)
-import           Data.List       (nub)
-import Control.Monad.Trans.Either (runEitherT)
+import           Control.Monad.Trans.Either (runEitherT)
+import           Data.Ebyam                 (ebyam)
+import           Data.List                  (nub)
 import           LN.Control
 import           LN.Db
 import           LN.Import
@@ -43,9 +46,26 @@ isSuperM user_id = do
 
 
 
+mustBe_SameUserM :: UserId -> UserId -> HandlerErrorEff ()
+mustBe_SameUserM user_id lookup_user_id = do
+  if user_id == lookup_user_id
+    then right ()
+    else left Error_PermissionDenied
+
+
+
 mustBe_OwnerOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerErrorEff ()
 mustBe_OwnerOf_OrganizationIdM user_id org_id = do
   is_owner <- isOwnerOf_OrganizationIdM user_id org_id
+  if is_owner
+    then right ()
+    else left Error_PermissionDenied
+
+
+
+mustBe_MemberOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerErrorEff ()
+mustBe_MemberOf_OrganizationIdM user_id org_id = do
+  is_owner <- isMemberOf_OrganizationIdM user_id org_id
   if is_owner
     then right ()
     else left Error_PermissionDenied
@@ -65,6 +85,18 @@ mustBe_OwnerOf_BoardIdM user_id board_id = do
   runEitherT $ do
     (Entity _ Board{..}) <- isT $ selectFirstDbE [BoardId ==. board_id] []
     isT $ mustBe_OwnerOf_OrganizationIdM user_id boardOrgId
+
+
+
+mustBe_OwnerOf_ThreadIdM :: UserId -> ThreadId -> HandlerErrorEff ()
+mustBe_OwnerOf_ThreadIdM user_id thread_id = do
+  -- TODO FIXME: Possibly broken? untested
+  runEitherT $ do
+    (Entity _ Thread{..}) <- isT $ selectFirstDbE [ThreadId ==. thread_id] []
+    isT $ do
+      v1 <- mustBe_SameUserM user_id user_id
+      -- TODO FIXME: very ugly .. wanted to just use: case1 <|> case2
+      either (const $ mustBe_OwnerOf_OrganizationIdM user_id threadOrgId) (right) v1
 
 
 
