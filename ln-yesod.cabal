@@ -85,6 +85,7 @@ library
                      LN.Model.Misc
                      LN.Old
                      LN.Settings
+                     LN.Settings.Internal
                      LN.Settings.StaticFiles
                      LN.Socket
 

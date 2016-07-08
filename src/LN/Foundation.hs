@@ -45,9 +45,14 @@ data AppSettingsLN = AppSettingsLN {
 instance FromJSON AppSettingsLN where
   parseJSON = withObject "AppSettingsLN" $ \o -> do
     appRedisHost          <- o .: "redis-host"
+    pure AppSettings {..}
+
+
+instance FromJSON AppSettingsKeys where
+  parseJSON = withObject "AppSettingsKeys" $ \o -> do
     appGithubClientID     <- o .: "oauth-github-client-id"
     appGithubClientSecret <- o .: "oauth-github-client-secret"
-    pure AppSettingsLN {..}
+    pure AppSettingsKeys {..}
 
 
 

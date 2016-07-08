@@ -32,8 +32,9 @@ import           Data.FileEmbed              (embedFile)
 import           Data.Yaml                   (decodeEither')
 import           Database.Persist.Postgresql (PostgresConf)
 import           Language.Haskell.TH.Syntax  (Exp, Name, Q)
+import           LN.Settings.Internal        (configSettingsDevYml)
 import           Network.Wai.Handler.Warp    (HostPreference)
-import           Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
+import           Yesod.Default.Config2       (applyEnvValue)
 import           Yesod.Default.Util          (WidgetFileSettings,
                                               widgetFileNoReload,
                                               widgetFileReload)
@@ -157,7 +158,7 @@ widgetFile s =
 
 -- | Raw bytes at compile time of @config/settings.yml@
 configSettingsYmlBS :: ByteString
-configSettingsYmlBS = $(embedFile configSettingsYml)
+configSettingsYmlBS = $(embedFile configSettingsDevYml)
 
 
 

@@ -1,6 +1,6 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE RecordWildCards     #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TemplateHaskell     #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module LN.Application (
@@ -62,6 +62,7 @@ import           LN.All.ThreadPost
 import           LN.All.User
 import           LN.Handler.Common
 import           LN.Import
+import           LN.Settings.Internal
 import           Network.Wai.Handler.Warp             (Settings,
                                                        defaultSettings, defaultShouldDisplayException,
                                                        getPort, runSettings,
@@ -202,12 +203,12 @@ getApplicationDev = do
 
 
 getAppSettings :: IO AppSettings
-getAppSettings = loadYamlSettings [configSettingsYml] [] useEnv
+getAppSettings = loadYamlSettings [configSettingsDevYml] [] useEnv
 
 
 
 getAppSettingsLN :: IO AppSettingsLN
-getAppSettingsLN = loadYamlSettings [configSettingsYml] [] useEnv
+getAppSettingsLN = loadYamlSettings [configSettingsDevYml] [] useEnv
 
 
 
