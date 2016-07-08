@@ -90,8 +90,8 @@ mkYesodDispatch "App" resourcesApp
 -- performs initialization and returns a foundation datatype value. This is also
 -- the place to put your migrate statements to have automatic database
 -- migrations handled by Yesod.
-makeFoundation :: AppSettings -> AppSettingsLN -> IO App
-makeFoundation appSettings appSettingsLN = do
+makeFoundation :: AppSettings -> AppSettingsLN -> AppSettingsKeys -> IO App
+makeFoundation appSettings appSettingsLN appSettingsKeys = do
 
 --    dbconf <- if appDatabaseUrl appSettings
   appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 16379 })
@@ -108,7 +108,7 @@ makeFoundation appSettings appSettingsLN = do
       (appStaticDir appSettings)
 
   -- custom
-  appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsLN) (T.pack $ appGithubClientSecret appSettingsLN)
+  appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsKeys) (T.pack $ appGithubClientSecret appSettingsKeys)
 
   let appSuperUsers = []
 
@@ -195,7 +195,8 @@ getApplicationDev :: IO (Settings, Application)
 getApplicationDev = do
   settings    <- getAppSettings
   ln_settings <- getAppSettingsLN
-  foundation  <- makeFoundation settings ln_settings
+  app_keys    <- getAppSettingsKeys
+  foundation  <- makeFoundation settings ln_settings app_keys
   wsettings   <- getDevSettings $ warpSettings foundation
   app         <- makeApplication foundation
   pure (wsettings, app)
@@ -212,6 +213,11 @@ getAppSettingsLN = loadYamlSettings [configSettingsDevYml] [] useEnv
 
 
 
+getAppSettingsKeys :: IO AppSettingsKeys
+getAppSettingsKeys = loadYamlSettings [configSettingsDevYml] [] useEnv
+
+
+
 -- | main function for use by yesod devel
 develMain :: IO ()
 develMain = develMainHelper getApplicationDev
@@ -223,18 +229,22 @@ appMain :: IO ()
 appMain = do
   -- Get the settings from all relevant sources
   settings <- loadYamlSettingsArgs
-      -- fall back to compile-time values, set to [] to require values at runtime
-      [configSettingsYmlValue]
+    -- fall back to compile-time values, set to [] to require values at runtime
+    [configSettingsYmlValue]
 
-      -- allow environment variables to override
-      useEnv
+    -- allow environment variables to override
+    useEnv
 
   ln_settings <- loadYamlSettingsArgs
-      [configSettingsYmlValue]
-      useEnv
+    [configSettingsYmlValue]
+    useEnv
+
+  app_keys <- loadYamlSettingsArgs
+    [configSettingsYmlValue]
+    useEnv
 
   -- Generate the foundation from the settings
-  foundation <- makeFoundation settings ln_settings
+  foundation <- makeFoundation settings ln_settings app_keys
 
   -- Generate a WAI Application from the foundation
   app <- makeApplication foundation
@@ -253,7 +263,8 @@ getApplicationRepl :: IO (Int, App, Application)
 getApplicationRepl = do
   settings    <- getAppSettings
   ln_settings <- getAppSettingsLN
-  foundation  <- makeFoundation settings ln_settings
+  app_keys    <- getAppSettingsKeys
+  foundation  <- makeFoundation settings ln_settings app_keys
   wsettings   <- getDevSettings $ warpSettings foundation
   app1        <- makeApplication foundation
   pure (getPort wsettings, foundation, app1)
@@ -273,7 +284,8 @@ handler :: Handler a -> IO a
 handler h = do
   settings    <- getAppSettings
   ln_settings <- getAppSettingsLN
-  makeFoundation settings ln_settings >>= flip unsafeHandler h
+  app_keys    <- getAppSettingsKeys
+  makeFoundation settings ln_settings app_keys >>= flip unsafeHandler h
 
 
 

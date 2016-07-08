@@ -35,7 +35,12 @@ import           Yesod.Default.Util          (addStaticContentExternal)
 
 
 data AppSettingsLN = AppSettingsLN {
-  appRedisHost          :: String,
+  appRedisHost          :: String
+}
+
+
+
+data AppSettingsKeys = AppSettingsKeys {
   appGithubClientID     :: String,
   appGithubClientSecret :: String
 }
@@ -44,8 +49,9 @@ data AppSettingsLN = AppSettingsLN {
 
 instance FromJSON AppSettingsLN where
   parseJSON = withObject "AppSettingsLN" $ \o -> do
-    appRedisHost          <- o .: "redis-host"
-    pure AppSettings {..}
+    appRedisHost <- o .: "redis-host"
+    pure AppSettingsLN {..}
+
 
 
 instance FromJSON AppSettingsKeys where
@@ -59,6 +65,7 @@ instance FromJSON AppSettingsKeys where
 data App = App {
   appSettings        :: AppSettings,
   appSettingsLN      :: AppSettingsLN,
+  appSettingsKeys    :: AppSettingsKeys,
   appStatic          :: Static, -- ^ Settings for static file serving.
   appConnPool        :: ConnectionPool, -- ^ Database connection pool.
   appHttpManager     :: Manager,
