@@ -11,6 +11,8 @@ module LN.All.Like (
   getLikeStatR,
 
   -- Model/Function
+  likeOptToScore,
+  likeOptToScore64,
   likeRequestToLike,
   likeToResponse,
   likesToResponses,
@@ -30,7 +32,7 @@ module LN.All.Like (
 
 
 import           LN.All.Prelude
-import qualified LN.T.Like   as L
+import qualified LN.T.Like      as L
 
 
 
@@ -98,6 +100,18 @@ getLikeStatR like_id = run $ do
 --
 -- Model/Function
 --
+
+likeOptToScore :: L.LikeOpt -> Int
+likeOptToScore L.Like    = 1
+likeOptToScore L.Neutral = 0
+likeOptToScore L.Dislike = (-1)
+
+likeOptToScore64 :: L.LikeOpt -> Int64
+likeOptToScore64 L.Like    = 1
+likeOptToScore64 L.Neutral = 0
+likeOptToScore64 L.Dislike = (-1)
+
+
 
 likeRequestToLike :: UserId -> Ent -> Int64 -> LikeRequest -> Like
 likeRequestToLike user_id ent ent_id LikeRequest{..} = Like {

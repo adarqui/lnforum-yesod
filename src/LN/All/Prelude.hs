@@ -14,6 +14,7 @@ import           LN.Cache                   as A
 import           LN.Control                 as A
 import           LN.Db                      as A
 import           LN.Error                   as A
+import           LN.Generate                as A
 import           LN.Import                  as A
 import           LN.Lib                     as A
 import           LN.Lifted                  as A
