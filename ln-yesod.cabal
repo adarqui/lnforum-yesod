@@ -190,11 +190,12 @@ library
                  , either
                  , string-conversions
                  , monad-loops
+                 , data-default
 
-                 , ln-types
                  , ln-lib
                  , ln-sanitize
                  , ln-validate
+                 , haskell-ln-types
                  , haskell-ebyam
                  , haskell-rehtie
                  , haskell-ifte
@@ -273,8 +274,7 @@ executable         ln-bg
 
     main-is:           main.hs
     hs-source-dirs:    ln-bg
-    build-depends:     base, ln-yesod, ln-types
-
+    build-depends:     base, ln-yesod, haskell-ln-types
     ghc-options:       -Wall -Werror -threaded -O2 -rtsopts -with-rtsopts=-N  -fobject-code -j
 
 
@@ -287,6 +287,5 @@ executable         ln-bg-test
 
     main-is:           main.hs
     hs-source-dirs:    ln-bg-test
-    build-depends:     base, ln-yesod, ln-types
-
+    build-depends:     base, ln-yesod, haskell-ln-types
     ghc-options:       -Wall -threaded -O0 -fobject-code -j

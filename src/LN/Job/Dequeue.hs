@@ -19,7 +19,6 @@ import           Database.Persist.Postgresql as P
 import           LN.All.Profile              (profileRequestToProfile)
 import           LN.Import
 import           LN.Job.Shared
-import           LN.T.Internal.Types
 import           LN.T.Job
 import           Network.AMQP
 import qualified Prelude                     as Prelude

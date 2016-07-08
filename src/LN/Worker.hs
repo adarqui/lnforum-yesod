@@ -8,17 +8,17 @@ module LN.Worker (
 
 
 import           Data.Aeson
-import           LN.All.Api           (insertApiM)
-import           LN.All.Profile       (insertProfileM)
-import           LN.Application       (handler)
+import           LN.All.Api     (insertApiM)
+import           LN.All.Profile (insertProfileM)
+import           LN.Application (handler)
 import           LN.Control
 import           LN.Import
 import           LN.Job.Shared
-import           LN.T.Api.Request     (ApiRequest (..))
+import           LN.T.Api       (ApiRequest (..))
 import           LN.T.Job
-import           LN.T.Profile.Request (ProfileRequest (..))
+import           LN.T.Profile   (ProfileRequest (..))
 import           Network.AMQP
-import qualified Prelude              as Prelude
+import qualified Prelude        as Prelude
 
 
 

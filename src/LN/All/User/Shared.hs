@@ -17,11 +17,11 @@ module LN.All.User.Shared (
 
 import           Control.Monad          (void)
 import           Database.Persist.Types (Entity (..))
+import           LN.Generate.Default    (defaultApiRequest,
+                                         defaultProfileRequest)
 import           LN.Job.Enqueue         (mkJob_CreateUserApi,
                                          mkJob_CreateUserProfile)
 import           LN.Model
-import           LN.T.Api.Request       (defaultApiRequest)
-import           LN.T.Profile.Request   (defaultProfileRequest)
 import           Prelude                (IO, pure, ($))
 
 

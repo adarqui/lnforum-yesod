@@ -4,10 +4,10 @@ flags:
     dev: false
 packages:
 - '.'
-- '../ln-types'
 - '../ln-lib'
 - '../ln-sanitize'
 - '../ln-validate'
+- '../haskell-ln-types'
 - '../haskell-api-helpers'
 - '../haskell-ebyam'
 - '../haskell-rehtie'
