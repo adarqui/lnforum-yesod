@@ -10,7 +10,9 @@ module LN.Job.Enqueue (
 
 import           LN.Import.NoFoundation
 import           LN.Job.Shared
+import           LN.T.Api               (ApiRequest (..))
 import           LN.T.Job
+import           LN.T.Profile           (ProfileRequest (..))
 
 
 

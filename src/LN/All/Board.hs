@@ -182,13 +182,10 @@ getBoardsM m_sp user_id = do
 
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spForumId, lookupSpMay m_sp spParentId) of
 
-    (J org_id, N, N)              -> getBoards_ByOrganizationIdM m_sp user_id org_id
-
-    (N, Just forum_id, N)         -> getBoards_ByForumIdM m_sp user_id forum_id
-
-    (N, N, J board_parent_id)     -> getBoards_ByBoardParentIdM m_sp user_id (int64ToKey' board_parent_id)
-
-    _                             -> left $ Error_InvalidArguments "org_id, forum_id, parent_id"
+    (Just org_id, Nothing, Nothing)          -> getBoards_ByOrganizationIdM m_sp user_id org_id
+    (Nothing, Just forum_id, Nothing)        -> getBoards_ByForumIdM m_sp user_id forum_id
+    (Nothing, Nothing, Just board_parent_id) -> getBoards_ByBoardParentIdM m_sp user_id (int64ToKey' board_parent_id)
+    _                                        -> left $ Error_InvalidArguments "org_id, forum_id, parent_id"
 
 
 

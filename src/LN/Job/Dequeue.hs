@@ -20,6 +20,7 @@ import           LN.All.Profile              (profileRequestToProfile)
 import           LN.Import
 import           LN.Job.Shared
 import           LN.T.Job
+import           LN.T.Profile                (ProfileRequest (..))
 import           Network.AMQP
 import qualified Prelude                     as Prelude
 

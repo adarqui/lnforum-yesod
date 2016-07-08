@@ -30,6 +30,7 @@ import           Data.Ebyam                 (ebyam)
 import           Data.List                  (nub)
 import           LN.Control
 import           LN.Db
+import           LN.Generate.Permission     (allPermissions)
 import           LN.Import
 import           LN.T.Permission
 import           LN.T.Team
