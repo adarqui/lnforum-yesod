@@ -33,5 +33,3 @@ copyright: leuro (C)
 #analytics: UA-YOURCODE
 
 redis-host: "dev.adarq.org"
-oauth-github-client-id: "b53b7cfba0fa60bc534a"
-oauth-github-client-secret: "9511f32914719d30d27aec8e9df639b05c142bac"
