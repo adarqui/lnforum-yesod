@@ -19,7 +19,7 @@ module LN.Application (
 
 
 import           Control.Monad.Logger                 (liftLoc, runLoggingT)
-import qualified Data.Text                            as T (pack)
+import qualified Data.Text                            as T (pack, unpack)
 import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        pgConnStr, pgPoolSize,
                                                        runSqlPool)
@@ -214,7 +214,7 @@ getAppSettingsLN = loadYamlSettings [configSettingsDevYml] [] useEnv
 
 
 getAppSettingsKeys :: IO AppSettingsKeys
-getAppSettingsKeys = loadYamlSettings [configSettingsDevYml] [] useEnv
+getAppSettingsKeys = loadYamlSettings [configSettingsPrivateDevYml] [] useEnv
 
 
 
@@ -227,19 +227,24 @@ develMain = develMainHelper getApplicationDev
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
-  -- Get the settings from all relevant sources
-  settings <- loadYamlSettingsArgs
-    -- fall back to compile-time values, set to [] to require values at runtime
-    [configSettingsYmlValue]
 
+  args <- (map T.unpack) <$> getArgs
+
+  -- Get the settings from all relevant sources
+  settings <- loadYamlSettings
+    -- fall back to compile-time values, set to [] to require values at runtime
+    args
+    [configSettingsYmlValue]
     -- allow environment variables to override
     useEnv
 
-  ln_settings <- loadYamlSettingsArgs
+  ln_settings <- loadYamlSettings
+    args
     [configSettingsYmlValue]
     useEnv
 
-  app_keys <- loadYamlSettingsArgs
+  app_keys <- loadYamlSettings
+    args
     [configSettingsYmlValue]
     useEnv
 

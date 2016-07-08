@@ -11,10 +11,10 @@ docs:
 	cabal haddock --hyperlink-source
 
 exec_prod:
-	./bin/ln-yesod config/settings.yml
+	./bin/ln-yesod config/settings/production.yml private/settings/production.yml
 
 exec_prod_sudo:
-	sudo ./bin/ln-yesod config/settings/production.yml
+	sudo ./bin/ln-yesod config/settings/production.yml private/settings/production.yml
 
 exec_dev_sudo:
 	sudo stack exec --allow-different-user -- yesod devel -p 80 --tls-port 443
