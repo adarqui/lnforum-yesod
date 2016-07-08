@@ -12,3 +12,4 @@ examples/dist/*
 cabal.config
 cabal.sandbox.config
 .stack-work
+/private
