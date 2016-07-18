@@ -17,7 +17,9 @@ getSPAR = do
   void $ requireAuthId
 
   webSockets socketHub
+
   defaultLayout $ do
+
     setTitle "adarq.org"
 
-    addScriptRemoteBustCache "/static/pure/ln.js"
+    addScriptRemoteBustCache "/static/dist/all.min.js"
