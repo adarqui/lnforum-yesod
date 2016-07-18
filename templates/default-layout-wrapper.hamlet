@@ -3,12 +3,24 @@ $doctype 5
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+
+    <link rel="icon" type="image/png" href="static/assets/favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="static/assets/favicon-16x16.png" sizes="16x16" />
+
+    <script src="https://fb.me/react-15.2.1.min.js"></script>
+    <script src="https://fb.me/react-dom-15.2.1.min.js"></script>
+
     <title>#{pageTitle pc}
     ^{pageHead pc}
+
+
+
+
   <body>
-$#    ^{pageBody nav}
 
     $maybe Entity _ _ <- muser
       <div>
@@ -17,8 +29,12 @@ $#    ^{pageBody nav}
         <a href=@{AuthR LoginR}>Sign in
 
     ^{pageBody pc}
-    <div id="purescript-container">
 
-    <footer .footer>
-      <div .container.clearfix>
-        <p .footer-copy>
+    <section id="ln"/>
+
+    $maybe Entity _ _ <- muser
+      <div>
+    $nothing
+      <footer .footer>
+        <div .container.clearfix>
+          <p .footer-copy>
