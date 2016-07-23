@@ -8,7 +8,7 @@ packages:
 - '../ln-sanitize'
 - '../ln-validate'
 - '../haskell-ln-types'
-- '../haskell-api-helpers'
+- '../haskell-api-helpers-shared'
 - '../haskell-ebyam'
 - '../haskell-rehtie'
 - '../haskell-ifte'

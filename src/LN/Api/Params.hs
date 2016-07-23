@@ -42,8 +42,8 @@ import           LN.T.Param
 
 
 data StandardParams = StandardParams {
-  spOffset           :: Maybe Int,
-  spLimit            :: Maybe Int,
+  spOffset           :: Maybe Int64,
+  spLimit            :: Maybe Int64,
   spSortOrder        :: Maybe SortOrderBy,
   spOrder            :: Maybe OrderBy,
   spTs               :: Maybe UTCTime,
@@ -143,17 +143,17 @@ defaultStandardParams = StandardParams {
 
 
 
-defLimit :: Maybe Int
+defLimit :: Maybe Int64
 defLimit = Just 10
 
-minLimit :: Int
+minLimit :: Int64
 minLimit = 1
 
-maxLimit :: Int
+maxLimit :: Int64
 maxLimit = 50
 
 
-sanitizeLimit :: Int -> Int
+sanitizeLimit :: Int64 -> Int64
 sanitizeLimit limit
   | limit < minLimit = minLimit
   | limit > maxLimit = maxLimit
@@ -161,10 +161,10 @@ sanitizeLimit limit
 
 
 
-minOffset :: Int
+minOffset :: Int64
 minOffset = 0
 
-sanitizeOffset :: Int -> Int
+sanitizeOffset :: Int64 -> Int64
 sanitizeOffset offset
   | offset < minOffset = minOffset
   | otherwise          = offset
@@ -395,10 +395,10 @@ spToSelect StandardParams{..} field =
   where
   offset = case spOffset of
            Nothing      -> []
-           Just offset' -> [OffsetBy offset']
+           Just offset' -> [OffsetBy $ fromIntegral offset']
   limit  = case spLimit of
            Nothing     -> []
-           Just limit' -> [LimitTo limit']
+           Just limit' -> [LimitTo $ fromIntegral limit']
   order  = case spSortOrder of
            Nothing               -> []
            Just SortOrderBy_Asc  -> [Asc field]
@@ -415,10 +415,10 @@ spToSelectMay (Just StandardParams{..}) field =
   where
   offset = case spOffset of
            Nothing      -> []
-           Just offset' -> [OffsetBy offset']
+           Just offset' -> [OffsetBy $ fromIntegral offset']
   limit  = case spLimit of
            Nothing     -> []
-           Just limit' -> [LimitTo limit']
+           Just limit' -> [LimitTo $ fromIntegral limit']
   order  = case spSortOrder of
            Nothing               -> []
            Just SortOrderBy_Asc  -> [Asc field]
