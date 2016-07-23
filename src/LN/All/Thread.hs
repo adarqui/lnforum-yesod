@@ -207,7 +207,7 @@ getThreadsM m_sp user_id = do
     (Just org_id, _, _)         -> getThreads_ByOrganizationIdM m_sp user_id org_id
     (_, Just board_id, _)       -> getThreads_ByBoardIdM m_sp user_id board_id
     (_, _, Just lookup_user_id) -> getThreads_ByUserIdM m_sp user_id lookup_user_id
-    _                           -> left $ Error_InvalidArguments "org_id, user_id, board_id"
+    _                           -> leftA $ Error_InvalidArguments "org_id, user_id, board_id"
 
 
 
@@ -249,12 +249,12 @@ getThreadMH m_sp _ thread_name = do
     Just board_id -> do
       selectFirstDbE [ThreadName ==. thread_name, ThreadBoardId ==. board_id, ThreadActive ==. True] []
 
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> leftA $ Error_InvalidArguments "board_id"
 
 
 
 getWithThreadM :: Bool -> UserId -> ThreadId -> HandlerErrorEff (Maybe (Entity Thread))
-getWithThreadM False _ _              = right Nothing
+getWithThreadM False _ _              = rightA Nothing
 getWithThreadM True user_id thread_id = fmap Just <$> getThreadM user_id thread_id
 
 
@@ -264,7 +264,7 @@ insertThreadM m_sp user_id thread_request = do
 
   case (lookupSpMay m_sp spBoardId) of
     Just board_id -> insertThread_ByBoardIdM user_id board_id thread_request
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> leftA $ Error_InvalidArguments "board_id"
 
 
 
@@ -273,14 +273,14 @@ insertThread_ByBoardIdM user_id board_id thread_request = do
 
   runEitherT $ do
     -- see mustBe_MemberOf_OrganizationIdM below:
-    sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
-    (Entity _ Board{..})     <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
-    isT $ mustBe_MemberOf_OrganizationIdM user_id boardOrgId
+    sanitized_thread_request <- mustT $ isValidAppM $ validateThreadRequest thread_request
+    (Entity _ Board{..})     <- mustT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
+    mustT $ mustBe_MemberOf_OrganizationIdM user_id boardOrgId
     ts                       <- lift timestampH'
     let
       thread = (threadRequestToThread user_id boardOrgId boardForumId board_id sanitized_thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
 
-    isT $ insertEntityDbE thread
+    mustT $ insertEntityDbE thread
 
 
 
@@ -288,14 +288,14 @@ updateThreadM :: UserId -> ThreadId -> ThreadRequest -> HandlerErrorEff (Entity 
 updateThreadM user_id thread_id thread_request = do
 
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
-    sanitized_thread_request <- isT $ isValidAppM $ validateThreadRequest thread_request
+    mustT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
+    sanitized_thread_request <- mustT $ isValidAppM $ validateThreadRequest thread_request
     ts                       <- lift timestampH'
 
     let
       Thread{..} = (threadRequestToThread user_id dummyId dummyId dummyId sanitized_thread_request) { threadModifiedAt = Just ts, threadActivityAt = Just ts }
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ ThreadUserId ==. user_id, ThreadId ==. thread_id ]
       [ ThreadModifiedAt  =. threadModifiedAt
       , ThreadActivityAt  =. threadActivityAt
@@ -310,15 +310,15 @@ updateThreadM user_id thread_id thread_request = do
       , ThreadGuard      +=. 1
       ]
 
-    isT $ selectFirstDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
+    mustT $ selectFirstDbE [ThreadUserId ==. user_id, ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 
 deleteThreadM :: UserId -> ThreadId -> HandlerErrorEff ()
 deleteThreadM user_id thread_id = do
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
-    isT $ deleteWhereDbE [ThreadId ==. thread_id, ThreadActive ==. True]
+    mustT $ mustBe_OwnerOf_ThreadIdM user_id thread_id
+    mustT $ deleteWhereDbE [ThreadId ==. thread_id, ThreadActive ==. True]
 
 
 
@@ -329,21 +329,21 @@ countThreadsM m_sp _ = do
 
     Just board_id -> do
       n <- countDb [ ThreadBoardId ==. board_id ]
-      right $ CountResponses [CountResponse (keyToInt64 board_id) (fromIntegral n)]
+      rightA $ CountResponses [CountResponse (keyToInt64 board_id) (fromIntegral n)]
 
-    _             -> left $ Error_InvalidArguments "board_id"
+    _             -> leftA $ Error_InvalidArguments "board_id"
 
 
 
 getThreadStatsM :: UserId -> HandlerErrorEff ThreadStatResponses
-getThreadStatsM _ = left Error_NotImplemented
+getThreadStatsM _ = leftA Error_NotImplemented
 
 
 
 getThreadStatM :: UserId -> ThreadId -> HandlerErrorEff ThreadStatResponse
 getThreadStatM _ thread_id = do
   num_thread_posts <- countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
-  right $ ThreadStatResponse {
+  rightA $ ThreadStatResponse {
     threadStatResponseThreadId    = keyToInt64 thread_id,
     threadStatResponseThreadPosts = fromIntegral $ num_thread_posts,
     threadStatResponseViews       = 0

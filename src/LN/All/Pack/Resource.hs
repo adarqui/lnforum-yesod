@@ -48,11 +48,11 @@ getResourcePacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourceP
 getResourcePacksM m_sp user_id = do
 
   e_resources <- getResourcesM m_sp user_id
-  rehtie e_resources left $ \resources -> do
+  rehtie e_resources leftA $ \resources -> do
 
     resource_packs <- rights <$> mapM (\resource -> getResourcePack_ByResourceM user_id resource) resources
 
-    right $ ResourcePackResponses {
+    rightA $ ResourcePackResponses {
       resourcePackResponses = resource_packs
     }
 
@@ -62,7 +62,7 @@ getResourcePackM :: UserId -> ResourceId -> HandlerErrorEff ResourcePackResponse
 getResourcePackM user_id resource_id = do
 
   e_resource <- getResourceM user_id resource_id
-  rehtie e_resource left $ getResourcePack_ByResourceM user_id
+  rehtie e_resource leftA $ getResourcePack_ByResourceM user_id
 
 
 
@@ -71,14 +71,14 @@ getResourcePack_ByResourceM user_id resource@(Entity resource_id Resource{..}) =
 
   lr <- runEitherT $ do
 
-    resource_user <- isT $ getUserM user_id resourceUserId
-    resource_stat <- isT $ getResourceStatM user_id resource_id
---  resource_like <- isT $ getResourceLike_ByResourceM user_id resource
---  resource_star <- isT $ getResourceStar_ByResourceM user_id resource
+    resource_user <- mustT $ getUserM user_id resourceUserId
+    resource_stat <- mustT $ getResourceStatM user_id resource_id
+--  resource_like <- mustT $ getResourceLike_ByResourceM user_id resource
+--  resource_star <- mustT $ getResourceStar_ByResourceM user_id resource
     pure (resource_user, resource_stat)
 
-  rehtie lr left $ \(resource_user, resource_stat) -> do
-    right $ ResourcePackResponse {
+  rehtie lr leftA $ \(resource_user, resource_stat) -> do
+    rightA $ ResourcePackResponse {
       resourcePackResponseResource    = resourceToResponse resource,
       resourcePackResponseResourceId  = keyToInt64 resource_id,
       resourcePackResponseUser        = userToSanitizedResponse resource_user,

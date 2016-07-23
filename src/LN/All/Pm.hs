@@ -145,7 +145,7 @@ insertPmM m_sp user_id pm_request = do
 
         then do
           -- can't send a pm to yourself
-          left $ Error_PermissionDenied -- TODO FIXME: PermissionDeniedReason "Can't send a PM to yourself"
+          leftA $ Error_PermissionDenied -- TODO FIXME: PermissionDeniedReason "Can't send a PM to yourself"
 
         else do
           ts <- timestampH'
@@ -153,7 +153,7 @@ insertPmM m_sp user_id pm_request = do
             pm = (pmRequestToPm user_id to_user_id pm_request) { pmCreatedAt = Just ts }
           insertEntityDbE pm
 
-    _               -> left $ Error_InvalidArguments "user_id"
+    _               -> leftA $ Error_InvalidArguments "user_id"
 
 
 
@@ -177,4 +177,4 @@ updatePmM user_id pm_id pm_request = do
 
 
 deletePmM :: UserId -> PmId -> HandlerErrorEff ()
-deletePmM _ _ = left Error_NotImplemented
+deletePmM _ _ = leftA Error_NotImplemented

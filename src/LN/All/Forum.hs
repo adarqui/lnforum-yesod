@@ -194,7 +194,7 @@ getForumsM m_sp user_id = do
 
     (Just org_id, _)         -> getForums_ByOrganizationIdM m_sp user_id org_id
     (_, Just lookup_user_id) -> getForums_ByUserIdM m_sp user_id lookup_user_id
-    _                        -> left $ Error_InvalidArguments "org_id, user_id"
+    _                        -> leftA $ Error_InvalidArguments "org_id, user_id"
 
 
 
@@ -240,12 +240,12 @@ getForumMH m_sp user_id forum_name = do
   case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id -> getForum_ByOrganizationIdMH m_sp user_id forum_name org_id
-    _           -> left $ Error_InvalidArguments "org_id"
+    _           -> leftA $ Error_InvalidArguments "org_id"
 
 
 
 getWithForumM :: Bool -> UserId -> ForumId -> HandlerErrorEff (Maybe (Entity Forum))
-getWithForumM False _ _              = right Nothing
+getWithForumM False _ _              = rightA Nothing
 getWithForumM True user_id forum_id  = fmap Just <$> getForumM user_id forum_id
 
 
@@ -255,7 +255,7 @@ insertForumM m_sp user_id forum_request = do
 
   case (lookupSpMay m_sp spOrganizationId) of
     Just org_id -> insertForum_ByOrganizationIdM user_id org_id forum_request
-    _           -> left $ Error_InvalidArguments "org_id"
+    _           -> leftA $ Error_InvalidArguments "org_id"
 
 
 
@@ -264,14 +264,14 @@ insertForum_ByOrganizationIdM user_id org_id forum_request = do
 
   runEitherT $ do
 
-    isT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
-    sanitized_forum_request <- isT $ isValidAppM $ validateForumRequest forum_request
+    mustT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
+    sanitized_forum_request <- mustT $ isValidAppM $ validateForumRequest forum_request
     ts                      <- lift timestampH'
 
     let
       forum = (forumRequestToForum user_id org_id sanitized_forum_request) { forumCreatedAt = Just ts }
 
-    isT $ insertEntityDbE forum
+    mustT $ insertEntityDbE forum
 
 
 
@@ -280,14 +280,14 @@ updateForumM user_id forum_id forum_request = do
 
   runEitherT $ do
 
-    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
-    sanitized_forum_request <- isT $ isValidAppM $ validateForumRequest forum_request
+    mustT $ mustBe_OwnerOf_ForumIdM user_id forum_id
+    sanitized_forum_request <- mustT $ isValidAppM $ validateForumRequest forum_request
     ts                      <- lift timestampH'
 
     let
       Forum{..} = (forumRequestToForum user_id dummyId sanitized_forum_request) { forumModifiedAt = Just ts }
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ ForumId ==. forum_id ]
       [ ForumModifiedAt           =. forumModifiedAt
       , ForumActivityAt           =. Just ts
@@ -305,15 +305,15 @@ updateForumM user_id forum_id forum_request = do
       , ForumGuard               +=. 1
       ]
 
-    isT $ selectFirstDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
+    mustT $ selectFirstDbE [ForumUserId ==. user_id, ForumId ==. forum_id, ForumActive ==. True] []
 
 
 
 deleteForumM :: UserId -> ForumId -> HandlerErrorEff ()
 deleteForumM user_id forum_id = do
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
-    isT $ deleteWhereDbE [ForumId ==. forum_id, ForumActive ==. True]
+    mustT $ mustBe_OwnerOf_ForumIdM user_id forum_id
+    mustT $ deleteWhereDbE [ForumId ==. forum_id, ForumActive ==. True]
 
 
 
@@ -324,14 +324,14 @@ countForumsM m_sp _ = do
 
     Just org_id -> do
       n <- countDb [ForumOrgId ==. org_id, ForumActive ==. True]
-      right $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
+      rightA $ CountResponses [CountResponse (keyToInt64 org_id) (fromIntegral n)]
 
-    _           -> left $ Error_InvalidArguments "org_id"
+    _           -> leftA $ Error_InvalidArguments "org_id"
 
 
 
 getForumStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ForumStatResponses
-getForumStatsM _ _ = left Error_NotImplemented
+getForumStatsM _ _ = leftA Error_NotImplemented
 
 
 
@@ -342,7 +342,7 @@ getForumStatM _ forum_id = do
   num_forum_threads <- countDb [ThreadForumId ==. forum_id, ThreadActive ==. True]
   num_forum_posts   <- countDb [ThreadPostForumId ==. forum_id, ThreadPostActive ==. True]
 
-  right $ ForumStatResponse {
+  rightA $ ForumStatResponse {
     forumStatResponseForumId     = keyToInt64 forum_id,
     forumStatResponseBoards      = fromIntegral num_forum_boards,
     forumStatResponseThreads     = fromIntegral num_forum_threads,

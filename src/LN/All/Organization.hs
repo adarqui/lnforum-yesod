@@ -211,7 +211,7 @@ getOrganizationM _ org_id = do
 
 
 getWithOrganizationM :: Bool -> UserId -> OrganizationId -> HandlerErrorEff (Maybe (Entity Organization))
-getWithOrganizationM False _ _           = right Nothing
+getWithOrganizationM False _ _           = rightA Nothing
 getWithOrganizationM True user_id org_id = fmap Just <$> getOrganizationM user_id org_id
 
 
@@ -231,7 +231,7 @@ insertOrganizationM :: UserId -> OrganizationRequest -> HandlerErrorEff (Entity 
 insertOrganizationM user_id organization_request = do
 
   runEitherT $ do
-    sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
+    sanitized_organization_request <- mustT $ isValidAppM $ validateOrganizationRequest organization_request
     ts                             <- lift timestampH'
 
     let
@@ -240,7 +240,7 @@ insertOrganizationM user_id organization_request = do
           organizationEmailMD5 = email_md5
         , organizationCreatedAt = Just ts
       }
-    org@(Entity org_id _) <- isT $ insertEntityByDbE organization
+    org@(Entity org_id _) <- mustT $ insertEntityByDbE organization
 
     void $ lift $ insert_SystemTeamsM user_id org_id
     pure org
@@ -252,16 +252,16 @@ updateOrganizationM user_id org_id organization_request = do
 
   runEitherT $ do
 
-    isT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
+    mustT $ mustBe_OwnerOf_OrganizationIdM user_id org_id
 
-    sanitized_organization_request <- isT $ isValidAppM $ validateOrganizationRequest organization_request
+    sanitized_organization_request <- mustT $ isValidAppM $ validateOrganizationRequest organization_request
     ts                             <- lift timestampH'
 
     let
       email_md5 = md5Text (organizationRequestEmail sanitized_organization_request)
       Organization{..} = (organizationRequestToOrganization user_id sanitized_organization_request) { organizationModifiedAt = Just ts }
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ OrganizationId ==. org_id ]
       [ OrganizationModifiedAt  =. organizationModifiedAt
       , OrganizationActivityAt  =. Just ts
@@ -279,7 +279,7 @@ updateOrganizationM user_id org_id organization_request = do
       , OrganizationGuard      +=. 1
       ]
 
-    isT $ selectFirstDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
+    mustT $ selectFirstDbE [OrganizationUserId ==. user_id, OrganizationId ==. org_id, OrganizationActive ==. True] []
 
 
 
@@ -308,15 +308,15 @@ deleteOrganizationTeamsM _ org_id = do
 countOrganizationsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countOrganizationsM m_sp _ = do
   case (lookupSpMay m_sp spUserId) of
-    Just _  -> left Error_NotImplemented
+    Just _  -> leftA Error_NotImplemented
     Nothing -> do
       n <- countDb [OrganizationActive ==. True]
-      right $ CountResponses [CountResponse 0 (fromIntegral n)]
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
 getOrganizationStatsM :: UserId -> HandlerErrorEff OrganizationStatResponses
-getOrganizationStatsM _ = left Error_NotImplemented
+getOrganizationStatsM _ = leftA Error_NotImplemented
 
 
 
@@ -328,7 +328,7 @@ getOrganizationStatM _ org_id = do
   num_org_threads <- countDb [ThreadOrgId ==. org_id, ThreadActive ==. True]
   num_org_posts   <- countDb [ThreadPostOrgId ==. org_id, ThreadPostActive ==. True]
 
-  right $ OrganizationStatResponse {
+  rightA $ OrganizationStatResponse {
     organizationStatResponseOrganizationId = keyToInt64 org_id,
     organizationStatResponseTeams          = 0,
     organizationStatResponseMembers        = 0,

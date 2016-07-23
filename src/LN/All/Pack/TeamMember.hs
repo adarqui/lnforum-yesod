@@ -46,7 +46,7 @@ getTeamMemberPacksM m_sp user_id = do
   case (lookupSpMay m_sp spTeamId) of
 
     Just team_id -> getTeamMemberPacks_ByTeamIdM m_sp user_id team_id
-    _            -> left $ Error_InvalidArguments "team_id"
+    _            -> leftA $ Error_InvalidArguments "team_id"
 
 
 
@@ -54,7 +54,7 @@ getTeamMemberPackM :: UserId -> TeamMemberId -> HandlerErrorEff TeamMemberPackRe
 getTeamMemberPackM user_id team_member_id = do
 
   e_team_member <- getTeamMemberM user_id team_member_id
-  rehtie e_team_member left $ \team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member
+  rehtie e_team_member leftA $ \team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member
 
 
 
@@ -63,9 +63,9 @@ getTeamMemberPacks_ByTeamIdM :: Maybe StandardParams -> UserId -> TeamId -> Hand
 getTeamMemberPacks_ByTeamIdM m_sp user_id team_id = do
 
   e_team_members <- getTeamMembers_ByTeamIdM m_sp user_id team_id
-  rehtie e_team_members left $ \team_members -> do
+  rehtie e_team_members leftA $ \team_members -> do
     team_member_packs <- rights <$> mapM (\team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member) team_members
-    right $ TeamMemberPackResponses {
+    rightA $ TeamMemberPackResponses {
       teamMemberPackResponses = team_member_packs
     }
 
@@ -75,9 +75,9 @@ getTeamMemberPack_ByTeamMemberM :: UserId -> Entity TeamMember -> HandlerErrorEf
 getTeamMemberPack_ByTeamMemberM user_id team_member@(Entity team_member_id TeamMember{..}) = do
 
   e_team_member_user <- getUserM user_id teamMemberUserId
-  rehtie e_team_member_user left $ \team_member_user -> do
+  rehtie e_team_member_user leftA $ \team_member_user -> do
 
-    right $ TeamMemberPackResponse {
+    rightA $ TeamMemberPackResponse {
       teamMemberPackResponseUser         = userToSanitizedResponse team_member_user,
       teamMemberPackResponseUserId       = entityKeyToInt64 team_member_user,
       teamMemberPackResponseTeamMember   = teamMemberToResponse team_member,

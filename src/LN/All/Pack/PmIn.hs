@@ -49,9 +49,9 @@ getPmInPacksM m_sp user_id = do
 
   e_pm_ins <- getPmInsM m_sp user_id
 
-  rehtie e_pm_ins left $ \pm_ins -> do
+  rehtie e_pm_ins leftA $ \pm_ins -> do
     pm_in_packs <- rights <$> mapM (\pm_in -> getPmInPack_ByPmInM user_id pm_in) pm_ins
-    right $ PmInPackResponses {
+    rightA $ PmInPackResponses {
       pmInPackResponses = pm_in_packs
     }
 
@@ -61,7 +61,7 @@ getPmInPackM :: UserId -> PmInId -> HandlerErrorEff PmInPackResponse
 getPmInPackM user_id pm_in_id = do
 
   e_pm_in <- getPmInM user_id pm_in_id
-  rehtie e_pm_in left $ getPmInPack_ByPmInM user_id
+  rehtie e_pm_in leftA $ getPmInPack_ByPmInM user_id
 
 
 
@@ -70,8 +70,8 @@ getPmInPack_ByPmInM user_id pmIn@(Entity pm_in_id PmIn{..}) = do
 
   e_pm_in_user <- getUserM user_id pmInUserId
 
-  rehtie e_pm_in_user left $ \pm_in_user -> do
-    right $ PmInPackResponse {
+  rehtie e_pm_in_user leftA $ \pm_in_user -> do
+    rightA $ PmInPackResponse {
       pmInPackResponsePmIn    = pmInToResponse pmIn,
       pmInPackResponsePmInId  = keyToInt64 pm_in_id,
       pmInPackResponseUser    = userToSanitizedResponse pm_in_user,

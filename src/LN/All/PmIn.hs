@@ -151,7 +151,7 @@ insertPmInM m_sp user_id pm_in_request = do
 
       insertEntityDbE pm_in
 
-    _          -> left $ Error_InvalidArguments "pm_id"
+    _          -> leftA $ Error_InvalidArguments "pm_id"
 
 
 
@@ -176,4 +176,4 @@ updatePmInM user_id pm_in_id pm_in_request = do
 
 
 deletePmInM :: UserId -> PmInId -> HandlerErrorEff ()
-deletePmInM _ _ = right ()
+deletePmInM _ _ = rightA ()

@@ -185,7 +185,7 @@ getBoardsM m_sp user_id = do
     (Just org_id, Nothing, Nothing)          -> getBoards_ByOrganizationIdM m_sp user_id org_id
     (Nothing, Just forum_id, Nothing)        -> getBoards_ByForumIdM m_sp user_id forum_id
     (Nothing, Nothing, Just board_parent_id) -> getBoards_ByBoardParentIdM m_sp user_id (int64ToKey' board_parent_id)
-    _                                        -> left $ Error_InvalidArguments "org_id, forum_id, parent_id"
+    _                                        -> leftA $ Error_InvalidArguments "org_id, forum_id, parent_id"
 
 
 
@@ -195,9 +195,9 @@ getBoards_ByOrganizationIdM m_sp user_id org_id = do
 
   -- TODO FIXME: move this to esqueleto
    e_forums <- getForums_ByOrganizationIdM m_sp user_id org_id
-   rehtie e_forums left $ \forums -> do
+   rehtie e_forums leftA $ \forums -> do
      boards <- rights <$> mapM (\(Entity forum_id _) -> getBoards_ByForumIdM m_sp user_id forum_id) forums
-     right $ concat boards
+     rightA $ concat boards
 
 
 
@@ -236,12 +236,12 @@ getBoardMH m_sp _ board_name = do
     Just forum_id -> do
       selectFirstDbE [BoardName ==. board_name, BoardForumId ==. forum_id, BoardActive ==. True] []
 
-    _             -> left $ Error_InvalidArguments "forum_id"
+    _             -> leftA $ Error_InvalidArguments "forum_id"
 
 
 
 getWithBoardM :: Bool -> UserId -> BoardId -> HandlerErrorEff (Maybe (Entity Board))
-getWithBoardM False _ _             = right Nothing
+getWithBoardM False _ _             = rightA Nothing
 getWithBoardM True user_id board_id = fmap Just <$> getBoardM user_id board_id
 
 
@@ -252,7 +252,7 @@ insertBoardM m_sp user_id board_request = do
   case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spBoardId) of
     (Just forum_id, _) -> insertBoard_ByForumId user_id forum_id board_request
     (_, Just board_id) -> insertBoard_ByBoardId user_id board_id board_request
-    _                  -> left $ Error_InvalidArguments "forum_id, board_id"
+    _                  -> leftA $ Error_InvalidArguments "forum_id, board_id"
 
 
 
@@ -260,11 +260,11 @@ insertBoard_ByForumId :: UserId -> ForumId -> BoardRequest -> HandlerErrorEff (E
 insertBoard_ByForumId user_id forum_id board_request = do
 
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ForumIdM user_id forum_id
-    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
+    mustT $ mustBe_OwnerOf_ForumIdM user_id forum_id
+    sanitized_board_request <- mustT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
-    (Entity _ Forum{..})    <- isT $ selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
-    isT $ insertEntityDbE $ (boardRequestToBoard user_id forumOrgId forum_id Nothing sanitized_board_request) { boardCreatedAt = Just ts }
+    (Entity _ Forum{..})    <- mustT $ selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
+    mustT $ insertEntityDbE $ (boardRequestToBoard user_id forumOrgId forum_id Nothing sanitized_board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -272,11 +272,11 @@ insertBoard_ByBoardId :: UserId -> BoardId -> BoardRequest -> HandlerErrorEff (E
 insertBoard_ByBoardId user_id board_id board_request = do
 
   runEitherT $ do
-    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
-    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
+    mustT $ mustBe_OwnerOf_BoardIdM user_id board_id
+    sanitized_board_request <- mustT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
-    (Entity _ Board{..})    <- isT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
-    isT $ insertEntityDbE $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) sanitized_board_request) { boardCreatedAt = Just ts }
+    (Entity _ Board{..})    <- mustT $ selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
+    mustT $ insertEntityDbE $ (boardRequestToBoard user_id boardOrgId boardForumId (Just board_id) sanitized_board_request) { boardCreatedAt = Just ts }
 
 
 
@@ -285,14 +285,14 @@ updateBoardM user_id board_id board_request = do
 
   runEitherT $ do
 
-    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
-    sanitized_board_request <- isT $ isValidAppM $ validateBoardRequest board_request
+    mustT $ mustBe_OwnerOf_BoardIdM user_id board_id
+    sanitized_board_request <- mustT $ isValidAppM $ validateBoardRequest board_request
     ts                      <- lift timestampH'
 
     let
       Board{..} = (boardRequestToBoard user_id dummyId dummyId Nothing sanitized_board_request) { boardModifiedAt = Just ts }
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [BoardId ==. board_id, BoardActive ==. True]
       [BoardModifiedAt         =. boardModifiedAt
       ,BoardActivityAt         =. Just ts
@@ -308,22 +308,22 @@ updateBoardM user_id board_id board_request = do
       ,BoardGuard             +=. 1
       ]
 
-    isT $ selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
+    mustT $ selectFirstDbE [BoardUserId ==. user_id, BoardId ==. board_id, BoardActive ==. True] []
 
 
 
 deleteBoardM :: UserId -> BoardId -> HandlerErrorEff ()
 deleteBoardM user_id board_id = do
   runEitherT $ do
-    isT $ mustBe_OwnerOf_BoardIdM user_id board_id
-    isT $ deleteWhereDbE [BoardId ==. board_id, BoardActive ==. True]
+    mustT $ mustBe_OwnerOf_BoardIdM user_id board_id
+    mustT $ deleteWhereDbE [BoardId ==. board_id, BoardActive ==. True]
 
 
 
 
 
 getBoardStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff Value
-getBoardStatsM _ _ = left Error_NotImplemented
+getBoardStatsM _ _ = leftA Error_NotImplemented
 
 
 
@@ -333,7 +333,7 @@ getBoardStatM _ board_id = do
   num_threads      <- countDb [ThreadBoardId ==. board_id, ThreadActive ==. True]
   num_thread_posts <- countDb [ThreadPostBoardId ==. board_id, ThreadPostActive ==. True]
 
-  right $ BoardStatResponse {
+  rightA $ BoardStatResponse {
     boardStatResponseBoardId     = keyToInt64 board_id,
     boardStatResponseThreads     = fromIntegral num_threads,
     boardStatResponseThreadPosts = fromIntegral num_thread_posts,

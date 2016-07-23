@@ -25,7 +25,7 @@ getUserPacksM m_sp user_id = do
   case (lookupSpMay m_sp spUserIds) of
 
     Just user_ids  -> getUserPacks_ByUserIdsM m_sp user_id user_ids
-    _              -> left $ Error_InvalidArguments "user_ids"
+    _              -> leftA $ Error_InvalidArguments "user_ids"
 
 
 
@@ -39,7 +39,7 @@ getUserPackM user_id lookup_user_id = do
 getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
 getUserPacks_ByUserIdsM _ user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
-  right $ UserPackResponses {
+  rightA $ UserPackResponses {
     userPackResponses = users_packs
   }
 
@@ -50,17 +50,17 @@ getUserPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserPackResponse
 getUserPack_ByUserIdM user_id lookup_user_id = do
 
   lr <- runEitherT $ do
-    lookup_user <- isT $ getUserM user_id lookup_user_id
-    stats       <- isT $ getUserStatM user_id lookup_user_id
-    profile     <- isT $ getProfile_ByUserIdM user_id lookup_user_id
+    lookup_user <- mustT $ getUserM user_id lookup_user_id
+    stats       <- mustT $ getUserStatM user_id lookup_user_id
+    profile     <- mustT $ getProfile_ByUserIdM user_id lookup_user_id
 
     pure (lookup_user
          ,stats
          ,profile)
 
 
-  rehtie lr left $ \(lookup_user, stats, profile) -> do
-    right $ UserPackResponse {
+  rehtie lr leftA $ \(lookup_user, stats, profile) -> do
+    rightA $ UserPackResponse {
       userPackResponseUser       = userToResponse lookup_user,
       userPackResponseUserId     = entityKeyToInt64 lookup_user,
       userPackResponseStat       = stats,

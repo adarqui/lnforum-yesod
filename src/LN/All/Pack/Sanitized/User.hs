@@ -68,9 +68,9 @@ getUsersSanitizedPacks_ByEverythingM :: Maybe StandardParams -> UserId -> Handle
 getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
   e_user_ids <- getUsers_ByEverything_KeysM m_sp user_id
-  rehtie e_user_ids left $ \user_ids -> do
+  rehtie e_user_ids leftA $ \user_ids -> do
     user_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
-    right $ UserSanitizedPackResponses {
+    rightA $ UserSanitizedPackResponses {
       userSanitizedPackResponses = user_packs
     }
 
@@ -91,7 +91,7 @@ getUserSanitizedPackMH user_id lookup_user_name = getUserSanitizedPack_ByUserNam
 getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
   users_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
-  right $ UserSanitizedPackResponses {
+  rightA $ UserSanitizedPackResponses {
     userSanitizedPackResponses = users_packs
   }
 
@@ -102,7 +102,7 @@ getUserSanitizedPack_ByUserIdM :: UserId -> UserId -> HandlerErrorEff UserSaniti
 getUserSanitizedPack_ByUserIdM user_id lookup_user_id = do
 
   e_lookup_user <- getUserM user_id lookup_user_id
-  rehtie e_lookup_user left $ getUserSanitizedPack_ByUserM user_id
+  rehtie e_lookup_user leftA $ getUserSanitizedPack_ByUserM user_id
 
 
 
@@ -111,7 +111,7 @@ getUserSanitizedPack_ByUserNameM :: UserId -> Text -> HandlerErrorEff UserSaniti
 getUserSanitizedPack_ByUserNameM user_id lookup_user_name = do
 
   e_lookup_user <- getUserMH user_id lookup_user_name
-  rehtie e_lookup_user left $ getUserSanitizedPack_ByUserM user_id
+  rehtie e_lookup_user leftA $ getUserSanitizedPack_ByUserM user_id
 
 
 
@@ -120,13 +120,13 @@ getUserSanitizedPack_ByUserM :: UserId -> Entity User -> HandlerErrorEff UserSan
 getUserSanitizedPack_ByUserM user_id lookup_user = do
 
   lr <- runEitherT $ do
-    stats   <- isT $ getUserStatM user_id lookup_user_id
-    profile <- isT $ getProfile_ByUserIdM user_id lookup_user_id
+    stats   <- mustT $ getUserStatM user_id lookup_user_id
+    profile <- mustT $ getProfile_ByUserIdM user_id lookup_user_id
     pure (stats, profile)
 
-  rehtie lr left $ \(stats, profile) -> do
+  rehtie lr leftA $ \(stats, profile) -> do
 
-    right $ UserSanitizedPackResponse {
+    rightA $ UserSanitizedPackResponse {
       userSanitizedPackResponseUser      = userToSanitizedResponse lookup_user,
       userSanitizedPackResponseUserId    = keyToInt64 lookup_user_id,
       userSanitizedPackResponseStat      = stats,

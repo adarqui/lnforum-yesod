@@ -174,7 +174,7 @@ insertLikeM m_sp user_id like_request = do
 
       insertEntityDbE like
 
-    _ -> left $ Error_InvalidArguments "ent, ent_id"
+    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
 
 
 
@@ -222,7 +222,7 @@ deleteLikeM user_id like_id = do
 
 
 getLikeStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LikeStatResponses
-getLikeStatsM _ _ = left Error_NotImplemented
+getLikeStatsM _ _ = leftA Error_NotImplemented
 
 
 
@@ -232,7 +232,7 @@ getLikeStatM m_sp user_id _ = do
 
   case (lookupSpMay m_sp spThreadPostId) of
     Just thread_post_id -> getLikeStat_ByThreadPostIdM user_id thread_post_id
-    _                   -> left $ Error_InvalidArguments "thread_post_id"
+    _                   -> leftA $ Error_InvalidArguments "thread_post_id"
 
 
 
@@ -244,7 +244,7 @@ getLikeStat_ByThreadPostIdM _ thread_post_id = do
     opts   = map (\(Entity _ Like{..}) -> likeOpt) likes
     scores = map (\(Entity _ Like{..}) -> likeScore) likes
 
-  right $ LikeStatResponse {
+  rightA $ LikeStatResponse {
     likeStatResponseEnt     = Ent_ThreadPost,
     likeStatResponseEntId   = i64,
     likeStatResponseScore   = fromIntegral $ sum scores,

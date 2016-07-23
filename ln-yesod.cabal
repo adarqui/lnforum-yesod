@@ -200,6 +200,7 @@ library
                  , haskell-ebyam
                  , haskell-rehtie
                  , haskell-ifte
+                 , haskell-either-helpers
 
 executable         ln-yesod
     default-language:  Haskell2010

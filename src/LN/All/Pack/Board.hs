@@ -64,7 +64,7 @@ getBoardPacksM m_sp user_id = do
   case (lookupSpMay m_sp spForumId) of
 
     Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
-    _             -> left $ Error_InvalidArguments "forum_id"
+    _             -> leftA $ Error_InvalidArguments "forum_id"
 
 
 
@@ -72,7 +72,7 @@ getBoardPackM :: UserId -> BoardId -> HandlerErrorEff BoardPackResponse
 getBoardPackM user_id board_id = do
 
   e_board <- getBoardM user_id board_id
-  rehtie e_board left $ getBoardPack_ByBoardM user_id
+  rehtie e_board leftA $ getBoardPack_ByBoardM user_id
 
 
 
@@ -80,7 +80,7 @@ getBoardPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff Boar
 getBoardPackMH m_sp user_id board_name = do
 
   e_board <- getBoardMH m_sp user_id board_name
-  rehtie e_board left $ getBoardPack_ByBoardM user_id
+  rehtie e_board leftA $ getBoardPack_ByBoardM user_id
 
 
 
@@ -95,17 +95,17 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
   lr <- runEitherT $ do
 
-    board_stats         <- isT $ getBoardStatM user_id board_id
+    board_stats         <- mustT $ getBoardStatM user_id board_id
 
-    thread_posts        <- isT $ getThreadPosts_ByBoardIdM (Just sp) user_id board_id
+    thread_posts        <- mustT $ getThreadPosts_ByBoardIdM (Just sp) user_id board_id
 
     m_thread            <- case (headMay thread_posts) of
                                 Nothing                       -> pure Nothing
-                                Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getThreadM user_id threadPostThreadId)
+                                Just (Entity _ ThreadPost{..}) -> Just <$> (mustT $ getThreadM user_id threadPostThreadId)
 
     m_user              <- case (headMay thread_posts) of
                                 Nothing                        -> pure Nothing
-                                Just (Entity _ ThreadPost{..}) -> Just <$> (isT $ getUserM user_id threadPostUserId)
+                                Just (Entity _ ThreadPost{..}) -> Just <$> (mustT $ getUserM user_id threadPostUserId)
 
     user_perms_by_board <- lift $ userPermissions_ByBoardIdM user_id (entityKey board)
 
@@ -115,8 +115,8 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
          ,m_user
          ,user_perms_by_board)
 
-  rehtie lr left $ \(board_stats, thread_posts, m_thread, m_user, user_perms_by_board) -> do
-    right $ BoardPackResponse {
+  rehtie lr leftA $ \(board_stats, thread_posts, m_thread, m_user, user_perms_by_board) -> do
+    rightA $ BoardPackResponse {
       boardPackResponseBoard                = boardToResponse board,
       boardPackResponseBoardId              = keyToInt64 board_id,
       boardPackResponseStat                 = board_stats,
@@ -136,8 +136,8 @@ getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> Handler
 getBoardPacks_ByForumIdM m_sp user_id forum_id = do
 
   e_board_keys <- getBoards_ByForumId_KeysM m_sp user_id forum_id
-  rehtie e_board_keys left $ \board_keys -> do
+  rehtie e_board_keys leftA $ \board_keys -> do
     board_packs <- rights <$> mapM (\key -> getBoardPackM user_id key) board_keys
-    right $ BoardPackResponses {
+    rightA $ BoardPackResponses {
       boardPackResponses = board_packs
     }

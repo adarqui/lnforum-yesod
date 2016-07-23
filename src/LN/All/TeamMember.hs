@@ -148,7 +148,7 @@ getTeamMembersM m_sp user_id = do
 
   case (lookupSpMay m_sp spTeamId) of
     Just team_id -> getTeamMembers_ByTeamIdM m_sp user_id team_id
-    _            -> left $ Error_InvalidArguments "team_id"
+    _            -> leftA $ Error_InvalidArguments "team_id"
 
 
 
@@ -173,7 +173,7 @@ insertTeamMemberM m_sp user_id team_member_request = do
     (Just org_id, _)   -> insertTeamMember_JoinM user_id org_id team_member_request
     -- TODO FIXME
     -- (_, Just team_id)  -> insertTeamMember_InternalM user_id team_id team_member_request
-    _                  -> left $ Error_InvalidArguments "org_id, team_id"
+    _                  -> leftA $ Error_InvalidArguments "org_id, team_id"
 
 
 
@@ -186,18 +186,18 @@ insertTeamMember_JoinM user_id org_id team_member_request = do
   ts <- timestampH'
 
   e_team <- selectFirstDbE [TeamOrgId ==. org_id, TeamSystem ==. Team_Members, TeamActive ==. True] []
-  rehtie e_team left $ \(Entity team_id _) -> do
+  rehtie e_team leftA $ \(Entity team_id _) -> do
 
     let
       team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
     e_team' <- selectFirstDbE [TeamId ==. team_id] []
 
-    rehtie e_team' left $ \(Entity _ Team{..}) -> do
+    rehtie e_team' leftA $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
       case teamMembership of
         Membership_Join -> insertEntityDbE team_member
-        _               -> left $ Error_PermissionDenied
+        _               -> leftA $ Error_PermissionDenied
 
 
 
@@ -215,11 +215,11 @@ insertTeamMember_InternalM user_id org_id team_id team_member_request = do
 
   e_team <- selectFirstDbE [TeamId ==. team_id] []
 
-  rehtie e_team left $ \(Entity _ Team{..}) -> do
+  rehtie e_team leftA $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
       Membership_Join -> insertEntityDbE team_member
-      _               -> left $ Error_PermissionDenied
+      _               -> leftA $ Error_PermissionDenied
 
 
 
@@ -232,7 +232,7 @@ insertTeamMember_BypassM user_id org_id team_id team_member_request = do
     team_member = (teamMemberRequestToTeamMember user_id org_id team_id team_member_request) { teamMemberCreatedAt = Just ts }
 
   e_team <- selectFirstDbE [TeamId ==. team_id] []
-  rehtie e_team left $ \(Entity _ Team{..}) -> do
+  rehtie e_team leftA $ \(Entity _ Team{..}) -> do
     -- TODO FIXME: PROPER MEMBERSHIP RESTRICTIONS
     case teamMembership of
       _ -> insertEntityDbE team_member
@@ -266,19 +266,19 @@ updateTeamMemberM user_id team_member_id team_member_request = do
 deleteTeamMemberM :: UserId -> TeamMemberId -> HandlerErrorEff ()
 deleteTeamMemberM user_id team_member_id = do
   lr <- runEitherT $ do
-    (Entity _ TeamMember{..})         <- isT $ selectFirstDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
-    (Entity org_id Organization{..})  <- isT $ selectFirstDbE [OrganizationId ==. teamMemberOrgId, OrganizationActive ==. True] []
+    (Entity _ TeamMember{..})         <- mustT $ selectFirstDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True] []
+    (Entity org_id Organization{..})  <- mustT $ selectFirstDbE [OrganizationId ==. teamMemberOrgId, OrganizationActive ==. True] []
     is_owner                          <- lift $ isOwnerOf_OrganizationIdM user_id org_id
     is_team_member_owner              <- lift $ isOwnerOf_OrganizationIdM teamMemberUserId org_id
     liftIO $ print (organizationUserId == user_id, is_owner, is_team_member_owner, user_id == teamMemberUserId)
     case (organizationUserId == user_id, is_owner, is_team_member_owner, user_id == teamMemberUserId) of
-      (True, _,    _,     False) -> isT $ del
-      (_,   True,  False, _)     -> isT $ del
-      (_,   False, False, True)  -> isT $ del
+      (True, _,    _,     False) -> mustT $ del
+      (_,   True,  False, _)     -> mustT $ del
+      (_,   False, False, True)  -> mustT $ del
       _                          -> leftT Error_PermissionDenied
     pure ()
 
-  rehtie lr left (const $ right ())
+  rehtie lr leftA (const $ rightA ())
   where
   del = deleteWhereDbE [TeamMemberId ==. team_member_id, TeamMemberActive ==. True]
 
@@ -291,6 +291,6 @@ countTeamMembersM m_sp _ = do
 
     Just lookup_user_id -> do
       n <- countDb [TeamMemberUserId ==. lookup_user_id, TeamMemberActive ==. True]
-      right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
+      rightA $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> leftA $ Error_InvalidArguments "user_id"

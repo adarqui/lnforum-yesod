@@ -57,7 +57,7 @@ getForumPacksM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId) of
 
     Just org_id   -> getForumPacks_ByOrganizationIdM m_sp user_id org_id
-    _             -> left $ Error_InvalidArguments "organization_id"
+    _             -> leftA $ Error_InvalidArguments "organization_id"
 
 
 
@@ -65,7 +65,7 @@ getForumPackM :: UserId -> ForumId -> HandlerErrorEff ForumPackResponse
 getForumPackM user_id forum_id = do
 
   e_forum <- getForumM user_id forum_id
-  rehtie e_forum left $ \forum -> getForumPack_ByForumM user_id forum
+  rehtie e_forum leftA $ \forum -> getForumPack_ByForumM user_id forum
 
 
 
@@ -73,7 +73,7 @@ getForumPackMH :: Maybe StandardParams -> UserId -> Text -> HandlerErrorEff Foru
 getForumPackMH m_sp user_id forum_name = do
 
   e_forum <- getForumMH m_sp user_id forum_name
-  rehtie e_forum left $ \forum -> getForumPack_ByForumM user_id forum
+  rehtie e_forum leftA $ \forum -> getForumPack_ByForumM user_id forum
 
 
 
@@ -81,9 +81,9 @@ getForumPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> Organizatio
 getForumPacks_ByOrganizationIdM m_sp user_id org_id = do
 
   e_forums       <- getForums_ByOrganizationIdM m_sp user_id org_id
-  rehtie e_forums left $ \forums -> do
+  rehtie e_forums leftA $ \forums -> do
     forums_packs <- fmap rights (mapM (\forum -> getForumPack_ByForumM user_id forum) forums)
-    right $ ForumPackResponses {
+    rightA $ ForumPackResponses {
       forumPackResponses = forums_packs
     }
 
@@ -93,11 +93,11 @@ getForumPack_ByForumM :: UserId -> Entity Forum -> HandlerErrorEff ForumPackResp
 getForumPack_ByForumM user_id forum@(Entity _ Forum{..}) = do
 
   e_forum_stats       <- getForumStatM user_id (entityKey forum)
-  rehtie e_forum_stats left $ \forum_stats -> do
+  rehtie e_forum_stats leftA $ \forum_stats -> do
 
     user_perms_by_forum <- userPermissions_ByForumIdM user_id (entityKey forum)
 
-    right $ ForumPackResponse {
+    rightA $ ForumPackResponse {
       forumPackResponseForum            = forumToResponse forum,
       forumPackResponseForumId          = forum_id,
       forumPackResponseStat             = forum_stats,

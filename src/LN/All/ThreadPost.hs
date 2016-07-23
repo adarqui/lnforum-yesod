@@ -190,7 +190,7 @@ getThreadPostsM m_sp user_id = do
     (_, Just board_id, _, _)       -> getThreadPosts_ByBoardIdM m_sp user_id board_id
     (_, _, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
     (_, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-    _                              -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+    _                              -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
@@ -233,7 +233,7 @@ insertThreadPostM m_sp user_id thread_post_request = do
     (_, Just thread_post_id) -> insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request
 
                              -- TODO FIXME: Error_InvalidArguments "Must supply a thread_id or thread_post_id"
-    _                        -> left $ Error_InvalidArguments "thread_id, thread_post_id"
+    _                        -> leftA $ Error_InvalidArguments "thread_id, thread_post_id"
 
 
 
@@ -242,9 +242,9 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
   runEitherT $ do
     --  see mustBe_MemberOf_OrganizationIdM below
-    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
-    (Entity _ Thread{..})         <- isT $ selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
-    isT $ mustBe_MemberOf_OrganizationIdM user_id threadOrgId
+    sanitized_thread_post_request <- mustT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    (Entity _ Thread{..})         <- mustT $ selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
+    mustT $ mustBe_MemberOf_OrganizationIdM user_id threadOrgId
     ts                            <- lift timestampH'
 
     let
@@ -252,9 +252,9 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
         (threadPostRequestToThreadPost user_id threadOrgId threadForumId threadBoardId thread_id Nothing sanitized_thread_post_request)
           { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-    thread_post_entity <- isT $ insertEntityDbE thread_post
+    thread_post_entity <- mustT $ insertEntityDbE thread_post
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ ThreadId ==. thread_id ]
       [ ThreadActivityAt =. Just ts ]
 
@@ -271,9 +271,9 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
   runEitherT $ do
     -- see mustBe_MemberOf_OrganizationIdM below
-    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
-    (Entity _ ThreadPost{..})     <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
-    isT $ mustBe_MemberOf_OrganizationIdM user_id threadPostOrgId
+    sanitized_thread_post_request <- mustT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    (Entity _ ThreadPost{..})     <- mustT $ selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+    mustT $ mustBe_MemberOf_OrganizationIdM user_id threadPostOrgId
     ts                            <- lift timestampH'
 
     let
@@ -281,9 +281,9 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
         (threadPostRequestToThreadPost user_id threadPostOrgId threadPostForumId threadPostBoardId threadPostThreadId (Just thread_post_id) sanitized_thread_post_request)
           { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-    thread_post_entity <- isT $ insertEntityDbE thread_post
+    thread_post_entity <- mustT $ insertEntityDbE thread_post
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ ThreadId ==. threadPostThreadId ]
       [ ThreadActivityAt =. Just ts ]
 
@@ -296,13 +296,13 @@ updateThreadPostM :: UserId -> ThreadPostId -> ThreadPostRequest -> HandlerError
 updateThreadPostM user_id thread_post_id thread_post_request = do
 
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
-    sanitized_thread_post_request <- isT $ isValidAppM $ validateThreadPostRequest thread_post_request
+    mustT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
+    sanitized_thread_post_request <- mustT $ isValidAppM $ validateThreadPostRequest thread_post_request
     ts                            <- lift timestampH'
 
     let
       ThreadPost{..} = (threadPostRequestToThreadPost user_id dummyId dummyId dummyId dummyId Nothing sanitized_thread_post_request) { threadPostModifiedAt = Just ts }
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id ]
       [ ThreadPostModifiedAt  =. threadPostModifiedAt
       , ThreadPostTitle       =. threadPostTitle
@@ -312,15 +312,15 @@ updateThreadPostM user_id thread_post_id thread_post_request = do
       , ThreadPostGuard      +=. 1
       ]
 
-    isT $ selectFirstDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+    mustT $ selectFirstDbE [ThreadPostUserId ==. user_id, ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 
 deleteThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 deleteThreadPostM user_id thread_post_id = do
   runEitherT $ do
-    isT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
-    isT $ deleteWhereDbE [ThreadPostId ==. thread_post_id]
+    mustT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
+    mustT $ deleteWhereDbE [ThreadPostId ==. thread_post_id]
 
 
 
@@ -332,14 +332,14 @@ countThreadPostsM m_sp _ = do
 
     Just thread_id -> do
       n <- countDb [ ThreadPostThreadId ==. thread_id ]
-      right $ CountResponses [CountResponse (keyToInt64 thread_id) (fromIntegral n)]
+      rightA $ CountResponses [CountResponse (keyToInt64 thread_id) (fromIntegral n)]
 
-    _              -> left $ Error_InvalidArguments "thread_id"
+    _              -> leftA $ Error_InvalidArguments "thread_id"
 
 
 
 getThreadPostStatsM :: UserId -> HandlerErrorEff ThreadPostStatResponse
-getThreadPostStatsM _ = left Error_NotImplemented
+getThreadPostStatsM _ = leftA Error_NotImplemented
 
 
 
@@ -356,7 +356,7 @@ getThreadPostStatM _ thread_post_id = do
   let
     likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes
 
-  right $ ThreadPostStatResponse {
+  rightA $ ThreadPostStatResponse {
     threadPostStatResponseThreadPostId = keyToInt64 thread_post_id,
     threadPostStatResponseLikes        = fromIntegral $ length $ filter (==L.Like) likes_flat,
     threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==L.Neutral) likes_flat,

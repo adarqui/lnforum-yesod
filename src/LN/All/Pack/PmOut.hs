@@ -47,9 +47,9 @@ getPmOutPackR thread_post_id = run $ do
 getPmOutPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff PmOutPackResponses
 getPmOutPacksM m_sp user_id = do
   e_pm_outs <- getPmOutsM m_sp user_id
-  rehtie e_pm_outs left $ \pm_outs -> do
+  rehtie e_pm_outs leftA $ \pm_outs -> do
     pm_out_packs <- rights <$> mapM (\pm_out -> getPmOutPack_ByPmOutM user_id pm_out) pm_outs
-    right $ PmOutPackResponses {
+    rightA $ PmOutPackResponses {
       pmOutPackResponses = pm_out_packs
     }
 
@@ -58,7 +58,7 @@ getPmOutPacksM m_sp user_id = do
 getPmOutPackM :: UserId -> PmOutId -> HandlerErrorEff PmOutPackResponse
 getPmOutPackM user_id pm_out_id = do
   e_pm_out <- getPmOutM user_id pm_out_id
-  rehtie e_pm_out left $ getPmOutPack_ByPmOutM user_id
+  rehtie e_pm_out leftA $ getPmOutPack_ByPmOutM user_id
 
 
 
@@ -67,8 +67,8 @@ getPmOutPack_ByPmOutM user_id pmOut@(Entity pm_out_id PmOut{..}) = do
 
   e_pm_out_user <- getUserM user_id pmOutUserId
 
-  rehtie e_pm_out_user left $ \pm_out_user -> do
-    right $ PmOutPackResponse {
+  rehtie e_pm_out_user leftA $ \pm_out_user -> do
+    rightA $ PmOutPackResponse {
       pmOutPackResponsePmOut   = pmOutToResponse pmOut,
       pmOutPackResponsePmOutId = keyToInt64 pm_out_id,
       pmOutPackResponseUser    = userToSanitizedResponse pm_out_user,

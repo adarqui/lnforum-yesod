@@ -133,7 +133,7 @@ getTeamsM m_sp user_id = do
   case (lookupSpMay m_sp spOrganizationId, lookupSpMay m_sp spUserId) of
     (Just org_id, Nothing)         -> getTeams_ByOrganizationIdM m_sp user_id org_id
     (Nothing, Just lookup_user_id) -> getTeams_ByUserIdM m_sp user_id lookup_user_id
-    _                              -> left $ Error_InvalidArguments "org_id, user_id"
+    _                              -> leftA $ Error_InvalidArguments "org_id, user_id"
 
 
 
@@ -184,16 +184,16 @@ insert_SystemTeamsM user_id org_id = do
 
   void $ runEitherT $ do
     -- bg job: Insert owners team
-    (Entity owners_id _)  <- isT $ insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
-    void $ isT $ insertTeamMember_BypassM user_id org_id owners_id (TeamMemberRequest 0)
+    (Entity owners_id _)  <- mustT $ insertTeam_InternalM user_id org_id Team_Owners (TeamRequest Membership_InviteOnly Nothing [] Public 0)
+    void $ mustT $ insertTeamMember_BypassM user_id org_id owners_id (TeamMemberRequest 0)
 
     -- bg job: Insert members team
-    (Entity members_id _) <- isT $ insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
-    void $ isT $ insertTeamMember_BypassM user_id org_id members_id (TeamMemberRequest 0)
+    (Entity members_id _) <- mustT $ insertTeam_InternalM user_id org_id Team_Members (TeamRequest Membership_Join Nothing [] Public 0)
+    void $ mustT $ insertTeamMember_BypassM user_id org_id members_id (TeamMemberRequest 0)
 
     pure ()
 
-  right ()
+  rightA ()
 
 
 
@@ -227,12 +227,12 @@ deleteTeamM user_id team_id = do
 
 
 getTeamCountM :: HandlerErrorEff Int
-getTeamCountM = right 2
+getTeamCountM = rightA 2
 
 
 
 getTeamStatM :: UserId -> TeamId -> HandlerErrorEff TeamStatResponse
 getTeamStatM _ _ = do
-  right $ TeamStatResponse {
+  rightA $ TeamStatResponse {
     teamStatResponseMembers = 0 -- TODO FIXME
   }

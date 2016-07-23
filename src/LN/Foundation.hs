@@ -278,7 +278,7 @@ myMaybeAuthId = do
         pure $ fromPathPiece $ T.pack $ show $ keyToInt64 apiUserId
 
   -- | Allows us to become any user .. only super users can do this
-  -- I hate this but, right now, it's essential for automated testing.
+  -- I hate this but, rightA now, it's essential for automated testing.
   -- Format: <key>:<user_id>
   --
   try_as_user_authorization authHeader = do

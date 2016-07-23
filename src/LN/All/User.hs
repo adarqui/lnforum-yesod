@@ -88,7 +88,7 @@ getUserH _ = run $ do
   where
   go :: HandlerErrorEff ()
   go = do
-    left Error_NotImplemented
+    leftA Error_NotImplemented
 
 
 
@@ -260,7 +260,7 @@ insertUsersM user_id user_request = do
   is_super_user <- isSuperM user_id
   if is_super_user
     then insertUsersM' user_id user_request
-    else left Error_PermissionDenied
+    else leftA Error_PermissionDenied
 
 
 
@@ -269,7 +269,7 @@ insertUsersM' _ user_request = do
 
   runEitherT $ do
 
-    sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
+    sanitized_user_request <- mustT $ isValidAppM $ validateUserRequest user_request
     ts                     <- lift timestampH'
     let
       email_md5 = md5Text (userRequestEmail sanitized_user_request)
@@ -279,7 +279,7 @@ insertUsersM' _ user_request = do
         , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
       }
 
-    new_user <- isT $ insertEntityByDbE user
+    new_user <- mustT $ insertEntityByDbE user
     -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
     void $ liftIO $ insertUsers_TasksM new_user
     pure new_user
@@ -306,7 +306,7 @@ updateUserM _ lookup_user_id user_request = do
 
   runEitherT $ do
 
-    sanitized_user_request <- isT $ isValidAppM $ validateUserRequest user_request
+    sanitized_user_request <- mustT $ isValidAppM $ validateUserRequest user_request
     ts                     <- lift timestampH'
 
     let
@@ -318,7 +318,7 @@ updateUserM _ lookup_user_id user_request = do
         , userModifiedAt = Just ts
       }
 
-    isT $ updateWhereDbE
+    mustT $ updateWhereDbE
       [ UserId ==. lookup_user_id, UserActive ==. True ]
 
       [ UserModifiedAt =. userModifiedAt
@@ -330,7 +330,7 @@ updateUserM _ lookup_user_id user_request = do
       , UserGuard      +=. 1
       ]
 
-    isT $ selectFirstDbE [UserId ==. lookup_user_id] []
+    mustT $ selectFirstDbE [UserId ==. lookup_user_id] []
 
 
 
@@ -349,7 +349,7 @@ deleteUserM user_id lookup_user_id = do
       deleteDbE lookup_user_id
 
     else
-      left Error_PermissionDenied
+      leftA Error_PermissionDenied
 
 
 
@@ -359,17 +359,17 @@ countUsersM m_sp _ = do
 
   case (lookupSpMay m_sp spOrganizationId) of
 
-    Just _ -> left Error_NotImplemented
+    Just _ -> leftA Error_NotImplemented
 
     _      -> do
       n <- countDb [UserActive ==. True]
-      right $ CountResponses [CountResponse 0 (fromIntegral n)]
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
 
 getUserStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedStatResponses
-getUserStatsM _ _ = left Error_NotImplemented
+getUserStatsM _ _ = leftA Error_NotImplemented
 
 
 
@@ -380,7 +380,7 @@ getUserStatM _ lookup_user_id = do
 
   let (threads,thread_posts,resources,leurons) = (E.unValue a, E.unValue b, E.unValue c, E.unValue d)
 
-  right $ UserSanitizedStatResponse {
+  rightA $ UserSanitizedStatResponse {
     userSanitizedStatResponseUserId      = keyToInt64 lookup_user_id,
     userSanitizedStatResponseThreads     = threads,
     userSanitizedStatResponseThreadPosts = thread_posts,

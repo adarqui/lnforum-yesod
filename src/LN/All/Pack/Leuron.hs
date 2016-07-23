@@ -50,11 +50,11 @@ getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackR
 getLeuronPacksM m_sp user_id = do
 
   e_leurons <- getLeuronsM m_sp user_id
-  rehtie e_leurons left $ \leurons -> do
+  rehtie e_leurons leftA $ \leurons -> do
 
     leuron_packs <- fmap rights $ mapM (\leuron -> getLeuronPack_ByLeuronM user_id leuron) leurons
 
-    right $ LeuronPackResponses {
+    rightA $ LeuronPackResponses {
       leuronPackResponses = leuron_packs
     }
 
@@ -64,7 +64,7 @@ getLeuronPackM :: UserId -> LeuronId -> HandlerErrorEff LeuronPackResponse
 getLeuronPackM user_id leuron_id = do
 
   e_leuron <- getLeuronM user_id leuron_id
-  rehtie e_leuron left $ \leuron -> getLeuronPack_ByLeuronM user_id leuron
+  rehtie e_leuron leftA $ \leuron -> getLeuronPack_ByLeuronM user_id leuron
 
 
 
@@ -72,17 +72,17 @@ getLeuronPack_ByLeuronM :: UserId -> Entity Leuron -> HandlerErrorEff LeuronPack
 getLeuronPack_ByLeuronM user_id leuron@(Entity leuron_id Leuron{..}) = do
 
   lr <- runEitherT $ do
-    leuron_user     <- isT $ getUserM user_id leuronUserId
-    leuron_stat     <- isT $ getLeuronStatM user_id leuron_id
-    leuron_training <- isT $ insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View 0
+    leuron_user     <- mustT $ getUserM user_id leuronUserId
+    leuron_stat     <- mustT $ getLeuronStatM user_id leuron_id
+    leuron_training <- mustT $ insertLeuronTrainingM user_id leuron_id $ LeuronTrainingRequest LTS_View 0
 
     pure (leuron_user
          ,leuron_stat
          ,leuron_training)
 
-  rehtie lr left $ \(leuron_user, leuron_stat, leuron_training) -> do
+  rehtie lr leftA $ \(leuron_user, leuron_stat, leuron_training) -> do
 
-    right $ LeuronPackResponse {
+    rightA $ LeuronPackResponse {
       leuronPackResponseLeuron      = leuronToResponse leuron,
       leuronPackResponseLeuronId    = keyToInt64 leuron_id,
       leuronPackResponseUser        = userToSanitizedResponse leuron_user,

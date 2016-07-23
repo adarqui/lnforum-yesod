@@ -10,7 +10,7 @@ module LN.All.Api (
   -- Model/Function
   apiRequestToApi,
   apiToResponse,
-  apisToResponses,
+  apmustToResponses,
 
   -- Model/Internal
   getApisM,
@@ -36,7 +36,7 @@ getApisR :: Handler Value
 getApisR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
-  errorOrJSON apisToResponses $ getApisM (pure sp) user_id
+  errorOrJSON apmustToResponses $ getApisM (pure sp) user_id
 
 
 
@@ -102,8 +102,8 @@ apiToResponse (Entity api_id Api{..}) = ApiResponse {
 
 
 
-apisToResponses :: [Entity Api] -> ApiResponses
-apisToResponses apis = ApiResponses {
+apmustToResponses :: [Entity Api] -> ApiResponses
+apmustToResponses apis = ApiResponses {
   apiResponses = map apiToResponse apis
 }
 

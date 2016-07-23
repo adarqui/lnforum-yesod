@@ -51,8 +51,8 @@ isSuperM user_id = do
 mustBe_SameUserM :: UserId -> UserId -> HandlerErrorEff ()
 mustBe_SameUserM user_id lookup_user_id = do
   if user_id == lookup_user_id
-    then right ()
-    else left Error_PermissionDenied
+    then rightA ()
+    else leftA Error_PermissionDenied
 
 
 
@@ -60,8 +60,8 @@ mustBe_OwnerOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerErrorEff ()
 mustBe_OwnerOf_OrganizationIdM user_id org_id = do
   is_owner <- isOwnerOf_OrganizationIdM user_id org_id
   if is_owner
-    then right ()
-    else left Error_PermissionDenied
+    then rightA ()
+    else leftA Error_PermissionDenied
 
 
 
@@ -69,24 +69,24 @@ mustBe_MemberOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerErrorEff (
 mustBe_MemberOf_OrganizationIdM user_id org_id = do
   is_owner <- isMemberOf_OrganizationIdM user_id org_id
   if is_owner
-    then right ()
-    else left Error_PermissionDenied
+    then rightA ()
+    else leftA Error_PermissionDenied
 
 
 
 mustBe_OwnerOf_ForumIdM :: UserId -> ForumId -> HandlerErrorEff ()
 mustBe_OwnerOf_ForumIdM user_id forum_id = do
   runEitherT $ do
-    (Entity _ Forum{..}) <- isT $ selectFirstDbE [ForumId ==. forum_id] []
-    isT $ mustBe_OwnerOf_OrganizationIdM user_id forumOrgId
+    (Entity _ Forum{..}) <- mustT $ selectFirstDbE [ForumId ==. forum_id] []
+    mustT $ mustBe_OwnerOf_OrganizationIdM user_id forumOrgId
 
 
 
 mustBe_OwnerOf_BoardIdM :: UserId -> BoardId -> HandlerErrorEff ()
 mustBe_OwnerOf_BoardIdM user_id board_id = do
   runEitherT $ do
-    (Entity _ Board{..}) <- isT $ selectFirstDbE [BoardId ==. board_id] []
-    isT $ mustBe_OwnerOf_OrganizationIdM user_id boardOrgId
+    (Entity _ Board{..}) <- mustT $ selectFirstDbE [BoardId ==. board_id] []
+    mustT $ mustBe_OwnerOf_OrganizationIdM user_id boardOrgId
 
 
 
@@ -94,8 +94,8 @@ mustBe_OwnerOf_ThreadIdM :: UserId -> ThreadId -> HandlerErrorEff ()
 mustBe_OwnerOf_ThreadIdM user_id thread_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
-    (Entity _ Thread{..}) <- isT $ selectFirstDbE [ThreadId ==. thread_id] []
-    void $ isT $ do
+    (Entity _ Thread{..}) <- mustT $ selectFirstDbE [ThreadId ==. thread_id] []
+    void $ mustT $ do
       choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadOrgId]
 
 
@@ -104,8 +104,8 @@ mustBe_OwnerOf_ThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
-    (Entity _ ThreadPost{..}) <- isT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
-    void $ isT $
+    (Entity _ ThreadPost{..}) <- mustT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
+    void $ mustT $
       choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadPostOrgId]
 
 

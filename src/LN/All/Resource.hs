@@ -261,12 +261,12 @@ countResourcesM m_sp _ = do
     -- TODO FIXME: not handling argument properly
     _ -> do
       n <- countDb [ResourceActive ==. True]
-      right $ CountResponses [CountResponse 0 (fromIntegral n)]
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
 getResourceStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourceStatResponse
-getResourceStatsM _ _ = left Error_NotImplemented
+getResourceStatsM _ _ = leftA Error_NotImplemented
 
 
 
@@ -285,7 +285,7 @@ getResourceStatM _ resource_id = do
   let
     likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes
 
-  right $ ResourceStatResponse {
+  rightA $ ResourceStatResponse {
     resourceStatResponseResourceId = keyToInt64 resource_id,
     resourceStatResponseLeurons    = fromIntegral leuron_count,
     resourceStatResponseLikes      = fromIntegral $ length $ filter (==L.Like) likes_flat,

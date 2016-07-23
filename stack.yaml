@@ -9,6 +9,7 @@ packages:
 - '../ln-validate'
 - '../haskell-ln-types'
 - '../haskell-api-helpers-shared'
+- '../haskell-either-helpers'
 - '../haskell-ebyam'
 - '../haskell-rehtie'
 - '../haskell-ifte'

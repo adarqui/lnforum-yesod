@@ -64,7 +64,7 @@ getOrganizationPackM :: UserId -> OrganizationId -> HandlerErrorEff Organization
 getOrganizationPackM user_id org_id = do
 
   e_organization <- getOrganizationM user_id org_id
-  rehtie e_organization left $ \organization -> do
+  rehtie e_organization leftA $ \organization -> do
     getOrganizationPack_ByOrganizationM user_id organization
 
 
@@ -79,10 +79,10 @@ getOrganizationPacks_ByEverythingM m_sp user_id = do
 
   e_organizations        <- getOrganizations_ByEverythingM m_sp user_id
 
-  rehtie e_organizations left $ \organizations -> do
+  rehtie e_organizations leftA $ \organizations -> do
 
     organization_packs <- fmap rights (mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations)
-    right $ OrganizationPackResponses {
+    rightA $ OrganizationPackResponses {
       organizationPackResponses = organization_packs
     }
 
@@ -93,7 +93,7 @@ getOrganizationPack_ByOrganizationName user_id organization_name = do
 
   e_organization <- getOrganization_ByOrganizationNameM user_id organization_name
   case e_organization of
-    Left err           -> left err
+    Left err           -> leftA err
     Right organization -> getOrganizationPack_ByOrganizationM user_id organization
 
 
@@ -103,8 +103,8 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
 
   lr <- runEitherT $ do
 
-    organization_user  <- isT $ getUserM user_id organizationUserId
-    organization_stats <- isT $ getOrganizationStatM user_id (entityKey organization)
+    organization_user  <- mustT $ getUserM user_id organizationUserId
+    organization_stats <- mustT $ getOrganizationStatM user_id (entityKey organization)
     user_perms_by_org  <- lift $ userPermissions_ByOrganizationIdM user_id org_id
     user_teams         <- lift $ userTeamsOf_OrganizationIdM user_id org_id
 
@@ -113,9 +113,9 @@ getOrganizationPack_ByOrganizationM user_id organization@(Entity org_id Organiza
          ,user_perms_by_org
          ,user_teams)
 
-  rehtie lr left $ \(organization_user, organization_stats, user_perms_by_org, user_teams) -> do
+  rehtie lr leftA $ \(organization_user, organization_stats, user_perms_by_org, user_teams) -> do
 
-      right $ OrganizationPackResponse {
+      rightA $ OrganizationPackResponse {
         organizationPackResponseOrganization   = organizationToResponse organization,
         organizationPackResponseOrganizationId = keyToInt64 org_id,
         organizationPackResponseUser           = userToSanitizedResponse organization_user,

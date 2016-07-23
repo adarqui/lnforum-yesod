@@ -282,7 +282,7 @@ insertLeuronM m_sp user_id leuron_request = do
 
       m_resource <- selectFirstDb [ResourceUserId ==. user_id, ResourceId ==. resource_id, ResourceActive ==. True] []
       case m_resource of
-        Nothing -> left Error_NotFound
+        Nothing -> leftA Error_NotFound
         Just _  -> do
           entity@(Entity leuron_id _) <- insertEntityDb leuron
           -- background job
@@ -293,9 +293,9 @@ insertLeuronM m_sp user_id leuron_request = do
           void $ insertLeuronRedis user_id resource_id leuron_id
           --
           -- end background job
-          right entity
+          rightA entity
 
-    _ -> left $ Error_InvalidArguments "resource_id"
+    _ -> leftA $ Error_InvalidArguments "resource_id"
 
 
 
@@ -331,7 +331,7 @@ updateLeuronM user_id leuron_id leuron_request = do
 deleteLeuronM :: UserId -> LeuronId -> HandlerErrorEff ()
 deleteLeuronM user_id leuron_id = do
   e_leuron <- getLeuronM user_id leuron_id
-  rehtie e_leuron left $ \(Entity _ Leuron{..}) -> do
+  rehtie e_leuron leftA $ \(Entity _ Leuron{..}) -> do
 
     -- Remove from database
     deleteWhereDb [ LeuronUserId ==. user_id, LeuronId ==. leuron_id ]
@@ -339,7 +339,7 @@ deleteLeuronM user_id leuron_id = do
     -- Remove from redis
     void $ deleteLeuronRedis user_id leuronResourceId leuron_id
 
-    right ()
+    rightA ()
 
 
 
@@ -360,7 +360,7 @@ insertLeuronCategoriesM leuron_id resource_id LeuronRequest{..} = do
       (\cat -> void $ R.sadd (resourceCategoriesKey resource_id cat) [encodeStrict cat])
       (depListToLower leuronRequestCategories)
 
-  right ()
+  rightA ()
 
 
 
@@ -385,7 +385,7 @@ insertLeuronRedis user_id resource_id leuron_id = do
     --
     void $ R.sadd (resourcesKey resource_id) [keyToInt64Sbs leuron_id]
 
-  right ()
+  rightA ()
 
 
 
@@ -399,7 +399,7 @@ deleteLeuronRedis user_id resource_id leuron_id = do
     void $ R.zrem (usersZLeuronsKey user_id) [keyToInt64Sbs leuron_id]
     void $ R.srem (resourcesKey resource_id) [keyToInt64Sbs leuron_id]
 
-  right ()
+  rightA ()
 
 
 
@@ -407,19 +407,19 @@ countLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponse
 countLeuronsM _ _ = do
 
   n <- countDb [LeuronActive ==. True]
-  right $ CountResponses [CountResponse 0 (fromIntegral n)]
+  rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
 getLeuronStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronStatResponses
-getLeuronStatsM _ _ = left Error_NotImplemented
+getLeuronStatsM _ _ = leftA Error_NotImplemented
 
 
 
 getLeuronStatM :: UserId -> LeuronId -> HandlerErrorEff LeuronStatResponse
 getLeuronStatM _ leuron_id = do
 
-  right $ LeuronStatResponse {
+  rightA $ LeuronStatResponse {
     leuronStatResponseLeuronId    = keyToInt64 leuron_id,
     leuronStatResponseLikes       = 0,
     leuronStatResponseNeutral     = 0,

@@ -2,6 +2,7 @@
 {-# LANGUAGE KindSignatures #-}
 
 module LN.Control (
+  module A,
   HandlerEff,
   HandlerErrorEff,
   ControlM,
@@ -12,22 +13,14 @@ module LN.Control (
   InternalControlState (..),
   run,
   ErrorEff,
-  left,
-  right,
   unknownError,
-  ApplicationError (..),-- re-export
-  leftT,
-  rightT,
-  isT,
-  choiceEitherM
+  ApplicationError (..), -- re-export
 ) where
 
 
 
-import           Control.Monad.Loops        (firstM)
-import qualified Control.Monad.Trans.Either as Either
 import           Control.Monad.Trans.RWS
-import           Data.Either                (isRight)
+import           Haskell.Helpers.Either     as A
 import           LN.Cache
 import           LN.Import
 import           LN.T.Error
@@ -71,44 +64,5 @@ type ErrorEff = Either ApplicationError
 
 
 
-left :: forall a (f :: * -> *) b.  Applicative f => a -> f (Either a b)
-left  = pure . Left
-
-
-
-right :: forall a (f :: * -> *) a1.  Applicative f => a -> f (Either a1 a)
-right = pure . Right
-
-
-
-unknownError :: forall (f :: * -> *) b.  Applicative f => f (Either ApplicationError b)
-unknownError = left Error_Unexpected
-
-
-
-leftT :: forall e (m :: * -> *) a.  Monad m => e -> Either.EitherT e m a
-leftT = Either.left
-
-
-
-rightT :: forall a e (m :: * -> *).  Monad m => a -> Either.EitherT e m a
-rightT = Either.right
-
-
-
-isT :: forall b (m :: * -> *) e.  Monad m => m (Either e b) -> Either.EitherT e m b
-isT go = do
-  x <- lift go
-  case x of
-    Left err -> leftT err
-    Right v  -> rightT v
-
-
-
-
-choiceEitherM :: forall (m :: * -> *) a b def. Monad m => def -> [m (Either a b)] -> m (Either def (m (Either a b)))
-choiceEitherM err acts = do
-  m <- firstM (fmap isRight) acts
-  case m of
-    Nothing -> left err
-    Just r  -> right r
+unknownError :: forall (f :: * -> *) b. Applicative f => f (Either ApplicationError b)
+unknownError = leftA Error_Unexpected

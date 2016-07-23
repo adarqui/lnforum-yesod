@@ -60,7 +60,7 @@ getThreadPostPacksM m_sp user_id = do
 
     (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id
 
-    (_, _, _)                   -> left $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+    (_, _, _)                   -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
@@ -69,9 +69,9 @@ getThreadPostPacks_ByForumIdM m_sp user_id forum_id = do
 
   e_thread_posts <- getThreadPosts_ByForumIdM m_sp user_id forum_id
 
-  rehtie e_thread_posts left $ \thread_posts -> do
+  rehtie e_thread_posts leftA $ \thread_posts -> do
     thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
-    right $ ThreadPostPackResponses {
+    rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
 
@@ -82,9 +82,9 @@ getThreadPostPacks_ByThreadIdM m_sp user_id thread_id = do
 
   e_thread_posts <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
 
-  rehtie e_thread_posts left $ \thread_posts -> do
+  rehtie e_thread_posts leftA $ \thread_posts -> do
     thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
-    right $ ThreadPostPackResponses {
+    rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
 
@@ -95,9 +95,9 @@ getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
   e_thread_posts <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
 
-  rehtie e_thread_posts left $ \thread_posts -> do
+  rehtie e_thread_posts leftA $ \thread_posts -> do
     thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
-    right $ ThreadPostPackResponses {
+    rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
 
@@ -107,7 +107,7 @@ getThreadPostPackM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerE
 getThreadPostPackM m_sp user_id thread_post_id = do
 
   e_thread_post <- getThreadPostM user_id thread_post_id
-  rehtie e_thread_post left $ getThreadPostPack_ByThreadPostM m_sp user_id
+  rehtie e_thread_post leftA $ getThreadPostPack_ByThreadPostM m_sp user_id
 
 
 
@@ -116,8 +116,8 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
   lr <- runEitherT $ do
 
-    thread_post_user <- isT $ getUserM user_id threadPostUserId
-    thread_post_stat <- isT $ getThreadPostStatM user_id thread_post_id
+    thread_post_user <- mustT $ getUserM user_id threadPostUserId
+    thread_post_stat <- mustT $ getThreadPostStatM user_id thread_post_id
     -- doesn't matter if we have a Like or not
     m_thread_post_like <- (either (const $ Nothing) Just) <$> (lift $ getLike_ByThreadPostIdM user_id thread_post_id)
 
@@ -125,10 +125,10 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     user_perms_by_thread_post <- lift $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
 
-    m_org    <- isT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
-    m_forum  <- isT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
-    m_board  <- isT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
-    m_thread <- isT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
+    m_org    <- mustT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
+    m_forum  <- mustT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
+    m_board  <- mustT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
+    m_thread <- mustT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
 
     pure (thread_post_user
          ,thread_post_stat
@@ -141,10 +141,10 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
   liftIO $ print lr
 
-  rehtie lr left $
+  rehtie lr leftA $
     \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
 
-      right $ ThreadPostPackResponse {
+      rightA $ ThreadPostPackResponse {
         threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
         threadPostPackResponseThreadPostId     = keyToInt64 thread_post_id,
         threadPostPackResponseUser             = userToSanitizedResponse thread_post_user,

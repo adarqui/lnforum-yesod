@@ -170,7 +170,7 @@ getGlobalGroupsM m_sp user_id = do
 
   case (lookupSpMay m_sp spUserId) of
     Just lookup_user_id -> getGlobalGroups_ByUserIdM m_sp user_id lookup_user_id
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> leftA $ Error_InvalidArguments "user_id"
 
 
 
@@ -245,19 +245,19 @@ countGlobalGroupsM m_sp _ = do
 
     Just lookup_user_id -> do
       n <- countDb [GlobalGroupUserId ==. lookup_user_id, GlobalGroupActive ==. True]
-      right $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
+      rightA $ CountResponses [CountResponse (keyToInt64 lookup_user_id) (fromIntegral n)]
 
-    _                   -> left $ Error_InvalidArguments "user_id"
+    _                   -> leftA $ Error_InvalidArguments "user_id"
 
 
 
 getGlobalGroupStatsM :: Maybe StandardParams -> UserId -> HandlerErrorEff GlobalGroupStatResponses
-getGlobalGroupStatsM _ _ = left $ Error_NotImplemented
+getGlobalGroupStatsM _ _ = leftA $ Error_NotImplemented
 
 
 
 getGlobalGroupStatM :: UserId -> GlobalGroupId -> HandlerErrorEff GlobalGroupStatResponse
 getGlobalGroupStatM _ _ = do
-  right $ GlobalGroupStatResponse {
+  rightA $ GlobalGroupStatResponse {
     globalGroupStatResponseGroups = 0 -- TODO FIXME
   }

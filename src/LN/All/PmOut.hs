@@ -144,7 +144,7 @@ insertPmOutM m_sp user_id pm_out_request = do
         pm_out = (pmOutRequestToPmOut user_id pm_id pm_out_request) { pmOutCreatedAt = Just ts }
       insertEntityDbE pm_out
 
-    _          -> left $ Error_InvalidArguments "pm_id"
+    _          -> leftA $ Error_InvalidArguments "pm_id"
 
 
 
@@ -168,4 +168,4 @@ updatePmOutM user_id pm_out_id pm_out_request = do
 
 deletePmOutM :: UserId -> PmOutId -> HandlerErrorEff ()
 deletePmOutM _ _ = do
-  right ()
+  rightA ()
