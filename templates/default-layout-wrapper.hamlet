@@ -28,9 +28,9 @@ $doctype 5
       <li .nav-item.nav-item--button>
         <a href=@{AuthR LoginR}>Sign in
 
-    ^{pageBody pc}
-
     <section id="ln"/>
+
+    ^{pageBody pc}
 
     $maybe Entity _ _ <- muser
       <div>
