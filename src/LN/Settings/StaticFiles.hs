@@ -15,6 +15,8 @@ module LN.Settings.StaticFiles (
   img_loading_2_gif,
   img_loading_3_gif,
   img_loading_4_gif,
+  img_404_png,
+  img_oops_png,
   assets_favicon_16x16_png,
   assets_favicon_32x32_png,
   assets_favicon_ico,

@@ -45,7 +45,6 @@ Team
   system       SystemTeam default='Team_Members'
   membership   Membership
   icon         Text Maybe
-  tags         [Text]
   visibility   Visibility
 
   active      Bool default=True
