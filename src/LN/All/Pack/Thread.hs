@@ -111,8 +111,12 @@ getThreadPack_ByThreadM _ user_id thread@(Entity thread_id Thread{..}) = do
     thread_user  <- mustT $ getUserM user_id threadUserId
     thread_stats <- mustT $ getThreadStatM user_id thread_id
     thread_posts <- mustT $ getThreadPosts_ByThreadIdM (Just sp) user_id thread_id
+
+    -- If no thread posts exist, make sure latestThreadPostUser is the thread owner
+    -- TODO FIXME: get rid of Maybe for latestThreadPostUser and rename it to LatestUser
+    --
     m_user       <- case (headMay thread_posts) of
-      Nothing                        -> pure Nothing
+      Nothing                        -> pure $ Just thread_user
       Just (Entity _ ThreadPost{..}) -> Just <$> (mustT $ getUserM user_id threadPostUserId)
 
     user_perms_by_thread <- lift $ userPermissions_ByThreadIdM user_id (entityKey thread)
