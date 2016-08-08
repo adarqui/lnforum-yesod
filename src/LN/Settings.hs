@@ -12,6 +12,7 @@ module LN.Settings (
   DB,
   OAuthKeys (..),
   AppSettings (..),
+  Environment (..),
   widgetFileSettings,
   combineSettings,
   widgetFile,

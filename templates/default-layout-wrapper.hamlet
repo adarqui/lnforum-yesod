@@ -4,19 +4,19 @@ $doctype 5
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    $if ((appEnvironment $ appSettings master) == EnvProduction)
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+      <script src="https://fb.me/react-15.2.1.min.js"></script>
+      <script src="https://fb.me/react-dom-15.2.1.min.js"></script>
+
+    $else
+      <link rel="stylesheet" href="/static/assets/bootstrap.css">
+      <script src="/static/assets/react.js"></script>
+      <script src="/static/assets/react-dom.js"></script>
+
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
-
     <link rel="icon" type="ico" href="static/assets/favicon.ico" />
-
-    <!--
-      <link rel="icon" type="image/png" href="static/assets/favicon-32x32.png" sizes="32x32" />
-      <link rel="icon" type="image/png" href="static/assets/favicon-16x16.png" sizes="16x16" />
-    -->
-
-    <script src="https://fb.me/react-15.2.1.min.js"></script>
-    <script src="https://fb.me/react-dom-15.2.1.min.js"></script>
 
     <title>#{pageTitle pc}
     ^{pageHead pc}
