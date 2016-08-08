@@ -32,4 +32,6 @@ database:
 copyright: leuro (C)
 #analytics: UA-YOURCODE
 
+env: "production"
+
 redis-host: "adarq.internal"

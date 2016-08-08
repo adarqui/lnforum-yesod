@@ -27,7 +27,7 @@ module LN.Settings (
 import           ClassyPrelude.Yesod
 import           Control.Exception           (throw)
 import           Data.Aeson                  (Result (..), fromJSON, withObject,
-                                              (.!=), (.:?))
+                                              withText, (.!=), (.:?))
 import           Data.FileEmbed              (embedFile)
 import           Data.Yaml                   (decodeEither')
 import           Database.Persist.Postgresql (PostgresConf)
@@ -40,7 +40,10 @@ import           Yesod.Default.Util          (WidgetFileSettings,
                                               widgetFileReload)
 
 
--- Custom -------------------------------------------------
+--
+-- CUSTOM
+--
+
 type DB a = forall (m :: * -> *).
   (MonadIO m, Functor m) => ReaderT SqlBackend m a
 
@@ -50,7 +53,32 @@ data OAuthKeys = OAuthKeys {
   oauthKeysClientId :: Text,
   oauthKeysClientSecret :: Text
 }
--- End Custom
+
+
+
+data Environment
+  = EnvProduction
+  | EnvStaging
+  | EnvDevelopment
+  deriving (Show, Eq, Ord, Generic)
+
+instance FromJSON Environment where
+  parseJSON = withText "Environment" $ \t -> do
+    case t of
+      "production"  -> pure EnvProduction
+      "staging"     -> pure EnvStaging
+      "development" -> pure EnvDevelopment
+      _             -> fail "Failed to parse environment"
+
+instance ToJSON Environment where
+  toJSON env = case env of
+    EnvProduction  -> "production"
+    EnvStaging     -> "staging"
+    EnvDevelopment -> "development"
+
+--
+-- END CUSTOM
+--
 
 
 
@@ -84,7 +112,7 @@ data AppSettings = AppSettings
   -- ^ Perform no stylesheet/script combining
 
   -- Example app-specific configuration values.
-  , appCopyrightA              :: Text
+  , appCopyrightA             :: Text
   -- ^ CopyrightA text to appear in the footer of the page
   , appAnalytics              :: Maybe Text
   -- ^ Google Analytics code
@@ -92,6 +120,7 @@ data AppSettings = AppSettings
   -- custom
   , appAllowDummyAuth         :: Bool
   , appForceSSL               :: Bool
+  , appEnvironment            :: Environment
   }
 
 
@@ -117,12 +146,13 @@ instance FromJSON AppSettings where
     appMutableStatic          <- o .:? "mutable-static"   .!= defaultDev
     appSkipCombining          <- o .:? "skip-combining"   .!= defaultDev
 
-    appCopyrightA              <- o .: "copyright"
+    appCopyrightA             <- o .: "copyright"
     appAnalytics              <- o .:? "analytics"
 
     -- custom
     appAllowDummyAuth         <- o .:? "allow-dummy-auth" .!= defaultDev
     appForceSSL               <- o .:? "force-ssl"        .!= (not defaultDev)
+    appEnvironment            <- o .: "env"
 
     pure AppSettings {..}
 
