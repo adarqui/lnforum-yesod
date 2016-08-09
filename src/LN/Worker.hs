@@ -42,7 +42,8 @@ initializeWorker_AddThreadPostToSet =
   bgRunDeq QAddThreadPostToSet (bgDeq runWorker_AddThreadPostToSet)
 
 initializeWorker_RemoveThreadPostFromSet :: IO ()
-initializeWorker_RemoveThreadPostFromSet = pure ()
+initializeWorker_RemoveThreadPostFromSet =
+  bgRunDeq QRemoveThreadPostFromSet (bgDeq runWorker_RemoveThreadPostFromSet)
 
 
 
@@ -80,6 +81,16 @@ runWorker_AddThreadPostToSet :: (Message, Envelope) -> IO ()
 runWorker_AddThreadPostToSet (Message{..}, env) = do
   void $ (try (handler $ do
     liftIO $ putStrLn "runJob_AddThreadPostToSet"
+    pure ()
+   ) :: IO (Either SomeException ()))
+  ackEnv env
+
+
+
+runWorker_RemoveThreadPostFromSet :: (Message, Envelope) -> IO ()
+runWorker_RemoveThreadPostFromSet (Message{..}, env) = do
+  void $ (try (handler $ do
+    liftIO $ putStrLn "runJob_RemoveThreadPostFromSet"
     pure ()
    ) :: IO (Either SomeException ()))
   ackEnv env
