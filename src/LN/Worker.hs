@@ -1,5 +1,6 @@
-{-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
+{-# LANGUAGE TemplateHaskell   #-}
 
 module LN.Worker (
   workerMain
@@ -8,17 +9,22 @@ module LN.Worker (
 
 
 import           Data.Aeson
-import           LN.All.Api     (insertApiM)
-import           LN.All.Profile (insertProfileM)
-import           LN.Application (handler)
+import qualified Data.ByteString.Char8 as BSC
+import qualified Database.Redis        as Redis
+import           Network.AMQP
+import qualified Prelude               as Prelude
+
+import           LN.All.Api            (insertApiM)
+import           LN.All.Empty          (emptyM)
+import           LN.All.Profile        (insertProfileM)
+import           LN.Application        (handler)
 import           LN.Control
 import           LN.Import
 import           LN.Job.Shared
-import           LN.T.Api       (ApiRequest (..))
+import           LN.Misc.Codec         (keyToInt64)
+import           LN.T.Api              (ApiRequest (..))
 import           LN.T.Job
-import           LN.T.Profile   (ProfileRequest (..))
-import           Network.AMQP
-import qualified Prelude        as Prelude
+import           LN.T.Profile          (ProfileRequest (..))
 
 
 
@@ -81,7 +87,20 @@ runWorker_AddThreadPostToSet :: (Message, Envelope) -> IO ()
 runWorker_AddThreadPostToSet (Message{..}, env) = do
   void $ (try (handler $ do
     liftIO $ putStrLn "runJob_AddThreadPostToSet"
-    pure ()
+    let lr = eitherDecode msgBody :: Either String (ThreadId, ThreadPostId)
+    case lr of
+      Left err                   -> liftIO $ Prelude.putStrLn err
+      Right (thread_id, post_id) -> do
+        void $ ((run $ do
+          emptyM
+          red <- getsYesod appRed
+          let
+            thread_id' = keyToInt64 thread_id
+            post_id'   = fromIntegral $ keyToInt64 post_id
+          liftIO $ Prelude.putStrLn "zadd 1.."
+          void $ liftIO $ Redis.runRedis red $ Redis.zadd ("thread_posts:"<>(BSC.pack $ show thread_id')) [(post_id', BSC.pack $ show post_id')]
+          liftIO $ Prelude.putStrLn "zadd 2.."
+          pure ()) :: Handler ())
    ) :: IO (Either SomeException ()))
   ackEnv env
 
@@ -91,7 +110,18 @@ runWorker_RemoveThreadPostFromSet :: (Message, Envelope) -> IO ()
 runWorker_RemoveThreadPostFromSet (Message{..}, env) = do
   void $ (try (handler $ do
     liftIO $ putStrLn "runJob_RemoveThreadPostFromSet"
-    pure ()
+    let lr = eitherDecode msgBody :: Either String (ThreadId, ThreadPostId)
+    case lr of
+      Left err                   -> liftIO $ Prelude.putStrLn err
+      Right (thread_id, post_id) -> do
+        void $ ((run $ do
+          emptyM
+          red <- getsYesod appRed
+          let
+            thread_id' = keyToInt64 thread_id
+            post_id'   = keyToInt64 post_id
+          void $ liftIO $ Redis.runRedis red $ Redis.zrem ("thread_posts:"<>(BSC.pack $ show thread_id')) [BSC.pack $ show post_id']
+          pure ()) :: Handler ())
    ) :: IO (Either SomeException ()))
   ackEnv env
 

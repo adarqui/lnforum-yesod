@@ -13,3 +13,4 @@ cabal.config
 cabal.sandbox.config
 .stack-work
 /private
+dump.rdb

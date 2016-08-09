@@ -55,7 +55,7 @@ defaultControlState = InternalControlState {
 
 
 -- run ::
-run :: forall b (f :: * -> *) b1.  Monad f => RWST () b1 InternalControlState f b -> f b
+run :: forall b (f :: * -> *) b1. Monad f => RWST () b1 InternalControlState f b -> f b
 run op = fst <$> evalRWST op () defaultControlState
 
 
