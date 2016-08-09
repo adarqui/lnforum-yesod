@@ -34,7 +34,9 @@ module LN.All.ThreadPost (
 
 
 import           LN.All.Prelude
-import qualified LN.T.Like                 as L
+import           LN.Job.Enqueue (mkJob_AddThreadPostToSet,
+                                 mkJob_RemoveThreadPostFromSet)
+import qualified LN.T.Like      as L
 
 
 
@@ -252,11 +254,15 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
         (threadPostRequestToThreadPost user_id threadOrgId threadForumId threadBoardId thread_id Nothing sanitized_thread_post_request)
           { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-    thread_post_entity <- mustT $ insertEntityDbE thread_post
+    thread_post_entity@(Entity new_post_id _) <- mustT $ insertEntityDbE thread_post
 
     mustT $ updateWhereDbE
       [ ThreadId ==. thread_id ]
       [ ThreadActivityAt =. Just ts ]
+
+    -- | Enqueue a job which adds this post to the proper thread set
+    --
+    liftIO $ mkJob_AddThreadPostToSet thread_id new_post_id
 
     rightT thread_post_entity
 
@@ -281,11 +287,15 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
         (threadPostRequestToThreadPost user_id threadPostOrgId threadPostForumId threadPostBoardId threadPostThreadId (Just thread_post_id) sanitized_thread_post_request)
           { threadPostCreatedAt = Just ts, threadPostModifiedAt = Just ts }
 
-    thread_post_entity <- mustT $ insertEntityDbE thread_post
+    thread_post_entity@(Entity new_post_id _) <- mustT $ insertEntityDbE thread_post
 
     mustT $ updateWhereDbE
       [ ThreadId ==. threadPostThreadId ]
       [ ThreadActivityAt =. Just ts ]
+
+    -- | Enqueue a job which adds this post to the proper thread set
+    --
+    liftIO $ mkJob_AddThreadPostToSet threadPostThreadId new_post_id
 
     rightT thread_post_entity
 
@@ -320,6 +330,8 @@ deleteThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 deleteThreadPostM user_id thread_post_id = do
   runEitherT $ do
     mustT $ mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id
+    (Entity _ ThreadPost{..}) <- mustPassT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
+    liftIO $ mkJob_RemoveThreadPostFromSet threadPostThreadId thread_post_id
     mustT $ deleteWhereDbE [ThreadPostId ==. thread_post_id]
 
 
