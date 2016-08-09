@@ -66,6 +66,7 @@ profileRequestToProfile user_id ProfileRequest{..} = Profile {
   profileGender     = profileRequestGender,
   profileBirthdate  = profileRequestBirthdate,
   profileWebsite    = profileRequestWebsite,
+  profileWebsites   = profileRequestWebsites,
   profileLocation   = profileRequestLocation,
   profileSignature  = profileRequestSignature,
   profileDebug      = profileRequestDebug,

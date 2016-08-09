@@ -177,6 +177,7 @@ Profile
   gender     ProfileGender
   birthdate  UTCTime
   website    Text Maybe
+  websites   [Text]
   location   Text Maybe
   signature  Text Maybe
   debug      Bool default=False
