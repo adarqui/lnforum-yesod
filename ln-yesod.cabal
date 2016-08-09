@@ -68,10 +68,8 @@ library
                      LN.Helper.Request
                      LN.Import
                      LN.Import.NoFoundation
-                     LN.Job
                      LN.Job.Shared
                      LN.Job.Enqueue
-                     LN.Job.Dequeue
                      LN.Worker
                      LN.Lifted
                      LN.Parent

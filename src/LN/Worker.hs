@@ -26,6 +26,8 @@ initializeWorkers :: IO ()
 initializeWorkers = do
   initializeWorker_CreateUserProfile
   initializeWorker_CreateUserApi
+  initializeWorker_AddThreadPostToSet
+  initializeWorker_RemoveThreadPostFromSet
 
 initializeWorker_CreateUserProfile :: IO ()
 initializeWorker_CreateUserProfile = do
@@ -34,6 +36,13 @@ initializeWorker_CreateUserProfile = do
 initializeWorker_CreateUserApi :: IO ()
 initializeWorker_CreateUserApi = do
   bgRunDeq QCreateUserApi (bgDeq runWorker_CreateUserApi)
+
+initializeWorker_AddThreadPostToSet :: IO ()
+initializeWorker_AddThreadPostToSet =
+  bgRunDeq QAddThreadPostToSet (bgDeq runWorker_AddThreadPostToSet)
+
+initializeWorker_RemoveThreadPostFromSet :: IO ()
+initializeWorker_RemoveThreadPostFromSet = pure ()
 
 
 
@@ -63,6 +72,16 @@ runWorker_CreateUserApi (Message{..}, env) = do
         liftIO $ putStrLn "success"
         void $ run $ insertApiM user_id api_request
         pure ()) :: IO (Either SomeException ()))
+  ackEnv env
+
+
+
+runWorker_AddThreadPostToSet :: (Message, Envelope) -> IO ()
+runWorker_AddThreadPostToSet (Message{..}, env) = do
+  void $ (try (handler $ do
+    liftIO $ putStrLn "runJob_AddThreadPostToSet"
+    pure ()
+   ) :: IO (Either SomeException ()))
   ackEnv env
 
 
