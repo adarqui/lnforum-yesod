@@ -248,7 +248,7 @@ getUsers_ByEverythingM m_sp _ = do
 getUsers_ByEverything_KeysM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Key User]
 getUsers_ByEverything_KeysM m_sp _ = do
 
-  selectKeysListDbE m_sp [] [] UserId
+  selectKeysListDbE m_sp [UserActive ==. True] [] UserId
 
 
 

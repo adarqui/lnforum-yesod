@@ -145,16 +145,19 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
     \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
 
       rightA $ ThreadPostPackResponse {
-        threadPostPackResponseThreadPost       = threadPostToResponse thread_post,
-        threadPostPackResponseThreadPostId     = keyToInt64 thread_post_id,
-        threadPostPackResponseUser             = userToSanitizedResponse thread_post_user,
-        threadPostPackResponseUserId           = entityKeyToInt64 thread_post_user,
-        threadPostPackResponseStat             = thread_post_stat,
-        threadPostPackResponseLike             = fmap likeToResponse m_thread_post_like,
-        threadPostPackResponseStar             = Nothing,
-        threadPostPackResponseWithOrganization = fmap organizationToResponse m_org,
-        threadPostPackResponseWithForum        = fmap forumToResponse m_forum,
-        threadPostPackResponseWithBoard        = fmap boardToResponse m_board,
-        threadPostPackResponseWithThread       = fmap threadToResponse m_thread,
-        threadPostPackResponsePermissions      = user_perms_by_thread_post
+        threadPostPackResponseThreadPost            = threadPostToResponse thread_post,
+        threadPostPackResponseThreadPostId          = keyToInt64 thread_post_id,
+        threadPostPackResponseUser                  = userToSanitizedResponse thread_post_user,
+        threadPostPackResponseUserId                = entityKeyToInt64 thread_post_user,
+        threadPostPackResponseStat                  = thread_post_stat,
+        threadPostPackResponseLike                  = fmap likeToResponse m_thread_post_like,
+        threadPostPackResponseStar                  = Nothing,
+        threadPostPackResponseWithOrganization      = fmap organizationToResponse m_org,
+        threadPostPackResponseWithForum             = fmap forumToResponse m_forum,
+        threadPostPackResponseWithBoard             = fmap boardToResponse m_board,
+        threadPostPackResponseWithThread            = fmap threadToResponse m_thread,
+        threadPostPackResponseWithThreadPosts       = Nothing,
+        threadPostPackResponseWithThreadPostsOffset = Nothing,
+        threadPostPackResponseWithThreadPostsLimit  = Nothing,
+        threadPostPackResponsePermissions           = user_perms_by_thread_post
       }

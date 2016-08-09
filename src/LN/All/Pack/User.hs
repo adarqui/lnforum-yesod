@@ -58,7 +58,6 @@ getUserPack_ByUserIdM user_id lookup_user_id = do
          ,stats
          ,profile)
 
-
   rehtie lr leftA $ \(lookup_user, stats, profile) -> do
     rightA $ UserPackResponse {
       userPackResponseUser       = userToResponse lookup_user,

@@ -409,22 +409,8 @@ spToSelect StandardParams{..} field =
 
 
 spToSelectMay :: forall typ record. Maybe StandardParams -> EntityField record typ -> [SelectOpt record]
-spToSelectMay Nothing _ = []
-spToSelectMay (Just StandardParams{..}) field =
-  offset <> limit <> order
-  where
-  offset = case spOffset of
-           Nothing      -> []
-           Just offset' -> [OffsetBy $ fromIntegral offset']
-  limit  = case spLimit of
-           Nothing     -> []
-           Just limit' -> [LimitTo $ fromIntegral limit']
-  order  = case spSortOrder of
-           Nothing               -> []
-           Just SortOrderBy_Asc  -> [Asc field]
-           Just SortOrderBy_Dsc  -> [Desc field]
-           -- TODO FIXME: need rand
-           _                     -> [Asc field]
+spToSelectMay Nothing _       = []
+spToSelectMay (Just sp) field = spToSelect sp field
 
 
 
