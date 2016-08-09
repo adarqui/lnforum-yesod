@@ -5,7 +5,6 @@
 
 module LN.Settings.StaticFiles (
   staticFiles,
-  css_bootstrap_css,
   css_style_css,
   fonts_glyphicons_halflings_regular_eot,
   fonts_glyphicons_halflings_regular_svg,
@@ -18,6 +17,7 @@ module LN.Settings.StaticFiles (
   img_404_png,
   img_oops_png,
   assets_bootstrap_css,
+  assets_bootstrap_css_map,
   assets_favicon_ico,
   assets_react_js,
   assets_react_dom_js,

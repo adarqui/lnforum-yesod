@@ -6,6 +6,10 @@
 
 This is the backend for ln.
 
+## important
+
+requires cabal 1.22.8.x. cabal 1.24.x.x causes problems with yesod-devel.
+
 ## building
 
 ```
