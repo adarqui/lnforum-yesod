@@ -19,6 +19,7 @@ import           LN.All.Empty          (emptyM)
 import           LN.All.Profile        (insertProfileM)
 import           LN.Application        (handler)
 import           LN.Control
+import           LN.Db
 import           LN.Import
 import           LN.Job.Shared
 import           LN.Misc.Codec         (keyToInt64)
@@ -34,6 +35,7 @@ initializeWorkers = do
   initializeWorker_CreateUserApi
   initializeWorker_AddThreadPostToSet
   initializeWorker_RemoveThreadPostFromSet
+  initializeWorker_FixThreadPostSets
 
 initializeWorker_CreateUserProfile :: IO ()
 initializeWorker_CreateUserProfile = do
@@ -50,6 +52,10 @@ initializeWorker_AddThreadPostToSet =
 initializeWorker_RemoveThreadPostFromSet :: IO ()
 initializeWorker_RemoveThreadPostFromSet =
   bgRunDeq QRemoveThreadPostFromSet (bgDeq runWorker_RemoveThreadPostFromSet)
+
+initializeWorker_FixThreadPostSets :: IO ()
+initializeWorker_FixThreadPostSets =
+  bgRunDeq QFixThreadPostSets (bgDeq runWorker_FixThreadPostSets)
 
 
 
@@ -122,6 +128,28 @@ runWorker_RemoveThreadPostFromSet (Message{..}, env) = do
             post_id'   = keyToInt64 post_id
           void $ liftIO $ Redis.runRedis red $ Redis.zrem ("thread_posts:"<>(BSC.pack $ show thread_id')) [BSC.pack $ show post_id']
           pure ()) :: Handler ())
+   ) :: IO (Either SomeException ()))
+  ackEnv env
+
+
+
+runWorker_FixThreadPostSets :: (Message, Envelope) -> IO ()
+runWorker_FixThreadPostSets (Message{..}, env) = do
+  void $ (try (handler $ do
+    liftIO $ putStrLn "runJob_FixThreadPostSets"
+    void $ ((run $ do
+      red <- getsYesod appRed
+      threads_keys <- selectKeysListDb Nothing [ThreadActive ==. True] [] ThreadId
+      forM_ threads_keys $ \thread_key -> do
+        posts_keys <- selectKeysListDb Nothing [ThreadPostThreadId ==. thread_key, ThreadPostActive ==. True] [] ThreadPostId
+        let
+          thread_id  = keyToInt64 thread_key
+          posts      = map (\post_key -> (fromIntegral $ keyToInt64 post_key, BSC.pack $ show $ keyToInt64 post_key)) posts_keys
+        void $ liftIO $ Redis.runRedis red $ do
+          void $ Redis.del ["thread_posts:"<>(BSC.pack $ show thread_id)]
+          void $ Redis.zadd ("thread_posts:"<>(BSC.pack $ show thread_id)) posts
+
+      pure ()) :: Handler ())
    ) :: IO (Either SomeException ()))
   ackEnv env
 
