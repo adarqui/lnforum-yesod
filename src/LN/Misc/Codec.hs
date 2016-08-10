@@ -7,10 +7,18 @@ module LN.Misc.Codec (
   textToKey',
   textToKeys,
   textToKeys',
+  bscToKey,
+  bscToKey',
+  bscToKeys,
+  bscToKeys',
   int64ToKey,
   int64ToKey',
   int64ToKeyMaybe,
   int64ToKeys,
+  int64ToKeyBSC,
+  int64ToKeyBSC',
+  int64ToKeyBSCMaybe,
+  int64ToKeysBSC,
   keyToInt64,
   keyToInt64Sbs,
   entityKeyToInt64,
@@ -19,6 +27,9 @@ module LN.Misc.Codec (
 
 
 
+import Data.String.Conversions
+import Data.Either.Combinators (mapLeft)
+import           Data.ByteString       (ByteString)
 import qualified Data.ByteString.Char8 as BSC
 import           Data.Either           (rights)
 import           Data.Int              (Int64)
@@ -50,6 +61,31 @@ textToKeys' = map int64ToKey' . tread
 
 
 
+bscToKey :: PersistEntity record => ByteString -> Either ByteString (Key record)
+bscToKey = int64ToKeyBSC . bscToInt64
+
+
+
+bscToKey' :: PersistEntity record => ByteString -> Key record
+bscToKey' = int64ToKeyBSC' . bscToInt64
+
+
+
+bscToKeys :: PersistEntity record => ByteString -> Either ByteString [Key record]
+bscToKeys = undefined
+
+
+
+bscToKeys' :: PersistEntity record => ByteString -> [Key record]
+bscToKeys' = map int64ToKeyBSC' . bread
+
+
+
+keyFromValuesBSC :: PersistEntity record => [PersistValue] -> Either ByteString (Key record)
+keyFromValuesBSC = mapLeft cs . keyFromValues
+
+
+
 int64ToKey :: PersistEntity record => Int64 -> Either Text (Key record)
 int64ToKey i64 = keyFromValues [PersistInt64 i64]
 
@@ -71,6 +107,30 @@ int64ToKey' i64 = key
 
 int64ToKeys :: PersistEntity record => [Int64] -> [Key record]
 int64ToKeys = rights . map (\i64 -> keyFromValues [PersistInt64 i64])
+
+
+
+int64ToKeyBSC :: PersistEntity record => Int64 -> Either ByteString (Key record)
+int64ToKeyBSC i64 = keyFromValuesBSC [PersistInt64 i64]
+
+
+
+int64ToKeyBSCMaybe :: PersistEntity record => Int64 -> Maybe (Key record)
+int64ToKeyBSCMaybe i64 = case (int64ToKeyBSC i64) of
+  Left _   -> Nothing
+  Right v  -> Just v
+
+
+
+int64ToKeyBSC' :: PersistEntity record => Int64 -> Key record
+int64ToKeyBSC' i64 = key
+  where
+  (Right key) = keyFromValues [PersistInt64 i64]
+
+
+
+int64ToKeysBSC :: PersistEntity record => [Int64] -> [Key record]
+int64ToKeysBSC = rights . map (\i64 -> keyFromValues [PersistInt64 i64])
 
 
 

@@ -86,6 +86,7 @@ data StandardParams = StandardParams {
   spWithForum        :: Bool,
   spWithBoard        :: Bool,
   spWithThread       :: Bool,
+  spWithThreadPosts  :: Bool,
   spWithResource     :: Bool
 } deriving (Eq, Show)
 
@@ -138,6 +139,7 @@ defaultStandardParams = StandardParams {
   spWithForum        = False,
   spWithBoard        = False,
   spWithThread       = False,
+  spWithThreadPosts  = False,
   spWithResource     = False
 }
 
@@ -218,6 +220,7 @@ lookupStandardParams = do
   with_forum         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithForum)
   with_board         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithBoard)
   with_thread        <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThread)
+  with_thread_posts  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThreadPosts)
   with_resource      <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithResource)
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
@@ -266,6 +269,7 @@ lookupStandardParams = do
     spWithForum        = with_forum,
     spWithBoard        = with_board,
     spWithThread       = with_thread,
+    spWithThreadPosts  = with_thread_posts,
     spWithResource     = with_resource
   }
 

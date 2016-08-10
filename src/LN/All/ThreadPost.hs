@@ -22,7 +22,9 @@ module LN.All.ThreadPost (
   getThreadPosts_ByBoardIdM,
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
+  getThreadPosts_ByThreadPostIdsM,
   getThreadPostM,
+  getWithThreadPostsM,
   insertThreadPostM,
   updateThreadPostM,
   deleteThreadPostM,
@@ -32,6 +34,9 @@ module LN.All.ThreadPost (
 ) where
 
 
+
+import qualified Data.ByteString.Char8 as BSC
+import qualified Database.Redis as Redis
 
 import           LN.All.Prelude
 import           LN.Job.Enqueue (mkJob_AddThreadPostToSet,
@@ -187,12 +192,14 @@ getThreadPostsM m_sp user_id = do
   case (lookupSpMay m_sp spForumId
        ,lookupSpMay m_sp spBoardId
        ,lookupSpMay m_sp spThreadId
-       ,lookupSpMay m_sp spThreadPostId) of
-    (Just forum_id, _, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
-    (_, Just board_id, _, _)       -> getThreadPosts_ByBoardIdM m_sp user_id board_id
-    (_, _, Just thread_id, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
-    (_, _, _, Just thread_post_id) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
-    _                              -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+       ,lookupSpMay m_sp spThreadPostId
+       ,lookupSpMay m_sp spThreadPostIds) of
+    (Just forum_id, _, _, _, _)       -> getThreadPosts_ByForumIdM m_sp user_id forum_id
+    (_, Just board_id, _, _, _)       -> getThreadPosts_ByBoardIdM m_sp user_id board_id
+    (_, _, Just thread_id, _, _)      -> getThreadPosts_ByThreadIdM m_sp user_id thread_id
+    (_, _, _, Just thread_post_id, _) -> getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
+    (_, _, _, _, Just posts_ids)      -> getThreadPosts_ByThreadPostIdsM m_sp user_id posts_ids
+    _                                 -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
@@ -215,14 +222,51 @@ getThreadPosts_ByThreadIdM m_sp _ thread_id = do
 
 
 getThreadPosts_ByThreadPostIdM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff [Entity ThreadPost]
-getThreadPosts_ByThreadPostIdM m_sp _ parent_id = do
-  selectListDbE m_sp [ThreadPostParentId ==. Just parent_id, ThreadPostActive ==. True] [] ThreadPostId
+getThreadPosts_ByThreadPostIdM m_sp _ thread_post_id = do
+  selectListDbE m_sp [ThreadPostParentId ==. Just thread_post_id, ThreadPostActive ==. True] [] ThreadPostId
+
+
+
+getThreadPosts_ByThreadPostIdsM :: Maybe StandardParams -> UserId -> [ThreadPostId] -> HandlerErrorEff [Entity ThreadPost]
+getThreadPosts_ByThreadPostIdsM m_sp _ posts_ids = do
+  selectListDbE m_sp [ThreadPostId <-. posts_ids, ThreadPostActive ==. True] [] ThreadPostId
 
 
 
 getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
 getThreadPostM _ thread_post_id = do
   selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+
+
+
+getWithThreadPostsM :: Bool -> UserId -> ThreadId -> ThreadPostId -> HandlerErrorEff (Maybe Int64, Maybe [Entity ThreadPost])
+getWithThreadPostsM False _ _ _              = rightA (Nothing, Nothing)
+getWithThreadPostsM True user_id thread_id post_id = do
+  red <- getsYesod appRed
+  lr <- liftIO $ Redis.runRedis red $ runEitherT $ do
+    let
+      thread_key = "thread_posts:" <> (BSC.pack $ show thread_id')
+      -- TODO FIXME: need to pull forum thread posts per thread limit
+      page_limit = 20
+      fst_half r = r `rem` page_limit
+      snd_half r = page_limit - (fst_half r)
+    m_rank         <- mustPassT $ Redis.zrank thread_key (BSC.pack $ show post_id')
+    case m_rank of
+      Nothing -> leftT $ Redis.Error ""
+      Just rank -> do
+        fst_half_posts <- mustPassT $ Redis.zrevrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') 0 0 (fst_half rank)
+        snd_half_posts <- mustPassT $ Redis.zrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') 0 999999999999999 (snd_half rank)
+        rightT (rank, map fst fst_half_posts, map fst snd_half_posts)
+
+  case lr of
+    Left _                           -> leftA Error_Unexpected
+    Right (rank, fst_half, snd_half) -> do
+      lr' <- getThreadPosts_ByThreadPostIdsM Nothing user_id (map bscToKey' $ fst_half <> snd_half)
+      rehtie lr' leftA $ \posts -> rightA (Just $ fromIntegral rank, Just posts)
+
+  where
+  thread_id' = keyToInt64 thread_id
+  post_id'   = keyToInt64 post_id
 
 
 

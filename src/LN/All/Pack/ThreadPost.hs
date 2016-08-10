@@ -125,10 +125,11 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     user_perms_by_thread_post <- lift $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
 
-    m_org    <- mustT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
-    m_forum  <- mustT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
-    m_board  <- mustT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
-    m_thread <- mustT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
+    m_org               <- mustT $ getWithOrganizationM (lookupSpBool m_sp spWithOrganization) user_id threadPostOrgId
+    m_forum             <- mustT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
+    m_board             <- mustT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
+    m_thread            <- mustT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
+    (m_offset, m_posts) <- mustT $ getWithThreadPostsM (lookupSpBool m_sp spWithThreadPosts) user_id threadPostThreadId thread_post_id
 
     pure (thread_post_user
          ,thread_post_stat
@@ -137,12 +138,14 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
          ,m_org
          ,m_forum
          ,m_board
-         ,m_thread)
+         ,m_thread
+         ,m_offset
+         ,m_posts)
 
   liftIO $ print lr
 
   rehtie lr leftA $
-    \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread) -> do
+    \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread, m_offset, m_posts) -> do
 
       rightA $ ThreadPostPackResponse {
         threadPostPackResponseThreadPost            = threadPostToResponse thread_post,
@@ -156,8 +159,8 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
         threadPostPackResponseWithForum             = fmap forumToResponse m_forum,
         threadPostPackResponseWithBoard             = fmap boardToResponse m_board,
         threadPostPackResponseWithThread            = fmap threadToResponse m_thread,
-        threadPostPackResponseWithThreadPosts       = Nothing,
-        threadPostPackResponseWithThreadPostsOffset = Nothing,
-        threadPostPackResponseWithThreadPostsLimit  = Nothing,
+        threadPostPackResponseWithThreadPosts       = maybe Nothing (Just . ThreadPostResponses . map threadPostToResponse) m_posts,
+        threadPostPackResponseWithThreadPostsOffset = m_offset,
+        threadPostPackResponseWithThreadPostsLimit  = maybe Nothing spLimit m_sp,
         threadPostPackResponsePermissions           = user_perms_by_thread_post
       }
