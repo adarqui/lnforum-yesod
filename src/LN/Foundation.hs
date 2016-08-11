@@ -9,36 +9,37 @@ module LN.Foundation where
 
 
 
-import           Control.Monad.Trans.Maybe   (runMaybeT)
-import           Control.Monad.Trans.Maybe   (MaybeT (..))
-import           Data.Aeson                  (withObject)
-import qualified Data.ByteString.Char8       as BSC (isPrefixOf)
-import           Data.Ebyam                  (ebyam)
-import qualified Data.Text                   as T (append, pack)
-import qualified Data.Text                   as T (splitAt)
-import qualified Data.Text.Encoding          as T (decodeUtf8)
-import           Database.Persist.Sql        (ConnectionPool, runSqlPool)
-import qualified Database.Redis              as R (Connection)
+import           Control.Monad.Trans.Maybe            (runMaybeT)
+import           Control.Monad.Trans.Maybe            (MaybeT (..))
+import           Data.Aeson                           (withObject)
+import qualified Data.ByteString.Char8                as BSC (isPrefixOf)
+import           Data.Ebyam                           (ebyam)
+import qualified Data.Text                            as T (append, pack)
+import qualified Data.Text                            as T (splitAt)
+import qualified Data.Text.Encoding                   as T (decodeUtf8)
+import           Database.Persist.Sql                 (ConnectionPool,
+                                                       runSqlPool)
+import qualified Database.Redis                       as R (Connection)
 import           LN.Import.NoFoundation
-import           LN.Misc.Codec               (keyToInt64)
-import           LN.OAuth2                   (authenticateUser)
-import qualified Network.Wai                 as W (rawPathInfo, requestHeaders)
-import           Network.Wai.Middleware.Cors ()
-import           Text.Hamlet                 (hamletFile)
-import           Text.Jasmine                (minifym)
-import           Yesod.Auth.OAuth2.Github    (oauth2Github, oauth2Url)
-import           Yesod.Auth.OAuth2.Github    ()
-import           Yesod.Core.Types            (Logger)
-import qualified Yesod.Core.Unsafe           as Unsafe (fakeHandlerGetLogger)
-import           Yesod.Default.Util          (addStaticContentExternal)
-
-import Web.ServerSession.Backend.Persistent (SqlStorage(..))
-import Web.ServerSession.Frontend.Yesod (simpleBackend)
+import           LN.Misc.Codec                        (keyToInt64)
+import           LN.OAuth2                            (authenticateUser)
+import qualified Network.Wai                          as W (rawPathInfo,
+                                                            requestHeaders)
+import           Network.Wai.Middleware.Cors          ()
+import           Text.Hamlet                          (hamletFile)
+import           Text.Jasmine                         (minifym)
+import           Web.ServerSession.Backend.Persistent (SqlStorage (..))
+import           Web.ServerSession.Frontend.Yesod     (simpleBackend)
+import           Yesod.Auth.OAuth2.Github             (oauth2Github, oauth2Url)
+import           Yesod.Auth.OAuth2.Github             ()
+import           Yesod.Core.Types                     (Logger)
+import qualified Yesod.Core.Unsafe                    as Unsafe (fakeHandlerGetLogger)
+import           Yesod.Default.Util                   (addStaticContentExternal)
 
 
 
 data AppSettingsLN = AppSettingsLN {
-  appRedisHost          :: String
+  appRedisHost :: String
 }
 
 
