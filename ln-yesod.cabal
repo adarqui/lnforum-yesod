@@ -191,6 +191,9 @@ library
                  , string-conversions
                  , monad-loops
                  , data-default
+                 , serversession
+                 , serversession-backend-persistent
+                 , serversession-frontend-yesod
 
                  , ln-lib
                  , ln-sanitize

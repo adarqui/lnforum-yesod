@@ -16,6 +16,6 @@ share
   [
     mkPersist sqlSettings,
     mkDeleteCascade sqlSettings,
-    mkMigrate "migrateAll"
+    mkSave "entityDefs"
   ]
   $(persistFileWith lowerCaseSettings "config/models")

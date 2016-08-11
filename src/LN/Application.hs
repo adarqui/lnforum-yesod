@@ -79,6 +79,16 @@ import           System.Log.FastLogger                (defaultBufSize,
                                                        toLogStr)
 
 
+
+import qualified Data.Proxy as P -- tagged package, or base from GHC 7.10 onwards
+import qualified Web.ServerSession.Core as SS
+import qualified Web.ServerSession.Backend.Persistent as SS
+
+
+mkMigrate "migrateAll" (SS.serverSessionDefs (P.Proxy :: P.Proxy SS.SessionMap) ++ entityDefs)
+
+
+
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
 -- comments there for more details.

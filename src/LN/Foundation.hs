@@ -32,6 +32,9 @@ import           Yesod.Core.Types            (Logger)
 import qualified Yesod.Core.Unsafe           as Unsafe (fakeHandlerGetLogger)
 import           Yesod.Default.Util          (addStaticContentExternal)
 
+import Web.ServerSession.Backend.Persistent (SqlStorage(..))
+import Web.ServerSession.Frontend.Yesod (simpleBackend)
+
 
 
 data AppSettingsLN = AppSettingsLN {
@@ -96,9 +99,10 @@ type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 
 instance Yesod App where
   approot = ApprootMaster $ appRoot . appSettings
-  makeSessionBackend _ = whenSSL sslOnlySessions $ fmap Just $ defaultClientSessionBackend
-      sessionTimeout    -- timeout in minutes
-      "config/client_session_key.aes"
+  makeSessionBackend = simpleBackend id . SqlStorage . appConnPool
+  -- makeSessionBackend _ = whenSSL sslOnlySessions $ fmap Just $ defaultClientSessionBackend
+  --     sessionTimeout    -- timeout in minutes
+  --     "config/client_session_key.aes"
 
   yesodMiddleware =
     whenSSL (sslOnlyMiddleware sessionTimeout) . defaultYesodMiddleware
