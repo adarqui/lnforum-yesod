@@ -25,6 +25,21 @@ import           Database.Persist.Postgresql          (createPostgresqlPool,
                                                        runSqlPool)
 import qualified Database.Redis                       as R
 import           Language.Haskell.TH.Syntax           (qLocation)
+import           Network.Wai.Handler.Warp             (Settings,
+                                                       defaultSettings, defaultShouldDisplayException,
+                                                       getPort, runSettings,
+                                                       setHost, setOnException,
+                                                       setPort)
+import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
+                                                       IPAddrSource (..),
+                                                       OutputFormat (..),
+                                                       destination,
+                                                       mkRequestLogger,
+                                                       outputFormat)
+import           System.Log.FastLogger                (defaultBufSize,
+                                                       newStdoutLoggerSet,
+                                                       toLogStr)
+
 import           LN.All.Api
 import           LN.All.Board
 import           LN.All.Forum
@@ -63,26 +78,11 @@ import           LN.All.User
 import           LN.Handler.Common
 import           LN.Import
 import           LN.Settings.Internal
-import           Network.Wai.Handler.Warp             (Settings,
-                                                       defaultSettings, defaultShouldDisplayException,
-                                                       getPort, runSettings,
-                                                       setHost, setOnException,
-                                                       setPort)
-import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
-                                                       IPAddrSource (..),
-                                                       OutputFormat (..),
-                                                       destination,
-                                                       mkRequestLogger,
-                                                       outputFormat)
-import           System.Log.FastLogger                (defaultBufSize,
-                                                       newStdoutLoggerSet,
-                                                       toLogStr)
 
 
-
-import qualified Data.Proxy as P -- tagged package, or base from GHC 7.10 onwards
-import qualified Web.ServerSession.Core as SS
+import qualified Data.Proxy                           as P
 import qualified Web.ServerSession.Backend.Persistent as SS
+import qualified Web.ServerSession.Core               as SS
 
 
 mkMigrate "migrateAll" (SS.serverSessionDefs (P.Proxy :: P.Proxy SS.SessionMap) ++ entityDefs)
