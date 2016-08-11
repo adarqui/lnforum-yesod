@@ -19,11 +19,14 @@ exec-prod-sudo:
 exec-dev-sudo:
 	sudo stack exec --allow-different-user -- yesod devel -p 80 --tls-port 443
 
+exec-dev-sudo-exe:
+	sudo ~/.local/bin/ln-yesod config/settings/dev.yml private/settings/dev.yml
+
 ghci:
 	sudo stack ghci ln-yesod --main-is none --fast --allow-different-user
 
 install:
-	stack install --local-bin-path=./bin
+	stack install
 
 install-yesod:
 	stack install yesod-bin cabal-install --install-ghc

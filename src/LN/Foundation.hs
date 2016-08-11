@@ -111,6 +111,11 @@ instance Yesod App where
       -- route <- getCurrentRoute
 
       -- let isRoute r = route == Just r
+      oldToken <- lookupSession "_yesod_oauth2_github"
+      rr <- getRequest
+      liftIO $ print oldToken
+      liftIO $ print $ reqSession rr
+      setSession "poop" "bleh"
 
       -- We break up the default layout into two components:
       -- default-layout is the contents of the body tag, and
@@ -226,7 +231,7 @@ instance YesodAuth App where
   authenticate = runDB . authenticateUser
 
   -- You can add other plugins like BrowserID, email or OAuth here
-  authPlugins m = -- addAuthBackDoor m
+  authPlugins m =
     [
       oauth2Github (oauthKeysClientId $ appGithubOAuthKeys m) (oauthKeysClientSecret $ appGithubOAuthKeys m)
     ]

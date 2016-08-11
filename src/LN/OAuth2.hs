@@ -21,13 +21,13 @@ module LN.OAuth2 (
 
 import           Data.Digest.Pure.SHA    (hmacSha256)
 import qualified Data.Text               as T
+import           LN.All.User.Shared      (insertUsers_TasksM)
 import           LN.Import.NoFoundation
 import           LN.Misc.Codec
 import           LN.Sanitize.Internal    (toSafeName)
 import           LN.T.Profile            (ProfileX (..))
 import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
-import LN.All.User.Shared (insertUsers_TasksM)
 
 
 
@@ -66,6 +66,10 @@ findUsers' = fmap (map entityVal) . findUsers
 --
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
+
+  liftIO $ print credsPlugin
+  liftIO $ print credsIdent
+  liftIO $ print credsExtra
 
   mapM_ updateByEmail
     $ fmap profileEmail
