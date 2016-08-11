@@ -24,7 +24,7 @@ module LN.All.ThreadPost (
   getThreadPosts_ByThreadPostIdM,
   getThreadPosts_ByThreadPostIdsM,
   getThreadPostM,
-  getWithThreadPostsM,
+  getWithThreadPostsKeysM,
   insertThreadPostM,
   updateThreadPostM,
   deleteThreadPostM,
@@ -239,9 +239,9 @@ getThreadPostM _ thread_post_id = do
 
 
 
-getWithThreadPostsM :: Bool -> UserId -> ThreadId -> ThreadPostId -> HandlerErrorEff (Maybe Int64, Maybe [Entity ThreadPost])
-getWithThreadPostsM False _ _ _              = rightA (Nothing, Nothing)
-getWithThreadPostsM True user_id thread_id post_id = do
+getWithThreadPostsKeysM :: Bool -> UserId -> ThreadId -> ThreadPostId -> HandlerErrorEff (Maybe Int64, Maybe [ThreadPostId])
+getWithThreadPostsKeysM False _ _ _              = rightA (Nothing, Nothing)
+getWithThreadPostsKeysM True _ thread_id post_id = do
   red <- getsYesod appRed
   lr <- liftIO $ Redis.runRedis red $ runEitherT $ do
     let
@@ -250,19 +250,22 @@ getWithThreadPostsM True user_id thread_id post_id = do
       page_limit = 20
       fst_half r = r `rem` page_limit
       snd_half r = page_limit - (fst_half r)
-    m_rank         <- mustPassT $ Redis.zrank thread_key (BSC.pack $ show post_id')
+      big_num    = 999999999999999
+    m_rank <- mustPassT $ Redis.zrank thread_key (BSC.pack $ show post_id')
     case m_rank of
       Nothing -> leftT $ Redis.Error ""
       Just rank -> do
-        fst_half_posts <- mustPassT $ Redis.zrevrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') 0 0 (fst_half rank)
-        snd_half_posts <- mustPassT $ Redis.zrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') 0 999999999999999 (snd_half rank)
+        fst_half_posts <- mustPassT $ Redis.zrevrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') 0 1 (fst_half rank)
+        snd_half_posts <- mustPassT $ Redis.zrangebyscoreWithscoresLimit thread_key (fromIntegral post_id') big_num 1 (snd_half rank)
         rightT (rank, map fst fst_half_posts, map fst snd_half_posts)
 
   case lr of
     Left _                           -> leftA Error_Unexpected
     Right (rank, fst_half, snd_half) -> do
-      lr' <- getThreadPosts_ByThreadPostIdsM Nothing user_id (map bscToKey' $ fst_half <> snd_half)
-      rehtie lr' leftA $ \posts -> rightA (Just $ fromIntegral rank, Just posts)
+      liftIO $ print (rank, fst_half, snd_half)
+      rightA (Just $ fromIntegral rank, Just $ map bscToKey' (fst_half <> snd_half))
+--      lr' <- getThreadPosts_ByThreadPostIdsM Nothing user_id (map bscToKey' $ fst_half <> snd_half)
+--      rehtie lr' leftA $ \posts -> rightA (Just $ fromIntegral rank, Just posts)
 
   where
   thread_id' = keyToInt64 thread_id

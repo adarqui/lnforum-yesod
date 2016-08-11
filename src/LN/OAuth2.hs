@@ -67,10 +67,6 @@ findUsers' = fmap (map entityVal) . findUsers
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
 
-  liftIO $ print credsPlugin
-  liftIO $ print credsIdent
-  liftIO $ print credsExtra
-
   mapM_ updateByEmail
     $ fmap profileEmail
     $ extraToProfileX credsPlugin credsExtra

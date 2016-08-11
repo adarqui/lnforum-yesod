@@ -52,15 +52,20 @@ getThreadPostPackR thread_post_id = run $ do
 getThreadPostPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ThreadPostPackResponses
 getThreadPostPacksM m_sp user_id = do
 
-  case (lookupSpMay m_sp spForumId, lookupSpMay m_sp spThreadId, lookupSpMay m_sp spThreadPostId) of
+  case (lookupSpMay m_sp spForumId
+       ,lookupSpMay m_sp spThreadId
+       ,lookupSpMay m_sp spThreadPostId
+       ,lookupSpMay m_sp spThreadPostIds) of
 
-    (Just forum_id, _, _)       -> getThreadPostPacks_ByForumIdM m_sp user_id forum_id
+    (Just forum_id, _, _, _)  -> getThreadPostPacks_ByForumIdM m_sp user_id forum_id
 
-    (_, Just thread_id, _)      -> getThreadPostPacks_ByThreadIdM m_sp user_id thread_id
+    (_, Just thread_id, _, _) -> getThreadPostPacks_ByThreadIdM m_sp user_id thread_id
 
-    (_, _, Just thread_post_id) -> getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id
+    (_, _, Just post_id, _)   -> getThreadPostPacks_ByThreadPostIdM m_sp user_id post_id
 
-    (_, _, _)                   -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
+    (_, _, _, Just post_ids)  -> getThreadPostPacks_ByThreadPostIdsM m_sp user_id post_ids
+
+    _                         -> leftA $ Error_InvalidArguments "forum_id, thread_id, thread_post_id"
 
 
 
@@ -103,6 +108,19 @@ getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
 
 
 
+getThreadPostPacks_ByThreadPostIdsM :: Maybe StandardParams -> UserId -> [ThreadPostId] -> HandlerErrorEff ThreadPostPackResponses
+getThreadPostPacks_ByThreadPostIdsM m_sp user_id post_ids = do
+
+  e_thread_posts <- getThreadPosts_ByThreadPostIdsM m_sp user_id post_ids
+
+  rehtie e_thread_posts leftA $ \thread_posts -> do
+    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    rightA $ ThreadPostPackResponses {
+      threadPostPackResponses = thread_post_packs
+    }
+
+
+
 getThreadPostPackM :: Maybe StandardParams -> UserId -> ThreadPostId -> HandlerErrorEff ThreadPostPackResponse
 getThreadPostPackM m_sp user_id thread_post_id = do
 
@@ -129,7 +147,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
     m_forum             <- mustT $ getWithForumM (lookupSpBool m_sp spWithForum) user_id threadPostForumId
     m_board             <- mustT $ getWithBoardM (lookupSpBool m_sp spWithBoard) user_id threadPostBoardId
     m_thread            <- mustT $ getWithThreadM (lookupSpBool m_sp spWithThread) user_id threadPostThreadId
-    (m_offset, m_posts) <- mustT $ getWithThreadPostsM (lookupSpBool m_sp spWithThreadPosts) user_id threadPostThreadId thread_post_id
+    (m_offset, m_posts) <- mustT $ getWithThreadPostsKeysM (lookupSpBool m_sp spWithThreadPosts) user_id threadPostThreadId thread_post_id
 
     pure (thread_post_user
          ,thread_post_stat
@@ -141,8 +159,6 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
          ,m_thread
          ,m_offset
          ,m_posts)
-
-  liftIO $ print lr
 
   rehtie lr leftA $
     \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread, m_offset, m_posts) -> do
@@ -159,7 +175,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
         threadPostPackResponseWithForum             = fmap forumToResponse m_forum,
         threadPostPackResponseWithBoard             = fmap boardToResponse m_board,
         threadPostPackResponseWithThread            = fmap threadToResponse m_thread,
-        threadPostPackResponseWithThreadPosts       = maybe Nothing (Just . ThreadPostResponses . map threadPostToResponse) m_posts,
+        threadPostPackResponseWithThreadPosts       = fmap (map keyToInt64) m_posts,
         threadPostPackResponseWithThreadPostsOffset = m_offset,
         threadPostPackResponseWithThreadPostsLimit  = maybe Nothing spLimit m_sp,
         threadPostPackResponsePermissions           = user_perms_by_thread_post
