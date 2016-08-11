@@ -249,7 +249,7 @@ getWithThreadPostsKeysM True _ thread_id post_id = do
       -- TODO FIXME: need to pull forum thread posts per thread limit
       page_limit = 20
       fst_half r = r `rem` page_limit
-      snd_half r = page_limit - (fst_half r)
+      snd_half r = case (page_limit - (fst_half r)) of 0 -> 0; n -> n - 1;
       big_num    = 999999999999999
     m_rank <- mustPassT $ Redis.zrank thread_key (BSC.pack $ show post_id')
     case m_rank of
@@ -264,8 +264,6 @@ getWithThreadPostsKeysM True _ thread_id post_id = do
     Right (rank, fst_half, snd_half) -> do
       liftIO $ print (rank, fst_half, snd_half)
       rightA (Just $ fromIntegral rank, Just $ map bscToKey' (fst_half <> snd_half))
---      lr' <- getThreadPosts_ByThreadPostIdsM Nothing user_id (map bscToKey' $ fst_half <> snd_half)
---      rehtie lr' leftA $ \posts -> rightA (Just $ fromIntegral rank, Just posts)
 
   where
   thread_id' = keyToInt64 thread_id
