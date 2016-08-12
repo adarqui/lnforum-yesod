@@ -77,7 +77,7 @@ bscToKeys = undefined
 
 
 bscToKeys' :: PersistEntity record => ByteString -> [Key record]
-bscToKeys' = map int64ToKeyBSC' . bread
+bscToKeys' = map int64ToKeyBSC' . bread . BSC.takeWhile (/= '.')
 
 
 
