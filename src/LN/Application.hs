@@ -62,6 +62,7 @@ import           LN.All.Pack.Team
 import           LN.All.Pack.TeamMember
 import           LN.All.Pack.Thread
 import           LN.All.Pack.ThreadPost
+import           LN.All.Pack.User
 import           LN.All.Pm
 import           LN.All.PmIn
 import           LN.All.PmOut

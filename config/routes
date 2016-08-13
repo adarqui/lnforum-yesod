@@ -254,6 +254,11 @@
 /api/user_sanitized_pack/#UserId UserSanitizedPackR GET
 !/api/user_sanitized_pack/#Text UserSanitizedPackH GET
 
+-- TODO ACCESS: ensure super only
+/api/user_packs UserPacksR GET
+/api/user_pack/#UserId UserPackR GET
+!/api/user_pack/#Text UserPackH GET
+
 
 
 /api/organizations_count OrganizationsCountR GET
