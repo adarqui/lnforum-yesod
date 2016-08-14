@@ -40,15 +40,15 @@ import           LN.OAuth2                            (authenticateUser)
 
 
 data AppSettingsLN = AppSettingsLN {
-  appRedisHost :: String,
-  appRole      :: Role
+  appRedisHost :: !String,
+  appRole      :: !Role
 }
 
 
 
 data AppSettingsKeys = AppSettingsKeys {
-  appGithubClientID     :: String,
-  appGithubClientSecret :: String
+  appGithubClientID     :: !String,
+  appGithubClientSecret :: !String
 }
 
 
@@ -70,20 +70,21 @@ instance FromJSON AppSettingsKeys where
 
 
 data App = App {
-  appSettings        :: AppSettings,
-  appSettingsLN      :: AppSettingsLN,
-  appSettingsKeys    :: AppSettingsKeys,
-  appStatic          :: Static, -- ^ Settings for static file serving.
+  appSettings        :: !AppSettings,
+  appSettingsLN      :: !AppSettingsLN,
+  appSettingsKeys    :: !AppSettingsKeys,
+  appStatic          :: !Static, -- ^ Settings for static file serving.
+                        -- Must remain lazy, otherwise we get an error in tempFoundation
   appConnPool        :: ConnectionPool, -- ^ Database connection pool.
-  appHttpManager     :: Manager,
-  appLogger          :: Logger,
+  appHttpManager     :: !Manager,
+  appLogger          :: !Logger,
 
   -- Custom Foundation Fields
-  appGithubOAuthKeys :: OAuthKeys,
-  -- appGoogleOAuthKeys :: OAuthKeys
-  appRed             :: R.Connection,
-  appZChat           :: TChan Text,
-  appSuperUsers      :: [Entity Super]
+  appGithubOAuthKeys :: !OAuthKeys,
+  -- appGoogleOAuthKeys :: !OAuthKeys
+  appRed             :: !R.Connection,
+  appZChat           :: !(TChan Text),
+  appSuperUsers      :: ![Entity Super]
 }
 
 

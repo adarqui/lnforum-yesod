@@ -1,7 +1,8 @@
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE ExplicitForAll #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE BangPatterns      #-}
+{-# LANGUAGE ExplicitForAll    #-}
+{-# LANGUAGE KindSignatures    #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeOperators     #-}
 
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
@@ -56,8 +57,8 @@ type DB a = forall (m :: * -> *).
 
 
 data OAuthKeys = OAuthKeys {
-  oauthKeysClientId :: Text,
-  oauthKeysClientSecret :: Text
+  oauthKeysClientId :: !Text,
+  oauthKeysClientSecret :: !Text
 }
 
 
@@ -118,41 +119,41 @@ instance ToJSON Role where
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
 data AppSettings = AppSettings
-  { appStaticDir              :: String
+  { appStaticDir              :: !String
   -- ^ Directory from which to serve static files.
-  , appDatabaseConf           :: PostgresConf
+  , appDatabaseConf           :: !PostgresConf
   -- ^ Configuration settings for accessing the database.
-  , appRoot                   :: Text
+  , appRoot                   :: !Text
   -- ^ Base for all generated URLs.
-  , appHost                   :: HostPreference
+  , appHost                   :: !HostPreference
   -- ^ Host/interface the server should bind to.
-  , appPort                   :: Int
+  , appPort                   :: !Int
   -- ^ Port to listen on
-  , appIpFromHeader           :: Bool
+  , appIpFromHeader           :: !Bool
   -- ^ Get the IP address from the header when logging. Useful when sitting
   -- behind a reverse proxy.
 
-  , appDetailedRequestLogging :: Bool
+  , appDetailedRequestLogging :: !Bool
   -- ^ Use detailed request logging system
-  , appShouldLogAll           :: Bool
+  , appShouldLogAll           :: !Bool
   -- ^ Should all log messages be displayed?
-  , appReloadTemplates        :: Bool
+  , appReloadTemplates        :: !Bool
   -- ^ Use the reload version of templates
-  , appMutableStatic          :: Bool
+  , appMutableStatic          :: !Bool
   -- ^ Assume that files in the static dir may change after compilation
-  , appSkipCombining          :: Bool
+  , appSkipCombining          :: !Bool
   -- ^ Perform no stylesheet/script combining
 
   -- Example app-specific configuration values.
-  , appCopyrightA             :: Text
+  , appCopyrightA             :: !Text
   -- ^ CopyrightA text to appear in the footer of the page
-  , appAnalytics              :: Maybe Text
+  , appAnalytics              :: !(Maybe Text)
   -- ^ Google Analytics code
 
   -- custom
-  , appAllowDummyAuth         :: Bool
-  , appForceSSL               :: Bool
-  , appEnvironment            :: Environment
+  , appAllowDummyAuth         :: !Bool
+  , appForceSSL               :: !Bool
+  , appEnvironment            :: !Environment
   }
 
 
