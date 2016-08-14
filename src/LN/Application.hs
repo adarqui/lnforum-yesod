@@ -78,12 +78,11 @@ import           LN.All.ThreadPost
 import           LN.All.User
 import           LN.Handler.Common
 import           LN.Import
-import           LN.Settings.Internal
-
 
 import qualified Data.Proxy                           as P
 import qualified Web.ServerSession.Backend.Persistent as SS
 import qualified Web.ServerSession.Core               as SS
+
 
 
 mkMigrate "migrateAll" (SS.serverSessionDefs (P.Proxy :: P.Proxy SS.SessionMap) ++ entityDefs)
@@ -217,17 +216,17 @@ getApplicationDev = do
 
 
 getAppSettings :: IO AppSettings
-getAppSettings = loadYamlSettings [configSettingsDevYml] [] useEnv
+getAppSettings = loadYamlSettingsArgv [] useEnv
 
 
 
 getAppSettingsLN :: IO AppSettingsLN
-getAppSettingsLN = loadYamlSettings [configSettingsDevYml] [] useEnv
+getAppSettingsLN = loadYamlSettingsArgv [] useEnv
 
 
 
 getAppSettingsKeys :: IO AppSettingsKeys
-getAppSettingsKeys = loadYamlSettings [configSettingsPrivateDevYml] [] useEnv
+getAppSettingsKeys = loadYamlSettingsArgv [] useEnv
 
 
 
@@ -241,26 +240,27 @@ develMain = develMainHelper getApplicationDev
 appMain :: IO ()
 appMain = do
 
-  putStrLn "appMain"
-
   args <- (map T.unpack) <$> getArgs
 
   -- Get the settings from all relevant sources
   settings <- loadYamlSettings
     -- fall back to compile-time values, set to [] to require values at runtime
     args
-    [configSettingsYmlValue]
+    []
+    -- [configSettingsYmlValue]
     -- allow environment variables to override
     useEnv
 
   ln_settings <- loadYamlSettings
     args
-    [configSettingsYmlValue]
+    []
+    -- [configSettingsYmlValue]
     useEnv
 
   app_keys <- loadYamlSettings
     args
-    [configSettingsYmlValue]
+    []
+    -- [configSettingsYmlValue]
     useEnv
 
   -- Generate the foundation from the settings

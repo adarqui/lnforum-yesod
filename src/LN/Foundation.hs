@@ -188,8 +188,15 @@ instance Yesod App where
 
 
 
+-- whenSSL :: (a -> a) -> (a -> a)
+-- whenSSL f = if (appForceSSL compileTimeAppSettings) then f else id
+
+
+
+-- | TODO FIXME - this could break ssl
+--
 whenSSL :: (a -> a) -> (a -> a)
-whenSSL f = if (appForceSSL compileTimeAppSettings) then f else id
+whenSSL = id
 
 
 

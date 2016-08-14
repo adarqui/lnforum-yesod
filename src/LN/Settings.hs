@@ -1,6 +1,7 @@
 {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
@@ -17,26 +18,29 @@ module LN.Settings (
   widgetFileSettings,
   combineSettings,
   widgetFile,
-  configSettingsYmlBS,
-  configSettingsYmlValue,
-  compileTimeAppSettings,
+  -- configSettingsYmlBS,
+  -- configSettingsYmlValue,
+  -- compileTimeAppSettings,
   combineStylesheets,
-  combineScripts
+  combineScripts,
+  loadYamlSettingsArgv
 ) where
 
 
 
-import           ClassyPrelude.Yesod
-import           Control.Exception           (throw)
-import           Data.Aeson                  (Result (..), fromJSON, withObject,
+import           ClassyPrelude.Yesod hiding (getArgs)
+-- import           Control.Exception           (throw)
+import System.Environment (getArgs)
+import           Data.Aeson                  ({-Result (..), fromJSON, -} withObject,
                                               withText, (.!=), (.:?))
-import           Data.FileEmbed              (embedFile)
-import           Data.Yaml                   (decodeEither')
+-- import           Data.FileEmbed              (embedFile)
+-- import           Data.Yaml                   (decodeEither')
 import           Database.Persist.Postgresql (PostgresConf)
 import           Language.Haskell.TH.Syntax  (Exp, Name, Q)
-import           LN.Settings.Internal        (configSettingsDevYml)
+-- import           LN.Settings.Internal        (configSettingsDevYml)
 import           Network.Wai.Handler.Warp    (HostPreference)
-import           Yesod.Default.Config2       (applyEnvValue)
+-- import           Yesod.Default.Config2       (applyEnvValue)
+import Yesod.Default.Config2
 import           Yesod.Default.Util          (WidgetFileSettings,
                                               widgetFileNoReload,
                                               widgetFileReload)
@@ -208,30 +212,30 @@ combineSettings = def
 --
 widgetFile :: String -> Q Exp
 widgetFile s =
- if appReloadTemplates compileTimeAppSettings
+ if True -- appReloadTemplates compileTimeAppSettings
     then widgetFileReload widgetFileSettings s
     else widgetFileNoReload widgetFileSettings s
 
 
 
 -- | Raw bytes at compile time of @config/settings.yml@
-configSettingsYmlBS :: ByteString
-configSettingsYmlBS = $(embedFile configSettingsDevYml)
+-- configSettingsYmlBS :: ByteString
+-- configSettingsYmlBS = $(embedFile configSettingsDevYml)
 
 
 
 -- | @config/settings.yml@, parsed to a @Value@.
-configSettingsYmlValue :: Value
-configSettingsYmlValue = either throw id $ decodeEither' configSettingsYmlBS
+-- configSettingsYmlValue :: Value
+-- configSettingsYmlValue = either throw id $ decodeEither' configSettingsYmlBS
 
 
 
 -- | A version of @AppSettings@ parsed at compile time from @config/settings.yml@.
-compileTimeAppSettings :: AppSettings
-compileTimeAppSettings =
-  case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
-      Error e -> error e
-      Success settings -> settings
+-- compileTimeAppSettings :: AppSettings
+-- compileTimeAppSettings =
+--   case fromJSON $ applyEnvValue False mempty configSettingsYmlValue of
+--       Error e -> error e
+--       Success settings -> settings
 
 
 
@@ -242,13 +246,30 @@ compileTimeAppSettings =
 -- > $(combineStylesheets 'StaticR [style1_css, style2_css])
 
 combineStylesheets :: Name -> [Route Static] -> Q Exp
-combineStylesheets = combineStylesheets'
-  (appSkipCombining compileTimeAppSettings)
-  combineSettings
+combineStylesheets =
+  combineStylesheets' True combineSettings
+  -- combineStylesheets'
+  --   (appSkipCombining compileTimeAppSettings)
+  --   combineSettings
 
 
 
 combineScripts :: Name -> [Route Static] -> Q Exp
-combineScripts = combineScripts'
-  (appSkipCombining compileTimeAppSettings)
-  combineSettings
+combineScripts =
+  combineScripts' True combineSettings
+  -- combineScripts'
+  --   (appSkipCombining compileTimeAppSettings)
+  --   combineSettings
+
+
+
+
+loadYamlSettingsArgv
+  :: FromJSON settings
+  => [Value]
+  -> EnvUsage
+  -> IO settings
+
+loadYamlSettingsArgv values usage = do
+  argv <- getArgs
+  loadYamlSettings argv values usage
