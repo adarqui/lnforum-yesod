@@ -20,7 +20,13 @@ exec-dev-sudo:
 	sudo stack exec --allow-different-user -- yesod devel -p 80 --tls-port 443
 
 exec-dev-sudo-exe:
-	sudo ~/.local/bin/ln-yesod config/settings/dev.yml private/settings/dev.yml
+	sudo ~/.local/bin/ln-yesod config/settings/dev.yml config/settings/role/web.yml private/settings/dev.yml
+
+exec-dev-workers-exe:
+	~/.local/bin/ln-bg ./config/settings/dev.yml ./config/settings/role/worker.yml
+
+exec-prod-workers-exe:
+	~/.local/bin/ln-bg ./config/settings/production.yml ./config/settings/role/worker.yml
 
 ghci:
 	sudo stack ghci ln-yesod --main-is none --fast --allow-different-user

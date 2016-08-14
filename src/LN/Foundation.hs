@@ -20,9 +20,6 @@ import qualified Data.Text.Encoding                   as T (decodeUtf8)
 import           Database.Persist.Sql                 (ConnectionPool,
                                                        runSqlPool)
 import qualified Database.Redis                       as R (Connection)
-import           LN.Import.NoFoundation
-import           LN.Misc.Codec                        (keyToInt64)
-import           LN.OAuth2                            (authenticateUser)
 import qualified Network.Wai                          as W (rawPathInfo,
                                                             requestHeaders)
 import           Network.Wai.Middleware.Cors          ()
@@ -36,10 +33,15 @@ import           Yesod.Core.Types                     (Logger)
 import qualified Yesod.Core.Unsafe                    as Unsafe (fakeHandlerGetLogger)
 import           Yesod.Default.Util                   (addStaticContentExternal)
 
+import           LN.Import.NoFoundation
+import           LN.Misc.Codec                        (keyToInt64)
+import           LN.OAuth2                            (authenticateUser)
+
 
 
 data AppSettingsLN = AppSettingsLN {
-  appRedisHost :: String
+  appRedisHost :: String,
+  appRole      :: Role
 }
 
 
@@ -54,6 +56,7 @@ data AppSettingsKeys = AppSettingsKeys {
 instance FromJSON AppSettingsLN where
   parseJSON = withObject "AppSettingsLN" $ \o -> do
     appRedisHost <- o .: "redis-host"
+    appRole      <- o .: "role"
     pure AppSettingsLN {..}
 
 

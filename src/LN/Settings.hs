@@ -13,6 +13,7 @@ module LN.Settings (
   OAuthKeys (..),
   AppSettings (..),
   Environment (..),
+  Role (..),
   widgetFileSettings,
   combineSettings,
   widgetFile,
@@ -57,6 +58,8 @@ data OAuthKeys = OAuthKeys {
 
 
 
+-- | dev -> staging -> production
+--
 data Environment
   = EnvProduction
   | EnvStaging
@@ -76,6 +79,30 @@ instance ToJSON Environment where
     EnvProduction  -> "production"
     EnvStaging     -> "staging"
     EnvDevelopment -> "development"
+
+
+
+
+-- | Is this our web server or a worker?
+-- For workers, we launch our web-server as a worker so that
+-- it can execute background jobs.
+--
+data Role
+  = RoleWeb
+  | RoleWorker
+  deriving (Show, Eq, Ord, Generic)
+
+instance FromJSON Role where
+  parseJSON = withText "Role" $ \t -> do
+    case t of
+      "web"    -> pure RoleWeb
+      "worker" -> pure RoleWorker
+      _        -> fail "Failed to parse role"
+
+instance ToJSON Role where
+  toJSON env = case env of
+    RoleWeb    -> "web"
+    RoleWorker -> "worker"
 
 --
 -- END CUSTOM

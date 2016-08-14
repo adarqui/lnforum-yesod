@@ -141,7 +141,9 @@ makeFoundation appSettings appSettingsLN appSettingsKeys = do
       (pgPoolSize $ appDatabaseConf appSettings)
 
   -- Perform database migration using our application's logging settings.
-  runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+  if appRole appSettingsLN == RoleWeb
+    then runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
+    else runLoggingT (runSqlPool (pure ()) pool) logFunc
 
   -- Patchwork
   let app = mkFoundation pool
@@ -238,6 +240,8 @@ develMain = develMainHelper getApplicationDev
 -- | The @main@ function for an executable running this site.
 appMain :: IO ()
 appMain = do
+
+  putStrLn "appMain"
 
   args <- (map T.unpack) <$> getArgs
 
