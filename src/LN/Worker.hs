@@ -103,9 +103,7 @@ runWorker_AddThreadPostToSet (Message{..}, env) = do
           let
             thread_id' = keyToInt64 thread_id
             post_id'   = keyToInt64 post_id
-          liftIO $ Prelude.putStrLn "zadd 1.."
           void $ liftIO $ Redis.runRedis red $ Redis.zadd ("thread_posts:"<>(BSC.pack $ show thread_id')) [(fromIntegral post_id', BSC.pack $ show post_id')]
-          liftIO $ Prelude.putStrLn "zadd 2.."
           pure ()) :: Handler ())
    ) :: IO (Either SomeException ()))
   ackEnv env
