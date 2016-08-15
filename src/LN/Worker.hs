@@ -156,5 +156,5 @@ runWorker_FixThreadPostSets (Message{..}, env) = do
 workerMain :: IO ()
 workerMain = do
   putStrLn $ "Launching workers.."
-  initializeWorkers
+  replicateM_ 20 initializeWorkers
   forever (getLine :: IO String)
