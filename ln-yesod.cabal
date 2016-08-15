@@ -60,6 +60,7 @@ library
                      LN.All.Pack.PmOut
                      LN.Access
                      LN.Cache
+                     LN.Cache.Internal
                      LN.Control
                      LN.Db
                      LN.Error

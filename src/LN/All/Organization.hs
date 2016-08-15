@@ -39,6 +39,7 @@ module LN.All.Organization (
 
 import           LN.All.Prelude
 import           LN.All.Team
+import           LN.Cache.Internal
 
 
 
@@ -206,7 +207,13 @@ getOrganizations_ByEverythingM m_sp _ = do
 
 getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
 getOrganizationM _ org_id = do
-  selectFirstDbE [OrganizationId ==. org_id, OrganizationActive ==. True] []
+  m_c_organization <- getOrganizationC org_id
+  cacheRun' m_c_organization $ do
+    lr <- selectFirstDbE [OrganizationId ==. org_id, OrganizationActive ==. True] []
+    rehtie
+      lr
+      (\err          -> putOrganizationC org_id CacheMissing *> leftA err)
+      (\organization -> putOrganizationC org_id (CacheEntry organization) *> rightA organization)
 
 
 

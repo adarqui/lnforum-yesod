@@ -27,7 +27,7 @@ type CacheMap a b = M.Map a (CacheEntry b)
 
 data Cache = Cache {
   cacheMe            :: Maybe User,
-  cacheOrganizations :: CacheMap OrganizationId Organization,
+  cacheOrganizations :: CacheMap OrganizationId (Entity Organization),
   cacheUsers         :: CacheMap UserId (Entity User),
   cacheForums        :: CacheMap ForumId Forum,
   cacheBoards        :: CacheMap BoardId Board,
