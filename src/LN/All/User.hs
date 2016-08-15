@@ -289,7 +289,13 @@ insertUsersM' _ user_request = do
 getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
 getUserM _ lookup_user_id = do
 
-  selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
+  m_c_user <- getUserC lookup_user_id
+  cacheRun m_c_user (leftA Error_NotFound) rightA $ do
+    lr <- selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
+    rehtie
+      lr
+      (\err  -> putUserC lookup_user_id CacheMissing *> leftA err)
+      (\user -> putUserC lookup_user_id (CacheEntry user) *> rightA user)
 
 
 
@@ -297,7 +303,6 @@ getUserMH :: UserId -> Text -> HandlerErrorEff (Entity User)
 getUserMH _ lookup_user_name = do
 
   selectFirstDbE [UserName ==. lookup_user_name, UserActive ==. True] []
-
 
 
 

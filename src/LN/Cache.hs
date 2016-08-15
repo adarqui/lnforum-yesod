@@ -5,6 +5,7 @@ module LN.Cache (
   CacheEntry (..),
   defaultCache,
   emptyCache
+--  cacheRun
 ) where
 
 
@@ -27,7 +28,7 @@ type CacheMap a b = M.Map a (CacheEntry b)
 data Cache = Cache {
   cacheMe            :: Maybe User,
   cacheOrganizations :: CacheMap OrganizationId Organization,
-  cacheUsers         :: CacheMap UserId User,
+  cacheUsers         :: CacheMap UserId (Entity User),
   cacheForums        :: CacheMap ForumId Forum,
   cacheBoards        :: CacheMap BoardId Board,
   cacheThreads       :: CacheMap ThreadId Thread,
@@ -51,3 +52,12 @@ defaultCache = Cache {
   cacheThreads       = emptyCache,
   cacheThreadPosts   = emptyCache
 }
+
+
+
+-- cacheRun :: CacheEntry a -> a -> (a -> a) -> a -> a
+-- cacheRun entry go1 go2 go3 =
+--   case entry of
+--     CacheEmpty   -> go1
+--     CacheEntry a -> go2 a
+--     CacheMissing -> go3
