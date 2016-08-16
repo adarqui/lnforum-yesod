@@ -23,7 +23,6 @@ module LN.All.Board (
   getBoards_ByForumIdM,
   getBoards_ByForumId_KeysM,
   getBoards_ByBoardParentIdM,
-  getBoardM,
   getBoardMH,
   getWithBoardM,
   insertBoardM,
@@ -36,6 +35,7 @@ module LN.All.Board (
 
 
 
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.Forum
 
@@ -219,12 +219,6 @@ getBoards_ByBoardParentIdM :: Maybe StandardParams -> UserId -> BoardId -> Handl
 getBoards_ByBoardParentIdM m_sp _ board_parent_id = do
 
   selectListDbE m_sp [BoardParentId ==. Just board_parent_id, BoardActive ==. True] [] BoardId
-
-
-
-getBoardM :: UserId -> BoardId -> HandlerErrorEff (Entity Board)
-getBoardM _ board_id = do
-  selectFirstDbE [BoardId ==. board_id, BoardActive ==. True] []
 
 
 

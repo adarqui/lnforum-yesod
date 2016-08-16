@@ -15,6 +15,7 @@ module LN.All.Pack.Board (
 
 
 import           LN.All.Board
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.Thread
 import           LN.All.ThreadPost

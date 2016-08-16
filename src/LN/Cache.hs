@@ -31,9 +31,9 @@ data Cache = Cache {
   cacheUsers         :: CacheMap UserId (Entity User),
   cacheTeams         :: CacheMap TeamId (Entity Team),
   cacheForums        :: CacheMap ForumId (Entity Forum),
-  cacheBoards        :: CacheMap BoardId Board,
-  cacheThreads       :: CacheMap ThreadId Thread,
-  cacheThreadPosts   :: CacheMap ThreadPostId ThreadPost
+  cacheBoards        :: CacheMap BoardId (Entity Board),
+  cacheThreads       :: CacheMap ThreadId (Entity Thread),
+  cacheThreadPosts   :: CacheMap ThreadPostId (Entity ThreadPost)
 }
 
 

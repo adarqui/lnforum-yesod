@@ -88,7 +88,7 @@ mustBe_OwnerOf_ForumIdM user_id forum_id = do
 mustBe_OwnerOf_BoardIdM :: UserId -> BoardId -> HandlerErrorEff ()
 mustBe_OwnerOf_BoardIdM user_id board_id = do
   runEitherT $ do
-    (Entity _ Board{..}) <- mustT $ selectFirstDbE [BoardId ==. board_id] []
+    (Entity _ Board{..}) <- mustT $ getBoardM user_id board_id
     mustT $ mustBe_OwnerOf_OrganizationIdM user_id boardOrgId
 
 

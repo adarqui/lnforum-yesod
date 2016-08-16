@@ -16,6 +16,12 @@ module LN.Cache.Internal (
   putTeamC,
   getForumC,
   putForumC,
+  getBoardC,
+  putBoardC,
+  getThreadC,
+  putThreadC,
+  getThreadPostC,
+  putThreadPostC,
 ) where
 
 
@@ -142,4 +148,58 @@ getForumC user_id = do
 putForumC :: ForumId -> CacheEntry (Entity Forum) -> HandlerErrorEff ()
 putForumC user_id c_user = do
   modifyCache (\st@Cache{..}->st{ cacheForums = Map.insert user_id c_user cacheForums })
+  rightA ()
+
+
+
+getBoardC :: BoardId -> HandlerEff (Maybe (CacheEntry (Entity Board)))
+getBoardC user_id = do
+  c_users <- getsCache cacheBoards
+  let
+    m_c_user = Map.lookup user_id c_users
+  case m_c_user of
+    Nothing     -> pure Nothing
+    Just c_user -> pure $ Just c_user
+
+
+
+putBoardC :: BoardId -> CacheEntry (Entity Board) -> HandlerErrorEff ()
+putBoardC user_id c_user = do
+  modifyCache (\st@Cache{..}->st{ cacheBoards = Map.insert user_id c_user cacheBoards })
+  rightA ()
+
+
+
+getThreadC :: ThreadId -> HandlerEff (Maybe (CacheEntry (Entity Thread)))
+getThreadC user_id = do
+  c_users <- getsCache cacheThreads
+  let
+    m_c_user = Map.lookup user_id c_users
+  case m_c_user of
+    Nothing     -> pure Nothing
+    Just c_user -> pure $ Just c_user
+
+
+
+putThreadC :: ThreadId -> CacheEntry (Entity Thread) -> HandlerErrorEff ()
+putThreadC user_id c_user = do
+  modifyCache (\st@Cache{..}->st{ cacheThreads = Map.insert user_id c_user cacheThreads })
+  rightA ()
+
+
+
+getThreadPostC :: ThreadPostId -> HandlerEff (Maybe (CacheEntry (Entity ThreadPost)))
+getThreadPostC user_id = do
+  c_users <- getsCache cacheThreadPosts
+  let
+    m_c_user = Map.lookup user_id c_users
+  case m_c_user of
+    Nothing     -> pure Nothing
+    Just c_user -> pure $ Just c_user
+
+
+
+putThreadPostC :: ThreadPostId -> CacheEntry (Entity ThreadPost) -> HandlerErrorEff ()
+putThreadPostC user_id c_user = do
+  modifyCache (\st@Cache{..}->st{ cacheThreadPosts = Map.insert user_id c_user cacheThreadPosts })
   rightA ()
