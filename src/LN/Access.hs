@@ -172,7 +172,7 @@ organizationPermissions_ByTeamsM = organizationPermissions_BySystemTeamsM . map 
 --
 userPermissions_ByOrganizationIdM :: UserId -> OrganizationId -> HandlerEff Permissions
 userPermissions_ByOrganizationIdM user_id org_id = do
-  m_org <- selectFirstDb [OrganizationId ==. org_id, OrganizationActive ==. True] []
+  m_org <- getOrganizationMaybeM user_id org_id
   ebyam m_org (pure []) $ \(Entity _ Organization{..}) -> do
     user_teams <- userTeamsOf_OrganizationIdM user_id org_id
     case user_teams of
@@ -183,7 +183,7 @@ userPermissions_ByOrganizationIdM user_id org_id = do
 
 userPermissions_ByForumIdM :: UserId -> ForumId -> HandlerEff Permissions
 userPermissions_ByForumIdM user_id forum_id = do
-  m_forum <- selectFirstDb [ForumId ==. forum_id, ForumActive ==. True] []
+  m_forum <- getForumMaybeM user_id forum_id
   ebyam m_forum (pure []) $ \(Entity _ Forum{..}) -> do
    userPermissions_ByOrganizationIdM user_id forumOrgId
 
@@ -191,7 +191,7 @@ userPermissions_ByForumIdM user_id forum_id = do
 
 userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff Permissions
 userPermissions_ByBoardIdM user_id board_id = do
-  m_board <- selectFirstDb [BoardId ==. board_id, BoardActive ==. True] []
+  m_board <- getBoardMaybeM user_id board_id
   ebyam m_board (pure []) $ \(Entity _ Board{..}) -> do
    userPermissions_ByOrganizationIdM user_id boardOrgId
 

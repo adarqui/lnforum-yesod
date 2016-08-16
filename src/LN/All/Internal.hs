@@ -2,10 +2,15 @@
 
 module LN.All.Internal (
   getOrganizationM,
+  getOrganizationMaybeM,
   getTeamM,
+  getTeamMaybeM,
   getUserM,
+  getUserMaybeM,
   getForumM,
+  getForumMaybeM,
   getBoardM,
+  getBoardMaybeM,
   getThreadM,
   getThreadMaybeM,
   getThreadPostM,
@@ -15,7 +20,6 @@ module LN.All.Internal (
 
 
 import           Data.Ebyam                 as A (ebyam)
-import           Data.Rehtie                as A (rehtie)
 
 import           LN.Cache                   as A
 import           LN.Cache.Internal
@@ -27,63 +31,92 @@ import           LN.Import                  as A
 
 
 getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
-getOrganizationM _ org_id = do
-  m_c_organization <- getOrganizationC org_id
-  cacheRun' m_c_organization $ do
-    lr <- selectFirstDbE [OrganizationId ==. org_id, OrganizationActive ==. True] []
-    rehtie
-      lr
-      (\err          -> putOrganizationC org_id CacheMissing *> leftA err)
-      (\organization -> putOrganizationC org_id (CacheEntry organization) *> rightA organization)
+getOrganizationM user_id organization_id = do
+  maybe (leftA Error_NotFound) rightA =<< getOrganizationMaybeM user_id organization_id
+
+
+
+getOrganizationMaybeM :: UserId -> OrganizationId -> HandlerEff (Maybe (Entity Organization))
+getOrganizationMaybeM _ organization_id = do
+  m_c_organization <- getOrganizationC organization_id
+  cacheRunMaybe' m_c_organization $ do
+    m_organization <- selectFirstDb [OrganizationId ==. organization_id, OrganizationActive ==. True] []
+    ebyam
+      m_organization
+      (putOrganizationC organization_id CacheMissing *> pure Nothing)
+      (\organization -> putOrganizationC organization_id (CacheEntry organization) *> pure (Just organization))
 
 
 
 getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
-getTeamM _ team_id = do
+getTeamM user_id team_id = do
+  maybe (leftA Error_NotFound) rightA =<< getTeamMaybeM user_id team_id
+
+
+
+getTeamMaybeM :: UserId -> TeamId -> HandlerEff (Maybe (Entity Team))
+getTeamMaybeM _ team_id = do
   m_c_team <- getTeamC team_id
-  cacheRun' m_c_team $ do
-    lr <- selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
-    rehtie
-      lr
-      (\err  -> putTeamC team_id CacheMissing *> leftA err)
-      (\team -> putTeamC team_id (CacheEntry team) *> rightA team)
+  cacheRunMaybe' m_c_team $ do
+    m_team <- selectFirstDb [TeamId ==. team_id, TeamActive ==. True] []
+    ebyam
+      m_team
+      (putTeamC team_id CacheMissing *> pure Nothing)
+      (\team -> putTeamC team_id (CacheEntry team) *> pure (Just team))
 
 
 
 getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
-getUserM _ lookup_user_id = do
+getUserM user_id lookup_user_id = do
+  maybe (leftA Error_NotFound) rightA =<< getUserMaybeM user_id lookup_user_id
 
+
+
+getUserMaybeM :: UserId -> UserId -> HandlerEff (Maybe (Entity User))
+getUserMaybeM _ lookup_user_id = do
   m_c_user <- getUserC lookup_user_id
-  cacheRun m_c_user (leftA Error_NotFound) rightA $ do
-    lr <- selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
-    rehtie
-      lr
-      (\err  -> putUserC lookup_user_id CacheMissing *> leftA err)
-      (\user -> putUserC lookup_user_id (CacheEntry user) *> rightA user)
+  cacheRunMaybe' m_c_user $ do
+    m_user <- selectFirstDb [UserId ==. lookup_user_id, UserActive ==. True] []
+    ebyam
+      m_user
+      (putUserC lookup_user_id CacheMissing *> pure Nothing)
+      (\user -> putUserC lookup_user_id (CacheEntry user) *> pure (Just user))
 
 
 
 getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
-getForumM _ forum_id = do
+getForumM user_id forum_id = do
+  maybe (leftA Error_NotFound) rightA =<< getForumMaybeM user_id forum_id
+
+
+
+getForumMaybeM :: UserId -> ForumId -> HandlerEff (Maybe (Entity Forum))
+getForumMaybeM _ forum_id = do
   m_c_forum <- getForumC forum_id
-  cacheRun' m_c_forum $ do
-    lr <- selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
-    rehtie
-      lr
-      (\err   -> putForumC forum_id CacheMissing *> leftA err)
-      (\forum -> putForumC forum_id (CacheEntry forum) *> rightA forum)
+  cacheRunMaybe' m_c_forum $ do
+    m_forum <- selectFirstDb [ForumId ==. forum_id, ForumActive ==. True] []
+    ebyam
+      m_forum
+      (putForumC forum_id CacheMissing *> pure Nothing)
+      (\forum -> putForumC forum_id (CacheEntry forum) *> pure (Just forum))
 
 
 
 getBoardM :: UserId -> BoardId -> HandlerErrorEff (Entity Board)
-getBoardM _ forum_id = do
-  m_c_forum <- getBoardC forum_id
-  cacheRun' m_c_forum $ do
-    lr <- selectFirstDbE [BoardId ==. forum_id, BoardActive ==. True] []
-    rehtie
-      lr
-      (\err   -> putBoardC forum_id CacheMissing *> leftA err)
-      (\forum -> putBoardC forum_id (CacheEntry forum) *> rightA forum)
+getBoardM user_id board_id = do
+  maybe (leftA Error_NotFound) rightA =<< getBoardMaybeM user_id board_id
+
+
+
+getBoardMaybeM :: UserId -> BoardId -> HandlerEff (Maybe (Entity Board))
+getBoardMaybeM _ board_id = do
+  m_c_board <- getBoardC board_id
+  cacheRunMaybe' m_c_board $ do
+    m_board <- selectFirstDb [BoardId ==. board_id, BoardActive ==. True] []
+    ebyam
+      m_board
+      (putBoardC board_id CacheMissing *> pure Nothing)
+      (\board -> putBoardC board_id (CacheEntry board) *> pure (Just board))
 
 
 
@@ -91,13 +124,7 @@ getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
 getThreadM user_id thread_id = do
   maybe (leftA Error_NotFound) rightA =<< getThreadMaybeM user_id thread_id
 
-  -- m_c_forum <- getThreadC forum_id
-  -- cacheRun' m_c_forum $ do
-  --   lr <- selectFirstDbE [ThreadId ==. forum_id, ThreadActive ==. True] []
-  --   rehtie
-  --     lr
-  --     (\err   -> putThreadC forum_id CacheMissing *> leftA err)
-  --     (\forum -> putThreadC forum_id (CacheEntry forum) *> rightA forum)
+
 
 getThreadMaybeM :: UserId -> ThreadId -> HandlerEff (Maybe (Entity Thread))
 getThreadMaybeM _ thread_id = do
@@ -112,8 +139,8 @@ getThreadMaybeM _ thread_id = do
 
 
 getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
-getThreadPostM user_id forum_id = do
-  (maybe (leftA Error_NotFound) rightA) =<< getThreadPostMaybeM user_id forum_id
+getThreadPostM user_id post_id = do
+  (maybe (leftA Error_NotFound) rightA) =<< getThreadPostMaybeM user_id post_id
 
   -- m_c_forum <- getThreadPostC forum_id
   -- cacheRun' m_c_forum $ do
