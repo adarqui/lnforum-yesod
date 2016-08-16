@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.Internal (
+  getOrganizationM,
   getTeamM,
   getForumM
 ) where
@@ -23,6 +24,18 @@ import           LN.Import                  as A
 import           LN.Lib                     as A
 import           LN.Lifted                  as A
 
+
+
+
+getOrganizationM :: UserId -> OrganizationId -> HandlerErrorEff (Entity Organization)
+getOrganizationM _ org_id = do
+  m_c_organization <- getOrganizationC org_id
+  cacheRun' m_c_organization $ do
+    lr <- selectFirstDbE [OrganizationId ==. org_id, OrganizationActive ==. True] []
+    rehtie
+      lr
+      (\err          -> putOrganizationC org_id CacheMissing *> leftA err)
+      (\organization -> putOrganizationC org_id (CacheEntry organization) *> rightA organization)
 
 
 

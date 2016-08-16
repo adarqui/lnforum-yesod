@@ -15,6 +15,7 @@ module LN.All.Pack.Organization (
 
 
 import           LN.Access
+import           LN.All.Internal
 import           LN.All.Organization
 import           LN.All.Prelude
 import           LN.All.User
