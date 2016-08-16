@@ -32,7 +32,6 @@ module LN.All.User (
   getUsers_ByEverythingM,
   getUsers_ByEverything_KeysM,
   insertUsersM,
-  getUserM,
   getUserMH,
   updateUserM,
   deleteUserM,
@@ -48,9 +47,9 @@ import qualified Data.Text          as T (filter, toLower)
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.User.Shared (insertUsers_TasksM)
-import           LN.Cache.Internal
 
 
 
@@ -286,18 +285,6 @@ insertUsersM' _ user_request = do
     void $ liftIO $ insertUsers_TasksM new_user
     pure new_user
 
-
-
-getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
-getUserM _ lookup_user_id = do
-
-  m_c_user <- getUserC lookup_user_id
-  cacheRun m_c_user (leftA Error_NotFound) rightA $ do
-    lr <- selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
-    rehtie
-      lr
-      (\err  -> putUserC lookup_user_id CacheMissing *> leftA err)
-      (\user -> putUserC lookup_user_id (CacheEntry user) *> rightA user)
 
 
 

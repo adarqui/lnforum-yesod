@@ -13,6 +13,7 @@ module LN.All.Pack.User (
 
 
 
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.Profile
 import           LN.All.User

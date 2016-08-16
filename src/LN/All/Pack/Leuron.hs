@@ -12,6 +12,7 @@ module LN.All.Pack.Leuron (
 
 
 
+import           LN.All.Internal
 import           LN.All.Leuron
 import           LN.All.LeuronTraining
 import           LN.All.Prelude

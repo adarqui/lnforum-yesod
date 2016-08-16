@@ -199,7 +199,7 @@ userPermissions_ByBoardIdM user_id board_id = do
 
 userPermissions_ByThreadIdM :: UserId -> ThreadId -> HandlerEff Permissions
 userPermissions_ByThreadIdM user_id thread_id = do
-  m_thread <- selectFirstDb [ThreadId ==. thread_id, ThreadActive ==. True] []
+  m_thread <- getThreadMaybeM user_id thread_id
   ebyam m_thread (pure []) $ \(Entity _ Thread{..}) -> do
     userPermissions_ByOrganizationIdM user_id threadOrgId
 
@@ -207,7 +207,6 @@ userPermissions_ByThreadIdM user_id thread_id = do
 
 userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff Permissions
 userPermissions_ByThreadPostIdM user_id thread_post_id = do
---  m_thread_post <- selectFirstDb [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
   m_thread_post <- getThreadPostMaybeM user_id thread_post_id
   ebyam m_thread_post (pure []) $ \(Entity _ ThreadPost{..}) -> do
     userPermissions_ByOrganizationIdM user_id threadPostOrgId

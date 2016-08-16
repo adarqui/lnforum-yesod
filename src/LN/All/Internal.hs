@@ -3,9 +3,11 @@
 module LN.All.Internal (
   getOrganizationM,
   getTeamM,
+  getUserM,
   getForumM,
   getBoardM,
   getThreadM,
+  getThreadMaybeM,
   getThreadPostM,
   getThreadPostMaybeM
 ) where
@@ -45,6 +47,19 @@ getTeamM _ team_id = do
       lr
       (\err  -> putTeamC team_id CacheMissing *> leftA err)
       (\team -> putTeamC team_id (CacheEntry team) *> rightA team)
+
+
+
+getUserM :: UserId -> UserId -> HandlerErrorEff (Entity User)
+getUserM _ lookup_user_id = do
+
+  m_c_user <- getUserC lookup_user_id
+  cacheRun m_c_user (leftA Error_NotFound) rightA $ do
+    lr <- selectFirstDbE [UserId ==. lookup_user_id, UserActive ==. True] []
+    rehtie
+      lr
+      (\err  -> putUserC lookup_user_id CacheMissing *> leftA err)
+      (\user -> putUserC lookup_user_id (CacheEntry user) *> rightA user)
 
 
 

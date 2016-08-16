@@ -32,7 +32,6 @@ import qualified Data.Text         as T
 import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.TeamMember
-import           LN.Cache.Internal
 import           LN.T.Membership
 import           LN.T.Visibility
 

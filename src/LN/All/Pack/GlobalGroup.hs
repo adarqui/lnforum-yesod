@@ -12,6 +12,7 @@ module LN.All.Pack.GlobalGroup (
 
 
 
+import           LN.All.Internal
 import           LN.All.GlobalGroup
 import           LN.All.Prelude
 import           LN.All.User
