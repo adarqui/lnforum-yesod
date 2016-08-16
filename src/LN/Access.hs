@@ -28,7 +28,6 @@ module LN.Access (
 import           Control.Monad.Trans.Either (runEitherT)
 import           Data.Ebyam                 (ebyam)
 import           Data.List                  (nub)
-import           Data.Rehtie                (rehtie)
 
 import           LN.All.Internal
 import           LN.Control
@@ -97,7 +96,7 @@ mustBe_OwnerOf_ThreadIdM :: UserId -> ThreadId -> HandlerErrorEff ()
 mustBe_OwnerOf_ThreadIdM user_id thread_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
-    (Entity _ Thread{..}) <- mustT $ selectFirstDbE [ThreadId ==. thread_id] []
+    (Entity _ Thread{..}) <- mustT $ getThreadM user_id thread_id
     void $ mustT $ do
       choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadOrgId]
 
@@ -107,7 +106,7 @@ mustBe_OwnerOf_ThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff ()
 mustBe_OwnerOf_ThreadPostIdM user_id thread_post_id = do
   -- TODO FIXME: Possibly broken? untested
   runEitherT $ do
-    (Entity _ ThreadPost{..}) <- mustT $ selectFirstDbE [ThreadPostId ==. thread_post_id] []
+    (Entity _ ThreadPost{..}) <- mustT $ getThreadPostM user_id thread_post_id
     void $ mustT $
       choiceEitherM Error_PermissionDenied [mustBe_SameUserM user_id user_id, mustBe_OwnerOf_OrganizationIdM user_id threadPostOrgId]
 
@@ -208,6 +207,7 @@ userPermissions_ByThreadIdM user_id thread_id = do
 
 userPermissions_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerEff Permissions
 userPermissions_ByThreadPostIdM user_id thread_post_id = do
-  m_thread_post <- selectFirstDb [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+--  m_thread_post <- selectFirstDb [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
+  m_thread_post <- getThreadPostMaybeM user_id thread_post_id
   ebyam m_thread_post (pure []) $ \(Entity _ ThreadPost{..}) -> do
     userPermissions_ByOrganizationIdM user_id threadPostOrgId

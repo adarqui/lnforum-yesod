@@ -6,6 +6,8 @@ module LN.Cache.Internal (
   module A,
   cacheRun,
   cacheRun',
+  cacheRunMaybe,
+  cacheRunMaybe',
   modifyCache,
   getsCache,
   getUserC,
@@ -60,6 +62,30 @@ cacheRun' m_c_entry go_nothing = cacheRun m_c_entry (leftA Error_NotFound) right
 
 
 
+cacheRunMaybe
+  :: Maybe (CacheEntry a)
+  -> HandlerEff (Maybe a)         -- ^ CacheMissing        - an entry was previously looked up, but not found
+  -> (a -> HandlerEff (Maybe a))  -- ^ CacheEntry (Just a) - an entry exists
+  -> HandlerEff (Maybe a)         -- ^ CacheEntry Nothing  - an entry doesnt exist and was never looked up
+  -> HandlerEff (Maybe a)
+
+cacheRunMaybe m_c_entry go_missing go_entry go_nothing =
+  case m_c_entry of
+    Just CacheMissing   -> go_missing
+    Just (CacheEntry a) -> go_entry a
+    Nothing             -> go_nothing
+
+
+
+cacheRunMaybe'
+  :: Maybe (CacheEntry a)
+  -> HandlerEff (Maybe a)         -- ^ CacheEntry Nothing  - an entry doesnt exist and was never looked up
+  -> HandlerEff (Maybe a)
+
+cacheRunMaybe' m_c_entry go_nothing = cacheRunMaybe m_c_entry (pure Nothing) (pure . Just) go_nothing
+
+
+
 modifyCache
   :: forall r w (m :: * -> *). (Monad m, Monoid w)
   => (Cache -> Cache)
@@ -91,115 +117,108 @@ getUserC user_id = do
 
 
 
-putUserC :: UserId -> CacheEntry (Entity User) -> HandlerErrorEff ()
+putUserC :: UserId -> CacheEntry (Entity User) -> HandlerEff ()
 putUserC user_id c_user = do
   modifyCache (\st@Cache{..}->st{ cacheUsers = Map.insert user_id c_user cacheUsers })
-  rightA ()
 
 
 
 getOrganizationC :: OrganizationId -> HandlerEff (Maybe (CacheEntry (Entity Organization)))
-getOrganizationC user_id = do
-  c_users <- getsCache cacheOrganizations
+getOrganizationC organization_id = do
+  c_organizations <- getsCache cacheOrganizations
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
-    Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    m_c_organization = Map.lookup organization_id c_organizations
+  case m_c_organization of
+    Nothing             -> pure Nothing
+    Just c_organization -> pure $ Just c_organization
 
 
 
-putOrganizationC :: OrganizationId -> CacheEntry (Entity Organization) -> HandlerErrorEff ()
-putOrganizationC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheOrganizations = Map.insert user_id c_user cacheOrganizations })
-  rightA ()
+putOrganizationC :: OrganizationId -> CacheEntry (Entity Organization) -> HandlerEff ()
+putOrganizationC organization_id c_organization = do
+  modifyCache (\st@Cache{..}->st{ cacheOrganizations = Map.insert organization_id c_organization cacheOrganizations })
 
 
 
 getTeamC :: TeamId -> HandlerEff (Maybe (CacheEntry (Entity Team)))
-getTeamC user_id = do
-  c_users <- getsCache cacheTeams
+getTeamC team_id = do
+  c_teams <- getsCache cacheTeams
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
+    m_c_team = Map.lookup team_id c_teams
+  case m_c_team of
     Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    Just c_team -> pure $ Just c_team
 
 
 
-putTeamC :: TeamId -> CacheEntry (Entity Team) -> HandlerErrorEff ()
-putTeamC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheTeams = Map.insert user_id c_user cacheTeams })
-  rightA ()
+putTeamC :: TeamId -> CacheEntry (Entity Team) -> HandlerEff ()
+putTeamC team_id c_team = do
+  modifyCache (\st@Cache{..}->st{ cacheTeams = Map.insert team_id c_team cacheTeams })
 
 
 
 getForumC :: ForumId -> HandlerEff (Maybe (CacheEntry (Entity Forum)))
-getForumC user_id = do
-  c_users <- getsCache cacheForums
+getForumC forum_id = do
+  c_forums <- getsCache cacheForums
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
+    m_c_forum = Map.lookup forum_id c_forums
+  case m_c_forum of
     Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    Just c_forum -> pure $ Just c_forum
 
 
 
-putForumC :: ForumId -> CacheEntry (Entity Forum) -> HandlerErrorEff ()
-putForumC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheForums = Map.insert user_id c_user cacheForums })
-  rightA ()
+putForumC :: ForumId -> CacheEntry (Entity Forum) -> HandlerEff ()
+putForumC forum_id c_forum = do
+  modifyCache (\st@Cache{..}->st{ cacheForums = Map.insert forum_id c_forum cacheForums })
 
 
 
 getBoardC :: BoardId -> HandlerEff (Maybe (CacheEntry (Entity Board)))
-getBoardC user_id = do
-  c_users <- getsCache cacheBoards
+getBoardC board_id = do
+  c_boards <- getsCache cacheBoards
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
+    m_c_board = Map.lookup board_id c_boards
+  case m_c_board of
     Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    Just c_board -> pure $ Just c_board
 
 
 
-putBoardC :: BoardId -> CacheEntry (Entity Board) -> HandlerErrorEff ()
-putBoardC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheBoards = Map.insert user_id c_user cacheBoards })
-  rightA ()
+putBoardC :: BoardId -> CacheEntry (Entity Board) -> HandlerEff ()
+putBoardC board_id c_board = do
+  modifyCache (\st@Cache{..}->st{ cacheBoards = Map.insert board_id c_board cacheBoards })
 
 
 
 getThreadC :: ThreadId -> HandlerEff (Maybe (CacheEntry (Entity Thread)))
-getThreadC user_id = do
-  c_users <- getsCache cacheThreads
+getThreadC thread_id = do
+  c_threads <- getsCache cacheThreads
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
+    m_c_thread = Map.lookup thread_id c_threads
+  case m_c_thread of
     Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    Just c_thread -> pure $ Just c_thread
 
 
 
-putThreadC :: ThreadId -> CacheEntry (Entity Thread) -> HandlerErrorEff ()
-putThreadC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheThreads = Map.insert user_id c_user cacheThreads })
-  rightA ()
+putThreadC :: ThreadId -> CacheEntry (Entity Thread) -> HandlerEff ()
+putThreadC thread_id c_thread = do
+  modifyCache (\st@Cache{..}->st{ cacheThreads = Map.insert thread_id c_thread cacheThreads })
 
 
 
 getThreadPostC :: ThreadPostId -> HandlerEff (Maybe (CacheEntry (Entity ThreadPost)))
-getThreadPostC user_id = do
-  c_users <- getsCache cacheThreadPosts
+getThreadPostC post_id = do
+  c_posts <- getsCache cacheThreadPosts
   let
-    m_c_user = Map.lookup user_id c_users
-  case m_c_user of
+    m_c_post = Map.lookup post_id c_posts
+  case m_c_post of
     Nothing     -> pure Nothing
-    Just c_user -> pure $ Just c_user
+    Just c_post -> pure $ Just c_post
 
 
 
-putThreadPostC :: ThreadPostId -> CacheEntry (Entity ThreadPost) -> HandlerErrorEff ()
-putThreadPostC user_id c_user = do
-  modifyCache (\st@Cache{..}->st{ cacheThreadPosts = Map.insert user_id c_user cacheThreadPosts })
-  rightA ()
+putThreadPostC :: ThreadPostId -> CacheEntry (Entity ThreadPost) -> HandlerEff ()
+putThreadPostC post_id c_post = do
+  modifyCache (\st@Cache{..}->st{ cacheThreadPosts = Map.insert post_id c_post cacheThreadPosts })

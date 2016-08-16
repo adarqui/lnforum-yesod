@@ -6,26 +6,20 @@ module LN.All.Internal (
   getForumM,
   getBoardM,
   getThreadM,
-  getThreadPostM
+  getThreadPostM,
+  getThreadPostMaybeM
 ) where
 
 
 
-import           Control.Monad.Trans.Either as A (EitherT, runEitherT)
 import           Data.Ebyam                 as A (ebyam)
-import           Data.Maybe                 as A (fromJust)
 import           Data.Rehtie                as A (rehtie)
-import qualified Data.Text                  as T
 
-import           LN.Api.Params              as A
 import           LN.Cache                   as A
 import           LN.Cache.Internal
 import           LN.Control                 as A
 import           LN.Db                      as A
-import           LN.Error                   as A
 import           LN.Import                  as A
-import           LN.Lib                     as A
-import           LN.Lifted                  as A
 
 
 
@@ -79,23 +73,49 @@ getBoardM _ forum_id = do
 
 
 getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
-getThreadM _ forum_id = do
-  m_c_forum <- getThreadC forum_id
-  cacheRun' m_c_forum $ do
-    lr <- selectFirstDbE [ThreadId ==. forum_id, ThreadActive ==. True] []
-    rehtie
-      lr
-      (\err   -> putThreadC forum_id CacheMissing *> leftA err)
-      (\forum -> putThreadC forum_id (CacheEntry forum) *> rightA forum)
+getThreadM user_id thread_id = do
+  maybe (leftA Error_NotFound) rightA =<< getThreadMaybeM user_id thread_id
+
+  -- m_c_forum <- getThreadC forum_id
+  -- cacheRun' m_c_forum $ do
+  --   lr <- selectFirstDbE [ThreadId ==. forum_id, ThreadActive ==. True] []
+  --   rehtie
+  --     lr
+  --     (\err   -> putThreadC forum_id CacheMissing *> leftA err)
+  --     (\forum -> putThreadC forum_id (CacheEntry forum) *> rightA forum)
+
+getThreadMaybeM :: UserId -> ThreadId -> HandlerEff (Maybe (Entity Thread))
+getThreadMaybeM _ thread_id = do
+  m_c_thread <- getThreadC thread_id
+  cacheRunMaybe' m_c_thread $ do
+    m_thread <- selectFirstDb [ThreadId ==. thread_id, ThreadActive ==. True] []
+    ebyam
+      m_thread
+      (putThreadC thread_id CacheMissing *> pure Nothing)
+      (\thread -> putThreadC thread_id (CacheEntry thread) *> pure (Just thread))
 
 
 
 getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
-getThreadPostM _ forum_id = do
-  m_c_forum <- getThreadPostC forum_id
-  cacheRun' m_c_forum $ do
-    lr <- selectFirstDbE [ThreadPostId ==. forum_id, ThreadPostActive ==. True] []
-    rehtie
-      lr
-      (\err   -> putThreadPostC forum_id CacheMissing *> leftA err)
-      (\forum -> putThreadPostC forum_id (CacheEntry forum) *> rightA forum)
+getThreadPostM user_id forum_id = do
+  (maybe (leftA Error_NotFound) rightA) =<< getThreadPostMaybeM user_id forum_id
+
+  -- m_c_forum <- getThreadPostC forum_id
+  -- cacheRun' m_c_forum $ do
+  --   lr <- selectFirstDbE [ThreadPostId ==. forum_id, ThreadPostActive ==. True] []
+  --   rehtie
+  --     lr
+  --     (\err   -> putThreadPostC forum_id CacheMissing *> leftA err)
+  --     (\forum -> putThreadPostC forum_id (CacheEntry forum) *> rightA forum)
+
+
+
+getThreadPostMaybeM :: UserId -> ThreadPostId -> HandlerEff (Maybe (Entity ThreadPost))
+getThreadPostMaybeM _ post_id = do
+  m_c_post <- getThreadPostC post_id
+  cacheRunMaybe' m_c_post $ do
+    m_post <- selectFirstDb [ThreadPostId ==. post_id, ThreadPostActive ==. True] []
+    ebyam
+      m_post
+      (putThreadPostC post_id CacheMissing *> pure Nothing)
+      (\post -> putThreadPostC post_id (CacheEntry post) *> pure (Just post))
