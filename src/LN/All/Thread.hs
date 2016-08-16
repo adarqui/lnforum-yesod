@@ -19,7 +19,6 @@ module LN.All.Thread (
 
   -- Model/Internal
   getThreadsM,
-  getThreadM,
   getThreadMH,
   getThreads_ByOrganizationIdM,
   getThreads_ByBoardIdM,
@@ -36,6 +35,7 @@ module LN.All.Thread (
 
 
 
+import           LN.All.Internal
 import           LN.All.Prelude
 
 
@@ -232,12 +232,6 @@ getThreads_ByBoardId_KeysM m_sp _ board_id = do
 getThreads_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Thread]
 getThreads_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [ThreadUserId ==. lookup_user_id, ThreadActive ==. True] [] ThreadId
-
-
-
-getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
-getThreadM _ thread_id = do
-  selectFirstDbE [ThreadId ==. thread_id, ThreadActive ==. True] []
 
 
 

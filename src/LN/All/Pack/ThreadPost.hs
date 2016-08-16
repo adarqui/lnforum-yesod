@@ -6,14 +6,14 @@ module LN.All.Pack.ThreadPost (
   getThreadPostPackR,
 
   -- Model
-  getThreadPostPacksM,
-  getThreadPostPackM
+  getThreadPostPacksM
 ) where
 
 
 
 import           LN.All.Board
 import           LN.All.Forum
+import           LN.All.Internal
 import           LN.All.Like
 import           LN.All.Organization
 import           LN.All.Prelude

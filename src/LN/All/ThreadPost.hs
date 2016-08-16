@@ -23,7 +23,6 @@ module LN.All.ThreadPost (
   getThreadPosts_ByThreadIdM,
   getThreadPosts_ByThreadPostIdM,
   getThreadPosts_ByThreadPostIdsM,
-  getThreadPostM,
   getWithThreadPostsKeysM,
   insertThreadPostM,
   updateThreadPostM,
@@ -36,12 +35,13 @@ module LN.All.ThreadPost (
 
 
 import qualified Data.ByteString.Char8 as BSC
-import qualified Database.Redis as Redis
+import qualified Database.Redis        as Redis
 
+import           LN.All.Internal
 import           LN.All.Prelude
-import           LN.Job.Enqueue (mkJob_AddThreadPostToSet,
-                                 mkJob_RemoveThreadPostFromSet)
-import qualified LN.T.Like      as L
+import           LN.Job.Enqueue        (mkJob_AddThreadPostToSet,
+                                        mkJob_RemoveThreadPostFromSet)
+import qualified LN.T.Like             as L
 
 
 
@@ -230,12 +230,6 @@ getThreadPosts_ByThreadPostIdM m_sp _ thread_post_id = do
 getThreadPosts_ByThreadPostIdsM :: Maybe StandardParams -> UserId -> [ThreadPostId] -> HandlerErrorEff [Entity ThreadPost]
 getThreadPosts_ByThreadPostIdsM m_sp _ posts_ids = do
   selectListDbE m_sp [ThreadPostId <-. posts_ids, ThreadPostActive ==. True] [] ThreadPostId
-
-
-
-getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
-getThreadPostM _ thread_post_id = do
-  selectFirstDbE [ThreadPostId ==. thread_post_id, ThreadPostActive ==. True] []
 
 
 

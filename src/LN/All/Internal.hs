@@ -4,7 +4,9 @@ module LN.All.Internal (
   getOrganizationM,
   getTeamM,
   getForumM,
-  getBoardM
+  getBoardM,
+  getThreadM,
+  getThreadPostM
 ) where
 
 
@@ -73,3 +75,27 @@ getBoardM _ forum_id = do
       lr
       (\err   -> putBoardC forum_id CacheMissing *> leftA err)
       (\forum -> putBoardC forum_id (CacheEntry forum) *> rightA forum)
+
+
+
+getThreadM :: UserId -> ThreadId -> HandlerErrorEff (Entity Thread)
+getThreadM _ forum_id = do
+  m_c_forum <- getThreadC forum_id
+  cacheRun' m_c_forum $ do
+    lr <- selectFirstDbE [ThreadId ==. forum_id, ThreadActive ==. True] []
+    rehtie
+      lr
+      (\err   -> putThreadC forum_id CacheMissing *> leftA err)
+      (\forum -> putThreadC forum_id (CacheEntry forum) *> rightA forum)
+
+
+
+getThreadPostM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity ThreadPost)
+getThreadPostM _ forum_id = do
+  m_c_forum <- getThreadPostC forum_id
+  cacheRun' m_c_forum $ do
+    lr <- selectFirstDbE [ThreadPostId ==. forum_id, ThreadPostActive ==. True] []
+    rehtie
+      lr
+      (\err   -> putThreadPostC forum_id CacheMissing *> leftA err)
+      (\forum -> putThreadPostC forum_id (CacheEntry forum) *> rightA forum)
