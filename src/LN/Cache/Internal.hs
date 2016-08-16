@@ -11,7 +11,9 @@ module LN.Cache.Internal (
   getUserC,
   putUserC,
   getOrganizationC,
-  putOrganizationC
+  putOrganizationC,
+  getTeamC,
+  putTeamC,
 ) where
 
 
@@ -102,4 +104,22 @@ getOrganizationC user_id = do
 putOrganizationC :: OrganizationId -> CacheEntry (Entity Organization) -> HandlerErrorEff ()
 putOrganizationC user_id c_user = do
   modifyCache (\st@Cache{..}->st{ cacheOrganizations = Map.insert user_id c_user cacheOrganizations })
+  rightA ()
+
+
+
+getTeamC :: TeamId -> HandlerEff (Maybe (CacheEntry (Entity Team)))
+getTeamC user_id = do
+  c_users <- getsCache cacheTeams
+  let
+    m_c_user = Map.lookup user_id c_users
+  case m_c_user of
+    Nothing     -> pure Nothing
+    Just c_user -> pure $ Just c_user
+
+
+
+putTeamC :: TeamId -> CacheEntry (Entity Team) -> HandlerErrorEff ()
+putTeamC user_id c_user = do
+  modifyCache (\st@Cache{..}->st{ cacheTeams = Map.insert user_id c_user cacheTeams })
   rightA ()
