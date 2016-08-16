@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns    #-}
 {-# LANGUAGE ExplicitForAll  #-}
 {-# LANGUAGE KindSignatures  #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -44,7 +45,7 @@ type ControlState  = InternalControlState
 
 
 data InternalControlState = InternalControlState {
-  cache :: Cache
+  cache :: !Cache
 }
 
 

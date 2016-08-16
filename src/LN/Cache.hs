@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns   #-}
 {-# LANGUAGE ExplicitForAll #-}
 
 module LN.Cache (
@@ -26,14 +27,14 @@ type CacheMap a b = M.Map a (CacheEntry b)
 
 
 data Cache = Cache {
-  cacheMe            :: Maybe User,
-  cacheOrganizations :: CacheMap OrganizationId (Entity Organization),
-  cacheUsers         :: CacheMap UserId (Entity User),
-  cacheTeams         :: CacheMap TeamId (Entity Team),
-  cacheForums        :: CacheMap ForumId (Entity Forum),
-  cacheBoards        :: CacheMap BoardId (Entity Board),
-  cacheThreads       :: CacheMap ThreadId (Entity Thread),
-  cacheThreadPosts   :: CacheMap ThreadPostId (Entity ThreadPost)
+  cacheMe            :: !(Maybe User),
+  cacheOrganizations :: !(CacheMap OrganizationId (Entity Organization)),
+  cacheUsers         :: !(CacheMap UserId (Entity User)),
+  cacheTeams         :: !(CacheMap TeamId (Entity Team)),
+  cacheForums        :: !(CacheMap ForumId (Entity Forum)),
+  cacheBoards        :: !(CacheMap BoardId (Entity Board)),
+  cacheThreads       :: !(CacheMap ThreadId (Entity Thread)),
+  cacheThreadPosts   :: !(CacheMap ThreadPostId (Entity ThreadPost))
 }
 
 
