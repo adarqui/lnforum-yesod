@@ -22,7 +22,7 @@ module LN.All.Forum (
   getForums_ByOrganizationIdM,
   getForums_ByOrganizationId_KeysM,
   getForums_ByUserIdM,
-  getForumM,
+--  getForumM,
   getForumMH,
   getForum_ByOrganizationIdMH,
   getWithForumM,
@@ -37,6 +37,7 @@ module LN.All.Forum (
 
 
 import           LN.All.Prelude
+import           LN.All.Internal
 
 
 
@@ -227,10 +228,10 @@ getForum_ByOrganizationIdMH _ _ forum_name org_id = do
 
 
 
-getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
-getForumM _ forum_id = do
+-- getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
+-- getForumM _ forum_id = do
 
-  selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
+--   selectFirstDbE [ForumId ==. forum_id, ForumActive ==. True] []
 
 
 

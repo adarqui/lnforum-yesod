@@ -18,6 +18,7 @@ library
                      LN.Application.Prelude
                      LN.Api.Auth
                      LN.Api.Params
+                     LN.All.Internal
                      LN.All.Api
                      LN.All.Board
                      LN.All.Empty

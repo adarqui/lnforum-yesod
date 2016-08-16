@@ -15,7 +15,7 @@ module LN.All.Team (
   getTeamsM,
   getTeams_ByOrganizationIdM,
   getTeams_ByUserIdM,
-  getTeamM,
+--  getTeamM,
   getTeamMH,
   insertTeam_InternalM,
   insert_SystemTeamsM,
@@ -29,9 +29,10 @@ module LN.All.Team (
 
 import qualified Data.Text         as T
 
-import           LN.Cache.Internal
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.TeamMember
+import           LN.Cache.Internal
 import           LN.T.Membership
 import           LN.T.Visibility
 
@@ -149,15 +150,15 @@ getTeams_ByUserIdM m_sp _ lookup_user_id = do
 
 
 
-getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
-getTeamM _ team_id = do
-  m_c_team <- getTeamC team_id
-  cacheRun' m_c_team $ do
-    lr <- selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
-    rehtie
-      lr
-      (\err  -> putTeamC team_id CacheMissing *> leftA err)
-      (\team -> putTeamC team_id (CacheEntry team) *> rightA team)
+-- getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
+-- getTeamM _ team_id = do
+--   m_c_team <- getTeamC team_id
+--   cacheRun' m_c_team $ do
+--     lr <- selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
+--     rehtie
+--       lr
+--       (\err  -> putTeamC team_id CacheMissing *> leftA err)
+--       (\team -> putTeamC team_id (CacheEntry team) *> rightA team)
 
 
 

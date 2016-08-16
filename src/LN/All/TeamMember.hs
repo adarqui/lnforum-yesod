@@ -27,6 +27,7 @@ module LN.All.TeamMember (
 
 import           LN.All.Prelude
 import           LN.T.Membership
+import LN.All.Internal
 
 
 

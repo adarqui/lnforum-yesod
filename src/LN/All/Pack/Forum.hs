@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module LN.All.Pack.Forum (
   -- Handler
   getForumPacksR,
@@ -14,6 +16,7 @@ module LN.All.Pack.Forum (
 
 import           LN.All.Prelude
 import           LN.All.Forum
+import           LN.All.Internal
 
 
 

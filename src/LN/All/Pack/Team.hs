@@ -11,6 +11,7 @@ module LN.All.Pack.Team (
 
 
 
+import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.Team
 import           LN.All.User

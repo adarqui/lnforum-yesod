@@ -30,7 +30,7 @@ data Cache = Cache {
   cacheOrganizations :: CacheMap OrganizationId (Entity Organization),
   cacheUsers         :: CacheMap UserId (Entity User),
   cacheTeams         :: CacheMap TeamId (Entity Team),
-  cacheForums        :: CacheMap ForumId Forum,
+  cacheForums        :: CacheMap ForumId (Entity Forum),
   cacheBoards        :: CacheMap BoardId Board,
   cacheThreads       :: CacheMap ThreadId Thread,
   cacheThreadPosts   :: CacheMap ThreadPostId ThreadPost

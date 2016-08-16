@@ -28,6 +28,9 @@ module LN.Access (
 import           Control.Monad.Trans.Either (runEitherT)
 import           Data.Ebyam                 (ebyam)
 import           Data.List                  (nub)
+import           Data.Rehtie                (rehtie)
+
+import           LN.All.Internal
 import           LN.Control
 import           LN.Db
 import           LN.Generate.Permission     (allPermissions)
@@ -77,7 +80,7 @@ mustBe_MemberOf_OrganizationIdM user_id org_id = do
 mustBe_OwnerOf_ForumIdM :: UserId -> ForumId -> HandlerErrorEff ()
 mustBe_OwnerOf_ForumIdM user_id forum_id = do
   runEitherT $ do
-    (Entity _ Forum{..}) <- mustT $ selectFirstDbE [ForumId ==. forum_id] []
+    (Entity _ Forum{..}) <- mustT $ getForumM user_id forum_id
     mustT $ mustBe_OwnerOf_OrganizationIdM user_id forumOrgId
 
 
