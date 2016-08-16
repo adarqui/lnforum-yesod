@@ -24,6 +24,10 @@ module LN.Cache.Internal (
   putThreadC,
   getThreadPostC,
   putThreadPostC,
+  getTeamsByOrgC,
+  putTeamsByOrgC,
+  getTeamMemberC,
+  putTeamMemberC
 ) where
 
 
@@ -32,7 +36,7 @@ import           Control.Monad.Trans.RWS
 import qualified Data.Map                as Map
 import           Haskell.Helpers.Either  as A
 
-import           LN.Cache   as A
+import           LN.Cache                as A
 import           LN.Control
 import           LN.Import
 
@@ -222,3 +226,37 @@ getThreadPostC post_id = do
 putThreadPostC :: ThreadPostId -> CacheEntry (Entity ThreadPost) -> HandlerEff ()
 putThreadPostC post_id c_post = do
   modifyCache (\st@Cache{..}->st{ cacheThreadPosts = Map.insert post_id c_post cacheThreadPosts })
+
+
+
+getTeamsByOrgC :: OrganizationId -> HandlerEff (Maybe (CacheEntry [Entity Team]))
+getTeamsByOrgC org_id = do
+  c_teams' <- getsCache cacheTeamsByOrg
+  let
+    m_c_teams = Map.lookup org_id c_teams'
+  case m_c_teams of
+    Nothing      -> pure Nothing
+    Just c_teams -> pure $ Just c_teams
+
+
+
+putTeamsByOrgC :: OrganizationId -> CacheEntry [Entity Team] -> HandlerEff ()
+putTeamsByOrgC org_id c_teams = do
+  modifyCache (\st@Cache{..}->st{ cacheTeamsByOrg = Map.insert org_id c_teams cacheTeamsByOrg })
+
+
+
+getTeamMemberC :: TeamMemberId -> UserId -> HandlerEff (Maybe (CacheEntry (Entity TeamMember)))
+getTeamMemberC team_member_id user_id = do
+  c_team_members <- getsCache cacheTeamMembers
+  let
+    m_c_team_member = Map.lookup (team_member_id, user_id) c_team_members
+  case m_c_team_member of
+    Nothing            -> pure Nothing
+    Just c_team_member -> pure $ Just c_team_member
+
+
+
+putTeamMemberC :: TeamMemberId -> UserId -> CacheEntry (Entity TeamMember) -> HandlerEff ()
+putTeamMemberC team_member_id user_id c_team_member = do
+  modifyCache (\st@Cache{..}->st{ cacheTeamMembers = Map.insert (team_member_id, user_id) c_team_member cacheTeamMembers })

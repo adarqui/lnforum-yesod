@@ -149,18 +149,6 @@ getTeams_ByUserIdM m_sp _ lookup_user_id = do
 
 
 
--- getTeamM :: UserId -> TeamId -> HandlerErrorEff (Entity Team)
--- getTeamM _ team_id = do
---   m_c_team <- getTeamC team_id
---   cacheRun' m_c_team $ do
---     lr <- selectFirstDbE [TeamId ==. team_id, TeamActive ==. True] []
---     rehtie
---       lr
---       (\err  -> putTeamC team_id CacheMissing *> leftA err)
---       (\team -> putTeamC team_id (CacheEntry team) *> rightA team)
-
-
-
 getTeamMH :: UserId -> Text -> OrganizationId -> HandlerErrorEff (Entity Team)
 getTeamMH _ team_sid org_id = do
   case m_system_team of
