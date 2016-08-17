@@ -76,7 +76,7 @@ getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> Handler
 getUserPacks_ByUserIdsM _ user_id user_ids = do
   e_users <- getUsers_ByUserIdsM Nothing user_id user_ids
   rehtie e_users leftA $ \users -> do
-    users_packs <- rights <$> mapConcurrently (getUserPack_ByUserM Nothing user_id) users
+    users_packs <- rights <$> forConcurrently users (getUserPack_ByUserM Nothing user_id)
     rightA $ UserPackResponses {
       userPackResponses = users_packs
     }

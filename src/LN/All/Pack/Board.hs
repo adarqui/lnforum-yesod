@@ -151,7 +151,7 @@ getBoardPacks_ByForumId_AsyncM m_sp user_id forum_id = do
 
   e_boards <- getBoards_ByForumIdM m_sp user_id forum_id
   rehtie e_boards leftA $ \boards -> do
-    board_packs <- rights <$> mapConcurrently (getBoardPack_ByBoardM user_id) boards
+    board_packs <- rights <$> forConcurrently boards (getBoardPack_ByBoardM user_id)
     rightA $ BoardPackResponses {
       boardPackResponses = board_packs
     }

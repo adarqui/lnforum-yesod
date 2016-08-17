@@ -75,7 +75,7 @@ getThreadPostPacks_ByForumIdM m_sp user_id forum_id = do
   e_thread_posts <- getThreadPosts_ByForumIdM m_sp user_id forum_id
 
   rehtie e_thread_posts leftA $ \thread_posts -> do
-    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    thread_post_packs <- rights <$> forConcurrently thread_posts (getThreadPostPack_ByThreadPostM m_sp user_id)
     rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
@@ -88,7 +88,7 @@ getThreadPostPacks_ByThreadIdM m_sp user_id thread_id = do
   e_thread_posts <- getThreadPosts_ByThreadIdM m_sp user_id thread_id
 
   rehtie e_thread_posts leftA $ \thread_posts -> do
-    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    thread_post_packs <- rights <$> forConcurrently thread_posts (getThreadPostPack_ByThreadPostM m_sp user_id)
     rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
@@ -101,7 +101,7 @@ getThreadPostPacks_ByThreadPostIdM m_sp user_id thread_post_id = do
   e_thread_posts <- getThreadPosts_ByThreadPostIdM m_sp user_id thread_post_id
 
   rehtie e_thread_posts leftA $ \thread_posts -> do
-    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    thread_post_packs <- rights <$> forConcurrently thread_posts (getThreadPostPack_ByThreadPostM m_sp user_id)
     rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }
@@ -114,7 +114,7 @@ getThreadPostPacks_ByThreadPostIdsM m_sp user_id post_ids = do
   e_thread_posts <- getThreadPosts_ByThreadPostIdsM m_sp user_id post_ids
 
   rehtie e_thread_posts leftA $ \thread_posts -> do
-    thread_post_packs <- rights <$> mapM (\thread_post -> getThreadPostPack_ByThreadPostM m_sp user_id thread_post) thread_posts
+    thread_post_packs <- rights <$> forConcurrently thread_posts (getThreadPostPack_ByThreadPostM m_sp user_id)
     rightA $ ThreadPostPackResponses {
       threadPostPackResponses = thread_post_packs
     }

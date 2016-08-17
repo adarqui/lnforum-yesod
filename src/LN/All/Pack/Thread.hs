@@ -91,7 +91,7 @@ getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
   e_threads <- getThreads_ByBoardIdM m_sp user_id board_id
   rehtie e_threads leftA $ \threads -> do
-    thread_packs <- rights <$> forM threads (getThreadPack_ByThreadM m_sp user_id)
+    thread_packs <- rights <$> forConcurrently threads (getThreadPack_ByThreadM m_sp user_id)
     rightA $ ThreadPackResponses {
       threadPackResponses = thread_packs
     }
