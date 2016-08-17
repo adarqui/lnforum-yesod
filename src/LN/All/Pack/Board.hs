@@ -136,9 +136,9 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
 getBoardPacks_ByForumIdM m_sp user_id forum_id = do
 
-  e_board_keys <- getBoards_ByForumId_KeysM m_sp user_id forum_id
-  rehtie e_board_keys leftA $ \board_keys -> do
-    board_packs <- rights <$> mapM (\key -> getBoardPackM user_id key) board_keys
+  e_boards <- getBoards_ByForumIdM m_sp user_id forum_id
+  rehtie e_boards leftA $ \boards -> do
+    board_packs <- rights <$> mapM (\board -> getBoardPack_ByBoardM user_id board) boards
     rightA $ BoardPackResponses {
       boardPackResponses = board_packs
     }
