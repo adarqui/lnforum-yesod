@@ -138,7 +138,7 @@ getBoardPacks_ByForumIdM m_sp user_id forum_id = do
 
   e_boards <- getBoards_ByForumIdM m_sp user_id forum_id
   rehtie e_boards leftA $ \boards -> do
-    board_packs <- rights <$> mapM (\board -> getBoardPack_ByBoardM user_id board) boards
+    board_packs <- rights <$> forM boards (getBoardPack_ByBoardM user_id)
     rightA $ BoardPackResponses {
       boardPackResponses = board_packs
     }

@@ -68,13 +68,12 @@ getUsersSanitizedPacksM m_sp user_id = do
 getUsersSanitizedPacks_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
-  e_user_ids <- getUsers_ByEverything_KeysM m_sp user_id
-  rehtie e_user_ids leftA $ \user_ids -> do
-    user_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
+  e_users <- getUsers_ByEverythingM m_sp user_id
+  rehtie e_users leftA $ \users -> do
+    user_packs <- rights <$> forM users (getUserSanitizedPack_ByUserM user_id)
     rightA $ UserSanitizedPackResponses {
       userSanitizedPackResponses = user_packs
     }
-
 
 
 
@@ -91,11 +90,12 @@ getUserSanitizedPackMH user_id lookup_user_name = getUserSanitizedPack_ByUserNam
 
 getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserSanitizedPackResponses
 getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
-  users_packs <- rights <$> mapM (\key -> getUserSanitizedPack_ByUserIdM user_id key) user_ids
-  rightA $ UserSanitizedPackResponses {
-    userSanitizedPackResponses = users_packs
-  }
-
+  e_users <- getUsers_ByUserIdsM Nothing user_id user_ids
+  rehtie e_users leftA $ \users -> do
+    user_packs <- rights <$> forM users (getUserSanitizedPack_ByUserM user_id)
+    rightA $ UserSanitizedPackResponses {
+      userSanitizedPackResponses = user_packs
+    }
 
 
 
