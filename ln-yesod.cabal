@@ -44,6 +44,7 @@ library
                      LN.All.TeamMember
                      LN.All.User
                      LN.All.User.Shared
+                     LN.All.View
                      LN.All.Pack.Me
                      LN.All.Pack.Organization
                      LN.All.Pack.User

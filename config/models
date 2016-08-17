@@ -731,3 +731,16 @@ Star
 
   UniqueStar userId ent entId
   deriving Eq Show Typeable
+
+
+
+View
+  ent          Ent
+  entId        Int64
+  count        Int64
+
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueView ent entId
+  deriving Eq Show Typeable
