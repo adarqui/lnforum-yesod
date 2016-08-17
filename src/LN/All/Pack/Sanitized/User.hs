@@ -70,7 +70,7 @@ getUsersSanitizedPacks_ByEverythingM m_sp user_id = do
 
   e_users <- getUsers_ByEverythingM m_sp user_id
   rehtie e_users leftA $ \users -> do
-    user_packs <- rights <$> forM users (getUserSanitizedPack_ByUserM user_id)
+    user_packs <- rights <$> forConcurrently users (getUserSanitizedPack_ByUserM user_id)
     rightA $ UserSanitizedPackResponses {
       userSanitizedPackResponses = user_packs
     }
@@ -92,7 +92,7 @@ getUsersSanitizedPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] 
 getUsersSanitizedPacks_ByUserIdsM _ user_id user_ids = do
   e_users <- getUsers_ByUserIdsM Nothing user_id user_ids
   rehtie e_users leftA $ \users -> do
-    user_packs <- rights <$> forM users (getUserSanitizedPack_ByUserM user_id)
+    user_packs <- rights <$> forConcurrently users (getUserSanitizedPack_ByUserM user_id)
     rightA $ UserSanitizedPackResponses {
       userSanitizedPackResponses = user_packs
     }
