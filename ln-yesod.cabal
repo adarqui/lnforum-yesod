@@ -179,6 +179,7 @@ library
 
                  -- for chat socket example
                  , conduit-combinators
+                 , lifted-async
                  , lifted-base
                  , stm-lifted
                  , yesod-websockets

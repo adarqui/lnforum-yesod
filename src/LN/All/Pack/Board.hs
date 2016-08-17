@@ -9,10 +9,12 @@ module LN.All.Pack.Board (
   -- Model
   getBoardPacksM,
   getBoardPackM,
-  getBoardPackMH,
+  getBoardPackMH
 ) where
 
 
+
+import           Control.Concurrent.Async.Lifted
 
 import           LN.All.Board
 import           LN.All.Internal
@@ -64,7 +66,8 @@ getBoardPacksM m_sp user_id = do
 
   case (lookupSpMay m_sp spForumId) of
 
-    Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
+    -- Just forum_id -> getBoardPacks_ByForumIdM m_sp user_id forum_id
+    Just forum_id -> getBoardPacks_ByForumId_AsyncM m_sp user_id forum_id
     _             -> leftA $ Error_InvalidArguments "forum_id"
 
 
@@ -133,12 +136,24 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
 
 
 
-getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
-getBoardPacks_ByForumIdM m_sp user_id forum_id = do
+-- getBoardPacks_ByForumIdM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
+-- getBoardPacks_ByForumIdM m_sp user_id forum_id = do
+
+--   e_boards <- getBoards_ByForumIdM m_sp user_id forum_id
+--   rehtie e_boards leftA $ \boards -> do
+--     board_packs <- rights <$> forM boards (getBoardPack_ByBoardM user_id)
+--     rightA $ BoardPackResponses {
+--       boardPackResponses = board_packs
+--     }
+
+
+
+getBoardPacks_ByForumId_AsyncM :: Maybe StandardParams -> UserId -> ForumId -> HandlerErrorEff BoardPackResponses
+getBoardPacks_ByForumId_AsyncM m_sp user_id forum_id = do
 
   e_boards <- getBoards_ByForumIdM m_sp user_id forum_id
   rehtie e_boards leftA $ \boards -> do
-    board_packs <- rights <$> forM boards (getBoardPack_ByBoardM user_id)
+    board_packs <- rights <$> mapConcurrently (getBoardPack_ByBoardM user_id) boards
     rightA $ BoardPackResponses {
       boardPackResponses = board_packs
     }
