@@ -14,8 +14,6 @@ module LN.All.Pack.Board (
 
 
 
-import           Control.Concurrent.Async.Lifted
-
 import           LN.All.Board
 import           LN.All.Internal
 import           LN.All.Prelude

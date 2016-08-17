@@ -74,10 +74,12 @@ getUserPackM user_id lookup_user_id = do
 
 getUserPacks_ByUserIdsM :: Maybe StandardParams -> UserId -> [UserId] -> HandlerErrorEff UserPackResponses
 getUserPacks_ByUserIdsM _ user_id user_ids = do
-  users_packs <- rights <$> mapM (\key -> getUserPack_ByUserIdM user_id key) user_ids
-  rightA $ UserPackResponses {
-    userPackResponses = users_packs
-  }
+  e_users <- getUsers_ByUserIdsM Nothing user_id user_ids
+  rehtie e_users leftA $ \users -> do
+    users_packs <- rights <$> mapConcurrently (getUserPack_ByUserM Nothing user_id) users
+    rightA $ UserPackResponses {
+      userPackResponses = users_packs
+    }
 
 
 
