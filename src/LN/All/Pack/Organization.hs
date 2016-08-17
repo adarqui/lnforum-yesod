@@ -82,7 +82,7 @@ getOrganizationPacks_ByEverythingM m_sp user_id = do
 
   rehtie e_organizations leftA $ \organizations -> do
 
-    organization_packs <- fmap rights (mapM (\organization -> getOrganizationPack_ByOrganizationM user_id organization) organizations)
+    organization_packs <- rights <$> forConcurrently organizations (getOrganizationPack_ByOrganizationM user_id)
     rightA $ OrganizationPackResponses {
       organizationPackResponses = organization_packs
     }
