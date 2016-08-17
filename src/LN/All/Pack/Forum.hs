@@ -85,7 +85,7 @@ getForumPacks_ByOrganizationIdM m_sp user_id org_id = do
 
   e_forums       <- getForums_ByOrganizationIdM m_sp user_id org_id
   rehtie e_forums leftA $ \forums -> do
-    forums_packs <- fmap rights (mapM (\forum -> getForumPack_ByForumM user_id forum) forums)
+    forums_packs <- rights <$> mapConcurrently (getForumPack_ByForumM user_id) forums
     rightA $ ForumPackResponses {
       forumPackResponses = forums_packs
     }
