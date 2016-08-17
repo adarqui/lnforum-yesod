@@ -24,10 +24,10 @@ module LN.Cache.Internal (
   putThreadC,
   getThreadPostC,
   putThreadPostC,
-  getTeamsByOrgC,
-  putTeamsByOrgC,
-  getTeamMemberC,
-  putTeamMemberC
+  getTeams_ByOrgC,
+  putTeams_ByOrgC,
+  getTeamMember_ByTeamC,
+  putTeamMember_ByTeamC
 ) where
 
 
@@ -229,8 +229,8 @@ putThreadPostC post_id c_post = do
 
 
 
-getTeamsByOrgC :: OrganizationId -> HandlerEff (Maybe (CacheEntry [Entity Team]))
-getTeamsByOrgC org_id = do
+getTeams_ByOrgC :: OrganizationId -> HandlerEff (Maybe (CacheEntry [Entity Team]))
+getTeams_ByOrgC org_id = do
   c_teams' <- getsCache cacheTeamsByOrg
   let
     m_c_teams = Map.lookup org_id c_teams'
@@ -240,23 +240,23 @@ getTeamsByOrgC org_id = do
 
 
 
-putTeamsByOrgC :: OrganizationId -> CacheEntry [Entity Team] -> HandlerEff ()
-putTeamsByOrgC org_id c_teams = do
+putTeams_ByOrgC :: OrganizationId -> CacheEntry [Entity Team] -> HandlerEff ()
+putTeams_ByOrgC org_id c_teams = do
   modifyCache (\st@Cache{..}->st{ cacheTeamsByOrg = Map.insert org_id c_teams cacheTeamsByOrg })
 
 
 
-getTeamMemberC :: TeamMemberId -> UserId -> HandlerEff (Maybe (CacheEntry (Entity TeamMember)))
-getTeamMemberC team_member_id user_id = do
-  c_team_members <- getsCache cacheTeamMembers
+getTeamMember_ByTeamC :: TeamId -> UserId -> HandlerEff (Maybe (CacheEntry (Entity TeamMember)))
+getTeamMember_ByTeamC team_id user_id = do
+  c_team_members <- getsCache cacheTeamMembersByTeam
   let
-    m_c_team_member = Map.lookup (team_member_id, user_id) c_team_members
+    m_c_team_member = Map.lookup (team_id, user_id) c_team_members
   case m_c_team_member of
     Nothing            -> pure Nothing
     Just c_team_member -> pure $ Just c_team_member
 
 
 
-putTeamMemberC :: TeamMemberId -> UserId -> CacheEntry (Entity TeamMember) -> HandlerEff ()
-putTeamMemberC team_member_id user_id c_team_member = do
-  modifyCache (\st@Cache{..}->st{ cacheTeamMembers = Map.insert (team_member_id, user_id) c_team_member cacheTeamMembers })
+putTeamMember_ByTeamC :: TeamId -> UserId -> CacheEntry (Entity TeamMember) -> HandlerEff ()
+putTeamMember_ByTeamC team_id user_id c_team_member = do
+  modifyCache (\st@Cache{..}->st{ cacheTeamMembersByTeam = Map.insert (team_id, user_id) c_team_member cacheTeamMembersByTeam })

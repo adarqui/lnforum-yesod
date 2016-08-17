@@ -14,7 +14,11 @@ module LN.All.Internal (
   getThreadM,
   getThreadMaybeM,
   getThreadPostM,
-  getThreadPostMaybeM
+  getThreadPostMaybeM,
+  getTeams_ByOrgM,
+  getTeams_ByOrg_MaybeM,
+  getTeamMember_ByTeamM,
+  getTeamMember_ByTeam_MaybeM
 ) where
 
 
@@ -161,3 +165,37 @@ getThreadPostMaybeM _ post_id = do
       m_post
       (putThreadPostC post_id CacheMissing *> pure Nothing)
       (\post -> putThreadPostC post_id (CacheEntry post) *> pure (Just post))
+
+
+
+
+getTeams_ByOrgM :: UserId -> OrganizationId -> HandlerErrorEff [Entity Team]
+getTeams_ByOrgM user_id org_id = do
+  (maybe (leftA Error_NotFound) rightA) =<< getTeams_ByOrg_MaybeM user_id org_id
+
+
+
+getTeams_ByOrg_MaybeM :: UserId -> OrganizationId -> HandlerEff (Maybe [Entity Team])
+getTeams_ByOrg_MaybeM _ org_id = do
+  m_c_teams <- getTeams_ByOrgC org_id
+  cacheRunMaybe' m_c_teams $ do
+    teams <- selectListDb Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
+    putTeams_ByOrgC org_id (CacheEntry teams) *> pure (Just teams)
+
+
+
+getTeamMember_ByTeamM :: TeamId -> UserId -> HandlerErrorEff (Entity TeamMember)
+getTeamMember_ByTeamM team_id lookup_user_id = do
+  (maybe (leftA Error_NotFound) rightA) =<< getTeamMember_ByTeam_MaybeM team_id lookup_user_id
+
+
+
+getTeamMember_ByTeam_MaybeM :: TeamId -> UserId -> HandlerEff (Maybe (Entity TeamMember))
+getTeamMember_ByTeam_MaybeM team_id lookup_user_id = do
+  m_c_team_members <- getTeamMember_ByTeamC team_id lookup_user_id
+  cacheRunMaybe' m_c_team_members $ do
+    m_team_member <- selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. lookup_user_id, TeamMemberActive ==. True] []
+    ebyam
+      m_team_member
+      (putTeamMember_ByTeamC team_id lookup_user_id CacheMissing *> pure Nothing)
+      (\team_member -> putTeamMember_ByTeamC team_id lookup_user_id (CacheEntry team_member) *> pure (Just team_member))

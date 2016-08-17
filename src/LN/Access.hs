@@ -31,7 +31,6 @@ import           Data.List                  (nub)
 
 import           LN.All.Internal
 import           LN.Control
-import           LN.Db
 import           LN.Generate.Permission     (allPermissions)
 import           LN.Import
 import           LN.T.Permission
@@ -127,19 +126,33 @@ isMemberOf_OrganizationIdM user_id org_id =
 isMemberOf_OrganizationId_TeamM :: UserId -> OrganizationId -> SystemTeam -> HandlerEff Bool
 isMemberOf_OrganizationId_TeamM user_id org_id system_team = do
 
-  m_team <- selectFirstDb [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
-  ebyam m_team (pure False) $ \(Entity team_id Team{..}) -> do
-    maybe False (const True) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] []
+  m_teams <- getTeams_ByOrg_MaybeM user_id org_id
+  ebyam m_teams (pure False) $ \teams -> do
+
+    case (find (\(Entity _ Team{..}) -> teamSystem == system_team) teams) of
+      Nothing                 -> pure False
+      Just (Entity team_id _) -> maybe False (const True) <$> getTeamMember_ByTeam_MaybeM team_id user_id
+
+    -- m_team <- selectFirstDb [TeamOrgId ==. org_id, TeamSystem ==. system_team, TeamActive ==. True] []
+    -- ebyam m_team (pure False) $ \(Entity team_id Team{..}) -> do
+    --   maybe False (const True) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] []
 
 
 
 userTeamsOf_OrganizationIdM :: UserId -> OrganizationId -> HandlerEff [Entity Team]
 userTeamsOf_OrganizationIdM user_id org_id = do
 
-  teams <- selectListDb Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
-  catMaybes <$> mapM (\team@(Entity team_id _) -> do
-    maybe Nothing (const $ Just team) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] [])
-    teams
+  m_teams <- getTeams_ByOrg_MaybeM user_id org_id
+  ebyam m_teams (pure []) $ \teams -> do
+
+    catMaybes <$>
+      (forM teams $ \team@(Entity team_id _) -> do
+        maybe Nothing (const $ Just team) <$> getTeamMember_ByTeam_MaybeM team_id user_id)
+
+  -- teams <- selectListDb Nothing [TeamOrgId ==. org_id, TeamActive ==. True] [] TeamId
+  -- catMaybes <$> mapM (\team@(Entity team_id _) -> do
+  --   maybe Nothing (const $ Just team) <$> selectFirstDb [TeamMemberTeamId ==. team_id, TeamMemberUserId ==. user_id, TeamMemberActive ==. True] [])
+  --   teams
 
 
 
