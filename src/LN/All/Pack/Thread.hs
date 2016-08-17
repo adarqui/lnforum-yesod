@@ -89,11 +89,11 @@ getThreadPackMH m_sp user_id thread_name = do
 getThreadPacks_ByBoardIdM :: Maybe StandardParams -> UserId -> BoardId -> HandlerErrorEff ThreadPackResponses
 getThreadPacks_ByBoardIdM m_sp user_id board_id = do
 
-  e_threads_keys <- getThreads_ByBoardId_KeysM m_sp user_id board_id
-  rehtie e_threads_keys leftA $ \threads_keys -> do
-    threads_packs <- rights <$> mapM (\key -> getThreadPackM m_sp user_id key) threads_keys
+  e_threads <- getThreads_ByBoardIdM m_sp user_id board_id
+  rehtie e_threads leftA $ \threads -> do
+    thread_packs <- rights <$> forM threads (getThreadPack_ByThreadM m_sp user_id)
     rightA $ ThreadPackResponses {
-      threadPackResponses = threads_packs
+      threadPackResponses = thread_packs
     }
 
 
