@@ -88,7 +88,7 @@ getTeamPacks_ByUserIdM m_sp user_id lookup_user_id = do
 
   e_teams <- getTeams_ByUserIdM m_sp user_id lookup_user_id
   rehtie e_teams leftA $ \teams -> do
-    teams_packs <- rights <$> mapM (\team -> getTeamPack_ByTeamM user_id team) teams
+    teams_packs <- rights <$> forConcurrently teams (getTeamPack_ByTeamM user_id)
     rightA $ TeamPackResponses {
       teamPackResponses = teams_packs
     }
@@ -99,7 +99,7 @@ getTeamPacks_ByOrganizationIdM :: Maybe StandardParams -> UserId -> Organization
 getTeamPacks_ByOrganizationIdM m_sp user_id org_id = do
   e_teams <- getTeams_ByOrganizationIdM m_sp user_id org_id
   rehtie e_teams leftA $ \teams -> do
-    teams_packs <- rights <$> mapM (\team -> getTeamPack_ByTeamM user_id team) teams
+    teams_packs <- rights <$> forConcurrently teams (getTeamPack_ByTeamM user_id)
     rightA $ TeamPackResponses {
       teamPackResponses = teams_packs
     }

@@ -65,7 +65,7 @@ getTeamMemberPacks_ByTeamIdM m_sp user_id team_id = do
 
   e_team_members <- getTeamMembers_ByTeamIdM m_sp user_id team_id
   rehtie e_team_members leftA $ \team_members -> do
-    team_member_packs <- rights <$> mapM (\team_member -> getTeamMemberPack_ByTeamMemberM user_id team_member) team_members
+    team_member_packs <- rights <$> forConcurrently team_members (getTeamMemberPack_ByTeamMemberM user_id)
     rightA $ TeamMemberPackResponses {
       teamMemberPackResponses = team_member_packs
     }
