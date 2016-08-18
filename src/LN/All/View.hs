@@ -20,13 +20,16 @@ module LN.All.View (
   getView_ByThreadPostM,
   getView_ByThreadPostIdM,
   updateViewM,
-  deleteViewM
+  deleteViewM,
+
+  -- Other
+  incView_ByViewIdM,
+  incView_ByEntM
 ) where
 
 
 
 import           LN.All.Prelude
-import           LN.T.Ent
 
 
 
@@ -73,30 +76,12 @@ deleteViewR view_id = run $ do
 
 
 
-getViewStatsR :: Handler Value
-getViewStatsR = run $ do
-  user_id <- _requireAuthId
-  sp      <- lookupStandardParams
-  errorOrJSON id $ getViewStatsM (pure sp) user_id
-
-
-
-getViewStatR :: ViewId -> Handler Value
-getViewStatR view_id = run $ do
-  user_id <- _requireAuthId
-  sp      <- lookupStandardParams
-  errorOrJSON id $ getViewStatM (pure sp) user_id view_id
-
-
-
-
-
 --
 -- Model/Function
 --
 
 viewRequestToView :: UserId -> Ent -> Int64 -> ViewRequest -> View
-viewRequestToView user_id ent ent_id ViewRequest{..} = View {
+viewRequestToView _ ent ent_id ViewRequest{..} = View {
   viewEnt            = ent,
   viewEntId          = ent_id,
   viewCount          = viewRequestCount,
@@ -130,7 +115,7 @@ viewsToResponses views = ViewResponses {
 --
 
 getViewsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity View]
-getViewsM m_sp user_id = do
+getViewsM m_sp _ = do
   selectListDbE m_sp [] [] ViewId
 
 
@@ -151,7 +136,7 @@ insertViewM m_sp user_id view_request = do
 
 
 getViewM :: UserId -> ViewId -> HandlerErrorEff (Entity View)
-getViewM user_id view_id = do
+getViewM _ view_id = do
   selectFirstDbE [ViewId ==. view_id] []
 
 
@@ -162,7 +147,7 @@ getView_ByThreadPostM user_id (Entity thread_post_id _) = getView_ByThreadPostId
 
 
 getView_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity View)
-getView_ByThreadPostIdM user_id thread_post_id = do
+getView_ByThreadPostIdM _ thread_post_id = do
   selectFirstDbE [ViewEnt ==. Ent_ThreadPost, ViewEntId ==. thread_post_id'] []
   where
   thread_post_id' = keyToInt64 thread_post_id
@@ -170,7 +155,7 @@ getView_ByThreadPostIdM user_id thread_post_id = do
 
 
 updateViewM :: UserId -> ViewId -> ViewRequest -> HandlerErrorEff (Entity View)
-updateViewM user_id view_id ViewRequest{..} = do
+updateViewM _ view_id ViewRequest{..} = do
 
   ts <- timestampH'
 
@@ -186,7 +171,7 @@ updateViewM user_id view_id ViewRequest{..} = do
 
 
 incView_ByViewIdM :: UserId -> ViewId -> HandlerErrorEff ()
-incView_ByViewIdM user_id view_id = do
+incView_ByViewIdM _ view_id = do
 
   ts <- timestampH'
 
@@ -196,21 +181,25 @@ incView_ByViewIdM user_id view_id = do
     , ViewCount      +=. 1
     ]
 
+  rightA ()
 
 
-incView_ByEntM :: UserId -> Ent -> EntId -> HandlerErrorEff ()
-incView_ByEntM user_id ent ent_id = do
+
+incView_ByEntM :: UserId -> Ent -> Int64 -> HandlerErrorEff ()
+incView_ByEntM _ ent ent_id = do
 
   ts <- timestampH'
 
   void $ updateWhereDb
-    [ Ent ==. ent, EntId ==. ent_id ]
+    [ ViewEnt ==. ent, ViewEntId ==. ent_id ]
     [ ViewModifiedAt  =. Just ts
     , ViewCount      +=. 1
     ]
 
+  rightA ()
+
 
 
 deleteViewM :: UserId -> ViewId -> HandlerErrorEff ()
-deleteViewM user_id view_id = do
+deleteViewM _ view_id = do
   deleteWhereDbE [ViewId ==. view_id]

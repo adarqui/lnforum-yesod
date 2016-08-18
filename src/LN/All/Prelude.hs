@@ -28,6 +28,6 @@ import           LN.Sanitize                     as A
 import           LN.Sanitize.Internal            as A
 import           LN.T                            as A hiding (LikeOpt (..),
                                                        Membership (..),
-                                                       Visibility (..))
+                                                       Visibility (..), View)
 import           LN.Validate                     as A
 import           LN.Validate.Internal            as A

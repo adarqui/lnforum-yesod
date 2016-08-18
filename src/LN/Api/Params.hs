@@ -19,6 +19,8 @@ module LN.Api.Params (
   lookupLikeEnt,
   lookupLikeEntMay,
   lookupStarEnt,
+  lookupViewEnt,
+  lookupViewEntMay,
   spToSelect,
   spToSelectMay,
   spToSelectE,
@@ -382,6 +384,22 @@ lookupStarEnt _                            = Nothing
 
 
 
+lookupViewEntMay :: Maybe StandardParams -> Maybe (Ent, Int64)
+lookupViewEntMay Nothing   = Nothing
+lookupViewEntMay (Just sp) = lookupViewEnt sp
+
+lookupViewEnt :: StandardParams -> Maybe (Ent, Int64)
+lookupViewEnt (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
+lookupViewEnt (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
+lookupViewEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
+lookupViewEnt (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
+lookupViewEnt (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
+lookupViewEnt (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
+lookupViewEnt (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
+lookupViewEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
+lookupViewEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
+-- lookupViewEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
+lookupViewEnt _                            = Nothing
 
 
 
