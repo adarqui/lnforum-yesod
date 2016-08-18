@@ -14,9 +14,8 @@ module LN.All.View (
   -- Model/Internal
   getViewsM,
   getViewM,
+  getView_ByEntM,
   insertView_ByEntM,
-  getView_ByThreadPostM,
-  getView_ByThreadPostIdM,
   updateViewM,
   deleteViewM,
 
@@ -104,6 +103,21 @@ getViewsM m_sp _ = do
 
 
 
+getViewM :: Maybe StandardParams -> UserId -> HandlerErrorEff (Entity View)
+getViewM m_sp user_id = do
+
+  case (lookupViewEntMay m_sp) of
+    Just (ent, ent_id) -> getView_ByEntM user_id ent ent_id
+    _                  -> leftA $ Error_InvalidArguments "ent, ent_id"
+
+
+
+getView_ByEntM :: UserId -> Ent -> Int64 -> HandlerErrorEff (Entity View)
+getView_ByEntM _ ent ent_id = do
+  selectFirstDbE [ViewEnt ==. ent, ViewEntId ==. ent_id] []
+
+
+
 insertView_ByEntM :: UserId -> Ent -> Int64 -> HandlerErrorEff (Entity View)
 insertView_ByEntM user_id ent ent_id = do
 
@@ -112,29 +126,6 @@ insertView_ByEntM user_id ent ent_id = do
     view = (viewRequestToView user_id ent ent_id $ ViewRequest 0) { viewCreatedAt = Just ts }
 
   insertEntityDbE view
-
-
-
-getViewM :: Maybe StandardParams -> UserId -> HandlerErrorEff (Entity View)
-getViewM m_sp _ = do
-
-  case (lookupViewEntMay m_sp) of
-    Just (ent, ent_id) -> do
-      selectFirstDbE [ViewEnt ==. ent, ViewEntId ==. ent_id] []
-    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
-
-
-
-getView_ByThreadPostM :: UserId -> Entity ThreadPost -> HandlerErrorEff (Entity View)
-getView_ByThreadPostM user_id (Entity thread_post_id _) = getView_ByThreadPostIdM user_id thread_post_id
-
-
-
-getView_ByThreadPostIdM :: UserId -> ThreadPostId -> HandlerErrorEff (Entity View)
-getView_ByThreadPostIdM _ thread_post_id = do
-  selectFirstDbE [ViewEnt ==. Ent_ThreadPost, ViewEntId ==. thread_post_id'] []
-  where
-  thread_post_id' = keyToInt64 thread_post_id
 
 
 

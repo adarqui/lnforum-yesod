@@ -341,10 +341,18 @@ getThreadStatsM _ = leftA Error_NotImplemented
 
 
 getThreadStatM :: UserId -> ThreadId -> HandlerErrorEff ThreadStatResponse
-getThreadStatM _ thread_id = do
-  num_thread_posts <- countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
-  rightA $ ThreadStatResponse {
-    threadStatResponseThreadId    = keyToInt64 thread_id,
-    threadStatResponseThreadPosts = fromIntegral $ num_thread_posts,
-    threadStatResponseViews       = 0
-  }
+getThreadStatM user_id thread_id = do
+  lr <- runEitherT $ do
+
+    num_thread_posts <- lift $ countDb [ThreadPostThreadId ==. thread_id, ThreadPostActive ==. True]
+    (Entity _ views) <- mustT $ getView_ByEntM user_id Ent_Thread (keyToInt64 thread_id)
+
+    pure (num_thread_posts, views)
+
+  rehtie lr leftA $ \(num_thread_posts, View{..}) -> do
+
+    rightA $ ThreadStatResponse {
+      threadStatResponseThreadId    = keyToInt64 thread_id,
+      threadStatResponseThreadPosts = fromIntegral $ num_thread_posts,
+      threadStatResponseViews       = viewCount
+    }
