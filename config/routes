@@ -93,7 +93,7 @@
 
 
 /api/views ViewsR GET
-/api/view ViewR GET POST PUT DELETE
+/api/view ViewR GET PUT
 
 
 

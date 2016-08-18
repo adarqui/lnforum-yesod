@@ -37,6 +37,7 @@ module LN.All.Thread (
 
 import           LN.All.Internal
 import           LN.All.Prelude
+import           LN.All.View
 
 
 
@@ -274,7 +275,12 @@ insertThread_ByBoardIdM user_id board_id thread_request = do
     let
       thread = (threadRequestToThread user_id boardOrgId boardForumId board_id sanitized_thread_request) { threadCreatedAt = Just ts, threadActivityAt = Just ts }
 
-    mustT $ insertEntityDbE thread
+    v <- mustT $ insertEntityDbE thread
+    let (Entity thread_id _) = v
+    -- Create view entry in the background
+    --
+    void $ fork $ void $ lift $ insertView_ByEntM user_id Ent_Thread (keyToInt64 thread_id)
+    pure v
 
 
 

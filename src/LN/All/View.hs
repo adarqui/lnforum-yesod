@@ -3,10 +3,8 @@
 module LN.All.View (
   -- Handler
   getViewsR,
-  postViewR,
   getViewR,
   putViewR,
-  deleteViewR,
 
   -- Model/Function
   viewRequestToView,
@@ -15,8 +13,8 @@ module LN.All.View (
 
   -- Model/Internal
   getViewsM,
-  insertViewM,
   getViewM,
+  insertView_ByEntM,
   getView_ByThreadPostM,
   getView_ByThreadPostIdM,
   updateViewM,
@@ -45,15 +43,6 @@ getViewsR = run $ do
 
 
 
-postViewR :: Handler Value
-postViewR = run $ do
-  user_id      <- _requireAuthId
-  view_request <- requireJsonBody
-  sp           <- lookupStandardParams
-  errorOrJSON viewToResponse $ insertViewM (pure sp) user_id view_request
-
-
-
 getViewR :: Handler Value
 getViewR = run $ do
   user_id <- _requireAuthId
@@ -68,14 +57,6 @@ putViewR = run $ do
   sp           <- lookupStandardParams
   view_request <- requireJsonBody
   errorOrJSON viewToResponse $ updateViewM (pure sp) user_id view_request
-
-
-
-deleteViewR :: Handler Value
-deleteViewR = run $ do
-  user_id <- _requireAuthId
-  sp      <- lookupStandardParams
-  errorOrJSON id $ deleteViewM (pure sp) user_id
 
 
 
@@ -123,18 +104,14 @@ getViewsM m_sp _ = do
 
 
 
-insertViewM :: Maybe StandardParams -> UserId -> ViewRequest -> HandlerErrorEff (Entity View)
-insertViewM m_sp user_id view_request = do
+insertView_ByEntM :: UserId -> Ent -> Int64 -> HandlerErrorEff (Entity View)
+insertView_ByEntM user_id ent ent_id = do
 
-  case (lookupViewEntMay m_sp) of
-    Just (ent, ent_id) -> do
-      ts <- timestampH'
-      let
-        view = (viewRequestToView user_id ent ent_id view_request) { viewCreatedAt = Just ts }
+  ts <- timestampH'
+  let
+    view = (viewRequestToView user_id ent ent_id $ ViewRequest 0) { viewCreatedAt = Just ts }
 
-      insertEntityDbE view
-
-    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
+  insertEntityDbE view
 
 
 
