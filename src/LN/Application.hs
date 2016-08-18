@@ -76,6 +76,7 @@ import           LN.All.TeamMember
 import           LN.All.Thread
 import           LN.All.ThreadPost
 import           LN.All.User
+import           LN.All.View
 import           LN.Handler.Common
 import           LN.Import
 

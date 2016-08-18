@@ -3,7 +3,7 @@
 module LN.All.View (
   -- Handler
   getViewsR,
-  postViewR0,
+  postViewR,
   getViewR,
   putViewR,
   deleteViewR,
@@ -45,8 +45,8 @@ getViewsR = run $ do
 
 
 
-postViewR0 :: Handler Value
-postViewR0 = run $ do
+postViewR :: Handler Value
+postViewR = run $ do
   user_id      <- _requireAuthId
   view_request <- requireJsonBody
   sp           <- lookupStandardParams
@@ -54,25 +54,28 @@ postViewR0 = run $ do
 
 
 
-getViewR :: ViewId -> Handler Value
-getViewR view_id = run $ do
+getViewR :: Handler Value
+getViewR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON viewToResponse $ getViewM user_id view_id
+  sp      <- lookupStandardParams
+  errorOrJSON viewToResponse $ getViewM (pure sp) user_id
 
 
 
-putViewR :: ViewId -> Handler Value
-putViewR view_id = run $ do
+putViewR :: Handler Value
+putViewR = run $ do
   user_id      <- _requireAuthId
+  sp           <- lookupStandardParams
   view_request <- requireJsonBody
-  errorOrJSON viewToResponse $ updateViewM user_id view_id view_request
+  errorOrJSON viewToResponse $ updateViewM (pure sp) user_id view_request
 
 
 
-deleteViewR :: ViewId -> Handler Value
-deleteViewR view_id = run $ do
+deleteViewR :: Handler Value
+deleteViewR = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ deleteViewM user_id view_id
+  sp      <- lookupStandardParams
+  errorOrJSON id $ deleteViewM (pure sp) user_id
 
 
 
@@ -135,9 +138,13 @@ insertViewM m_sp user_id view_request = do
 
 
 
-getViewM :: UserId -> ViewId -> HandlerErrorEff (Entity View)
-getViewM _ view_id = do
-  selectFirstDbE [ViewId ==. view_id] []
+getViewM :: Maybe StandardParams -> UserId -> HandlerErrorEff (Entity View)
+getViewM m_sp _ = do
+
+  case (lookupViewEntMay m_sp) of
+    Just (ent, ent_id) -> do
+      selectFirstDbE [ViewEnt ==. ent, ViewEntId ==. ent_id] []
+    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
 
 
 
@@ -154,19 +161,24 @@ getView_ByThreadPostIdM _ thread_post_id = do
 
 
 
-updateViewM :: UserId -> ViewId -> ViewRequest -> HandlerErrorEff (Entity View)
-updateViewM _ view_id ViewRequest{..} = do
+updateViewM :: Maybe StandardParams -> UserId -> ViewRequest -> HandlerErrorEff (Entity View)
+updateViewM m_sp _ ViewRequest{..} = do
 
-  ts <- timestampH'
+  case lookupViewEntMay m_sp of
+    Just (ent, ent_id) -> do
 
-  void $ updateWhereDb
-    [ ViewId ==. view_id ]
+      ts <- timestampH'
 
-    [ ViewModifiedAt =. Just ts
-    , ViewCount      =. viewRequestCount
-    ]
+      void $ updateWhereDb
+        [ ViewEnt ==. ent, ViewEntId ==. ent_id ]
 
-  selectFirstDbE [ViewId ==. view_id] []
+        [ ViewModifiedAt =. Just ts
+        , ViewCount      =. viewRequestCount
+        ]
+
+      selectFirstDbE [ViewEnt ==. ent, ViewEntId ==. ent_id] []
+
+    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
 
 
 
@@ -200,6 +212,11 @@ incView_ByEntM _ ent ent_id = do
 
 
 
-deleteViewM :: UserId -> ViewId -> HandlerErrorEff ()
-deleteViewM _ view_id = do
-  deleteWhereDbE [ViewId ==. view_id]
+deleteViewM :: Maybe StandardParams -> UserId -> HandlerErrorEff ()
+deleteViewM m_sp _ = do
+
+  case lookupViewEntMay m_sp of
+    Just (ent, ent_id) -> do
+      deleteWhereDbE [ViewEnt ==. ent, ViewEntId ==. ent_id]
+
+    _ -> leftA $ Error_InvalidArguments "ent, ent_id"
