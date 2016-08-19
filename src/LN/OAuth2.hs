@@ -67,8 +67,6 @@ findUsers' = fmap (map entityVal) . findUsers
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
 
-  liftIO $ print creds
-
   mapM_ updateByEmail
     $ fmap profileEmail
     $ extraToProfileX credsPlugin credsExtra
@@ -154,7 +152,7 @@ githubProfileX extra = ProfileX
 
 googleProfileX :: [(Text, Text)] -> Either Text ProfileX
 googleProfileX extra = ProfileX
-  <$> (handleLogin =<< decodeEitherText =<< lookupExtra "login" extra)
+  <$> (handleName =<< decodeEitherText =<< lookupExtra "name" extra)
   <*> (handleName =<< decodeEitherText =<< lookupExtra "name" extra)
   <*> (handleEmails =<< decodeEitherText =<< lookupExtra "emails" extra)
 
@@ -167,9 +165,6 @@ googleProfileX extra = ProfileX
             (_, Just given, _) -> Right given
             (_, _, Just family) -> Right family
             _ -> Left "user has no name"
-
-    handleLogin :: Text -> Either Text Text
-    handleLogin _ = Left "TODO FIXME"
 
     handleEmails :: [Email] -> Either Text Text
     handleEmails []        = Left "user has no emails"
