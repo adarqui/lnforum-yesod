@@ -9,4 +9,4 @@
       <a href=@{AuthR $ oauth2Url "github"}>Sign in with Github
 
     <div>
-      <a href=@{AuthR $ oauth2Url "google"}>Sign in with Google
+      <a href=@{AuthR $ forwardUrl}>Sign in with Google
