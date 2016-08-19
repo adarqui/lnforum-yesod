@@ -120,6 +120,7 @@ makeFoundation appSettings appSettingsLN appSettingsKeys = do
 
   -- custom
   appGithubOAuthKeys <- pure $ OAuthKeys (T.pack $ appGithubClientID appSettingsKeys) (T.pack $ appGithubClientSecret appSettingsKeys)
+  appGoogleOAuthKeys <- pure $ OAuthKeys (T.pack $ appGoogleClientID appSettingsKeys) (T.pack $ appGoogleClientSecret appSettingsKeys)
 
   let appSuperUsers = []
 

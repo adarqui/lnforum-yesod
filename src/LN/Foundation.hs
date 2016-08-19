@@ -27,6 +27,7 @@ import           Text.Hamlet                          (hamletFile)
 import           Text.Jasmine                         (minifym)
 import           Web.ServerSession.Backend.Persistent (SqlStorage (..))
 import           Web.ServerSession.Frontend.Yesod     (simpleBackend)
+import           Yesod.Auth.GoogleEmail2
 import           Yesod.Auth.OAuth2.Github             (oauth2Github, oauth2Url)
 import           Yesod.Auth.OAuth2.Github             ()
 import           Yesod.Core.Types                     (Logger)
@@ -48,7 +49,9 @@ data AppSettingsLN = AppSettingsLN {
 
 data AppSettingsKeys = AppSettingsKeys {
   appGithubClientID     :: !String,
-  appGithubClientSecret :: !String
+  appGithubClientSecret :: !String,
+  appGoogleClientID     :: !String,
+  appGoogleClientSecret :: !String
 }
 
 
@@ -65,6 +68,8 @@ instance FromJSON AppSettingsKeys where
   parseJSON = withObject "AppSettingsKeys" $ \o -> do
     appGithubClientID     <- o .: "oauth-github-client-id"
     appGithubClientSecret <- o .: "oauth-github-client-secret"
+    appGoogleClientID     <- o .: "oauth-google-client-id"
+    appGoogleClientSecret <- o .: "oauth-google-client-secret"
     pure AppSettingsKeys {..}
 
 
@@ -81,7 +86,7 @@ data App = App {
 
   -- Custom Foundation Fields
   appGithubOAuthKeys :: !OAuthKeys,
-  -- appGoogleOAuthKeys :: !OAuthKeys
+  appGoogleOAuthKeys :: !OAuthKeys,
   appRed             :: !R.Connection,
   appZChat           :: !(TChan Text),
   appSuperUsers      :: ![Entity Super]
@@ -242,8 +247,8 @@ instance YesodAuth App where
 
   -- You can add other plugins like BrowserID, email or OAuth here
   authPlugins m =
-    [
-      oauth2Github (oauthKeysClientId $ appGithubOAuthKeys m) (oauthKeysClientSecret $ appGithubOAuthKeys m)
+    [ oauth2Github (oauthKeysClientId $ appGithubOAuthKeys m) (oauthKeysClientSecret $ appGithubOAuthKeys m)
+    , authGoogleEmail (oauthKeysClientId $ appGoogleOAuthKeys m) (oauthKeysClientSecret $ appGoogleOAuthKeys m)
     ]
 
   authHttpManager = getHttpManager
