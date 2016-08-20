@@ -2,6 +2,7 @@
 
 module LN.Access (
   isSuperM,
+  mustBe_SuperM,
   mustBe_SameUserM,
   mustBe_OwnerOf_OrganizationIdM,
   mustBe_OwnerOf_ForumIdM,
@@ -46,6 +47,15 @@ isSuperM :: UserId -> HandlerEff Bool
 isSuperM user_id = do
   super_users <- getsYesod appSuperUsers
   pure $ any (\(Entity _ Super{..}) -> user_id == superUserId) super_users
+
+
+
+mustBe_SuperM :: UserId -> HandlerErrorEff ()
+mustBe_SuperM user_id = do
+  super_users <- getsYesod appSuperUsers
+  if (not $ any (\(Entity _ Super{..}) -> user_id == superUserId) super_users)
+     then leftA Error_PermissionDenied
+     else rightA ()
 
 
 
