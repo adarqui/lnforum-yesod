@@ -1,4 +1,4 @@
--- Stolen from Carnival
+-- Mostly stolen from Thoughtbot's Carnival
 --
 
 {-# LANGUAGE GADTs             #-}
@@ -10,49 +10,17 @@
 
 module LN.OAuth2 (
   User(..),
-  userGravatar,
-  intercomHash,
-  findUsers,
-  findUsers',
   authenticateUser
 ) where
 
 
 
-import           Data.Digest.Pure.SHA    (hmacSha256)
-import qualified Data.Text               as T
 import           LN.All.User.Shared      (insertUsers_TasksM)
 import           LN.Import.NoFoundation
 import           LN.Misc.Codec
 import           LN.Sanitize.Internal    (toSafeName)
 import           LN.T.Profile            (ProfileX (..))
-import           Network.Gravatar
 import           Yesod.Auth.GoogleEmail2
-
-
-
-userGravatar :: User -> Text
-userGravatar = T.pack . gravatar def . userEmail
-
-
-
-intercomHash :: UserId -> Text -> Text
-intercomHash userId secret = pack $ show $ hmacSha256 secret' userId'
-
-  where
-    secret' = textToLbs secret
-    userId' = textToLbs $ toPathPiece userId
-
-
-
-findUsers :: [UserId] -> DB [Entity User]
-findUsers userIds = selectList [UserId <-. userIds] []
-
-
-
--- | Same as @findUsers@, but discards the @entityKey@
-findUsers' :: [UserId] -> DB [User]
-findUsers' = fmap (map entityVal) . findUsers
 
 
 
@@ -67,31 +35,42 @@ findUsers' = fmap (map entityVal) . findUsers
 authenticateUser :: AuthId m ~ UserId => Creds m -> DB (AuthenticationResult m)
 authenticateUser creds@Creds{..} = do
 
-  mapM_ updateByEmail
-    $ fmap profileEmail
-    $ extraToProfileX credsPlugin credsExtra
+  -- mapM_ (updateByEmail credsPlugin)
+  --   $ fmap profileEmail
+  --   $ extraToProfileX credsPlugin credsExtra
 
-  m_user <- getBy $ UniqueUser credsPlugin credsIdent
+  case profileX of
+    Left err           -> pure $ ServerError err
+    Right ProfileX{..} -> do
+      m_user <- getBy $ UniqueEmail profileEmail
 
-  now <- liftIO $ getCurrentTime
+      now <- liftIO $ getCurrentTime
 
-  let
-    e_user = credsToUser now creds
-    m_user_id = entityKey <$> m_user
+      let
+        e_user    = credsToUser now creds
+        m_user_id = entityKey <$> m_user
 
-  maybe (authNew e_user) (authExisting e_user) $ m_user_id
+      case m_user_id of
+        Nothing      -> authNew e_user
+        Just user_id -> authExisting e_user user_id
 
   where
 
+  profileX     = extraToProfileX credsPlugin credsExtra
 
-  updateByEmail email = updateWhere
-    [ UserPlugin !=. credsPlugin
-    , UserIdent  !=. credsIdent
-    , UserEmail  ==. email
+  updateByEmail "github" email = updateWhere
+    [ UserEmail        ==. email ]
+    [ UserPlugin       =. credsPlugin
+    , UserGithubIdent  =. Just credsIdent
     ]
-    [ UserPlugin =. credsPlugin
-    , UserIdent  =. credsIdent
+
+  updateByEmail "googleemail2" email = updateWhere
+    [ UserEmail        ==. email ]
+    [ UserPlugin       =. credsPlugin
+    , UserGoogleIdent  =. Just credsIdent
     ]
+
+  updateByEmail _ _ = pure ()
 
 
 
@@ -99,6 +78,7 @@ authenticateUser creds@Creds{..} = do
   authNew (Right user) = do
 
     -- Add user, then queue up a CreateUserProfile background job
+    --
     returned_user <- insertEntity user
     void $ liftIO $ insertUsers_TasksM returned_user
     pure $ Authenticated (entityKey returned_user)
@@ -106,31 +86,50 @@ authenticateUser creds@Creds{..} = do
 
 
   authExisting e_user userId = do
-    mapM_ (replace userId) e_user
-    pure $ Authenticated userId
+    -- TODO FIXME: replacing a user due to oauth2 changes..
+    --
+    -- mapM_ (replace userId) e_user
+    case e_user of
+      Left err   -> pure $ ServerError err
+      Right user -> do
+        updateByEmail credsPlugin (userEmail user)
+        pure $ Authenticated userId
 
 
 
 credsToUser :: UTCTime -> Creds m -> Either Text User
 credsToUser now Creds{..} = User
-  <$> ((toSafeName . profileName) <$> eprofile)
-  <*> (profileName <$> eprofile)
-  <*> (profileName <$> eprofile)
-  <*> (profileEmail <$> eprofile)
-  <*> pure email_md5
-  <*> pure credsPlugin
-  <*> pure credsIdent
-  <*> pure Nothing
-  <*> pure True
-  <*> pure 0
-  <*> pure (Just now)
-  <*> pure Nothing
-  <*> pure Nothing
+  <$> ((toSafeName . profileName) <$> e_profile) -- ^ name
+  <*> (profileName <$> e_profile)                -- ^ display name
+  <*> (profileName <$> e_profile)                -- ^ full name
+  <*> (profileEmail <$> e_profile)               -- ^ email
+  <*> pure email_md5                             -- ^ email md5
+  <*> pure credsPlugin                           -- ^ plugin: github, google, etc..
+  <*> pure github_ident                          -- ^ github ident
+  <*> pure github_ts                             -- ^ github created at
+  <*> pure google_ident                          -- ^ google ident
+  <*> pure google_ts                             -- ^ google created at
+  <*> pure Nothing                               -- ^ accept TOS
+  <*> pure True                                  -- ^ active
+  <*> pure 0                                     -- ^ guard
+  <*> pure (Just now)                            -- ^ created at
+  <*> pure Nothing                               -- ^ modified at
+  <*> pure Nothing                               -- ^ activity at
   where
-  eprofile = extraToProfileX credsPlugin credsExtra
-  email_md5 = case eprofile of
+  e_profile = extraToProfileX credsPlugin credsExtra
+  email_md5 = case e_profile of
                 Left _ -> "md5"
                 Right ProfileX{..} -> md5Text profileEmail
+
+  github_ident = if credsPlugin == "github"
+                    then Just credsIdent
+                    else Nothing
+  github_ts    = maybe Nothing (const $ Just now) github_ident
+
+  google_ident = if credsPlugin == "googleemail2"
+                    then Just credsIdent
+                    else Nothing
+  google_ts    = maybe Nothing (const $ Just now) google_ident
 
 
 

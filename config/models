@@ -146,26 +146,37 @@ GroupMember
 
 
 User
-  name        Text
-  displayName Text default='null'
-  fullName    Text default='null'
-  email       Text
-  emailMD5    Text
-  plugin      Text
-  ident       Text
-  acceptTOS   UTCTime Maybe default=now()
+  name            Text
+  displayName     Text default='null'
+  fullName        Text default='null'
+  email           Text
+  emailMD5        Text
+  plugin          Text
 
-  active      Bool default=True
-  guard       Int  default=0
+  -- Specific OAuth2 services
+  -- * Github
+  -- * Google
+  --
+  githubIdent     Text Maybe
+  githubCreatedAt UTCTime Maybe
 
-  createdAt   UTCTime Maybe default=now()
-  modifiedAt  UTCTime Maybe
-  activityAt  UTCTime Maybe
+  googleIdent     Text Maybe
+  googleCreatedAt UTCTime Maybe
 
-  UniqueName        name
-  UniqueDisplayName displayName
-  UniqueUser        plugin ident
-  UniqueEmail       email
+  acceptTOS       UTCTime Maybe default=now()
+
+  active          Bool default=True
+  guard           Int  default=0
+
+  createdAt       UTCTime Maybe default=now()
+  modifiedAt      UTCTime Maybe
+  activityAt      UTCTime Maybe
+
+  UniqueName         name
+  UniqueDisplayName  displayName
+  UniqueGithubIdent  githubIdent !force
+  UniqueGoogleIdent  googleIdent !force
+  UniqueEmail        email
 
   deriving Eq Show Typeable
 

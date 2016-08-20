@@ -147,40 +147,46 @@ profileNameToName = T.toLower . T.filter isAlphaNum
 
 userRequestToUser :: UserRequest -> User
 userRequestToUser UserRequest{..} = User {
-  userName        = toSafeName userRequestDisplayName,
-  userDisplayName = userRequestDisplayName,
+  userName            = toSafeName userRequestDisplayName,
+  userDisplayName     = userRequestDisplayName,
   userFullName        = userRequestFullName,
-  userEmail       = userRequestEmail,
-  userEmailMD5    = "md5",
-  userPlugin      = userRequestPlugin,
-  userIdent       = userRequestIdent,
-  userAcceptTOS   = userRequestAcceptTOS,
-  userActive      = False,
-  userGuard       = 0,
-  userCreatedAt   = Nothing,
-  userModifiedAt  = Nothing,
-  userActivityAt  = Nothing
+  userEmail           = userRequestEmail,
+  userEmailMD5        = "md5",
+  userPlugin          = userRequestPlugin,
+  userGithubIdent     = Nothing,
+  userGithubCreatedAt = Nothing,
+  userGoogleIdent     = Nothing,
+  userGoogleCreatedAt = Nothing,
+  userAcceptTOS       = userRequestAcceptTOS,
+  userActive          = False,
+  userGuard           = 0,
+  userCreatedAt       = Nothing,
+  userModifiedAt      = Nothing,
+  userActivityAt      = Nothing
 }
 
 
 
 userToResponse :: Entity User -> UserResponse
 userToResponse (Entity user_id User{..}) = UserResponse {
-  userResponseId            = keyToInt64 user_id,
-  userResponseName          = userName,
-  userResponseDisplayName   = userDisplayName,
-  userResponseFullName      = userFullName,
-  userResponseEmail         = userEmail,
-  userResponseEmailMD5      = userEmailMD5,
-  userResponsePlugin        = userPlugin,
-  userResponseIdent         = userIdent,
-  userResponseAcceptTOS     = userAcceptTOS,
-  userResponseActive        = userActive,
-  userResponseGuard         = userGuard,
-  userResponseCreatedAt     = userCreatedAt,
-  userResponseModifiedAt    = userModifiedAt,
-  userResponseDeactivatedAt = Nothing,
-  userResponseActivityAt    = Nothing
+  userResponseId              = keyToInt64 user_id,
+  userResponseName            = userName,
+  userResponseDisplayName     = userDisplayName,
+  userResponseFullName        = userFullName,
+  userResponseEmail           = userEmail,
+  userResponseEmailMD5        = userEmailMD5,
+  userResponsePlugin          = userPlugin,
+  userResponseGithubIdent     = userGithubIdent,
+  userResponseGithubCreatedAt = userGithubCreatedAt,
+  userResponseGoogleIdent     = userGoogleIdent,
+  userResponseGoogleCreatedAt = userGoogleCreatedAt,
+  userResponseAcceptTOS       = userAcceptTOS,
+  userResponseActive          = userActive,
+  userResponseGuard           = userGuard,
+  userResponseCreatedAt       = userCreatedAt,
+  userResponseModifiedAt      = userModifiedAt,
+  userResponseDeactivatedAt   = Nothing,
+  userResponseActivityAt      = Nothing
 }
 
 
