@@ -19,6 +19,7 @@ module LN.Api.Params (
   lookupLikeEnt,
   lookupLikeEntMay,
   lookupStarEnt,
+  lookupStarEntMay,
   lookupViewEnt,
   lookupViewEntMay,
   spToSelect,
@@ -367,6 +368,10 @@ lookupLikeEnt _                            = Nothing
 
 
 
+
+lookupStarEntMay :: Maybe StandardParams -> Maybe (Ent, Int64)
+lookupStarEntMay Nothing   = Nothing
+lookupStarEntMay (Just sp) = lookupStarEnt sp
 
 lookupStarEnt :: StandardParams -> Maybe (Ent, Int64)
 lookupStarEnt (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)

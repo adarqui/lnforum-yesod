@@ -17,6 +17,7 @@ import           LN.All.Internal
 import           LN.All.Like
 import           LN.All.Organization
 import           LN.All.Prelude
+import           LN.All.Star
 import           LN.All.Thread
 import           LN.All.ThreadPost
 import           LN.All.User
@@ -136,10 +137,10 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
 
     thread_post_user <- mustT $ getUserM user_id threadPostUserId
     thread_post_stat <- mustT $ getThreadPostStatM user_id thread_post_id
-    -- doesn't matter if we have a Like or not
-    m_thread_post_like <- (either (const $ Nothing) Just) <$> (lift $ getLike_ByThreadPostIdM user_id thread_post_id)
 
-    --  thread_post_star <- getThreadPostStar_ByThreadPostM user_id thread_post
+    -- doesn't matter if we have a Like, Star or not
+    m_thread_post_like <- (either (const $ Nothing) Just) <$> (lift $ getLike_ByThreadPostIdM user_id thread_post_id)
+    m_thread_post_star <- (either (const $ Nothing) Just) <$> (lift $ getStar_ByThreadPostIdM user_id thread_post_id)
 
     user_perms_by_thread_post <- lift $ userPermissions_ByThreadPostIdM user_id (entityKey thread_post)
 
@@ -152,6 +153,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
     pure (thread_post_user
          ,thread_post_stat
          ,m_thread_post_like
+         ,m_thread_post_star
          ,user_perms_by_thread_post
          ,m_org
          ,m_forum
@@ -161,7 +163,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
          ,m_posts)
 
   rehtie lr leftA $
-    \(thread_post_user, thread_post_stat, m_thread_post_like, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread, m_offset, m_posts) -> do
+    \(thread_post_user, thread_post_stat, m_thread_post_like, m_thread_post_star, user_perms_by_thread_post, m_org, m_forum, m_board, m_thread, m_offset, m_posts) -> do
 
       rightA $ ThreadPostPackResponse {
         threadPostPackResponseThreadPost            = threadPostToResponse thread_post,
@@ -170,7 +172,7 @@ getThreadPostPack_ByThreadPostM m_sp user_id thread_post@(Entity thread_post_id 
         threadPostPackResponseUserId                = entityKeyToInt64 thread_post_user,
         threadPostPackResponseStat                  = thread_post_stat,
         threadPostPackResponseLike                  = fmap likeToResponse m_thread_post_like,
-        threadPostPackResponseStar                  = Nothing,
+        threadPostPackResponseStar                  = fmap starToResponse m_thread_post_star,
         threadPostPackResponseWithOrganization      = fmap organizationToResponse m_org,
         threadPostPackResponseWithForum             = fmap forumToResponse m_forum,
         threadPostPackResponseWithBoard             = fmap boardToResponse m_board,
