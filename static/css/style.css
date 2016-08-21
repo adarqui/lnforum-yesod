@@ -42,3 +42,24 @@ iframe {
   overflow: auto;
 }
 */
+
+/* WTF? doesn't work.. */
+.like-like {
+  color: green;
+}
+
+.like-neutral {
+  color: orange;
+}
+
+.like-dislike {
+  color: red;
+}
+
+.like-none {
+  color: black;
+}
+
+.like-like {
+  color: green;
+}
