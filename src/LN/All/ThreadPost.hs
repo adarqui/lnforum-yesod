@@ -401,8 +401,11 @@ getThreadPostStatM _ thread_post_id = do
   likes <- selectListDb Nothing [LikeEntId ==. keyToInt64 thread_post_id, LikeActive ==. True] [] LikeId
 
   -- get star counts
--- TODO FIXME
---  stars <- selectListDb defaultStandardParams [ StarEntityId ==. keyToInt64 thread_post_id ] [] StarId
+  -- stars <- selectKeysListDb Nothing [StarEntId ==. keyToInt64 thread_post_id, StarActive ==. True] [] StarId
+  stars <- countDb [StarEntId ==. keyToInt64 thread_post_id, StarActive ==. True]
+
+  -- get views
+  -- TODO FIXME
 
   let
     likes_flat = map (\(Entity _ Like{..}) -> likeOpt) likes
@@ -412,7 +415,7 @@ getThreadPostStatM _ thread_post_id = do
     threadPostStatResponseLikes        = fromIntegral $ length $ filter (==L.Like) likes_flat,
     threadPostStatResponseNeutral      = fromIntegral $ length $ filter (==L.Neutral) likes_flat,
     threadPostStatResponseDislikes     = fromIntegral $ length $ filter (==L.Dislike) likes_flat,
-    threadPostStatResponseStars        = 0, -- TODO FIXME fromIntegral $ length stars,
+    threadPostStatResponseStars        = fromIntegral stars,
     threadPostStatResponseViews        = 0
   }
 
