@@ -60,6 +60,16 @@ iframe {
   color: black;
 }
 
+/* Something is liked */
 .like-like {
+  color: green;
+}
+
+.star-none {
+  color: black;
+}
+
+/* Something is starred */
+.star {
   color: green;
 }
