@@ -73,3 +73,28 @@ iframe {
 .star {
   color: orange;
 }
+
+
+
+/*
+ * Post body / Post data
+ */
+
+.thread-post-body {
+  white-space: pre-wrap;
+}
+
+.post-data-empty {
+}
+
+.post-data-raw {
+}
+
+.post-data-bbcode {
+}
+
+.post-data-markdown {
+}
+
+.post-data-unknown {
+}
