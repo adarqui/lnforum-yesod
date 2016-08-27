@@ -10,6 +10,7 @@ module LN.Settings.StaticFiles (
   fonts_glyphicons_halflings_regular_svg,
   fonts_glyphicons_halflings_regular_ttf,
   fonts_glyphicons_halflings_regular_woff,
+  fonts_glyphicons_halflings_regular_woff2,
   img_loading_1_gif,
   img_loading_2_gif,
   img_loading_3_gif,
