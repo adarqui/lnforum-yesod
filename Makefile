@@ -11,7 +11,7 @@ docs:
 	cabal haddock --hyperlink-source
 
 exec-prod:
-	~/.local/bin/ln-yesod ./config/settings/production.yml ./private/settings/production.yml
+	~/.local/bin/ln-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
 
 exec-prod-sudo:
 	sudo ./bin/ln-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
