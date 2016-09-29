@@ -75,6 +75,7 @@ library
                      LN.Job.Shared
                      LN.Job.Enqueue
                      LN.Worker
+                     LN.Worker.Internal
                      LN.Lifted
                      LN.Parent
                      LN.OAuth2

@@ -39,9 +39,9 @@ import qualified Database.Redis        as Redis
 
 import           LN.All.Internal
 import           LN.All.Prelude
-import           LN.Job.Enqueue        (mkJob_AddThreadPostToSet,
-                                        mkJob_RemoveThreadPostFromSet)
+import           LN.Job.Enqueue        (mkJob_RemoveThreadPostFromSet)
 import qualified LN.T.Like             as L
+import           LN.Worker.Internal
 
 
 
@@ -301,7 +301,7 @@ insertThreadPost_ByThreadIdM user_id thread_id thread_post_request = do
 
     -- | Enqueue a job which adds this post to the proper thread set
     --
-    liftIO $ mkJob_AddThreadPostToSet thread_id new_post_id
+    lift $ lift $ runWorkerDirectly_AddThreadPostToSet thread_id new_post_id
 
     rightT thread_post_entity
 
@@ -334,7 +334,8 @@ insertThreadPost_ByThreadPostIdM user_id thread_post_id thread_post_request = do
 
     -- | Enqueue a job which adds this post to the proper thread set
     --
-    liftIO $ mkJob_AddThreadPostToSet threadPostThreadId new_post_id
+    -- liftIO $ mkJob_AddThreadPostToSet threadPostThreadId new_post_id
+    lift $ lift $  runWorkerDirectly_AddThreadPostToSet threadPostThreadId new_post_id
 
     rightT thread_post_entity
 

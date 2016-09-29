@@ -105,7 +105,7 @@ makeFoundation :: AppSettings -> AppSettingsLN -> AppSettingsKeys -> IO App
 makeFoundation appSettings appSettingsLN appSettingsKeys = do
 
 --    dbconf <- if appDatabaseUrl appSettings
-  appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 16379 })
+  appRed <- R.connect (R.defaultConnectInfo { R.connectHost = appRedisHost appSettingsLN, R.connectPort = R.PortNumber 6379 })
 
   -- example chat initialization
   appZChat <- atomically newBroadcastTChan

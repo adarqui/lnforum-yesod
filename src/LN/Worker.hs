@@ -26,6 +26,7 @@ import           LN.Misc.Codec         (keyToInt64)
 import           LN.T.Api              (ApiRequest (..))
 import           LN.T.Job
 import           LN.T.Profile          (ProfileRequest (..))
+import           LN.Worker.Internal
 
 
 
@@ -96,16 +97,7 @@ runWorker_AddThreadPostToSet (Message{..}, env) = do
     let lr = eitherDecode msgBody :: Either String (ThreadId, ThreadPostId)
     case lr of
       Left err                   -> liftIO $ Prelude.putStrLn err
-      Right (thread_id, post_id) -> do
-        void $ ((run $ do
-          emptyM
-          red <- getsYesod appRed
-          let
-            thread_id' = keyToInt64 thread_id
-            post_id'   = keyToInt64 post_id
-          void $ liftIO $ Redis.runRedis red $ Redis.zadd ("thread_posts:"<>(BSC.pack $ show thread_id')) [(fromIntegral post_id', BSC.pack $ show post_id')]
-          pure ()) :: Handler ())
-   ) :: IO (Either SomeException ()))
+      Right (thread_id, post_id) -> runWorkerDirectly_AddThreadPostToSet thread_id post_id) :: IO (Either SomeException ()))
   ackEnv env
 
 
