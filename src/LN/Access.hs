@@ -224,7 +224,15 @@ userPermissions_ByThreadIdM :: UserId -> ThreadId -> HandlerEff Permissions
 userPermissions_ByThreadIdM user_id thread_id = do
   m_thread <- getThreadMaybeM user_id thread_id
   ebyam m_thread (pure []) $ \(Entity _ Thread{..}) -> do
-    userPermissions_ByOrganizationIdM user_id threadOrgId
+    org_perms <- userPermissions_ByOrganizationIdM user_id threadOrgId
+    -- If we have organization permissions, we need to add "create"
+    -- if the topic is not locked
+    --
+    case org_perms of
+      [] -> pure []
+      _  -> if threadLocked
+        then pure org_perms
+        else pure $ org_perms <> [Perm_Create]
 
 
 
