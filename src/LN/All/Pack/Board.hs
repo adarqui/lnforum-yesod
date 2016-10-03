@@ -109,15 +109,16 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
                                 Nothing                        -> pure Nothing
                                 Just (Entity _ ThreadPost{..}) -> Just <$> (mustT $ getUserM user_id threadPostUserId)
 
-    user_perms_by_board <- lift $ userPermissions_ByBoardIdM user_id (entityKey board)
+    (user_perms_by_board, thread_perms_by_board) <- lift $ userPermissions_ByBoardIdM user_id (entityKey board)
 
     pure (board_stats
          ,thread_posts
          ,m_thread
          ,m_user
-         ,user_perms_by_board)
+         ,user_perms_by_board
+         ,thread_perms_by_board)
 
-  rehtie lr leftA $ \(board_stats, thread_posts, m_thread, m_user, user_perms_by_board) -> do
+  rehtie lr leftA $ \(board_stats, thread_posts, m_thread, m_user, user_perms_by_board, thread_perms_by_board) -> do
     rightA $ BoardPackResponse {
       boardPackResponseBoard                = boardToResponse board,
       boardPackResponseBoardId              = keyToInt64 board_id,
@@ -129,7 +130,8 @@ getBoardPack_ByBoardM user_id board@(Entity board_id Board{..}) = do
       boardPackResponseStar                 = Nothing,
       boardPackResponseWithOrganization     = Nothing,
       boardPackResponseWithForum            = Nothing,
-      boardPackResponsePermissions          = user_perms_by_board
+      boardPackResponsePermissions          = user_perms_by_board,
+      boardPackResponseThreadPermissions    = thread_perms_by_board
     }
 
 

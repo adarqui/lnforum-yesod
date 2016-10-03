@@ -212,11 +212,24 @@ userPermissions_ByForumIdM user_id forum_id = do
 
 
 
-userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff Permissions
+userPermissions_ByBoardIdM :: UserId -> BoardId -> HandlerEff (Permissions, Permissions)
 userPermissions_ByBoardIdM user_id board_id = do
   m_board <- getBoardMaybeM user_id board_id
-  ebyam m_board (pure []) $ \(Entity _ Board{..}) -> do
-   userPermissions_ByOrganizationIdM user_id boardOrgId
+  ebyam m_board (pure ([], [])) $ \(Entity _ Board{..}) -> do
+    -- If we have organization permissions, we then need to see
+    -- whether we are an owner (which has full permissions),
+    -- or an ordinary member:
+    --  which has perms if CanCreateSubBoards && CanCreateThreads
+    org_perms <- userPermissions_ByOrganizationIdM user_id boardOrgId
+    case org_perms of
+      [] -> pure ([], [])
+      _  -> if Perm_Create `elem` org_perms
+              then case (boardCanCreateSubBoards, boardCanCreateThreads) of
+                (True, True) -> pure (org_perms, allPermissions)
+                _            -> pure ([], [])
+              else if boardCanCreateThreads
+                then pure (org_perms, allPermissions)
+                else pure (org_perms, [Perm_Read, Perm_Delete])
 
 
 
@@ -231,8 +244,8 @@ userPermissions_ByThreadIdM user_id thread_id = do
     case org_perms of
       [] -> pure []
       _  -> if threadLocked
-        then pure org_perms
-        else pure $ org_perms <> [Perm_Create]
+              then pure org_perms
+              else pure $ org_perms <> [Perm_Create]
 
 
 
