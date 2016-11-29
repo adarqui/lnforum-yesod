@@ -36,3 +36,22 @@ install:
 
 install-yesod:
 	stack install yesod-bin cabal-install --install-ghc
+
+# just some simple stuff for my mbp
+mbp-postgres:
+	postgres -D /usr/local/var/postgres/
+
+mbp-postgres-cli:
+	pg leuro
+
+mbp-redis:
+	redis-server /usr/local/etc/redis.conf
+
+mbp-rabbitmq:
+	/usr/local/sbin/rabbitmq-server
+
+mbp-yesod-bg:
+	make exec-dev-workers-exe
+
+mbp-yesod:
+	make exec-dev-sudo-exe
