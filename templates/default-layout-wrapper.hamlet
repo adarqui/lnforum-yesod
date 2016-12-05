@@ -16,6 +16,7 @@ $doctype 5
 
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/bbcode.css">
     <link rel="icon" type="ico" href="static/assets/favicon.ico" />
 
     <title>#{pageTitle pc}
