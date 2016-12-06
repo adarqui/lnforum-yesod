@@ -60,6 +60,7 @@
  * BBCODE STUFF - which lives outside of the bbcode parser's css file
  */
 blockquote {
+  padding: 0px 10px;
   margin: 0 0 0px;
   font-size: 14px;
 }
