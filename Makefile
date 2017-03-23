@@ -13,6 +13,9 @@ docs:
 exec-prod:
 	~/.local/bin/ln-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
 
+exec-dev:
+	~/.local/bin/ln-yesod ./config/settings/dev.yml ./config/settings/role/web.yml ./private/settings/dev.yml
+
 exec-prod-sudo:
 	sudo ./bin/ln-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
 

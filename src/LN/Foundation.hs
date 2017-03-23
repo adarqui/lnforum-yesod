@@ -322,5 +322,5 @@ instance RenderMessage App FormMessage where
 
 
 
-unsafeHandler :: App -> Handler a -> IO a
+unsafeHandler :: App -> LN.Foundation.Handler a -> IO a
 unsafeHandler = Unsafe.fakeHandlerGetLogger appLogger

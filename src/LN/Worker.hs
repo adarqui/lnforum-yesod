@@ -149,4 +149,4 @@ workerMain :: IO ()
 workerMain = do
   putStrLn $ "Launching workers.."
   replicateM_ 20 initializeWorkers
-  forever (getLine :: IO String)
+  forever (Prelude.getLine :: IO String)

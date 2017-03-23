@@ -66,7 +66,7 @@ bgEnq :: ToJSON v => v -> ReaderT BgReader IO ()
 bgEnq v = do
   BgReader{..} <- ask
   liftIO $ putStrLn $ tshow bgQueue
-  liftIO $ publishMsg bgChan bgExchg (tshow bgQueue) $
+  liftIO $ void $ publishMsg bgChan bgExchg (tshow bgQueue) $
     newMsg {
       msgBody         = encode v,
       msgDeliveryMode = Just Persistent

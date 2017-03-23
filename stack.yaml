@@ -3,15 +3,21 @@ flags:
     library-only: false
     dev: false
 packages:
-- '.'
-- '../ln-lib'
-- '../ln-sanitize'
-- '../ln-validate'
-- '../haskell-ln-types'
-- '../haskell-api-helpers-shared'
-- '../haskell-either-helpers'
-- '../haskell-ebyam'
-- '../haskell-rehtie'
-- '../haskell-ifte'
-extra-deps: [stm-lifted-0.1.0.0, html-entities-1.1.2, yesod-bootstrap-0.2.1, yesod-markdown-0.11.0, random-extras-0.19]
-resolver: lts-6.5
+- .
+- ../ln-lib
+- ../ln-sanitize
+- ../ln-validate
+- ../haskell-ln-types
+- ../haskell-api-helpers-shared
+- ../haskell-either-helpers
+- ../haskell-ebyam
+- ../haskell-rehtie
+- ../haskell-ifte
+- ../stm-lifted
+- ../yesod-auth-oauth2
+extra-deps:
+- html-entities-1.1.4
+- random-extras-0.19
+- serversession-backend-persistent-1.0.3
+- load-env-0.1.1
+resolver: lts-8.5

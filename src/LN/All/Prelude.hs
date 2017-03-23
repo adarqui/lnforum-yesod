@@ -4,7 +4,7 @@ module LN.All.Prelude (
 
 
 
-import           Control.Concurrent.Async.Lifted as A
+import           Control.Concurrent.Async.Lifted as A (forConcurrently)
 import           Control.Monad.Trans.Either      as A (EitherT, runEitherT)
 import           Data.Ebyam                      as A (ebyam)
 import           Data.Maybe                      as A (fromJust)
