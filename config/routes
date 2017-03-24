@@ -1,6 +1,6 @@
 / SPALnR GET
+/lnotes-ghcjs SPALNotesR_GHCJS GET
 /lnotes SPALNotesR GET
-
 
 
 /static StaticR Static appStatic

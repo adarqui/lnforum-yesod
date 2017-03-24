@@ -1,6 +1,7 @@
 module LN.All.SPA (
   getSPAR,
   getSPALnR,
+  getSPALNotesR_GHCJS,
   getSPALNotesR
 ) where
 
@@ -19,8 +20,13 @@ getSPALnR = getSPAR "adarq.org" "/static/ln.dist/all.min.js"
 
 
 
+getSPALNotesR_GHCJS :: Handler Html
+getSPALNotesR_GHCJS = getSPAR "adarq.org" "/static/lnotes.ghcjs.dist/all.min.js"
+
+
+
 getSPALNotesR :: Handler Html
-getSPALNotesR = getSPAR "adarq.org" "/static/lnotes.dist/all.min.js"
+getSPALNotesR = getSPAR "adarq.org" "/static/lnotes.dist/bundle.js"
 
 
 

@@ -14,6 +14,9 @@ $doctype 5
       <script src="/static/assets/react.js"></script>
       <script src="/static/assets/react-dom.js"></script>
 
+      <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     <link rel="stylesheet" type="text/css" href="/static/css/bbcode.css">
@@ -34,6 +37,7 @@ $doctype 5
         <a href=@{AuthR LoginR}>Sign in
 
     <section id="ln"/>
+    <app></app>
 
     ^{pageBody pc}
 
