@@ -60,6 +60,7 @@ library
                      LN.All.Pack.Leuron
                      LN.All.Pack.PmIn
                      LN.All.Pack.PmOut
+                     LN.All.Templates
                      LN.Access
                      LN.Cache
                      LN.Cache.Internal

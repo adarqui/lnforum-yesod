@@ -157,8 +157,7 @@
 
 
 /api/resources ResourcesR GET
-/api/resource ResourceR0 POST
-/api/resource/#ResourceId ResourceR GET PUT DELETE
+/api/resources/#ResourceId ResourceR GET PUT DELETE
 
 
 
@@ -169,20 +168,6 @@
 
 /api/resource_packs ResourcePacksR GET
 /api/resource_pack/#ResourceId ResourcePackR GET
-
-
-
--- TODO FIXME
--- /api/resource_likes ResourceLikesR GET
--- /api/resource_like ResourceLikeR0 POST
--- /api/resource_like/#ResourceLikeId ResourceLikeR GET PUT DELETE
-
-
-
--- TODO FIXME
--- /api/resource_stars ResourceStarsR GET
--- /api/resource_star ResourceStarR0 POST
--- /api/resource_star/#ResourceStarId ResourceStarR GET PUT DELETE
 
 
 
@@ -274,3 +259,7 @@
 /api/thread_posts_count ThreadPostsCountR GET
 /api/resources_count ResourcesCountR GET
 /api/leurons_count LeuronsCountR GET
+
+
+
+/api/templates TemplatesR GET

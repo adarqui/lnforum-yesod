@@ -74,6 +74,7 @@ module LN.Settings.StaticFiles (
   emoticons_motherofgod_gif,
   emoticons_ibrunning_gif,
   emoticons_strong_gif,
+  {-
   dist_all_js,
   dist_all_min_js,
   dist_all_min_js_gz,
@@ -84,6 +85,7 @@ module LN.Settings.StaticFiles (
   dist_out_stats,
   dist_rts_js,
   dist_runmain_js
+  -}
 ) where
 
 
