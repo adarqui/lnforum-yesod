@@ -6,6 +6,8 @@
 *.swp
 .hpc/
 dist
+ln.dist
+lnotes.dist
 examples/dist/*
 .cabal-sandbox/
 .DS_Store

@@ -10,6 +10,12 @@ build-watch:
 docs:
 	cabal haddock --hyperlink-source
 
+copy-ui:
+	mkdir -p /Users/x/code/github/adarqui/ln-yesod/static/lnotes.dist
+	rsync -av /Users/x/code/github/adarqui/lnotes-ui-ghcjs/static/dist/ /Users/x/code/github/adarqui/ln-yesod/static/lnotes.dist/
+
+dev: copy-ui install exec-dev
+
 exec-prod:
 	~/.local/bin/ln-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
 
@@ -35,7 +41,7 @@ ghci:
 	sudo stack ghci ln-yesod --main-is none --fast --allow-different-user
 
 install:
-	stack install
+	stack --allow-different-user install
 
 install-yesod:
 	stack install yesod-bin cabal-install --install-ghc

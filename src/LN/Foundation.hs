@@ -230,9 +230,9 @@ instance YesodAuth App where
   type AuthId App = UserId
 
   -- Where to send a user after successful login
-  loginDest _ = SPAR -- RootR
+  loginDest _ = SPALnR -- RootR
   -- Where to send a user after logout
-  logoutDest _ = SPAR -- RootR
+  logoutDest _ = SPALnR -- RootR
   -- Override the above two destinations when a Referer: header is present
   redirectToReferer _ = True
 

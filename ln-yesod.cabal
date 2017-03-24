@@ -187,6 +187,7 @@ library
                  , yesod-websockets
 
                  , blaze-html
+                 , blaze-markup
                  , pureMD5
                  , safe
                  , hoauth2

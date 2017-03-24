@@ -1,5 +1,7 @@
 module LN.All.SPA (
-  getSPAR
+  getSPAR,
+  getSPALnR,
+  getSPALNotesR
 ) where
 
 
@@ -8,11 +10,22 @@ import           LN.All.Prelude
 import           LN.Misc.Widget
 import           LN.Socket
 import           Yesod.WebSockets
+import           Text.Blaze.Internal
 
 
 
-getSPAR :: Handler Html
-getSPAR = do
+getSPALnR :: Handler Html
+getSPALnR = getSPAR "adarq.org" "/static/ln.dist/all.min.js"
+
+
+
+getSPALNotesR :: Handler Html
+getSPALNotesR = getSPAR "adarq.org" "/static/lnotes.dist/all.min.js"
+
+
+
+getSPAR :: MarkupM () -> Text -> Handler Html
+getSPAR title file = do
 
   void $ requireAuthId
 
@@ -20,6 +33,6 @@ getSPAR = do
 
   defaultLayout $ do
 
-    setTitle "adarq.org"
+    setTitle title
 
-    addScriptRemoteBustCache "/static/dist/all.min.js"
+    addScriptRemoteBustCache file
