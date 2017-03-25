@@ -1,14 +1,14 @@
 flags:
-  ln-yesod:
+  lnotes-yesod:
     library-only: false
     dev: false
 packages:
 - .
 - ../ln-lib
-- ../ln-sanitize
-- ../ln-validate
-- ../haskell-ln-types
+- ../lnotes-sanitize
+- ../lnotes-validate
 - ../haskell-api-helpers-shared
+- ../haskell-lnotes-types
 - ../haskell-either-helpers
 - ../haskell-ebyam
 - ../haskell-rehtie
