@@ -2,8 +2,8 @@
 # See https://github.com/yesodweb/yesod/wiki/Configuration#overriding-configuration-values-with-environment-variables
 
 static-dir:     "_env:STATIC_DIR:static"
-host:           "_env:HOST:*4" # any IPv4 host
-port:           "_env:PORT:80"
+host:           "_env:HOST:127.0.0.1" # any IPv4 host
+port:           "_env:PORT:1682"
 approot:        "_env:APPROOT:https://leuro.adarq.org"
 ip-from-header: "_env:IP_FROM_HEADER:false"
 
