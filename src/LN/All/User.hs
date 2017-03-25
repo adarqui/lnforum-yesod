@@ -357,13 +357,8 @@ deleteUserM user_id lookup_user_id = do
 countUsersM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countUsersM m_sp _ = do
 
-  case (lookupSpMay m_sp spOrganizationId) of
-
-    Just _ -> leftA Error_NotImplemented
-
-    _      -> do
-      n <- countDb [UserActive ==. True]
-      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+  n <- countDb [UserActive ==. True]
+  rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
@@ -376,14 +371,14 @@ getUserStatsM _ _ = leftA Error_NotImplemented
 getUserStatM :: UserId -> UserId -> HandlerErrorEff UserSanitizedStatResponse
 getUserStatM _ lookup_user_id = do
 
-  (a,b,c,d) <- qUserStats lookup_user_id
+  (a,b) <- qUserStats lookup_user_id
 
-  let (threads,thread_posts,resources,leurons) = (E.unValue a, E.unValue b, E.unValue c, E.unValue d)
+  let (resources,leurons) = (E.unValue a, E.unValue b)
 
   rightA $ UserSanitizedStatResponse {
     userSanitizedStatResponseUserId      = keyToInt64 lookup_user_id,
-    userSanitizedStatResponseThreads     = threads,
-    userSanitizedStatResponseThreadPosts = thread_posts,
+    userSanitizedStatResponseThreads     = 0,
+    userSanitizedStatResponseThreadPosts = 0,
     userSanitizedStatResponseRespect     = 0,
     userSanitizedStatResponseResources   = resources,
     userSanitizedStatResponseLeurons     = leurons,
@@ -395,7 +390,7 @@ getUserStatM _ lookup_user_id = do
 qUserStats
   :: forall site.  (YesodPersist site, YesodPersistBackend site ~ SqlBackend)
   => Key User
-  -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64, E.Value Int64, E.Value Int64)
+  -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64)
 qUserStats user_id = do
   _runDB $ do
     (leurons:[]) <- E.select
@@ -408,14 +403,4 @@ qUserStats user_id = do
       E.where_ $ resource ^. ResourceUserId E.==. E.val user_id
       pure (E.countDistinct $ resource ^. ResourceId)
 
-    (thread_posts:[]) <- E.select
-      $ E.from $ \thread_post -> do
-      E.where_ $ thread_post ^. ThreadPostUserId E.==. E.val user_id
-      pure (E.countDistinct $ thread_post ^. ThreadPostId)
-
-    (threads:[]) <- E.select
-      $ E.from $ \thread -> do
-      E.where_ $ thread ^. ThreadUserId E.==. E.val user_id
-      pure (E.countDistinct $ thread ^. ThreadId)
-
-    pure (threads :: E.Value Int64, thread_posts :: E.Value Int64, resources :: E.Value Int64, leurons :: E.Value Int64)
+    pure (resources :: E.Value Int64, leurons :: E.Value Int64)

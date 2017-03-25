@@ -1,6 +1,4 @@
 / SPALnR GET
-/lnotes-ghcjs SPALNotesR_GHCJS GET
-/lnotes SPALNotesR GET
 
 
 /static StaticR Static appStatic
@@ -21,48 +19,6 @@
 
 
 
-/api/boards BoardsR GET
-/api/board BoardR0 POST
-/api/board/#BoardId BoardR GET PUT DELETE
-!/api/board/#Text BoardH GET
-
-/api/board_stats BoardStatsR GET
-/api/board_stat/#BoardId BoardStatR GET
-
-/api/board_packs BoardPacksR GET
-/api/board_pack/#BoardId BoardPackR GET
-!/api/board_pack/#Text BoardPackH GET
-
-
-
-/api/forums ForumsR GET
-/api/forum ForumR0 POST
-/api/forum/#ForumId ForumR GET PUT DELETE
-!/api/forum/#Text ForumH GET
-
-/api/forum_stats ForumStatsR GET
-/api/forum_stat/#ForumId ForumStatR GET
-
-/api/forum_packs ForumPacksR GET
-/api/forum_pack/#ForumId ForumPackR GET
-!/api/forum_pack/#Text ForumPackH GET
-
-
-
-/api/global_groups GlobalGroupsR GET
-/api/global_group GlobalGroupR0 POST
-/api/global_group/#GlobalGroupId GlobalGroupR GET PUT DELETE
-!/api/global_group/#Text GlobalGroupH GET
-
-/api/global_group_stats GlobalGroupStatsR GET
-/api/global_group_stat/#GlobalGroupId GlobalGroupStatR GET
-
-/api/global_group_packs GlobalGroupPacksR GET
-/api/global_group_pack/#GlobalGroupId GlobalGroupPackR GET
-!/api/global_group_pack/#Text GlobalGroupPackH GET
-
-
-
 /api/leurons LeuronsR GET
 /api/leuron LeuronR0 POST
 /api/leuron/#LeuronId LeuronR GET PUT DELETE
@@ -75,84 +31,13 @@
 
 
 
-/api/likes LikesR GET
-/api/like LikeR0 POST
-/api/like/#LikeId LikeR GET PUT DELETE
-
-/api/like_stats LikeStatsR GET
-/api/like_stat/#LikeId LikeStatR GET
-
-
-
-/api/stars StarsR GET
-/api/star StarR0 POST
-/api/star/#StarId StarR GET PUT DELETE
-
-/api/star_stats StarStatsR GET
-/api/star_stat/#StarId StarStatR GET
-
-
-
-/api/views ViewsR GET
-/api/view ViewR GET PUT
-
-
-
 /api/me MeR GET
 /api/me_pack MePackR GET
 
 
 
-/api/organizations OrganizationsR GET
-/api/organization OrganizationR0 POST
-/api/organization/#OrganizationId OrganizationR GET PUT DELETE
-!/api/organization/#Text OrganizationH GET
-
-/api/organization_stats OrganizationStatsR GET
-/api/organization_stat/#OrganizationId OrganizationStatR GET
-
-/api/organization_packs OrganizationPacksR GET
-/api/organization_pack/#OrganizationId OrganizationPackR GET
-!/api/organization_pack/#Text OrganizationPackH GET
-
-
-
-/api/pms PmsR GET
-/api/pm PmR0 POST
-/api/pm/#PmId PmR GET PUT DELETE
-
-
-
-/api/pm_ins PmInsR GET
-/api/pm_in/#PmInId PmInR GET PUT DELETE
-
-/api/pm_in_packs PmInPacksR GET
-/api/pm_in_pack/#PmInId PmInPackR GET
-
-
-
-/api/pm_outs PmOutsR GET
-/api/pm_out/#PmOutId PmOutR GET PUT DELETE
-
-/api/pm_out_packs PmOutPacksR GET
-/api/pm_out_pack/#PmOutId PmOutPackR GET
-
-
-
 /api/user_profiles ProfilesR GET
 /api/user_profile/#ProfileId ProfileR GET PUT
-
-
-
-/api/reminders RemindersR GET POST
-/api/reminder/#ReminderId ReminderR GET PUT DELETE
-
-
-
-/api/reminder_folders ReminderFoldersR GET POST
-/api/reminder_folder/#ReminderFolderId ReminderFolderR GET POST PUT DELETE
-
-
 
 
 
@@ -168,65 +53,6 @@
 
 /api/resource_packs ResourcePacksR GET
 /api/resource_pack/#ResourceId ResourcePackR GET
-
-
-
-/api/teams TeamsR GET
--- /api/team TeamR0 POST
-/api/team/#TeamId TeamR GET PUT
-
-/api/team_packs TeamPacksR GET
-/api/team_pack/#TeamId TeamPackR GET
-!/api/team_pack/#Text TeamPackH GET
-
-
-
-/api/team_members TeamMembersR GET
-/api/team_member TeamMemberR0 POST
-/api/team_member/#TeamMemberId TeamMemberR GET PUT DELETE
-
-/api/team_member_packs TeamMemberPacksR GET
-/api/team_member_pack/#TeamMemberId TeamMemberPackR GET
-
-
-
-/api/threads ThreadsR GET
-/api/thread ThreadR0 POST
-/api/thread/#ThreadId ThreadR GET PUT DELETE
-!/api/thread/#Text ThreadH GET
-
-/api/thread_stats ThreadStatsR GET
-/api/thread_stat/#ThreadId ThreadStatR GET
-
-/api/thread_packs ThreadPacksR GET
-/api/thread_pack/#ThreadId ThreadPackR GET
-!/api/thread_pack/#Text ThreadPackH GET
-
-
-
-/api/thread_posts ThreadPostsR GET
-/api/thread_post ThreadPostR0 POST
-/api/thread_post/#ThreadPostId ThreadPostR GET PUT DELETE
-
-/api/thread_post_stats ThreadPostStatsR GET
-/api/thread_post_stat/#ThreadPostId ThreadPostStatR GET
-
-/api/thread_post_packs ThreadPostPacksR GET
-/api/thread_post_pack/#ThreadPostId ThreadPostPackR GET
-
-
-
--- TODO FIXME
--- /api/thread_post_likes ThreadPostLikesR GET
--- /api/thread_post_like ThreadPostLikeR0 POST
--- /api/thread_post_like/#ThreadPostLikeId ThreadPostLikeR GET PUT DELETE
-
-
-
--- TODO FIXME
--- /api/thread_post_stars ThreadPostStarsR GET
--- /api/thread_post_star ThreadPostStarR0 POST
--- /api/thread_post_star/#ThreadPostStarId ThreadPostStarR GET PUT DELETE
 
 
 
@@ -252,11 +78,7 @@
 
 
 
-/api/organizations_count OrganizationsCountR GET
-/api/teams_members_count TeamMembersCountR GET
 /api/users_count UsersCountR GET
-/api/threads_count ThreadsCountR GET
-/api/thread_posts_count ThreadPostsCountR GET
 /api/resources_count ResourcesCountR GET
 /api/leurons_count LeuronsCountR GET
 

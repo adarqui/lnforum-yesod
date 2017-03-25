@@ -56,41 +56,19 @@ data StandardParams = StandardParams {
   spRealIp           :: Maybe Text,
   spIp               :: Maybe Text,
   -- id
-  spBoardId          :: Maybe BoardId,
   spBucketId         :: Maybe BucketId,
-  spForumId          :: Maybe ForumId,
-  spLeuronId         :: Maybe LeuronId,
-  spPmId             :: Maybe PmId,
-  spReminderId       :: Maybe ReminderId,
-  spReminderFolderId :: Maybe ReminderFolderId,
   spResourceId       :: Maybe ResourceId,
-  spOrganizationId   :: Maybe OrganizationId,
-  spTeamId           :: Maybe TeamId,
-  spThreadId         :: Maybe ThreadId,
-  spThreadPostId     :: Maybe ThreadPostId,
+  spLeuronId         :: Maybe LeuronId,
   spUserId           :: Maybe UserId,
   spParentId         :: Maybe Int64,
   -- ids
   spUserIds          :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
-  spThreadIds        :: Maybe [ThreadId],
-  spThreadPostIds    :: Maybe [ThreadPostId],
   -- names
-  spOrganizationName :: Maybe Text,
-  spTeamName         :: Maybe Text,
   spUserName         :: Maybe Text,
-  spForumName        :: Maybe Text,
-  spBoardName        :: Maybe Text,
-  spThreadName       :: Maybe Text,
-  spThreadPostName   :: Maybe Text,
   spResourceName     :: Maybe Text,
   spParentName       :: Maybe Text,
   spEmail            :: Maybe Text,
   spSelf             :: Bool,
-  spWithOrganization :: Bool,
-  spWithForum        :: Bool,
-  spWithBoard        :: Bool,
-  spWithThread       :: Bool,
-  spWithThreadPosts  :: Bool,
   spWithResource     :: Bool
 } deriving (Eq, Show)
 
@@ -110,41 +88,19 @@ defaultStandardParams = StandardParams {
   spRealIp           = Nothing,
   spIp               = Nothing,
   -- id
-  spBoardId          = Nothing,
   spBucketId         = Nothing,
-  spForumId          = Nothing,
   spLeuronId         = Nothing,
-  spOrganizationId   = Nothing,
-  spPmId             = Nothing,
-  spReminderId       = Nothing,
-  spReminderFolderId = Nothing,
   spResourceId       = Nothing,
-  spTeamId           = Nothing,
-  spThreadId         = Nothing,
-  spThreadPostId     = Nothing,
   spUserId           = Nothing,
   spParentId         = Nothing,
   -- ids
   spUserIds          = Nothing,
-  spThreadIds        = Nothing,
-  spThreadPostIds    = Nothing,
   -- names
-  spOrganizationName = Nothing,
-  spTeamName         = Nothing,
   spUserName         = Nothing,
-  spForumName        = Nothing,
-  spBoardName        = Nothing,
-  spThreadName       = Nothing,
-  spThreadPostName   = Nothing,
   spResourceName     = Nothing,
   spParentName       = Nothing,
   spEmail            = Nothing,
   spSelf             = False,
-  spWithOrganization = False,
-  spWithForum        = False,
-  spWithBoard        = False,
-  spWithThread       = False,
-  spWithThreadPosts  = False,
   spWithResource     = False
 }
 
@@ -192,41 +148,19 @@ lookupStandardParams = do
   real_ip            <- lookupHeader "real_ip"  -- TODO FIXME: case insensitive bytestring $ tshow ParamTag_RealIP
   ip                 <- lookupGetParam $ tshow ParamTag_IP
   -- id
-  board_id           <- lookupGetParam $ tshow ParamTag_ByBoardId
   bucket_id          <- lookupGetParam $ tshow ParamTag_ByBucketId
-  forum_id           <- lookupGetParam $ tshow ParamTag_ByForumId
   leuron_id          <- lookupGetParam $ tshow ParamTag_ByLeuronId
-  org_id    <- lookupGetParam $ tshow ParamTag_ByOrganizationId
-  pm_id              <- lookupGetParam $ tshow ParamTag_ByPmId
-  reminder_id        <- lookupGetParam $ tshow ParamTag_ByReminderId
-  reminder_folder_id <- lookupGetParam $ tshow ParamTag_ByReminderFolderId
   resource_id        <- lookupGetParam $ tshow ParamTag_ByResourceId
-  team_id            <- lookupGetParam $ tshow ParamTag_ByTeamId
-  thread_id          <- lookupGetParam $ tshow ParamTag_ByThreadId
-  thread_post_id     <- lookupGetParam $ tshow ParamTag_ByThreadPostId
   user_id            <- lookupGetParam $ tshow ParamTag_ByUserId
   parent_id          <- lookupGetParam $ tshow ParamTag_ByParentId
   -- ids
   user_ids           <- lookupGetParam $ tshow ParamTag_ByUsersIds
-  thread_ids         <- lookupGetParam $ tshow ParamTag_ByThreadsIds
-  thread_post_ids    <- lookupGetParam $ tshow ParamTag_ByThreadPostsIds
   -- names
-  org_name           <- lookupGetParam $ tshow ParamTag_ByOrganizationName
-  team_name          <- lookupGetParam $ tshow ParamTag_ByTeamName
   user_name          <- lookupGetParam $ tshow ParamTag_ByUserName
-  forum_name         <- lookupGetParam $ tshow ParamTag_ByForumName
-  board_name         <- lookupGetParam $ tshow ParamTag_ByBoardName
-  thread_name        <- lookupGetParam $ tshow ParamTag_ByThreadName
-  thread_post_name   <- lookupGetParam $ tshow ParamTag_ByThreadPostName
   resource_name      <- lookupGetParam $ tshow ParamTag_ByResourceName
   parent_name        <- lookupGetParam $ tshow ParamTag_ByParentName
   email              <- lookupGetParam $ tshow ParamTag_ByEmail
   self               <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_BySelf)
-  with_organization  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithOrganization)
-  with_forum         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithForum)
-  with_board         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithBoard)
-  with_thread        <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThread)
-  with_thread_posts  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThreadPosts)
   with_resource      <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithResource)
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
@@ -242,41 +176,19 @@ lookupStandardParams = do
     spRealIp           = fmap bread real_ip,
     spIp               = fmap tread ip,
     -- id
-    spBoardId          = fmap textToKey' board_id,
     spBucketId         = fmap textToKey' bucket_id,
-    spForumId          = fmap textToKey' forum_id,
     spLeuronId         = fmap textToKey' leuron_id,
-    spOrganizationId   = fmap textToKey' org_id,
-    spPmId             = fmap textToKey' pm_id,
-    spReminderId       = fmap textToKey' reminder_id,
-    spReminderFolderId = fmap textToKey' reminder_folder_id,
     spResourceId       = fmap textToKey' resource_id,
-    spTeamId           = fmap textToKey' team_id,
-    spThreadId         = fmap textToKey' thread_id,
-    spThreadPostId     = fmap textToKey' thread_post_id,
     spUserId           = fmap textToKey' user_id,
     spParentId         = fmap tread parent_id,
     -- ids
     spUserIds          = fmap (nub . textToKeys') user_ids,
-    spThreadIds        = fmap (nub . textToKeys') thread_ids,
-    spThreadPostIds    = fmap (nub . textToKeys') thread_post_ids,
     --- names
-    spOrganizationName = org_name,
-    spTeamName         = team_name,
     spUserName         = user_name,
-    spForumName        = forum_name,
-    spBoardName        = board_name,
-    spThreadName       = thread_name,
-    spThreadPostName   = thread_post_name,
     spResourceName     = resource_name,
     spParentName       = parent_name,
     spEmail            = email,
     spSelf             = self,
-    spWithOrganization = with_organization,
-    spWithForum        = with_forum,
-    spWithBoard        = with_board,
-    spWithThread       = with_thread,
-    spWithThreadPosts  = with_thread_posts,
     spWithResource     = with_resource
   }
 
@@ -335,18 +247,9 @@ lookupGetParamStatus status param = do
 
 
 lookupEnt :: StandardParams -> Maybe (Ent, Int64)
-lookupEnt (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
-lookupEnt (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
 lookupEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupEnt (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
-lookupEnt (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
-lookupEnt (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
-lookupEnt (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
 lookupEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
 lookupEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
--- lookupEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
--- lookupEnt (spLikeId -> Just v)         = Just (Ent_Like, keyToInt64 v)
--- lookupEnt (spStarId -> Just v)         = Just (Ent_Star, keyToInt64 v)
 lookupEnt _                            = Nothing
 
 
@@ -359,9 +262,6 @@ lookupLikeEntMay (Just sp) = lookupLikeEnt sp
 
 
 lookupLikeEnt :: StandardParams -> Maybe (Ent, Int64)
-lookupLikeEnt (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
-lookupLikeEnt (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
-lookupLikeEnt (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
 lookupLikeEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 -- lookupLikeEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
 lookupLikeEnt _                            = Nothing
@@ -374,16 +274,9 @@ lookupStarEntMay Nothing   = Nothing
 lookupStarEntMay (Just sp) = lookupStarEnt sp
 
 lookupStarEnt :: StandardParams -> Maybe (Ent, Int64)
-lookupStarEnt (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
-lookupStarEnt (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
 lookupStarEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupStarEnt (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
-lookupStarEnt (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
-lookupStarEnt (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
-lookupStarEnt (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
 lookupStarEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
 lookupStarEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
--- lookupStarEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
 lookupStarEnt _                            = Nothing
 
 
@@ -394,16 +287,9 @@ lookupViewEntMay Nothing   = Nothing
 lookupViewEntMay (Just sp) = lookupViewEnt sp
 
 lookupViewEnt :: StandardParams -> Maybe (Ent, Int64)
-lookupViewEnt (spOrganizationId -> Just v) = Just (Ent_Organization, keyToInt64 v)
-lookupViewEnt (spTeamId -> Just v)         = Just (Ent_Team, keyToInt64 v)
 lookupViewEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupViewEnt (spForumId -> Just v)        = Just (Ent_Forum, keyToInt64 v)
-lookupViewEnt (spBoardId -> Just v)        = Just (Ent_Board, keyToInt64 v)
-lookupViewEnt (spThreadId -> Just v)       = Just (Ent_Thread, keyToInt64 v)
-lookupViewEnt (spThreadPostId -> Just v)   = Just (Ent_ThreadPost, keyToInt64 v)
 lookupViewEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
 lookupViewEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
--- lookupViewEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
 lookupViewEnt _                            = Nothing
 
 
