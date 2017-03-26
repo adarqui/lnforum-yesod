@@ -3,7 +3,7 @@
 module LN.All.Leuron (
   -- Handler
   getLeuronsR,
-  postLeuronR0,
+  postLeuronsR,
   getLeuronR,
   putLeuronR,
   deleteLeuronR,
@@ -53,8 +53,8 @@ getLeuronsR = run $ do
 
 
 
-postLeuronR0 :: Handler Value
-postLeuronR0 = run $ do
+postLeuronsR :: Handler Value
+postLeuronsR = run $ do
   user_id        <- _requireAuthId
   sp             <- lookupStandardParams
   leuron_request <- requireJsonBody
