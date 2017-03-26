@@ -32,7 +32,7 @@
 
 
 /api/leuron_training/#LeuronTrainingId LeuronTrainingR GET
-/api/leuron_training LeuronTrainingsR GET
+/api/leuron_training LeuronTrainingsR GET POST
 
 
 

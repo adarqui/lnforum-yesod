@@ -4,6 +4,7 @@ module LN.All.LeuronTraining (
 
   -- Handler
   getLeuronTrainingsR,
+  postLeuronTrainingsR,
   getLeuronTrainingR,
   getLeuronTrainingCountR,
 
@@ -31,6 +32,17 @@ getLeuronTrainingsR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
   errorOrJSON leuronTrainingsToResponses $ getLeuronTrainingsM (pure sp) user_id
+
+
+
+postLeuronTrainingsR :: Handler Value
+postLeuronTrainingsR = run $ do
+  user_id                 <- _requireAuthId
+  sp                      <- lookupStandardParams
+  leuron_training_request <- requireJsonBody
+  case (spLeuronId sp) of
+    Just leuron_id -> errorOrJSON leuronTrainingToResponse $ insertLeuronTrainingM user_id leuron_id leuron_training_request
+    _              -> errorOrJSON id $ (leftA $ Error_InvalidArguments "leuron_id" :: HandlerErrorEff ())
 
 
 
