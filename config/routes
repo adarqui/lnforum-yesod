@@ -47,7 +47,7 @@
 
 
 
-/api/resources ResourcesR GET
+/api/resources ResourcesR GET POST
 /api/resources/#ResourceId ResourceR GET PUT DELETE
 
 

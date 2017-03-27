@@ -3,7 +3,7 @@
 module LN.All.Resource (
   -- Handler
   getResourcesR,
-  postResourceR,
+  postResourcesR,
   getResourceR,
   putResourceR,
   deleteResourceR,
@@ -48,8 +48,8 @@ getResourcesR = run $ do
 
 
 
-postResourceR :: Handler Value
-postResourceR = run $ do
+postResourcesR :: Handler Value
+postResourcesR = run $ do
   user_id          <- _requireAuthId
   resource_request <- requireJsonBody
   errorOrJSON resourceToResponse $ insertResourceM user_id resource_request
