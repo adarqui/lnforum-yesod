@@ -2,7 +2,7 @@
 # See https://github.com/yesodweb/yesod/wiki/Configuration#overriding-configuration-values-with-environment-variables
 
 static-dir:     "_env:STATIC_DIR:static"
-host:           "_env:HOST:127.0.0.1" # any IPv4 host
+host:           "_env:HOST:0.0.0.0"
 port:           "_env:PORT:1682"
 approot:        "_env:APPROOT:https://leuro.adarq.org"
 ip-from-header: "_env:IP_FROM_HEADER:false"
@@ -24,7 +24,7 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 database:
   user:     "_env:PGUSER:postgres"
   password: "_env:PGPASS:"
-  host:     "_env:PGHOST:adarq.internal"
+  host:     "_env:PGHOST:127.0.0.1"
   port:     "_env:PGPORT:5432"
   database: "_env:PGDATABASE:leuro"
   poolsize: "_env:PGPOOLSIZE:10"
