@@ -23,6 +23,8 @@ module LN.Settings.StaticFiles (
   assets_favicon_ico,
   assets_react_js,
   assets_react_dom_js,
+  assets_jquery_js,
+  assets_bootstrap_js,
   assets_style_css,
   emoticons_cycling_gif,
   emoticons_frown_gif,
