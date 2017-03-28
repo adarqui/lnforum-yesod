@@ -116,14 +116,6 @@ Resource
 
 
 
-ResourceSubscribers
-  userId     UserId
-  resourceId ResourceId
-
-  UniqueResourceId userId resourceId
-
-
-
 Leuron
   userId        UserId
   resourceId    ResourceId
@@ -147,15 +139,6 @@ Leuron
   modifiedAt    UTCTime Maybe
   activityAt    UTCTime Maybe
 
-  deriving Eq Show Typeable
-
-
-
-LeuronSubscribers
-  userId   UserId
-  leuronId LeuronId
-
-  UniqueLeuronSubscribers userId leuronId
   deriving Eq Show Typeable
 
 
@@ -277,40 +260,4 @@ LeuronHistory
   op        Text
   createdAt UTCTime Maybe default=now()
 
-  deriving Eq Show Typeable
-
-
-
-Like
-  userId       UserId
-  ent          Ent
-  entId        Int64
-  opt          LikeOpt
-  score        Int
-  reason       Text Maybe
-
-  active       Bool default=True
-  guard        Int  default=0
-
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueLike userId ent entId
-  deriving Eq Show Typeable
-
-
-
-Star
-  userId       UserId
-  ent          Ent
-  entId        Int64
-  reason       Text Maybe
-
-  active       Bool default=True
-  guard        Int  default=0
-
-  createdAt    UTCTime Maybe default=now()
-  modifiedAt   UTCTime Maybe
-
-  UniqueStar userId ent entId
   deriving Eq Show Typeable
