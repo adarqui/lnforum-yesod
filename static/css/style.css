@@ -64,3 +64,13 @@ blockquote {
   margin: 0 0 0px;
   font-size: 14px;
 }
+
+
+
+/*
+ * For Leuron view: when sifting, quizzing, etc.. specifies the height of the div in vh (viewport height)
+ */
+.pre-scrollable {
+  max-height: 80vh;
+  overflow-y: scroll;
+}
