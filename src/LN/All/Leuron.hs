@@ -404,9 +404,20 @@ deleteLeuronRedis user_id resource_id leuron_id = do
 
 
 countLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
-countLeuronsM _ _ = do
+countLeuronsM m_sp _ = do
 
-  n <- countDb [LeuronActive ==. True]
+  /*
+   * We're going to need all kinds of logic here:
+   * - count by everything
+   * - count by resource_id
+   * - count by resource_id's
+   */
+  let
+    extra_selectors = case lookupSpMay m_sp spResourceId of
+                           Nothing          -> []
+                           Just resource_id -> [LeuronResourceId ==. resource_id]
+
+  n <- countDb $ [LeuronActive ==. True] <> extra_selectors
   rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
