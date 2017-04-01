@@ -23,6 +23,7 @@ library
                      LN.All.Empty
                      LN.All.Leuron
                      LN.All.LeuronTraining
+                     LN.All.Bucket
                      LN.All.Me
                      LN.All.Prelude
                      LN.All.Profile
@@ -35,6 +36,7 @@ library
                      LN.All.Pack.Sanitized.User
                      LN.All.Pack.Resource
                      LN.All.Pack.Leuron
+                     LN.All.Pack.Bucket
                      LN.All.Templates
                      LN.Access
                      LN.Cache

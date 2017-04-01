@@ -143,7 +143,6 @@ Leuron
 
 
 
--- LeuronBucket
 Bucket
   userId      UserId
   name        Text
