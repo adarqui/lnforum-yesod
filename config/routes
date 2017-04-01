@@ -22,6 +22,9 @@
 /api/buckets/#BucketId BucketR GET PUT DELETE
 /api/buckets BucketsR GET POST
 
+/api/bucket_packs BucketPacksR GET
+/api/bucket_pack/#BucketId BucketPackR GET
+
 
 
 /api/leurons/#LeuronId LeuronR GET PUT DELETE
