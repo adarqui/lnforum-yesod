@@ -176,7 +176,6 @@ BucketLeuron
   active     Bool
   leuronId   LeuronId
   createdAt  UTCTime Maybe default=now()
-  modifiedAt UTCTime Maybe
 
   UniqueBucketLeuron userId bucketId leuronId
   deriving Eq Show Typeable
@@ -189,7 +188,6 @@ BucketResource
   resourceId ResourceId
   active     Bool
   createdAt  UTCTime Maybe default=now()
-  modifiedAt UTCTime Maybe
 
   UniqueBucketResource userId bucketId resourceId
   deriving Eq Show Typeable

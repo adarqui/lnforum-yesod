@@ -42,6 +42,8 @@ import           System.Log.FastLogger                (defaultBufSize,
 
 import           LN.All.Api
 import           LN.All.Bucket
+import           LN.All.BucketResource
+import           LN.All.BucketLeuron
 import           LN.All.Leuron
 import           LN.All.LeuronTraining
 import           LN.All.Me

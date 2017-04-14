@@ -19,6 +19,10 @@
 
 
 
+/api/buckets/#BucketId/resources/#ResourceId BucketResourceR POST DELETE
+
+/api/buckets/#BucketId/leurons/#LeuronId BucketLeuronR POST DELETE
+
 /api/buckets/#BucketId BucketR GET PUT DELETE
 /api/buckets BucketsR GET POST
 
