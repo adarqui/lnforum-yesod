@@ -2,13 +2,8 @@
 
 module LN.All.BucketLeuron (
   -- Handler
-  postBucketLeuronsR,
+  postBucketLeuronR,
   deleteBucketLeuronR,
-
-  -- Model/Function
-  bucketLeuronRequestToBucketLeuron,
-  bucketLeuronToResponse,
-  -- bucketLeuronsToResponses,
 
   -- Model/Internal
   getBucketLeuronsM,
@@ -30,60 +25,17 @@ import           LN.All.Prelude
 -- Handler
 --
 
-postBucketLeuronsR :: Handler Value
-postBucketLeuronsR = run $ do
-  user_id          <- _requireAuthId
-  id_leuron_request <- requireJsonBody
-  errorOrJSON bucketLeuronToResponse $ insertBucketLeuronM user_id id_leuron_request
-
-
-
-deleteBucketLeuronR :: BucketLeuronId -> Handler Value
-deleteBucketLeuronR bucketLeuron_id = run $ do
+postBucketLeuronR :: BucketId -> LeuronId -> Handler Value
+postBucketLeuronR bucket_id leuron_id = run $ do
   user_id <- _requireAuthId
-  errorOrJSON id $ deleteBucketLeuronM user_id bucketLeuron_id
+  errorOrJSON (pure ()) $ insertBucketLeuronM user_id bucket_id leuron_id
 
 
 
-
-
---
--- Model/Function
---
-
-bucketLeuronRequestToBucketLeuron :: UserId -> IdRequest -> BucketLeuron
-bucketLeuronRequestToBucketLeuron user_id IdRequest{..} = BucketLeuron {
-  bucketLeuronUserId         = user_id,
-  bucketLeuronBucketId       = int64ToKey' 0,
-  bucketLeuronLeuronId     = int64ToKey' idRequestTargetId,
-  bucketLeuronCreatedAt      = Nothing,
-  bucketLeuronActive         = True
-}
-
-
-
-bucketLeuronToResponse :: Entity BucketLeuron -> IdResponse
-bucketLeuronToResponse (Entity bucket_leuron_id BucketLeuron{..}) = IdResponse {
-  idResponseId                  = keyToInt64 bucket_leuron_id,
-  idResponseUserId              = keyToInt64 bucketLeuronUserId,
-  idResponseTargetId            = keyToInt64 bucketLeuronLeuronId,
-  idResponseGuard               = 0,
-  idResponseCreatedAt           = bucketLeuronCreatedAt,
-  idResponseModifiedAt          = Nothing,
-  idResponseActivityAt          = Nothing
-}
-
-
-
-{-
-bucketLeuronsToResponses :: [Entity BucketLeuron] -> IdResponses
-bucketLeuronsToResponses bucket_leurons = idResponses {
-  idResponses = map bucketLeuronToResponse bucket_leurons
-}
--}
-
-
-
+deleteBucketLeuronR :: BucketId -> LeuronId -> Handler Value
+deleteBucketLeuronR bucket_id leuron_id = run $ do
+  user_id <- _requireAuthId
+  errorOrJSON id $ deleteBucketLeuronM user_id bucket_id leuron_id
 
 
 
@@ -116,26 +68,32 @@ getBucketLeurons_ByUserIdM m_sp _ lookup_user_id = do
 
 
 getBucketLeuronM :: UserId -> BucketLeuronId -> HandlerErrorEff (Entity BucketLeuron)
-getBucketLeuronM _ bucketLeuron_id = do
-  selectFirstDbE [BucketLeuronId ==. bucketLeuron_id, BucketLeuronActive ==. True] []
+getBucketLeuronM _ bucket_leuron_id = do
+  selectFirstDbE [BucketLeuronId ==. bucket_leuron_id, BucketLeuronActive ==. True] []
 
 
 
-insertBucketLeuronM :: UserId -> IdRequest -> HandlerErrorEff (Entity BucketLeuron)
-insertBucketLeuronM user_id id_leuron_request = do
+insertBucketLeuronM :: UserId -> BucketId -> LeuronId -> HandlerErrorEff (Entity BucketLeuron)
+insertBucketLeuronM user_id bucket_id leuron_id = do
 
   ts <- timestampH'
 
   let
-    bucketLeuron = (bucketLeuronRequestToBucketLeuron user_id id_leuron_request) { bucketLeuronCreatedAt = Just ts }
+    bucketLeuron = BucketLeuron {
+      bucketLeuronUserId     = user_id,
+      bucketLeuronBucketId   = bucket_id,
+      bucketLeuronLeuronId = leuron_id,
+      bucketLeuronActive     = True,
+      bucketLeuronCreatedAt  = Just ts
+    }
 
   insertEntityDbE bucketLeuron
 
 
 
-deleteBucketLeuronM :: UserId -> BucketLeuronId -> HandlerErrorEff ()
-deleteBucketLeuronM user_id bucketLeuron_id = do
-  deleteWhereDbE [BucketLeuronUserId ==. user_id, BucketLeuronId ==. bucketLeuron_id, BucketLeuronActive ==. True]
+deleteBucketLeuronM :: UserId -> BucketId -> LeuronId -> HandlerErrorEff ()
+deleteBucketLeuronM user_id bucket_id leuron_id = do
+  deleteWhereDbE [BucketLeuronUserId ==. user_id, BucketLeuronBucketId ==. bucket_id, BucketLeuronLeuronId ==. leuron_id, BucketLeuronActive ==. True]
 
 
 

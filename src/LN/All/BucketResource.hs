@@ -2,13 +2,8 @@
 
 module LN.All.BucketResource (
   -- Handler
-  postBucketResourcesR,
+  postBucketResourceR,
   deleteBucketResourceR,
-
-  -- Model/Function
-  bucketResourceRequestToBucketResource,
-  bucketResourceToResponse,
-  -- bucketResourcesToResponses,
 
   -- Model/Internal
   getBucketResourcesM,
@@ -23,7 +18,6 @@ module LN.All.BucketResource (
 
 
 import           LN.All.Prelude
-import LN.T.Id
 
 
 
@@ -31,10 +25,10 @@ import LN.T.Id
 -- Handler
 --
 
-postBucketResourcesR :: BucketId -> ResourceId -> Handler Value
-postBucketResourcesR bucket_id resource_id = run $ do
+postBucketResourceR :: BucketId -> ResourceId -> Handler Value
+postBucketResourceR bucket_id resource_id = run $ do
   user_id <- _requireAuthId
-  errorOrJSON bucketResourceToResponse $ insertBucketResourceM user_id bucket_id resource_id
+  errorOrJSON (pure ()) $ insertBucketResourceM user_id bucket_id resource_id
 
 
 
@@ -42,48 +36,6 @@ deleteBucketResourceR :: BucketId -> ResourceId -> Handler Value
 deleteBucketResourceR bucket_id resource_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteBucketResourceM user_id bucket_id resource_id
-
-
-
-
-
---
--- Model/Function
---
-
-bucketResourceRequestToBucketResource :: UserId -> IdRequest -> BucketResource
-bucketResourceRequestToBucketResource user_id IdRequest{..} = BucketResource {
-  bucketResourceUserId         = user_id,
-  bucketResourceBucketId       = int64ToKey' 0,
-  bucketResourceResourceId     = int64ToKey' idRequestTargetId,
-  bucketResourceCreatedAt      = Nothing,
-  bucketResourceActive         = True
-}
-
-
-
-bucketResourceToResponse :: Entity BucketResource -> IdResponse
-bucketResourceToResponse (Entity bucket_resource_id BucketResource{..}) = IdResponse {
-  idResponseId                  = keyToInt64 bucket_resource_id,
-  idResponseUserId              = keyToInt64 bucketResourceUserId,
-  idResponseTargetId            = keyToInt64 bucketResourceResourceId,
-  idResponseGuard               = 0,
-  idResponseCreatedAt           = bucketResourceCreatedAt,
-  idResponseModifiedAt          = Nothing,
-  idResponseActivityAt          = Nothing
-}
-
-
-
-{-
-bucketResourcesToResponses :: [Entity BucketResource] -> IdResponses
-bucketResourcesToResponses bucket_resources = idResponses {
-  idResponses = map bucketResourceToResponse bucket_resources
-}
--}
-
-
-
 
 
 
@@ -121,13 +73,19 @@ getBucketResourceM _ bucket_resource_id = do
 
 
 
-insertBucketResourceM :: UserId -> IdRequest -> HandlerErrorEff (Entity BucketResource)
-insertBucketResourceM user_id id_resource_request = do
+insertBucketResourceM :: UserId -> BucketId -> ResourceId -> HandlerErrorEff (Entity BucketResource)
+insertBucketResourceM user_id bucket_id resource_id = do
 
   ts <- timestampH'
 
   let
-    bucketResource = (bucketResourceRequestToBucketResource user_id id_resource_request) { bucketResourceCreatedAt = Just ts }
+    bucketResource = BucketResource {
+      bucketResourceUserId     = user_id,
+      bucketResourceBucketId   = bucket_id,
+      bucketResourceResourceId = resource_id,
+      bucketResourceActive     = True,
+      bucketResourceCreatedAt  = Just ts
+    }
 
   insertEntityDbE bucketResource
 
