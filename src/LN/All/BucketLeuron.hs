@@ -12,7 +12,12 @@ module LN.All.BucketLeuron (
   getBucketLeuronM,
   insertBucketLeuronM,
   deleteBucketLeuronM,
-  countBucketLeuronsM
+  countBucketLeuronsM,
+
+  -- Other
+  getBucketLeuronIdsR,
+  getBucketLeuronIdsM,
+
 ) where
 
 
@@ -106,3 +111,23 @@ countBucketLeuronsM m_sp _ = do
     _ -> do
       n <- countDb [BucketLeuronActive ==. True]
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+
+
+
+--
+-- Other
+--
+
+getBucketLeuronIdsR :: BucketId -> Handler Value
+getBucketLeuronIdsR bucket_id = run $ do
+  user_id <- _requireAuthId
+  errorOrJSON id $ getBucketLeuronIdsM user_id bucket_id
+
+
+
+getBucketLeuronIdsM :: UserId -> BucketId -> HandlerErrorEff SimpleIntsResponse
+getBucketLeuronIdsM _ bucket_id = do
+  keys <- selectKeysListDb Nothing [BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True] [] BucketLeuronId
+  rightA $ SimpleIntsResponse $ map keyToInt64 keys

@@ -12,7 +12,13 @@ module LN.All.BucketResource (
   getBucketResourceM,
   insertBucketResourceM,
   deleteBucketResourceM,
-  countBucketResourcesM
+  countBucketResourcesM,
+
+ -- Other
+  getBucketResourceIdsR,
+  getBucketResourceIdsM,
+
+
 ) where
 
 
@@ -106,3 +112,24 @@ countBucketResourcesM m_sp _ = do
     _ -> do
       n <- countDb [BucketResourceActive ==. True]
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+
+
+
+
+--
+-- Other
+--
+
+getBucketResourceIdsR :: BucketId -> Handler Value
+getBucketResourceIdsR bucket_id = run $ do
+  user_id <- _requireAuthId
+  errorOrJSON id $ getBucketResourceIdsM user_id bucket_id
+
+
+
+getBucketResourceIdsM :: UserId -> BucketId -> HandlerErrorEff SimpleIntsResponse
+getBucketResourceIdsM _ bucket_id = do
+  keys <- selectKeysListDb Nothing [BucketResourceBucketId ==. bucket_id, BucketResourceActive ==. True] [] BucketResourceId
+  rightA $ SimpleIntsResponse $ map keyToInt64 keys
