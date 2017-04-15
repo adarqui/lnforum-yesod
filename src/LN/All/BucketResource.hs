@@ -131,5 +131,6 @@ getBucketResourceIdsR bucket_id = run $ do
 
 getBucketResourceIdsM :: UserId -> BucketId -> HandlerErrorEff SimpleIntsResponse
 getBucketResourceIdsM _ bucket_id = do
-  keys <- selectKeysListDb Nothing [BucketResourceBucketId ==. bucket_id, BucketResourceActive ==. True] [] BucketResourceId
-  rightA $ SimpleIntsResponse $ map keyToInt64 keys
+  e_ents <- selectListDbE Nothing [BucketResourceBucketId ==. bucket_id, BucketResourceActive ==. True] [] BucketResourceId
+  rehtie e_ents leftA $ \ents -> do
+    rightA $ SimpleIntsResponse $ map (\(Entity _ BucketResource{..}) -> keyToInt64 bucketResourceResourceId) ents

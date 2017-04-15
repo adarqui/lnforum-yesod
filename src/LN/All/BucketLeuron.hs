@@ -129,5 +129,6 @@ getBucketLeuronIdsR bucket_id = run $ do
 
 getBucketLeuronIdsM :: UserId -> BucketId -> HandlerErrorEff SimpleIntsResponse
 getBucketLeuronIdsM _ bucket_id = do
-  keys <- selectKeysListDb Nothing [BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True] [] BucketLeuronId
-  rightA $ SimpleIntsResponse $ map keyToInt64 keys
+  e_ents <- selectListDbE Nothing [BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True] [] BucketLeuronId
+  rehtie e_ents leftA $ \ents -> do
+    rightA $ SimpleIntsResponse $ map (\(Entity _ BucketLeuron{..}) -> keyToInt64 bucketLeuronLeuronId) ents
