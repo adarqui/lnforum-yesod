@@ -20,6 +20,7 @@ module LN.All.Resource (
   getResourcesM,
   getResources_ByEverythingM,
   getResources_ByUserIdM,
+  getResources_ParameterizedM,
   getResourceM,
   insertResourceM,
   updateResourceM,
@@ -30,6 +31,9 @@ module LN.All.Resource (
 ) where
 
 
+
+import Control.Monad.Trans.State
+import qualified Control.Monad.Trans.State as StateT
 
 import           LN.All.Prelude
 import qualified LN.T.Like      as L
@@ -177,12 +181,14 @@ resourcesToResponses resources = ResourceResponses {
 --
 
 getResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
-getResourcesM m_sp user_id = do
+getResourcesM m_sp user_id = getResources_ParameterizedM m_sp user_id
 
+{-
   case (lookupSpMay m_sp spUserId) of
 
     Just lookup_user_id -> getResources_ByUserIdM m_sp user_id lookup_user_id
     _                   -> getResources_ByEverythingM m_sp user_id
+    -}
 
 
 
@@ -195,6 +201,19 @@ getResources_ByEverythingM m_sp _ = do
 getResources_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [ResourceUserId ==. lookup_user_id, ResourceActive ==. True] [] ResourceId
+
+
+
+getResources_ParameterizedM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
+getResources_ParameterizedM m_sp _ = do
+  evalStateT go []
+  where
+  go = do
+    case lookupSpMay m_sp spUserId of
+      Just lookup_user_id -> modify (\st->st <> [ResourceUserId ==. lookup_user_id])
+      _ -> pure ()
+    params <- ([ResourceActive ==. True] <>) <$> StateT.get
+    lift $ selectListDbE m_sp params [] ResourceId
 
 
 
