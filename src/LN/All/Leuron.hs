@@ -411,9 +411,11 @@ countLeuronsM m_sp _ = do
 
   case lookupSpMay m_sp spBucketId of
 
+
     Just bucket_id -> flip evalStateT [] $ do
       n <- lift $ countDb [BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True]
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
 
     _ -> flip evalStateT [] $ do
       -- user_id=
