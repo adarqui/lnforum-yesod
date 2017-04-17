@@ -67,6 +67,7 @@ getBucketResources_ParameterizedM m_sp user_id bucket_id = do
   where
   go = do
 
+    -- user_id=
     ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
       modify (\st->st <> [BucketResourceUserId ==. lookup_user_id])
 

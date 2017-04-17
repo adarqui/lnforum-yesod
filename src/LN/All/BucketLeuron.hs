@@ -53,25 +53,30 @@ deleteBucketLeuronR bucket_id leuron_id = run $ do
 -- Model/Internal
 --
 
-getBucketLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity BucketLeuron]
-getBucketLeuronsM m_sp user_id = do
-
-  case (lookupSpMay m_sp spUserId) of
-
-    Just lookup_user_id -> getBucketLeurons_ByUserIdM m_sp user_id lookup_user_id
-    _                   -> getBucketLeurons_ByEverythingM m_sp user_id
+getBucketLeuronsM :: Maybe StandardParams -> UserId -> BucketId -> HandlerErrorEff [Entity Leuron]
+getBucketLeuronsM = getBucketLeurons_ParameterizedM
 
 
 
-getBucketLeurons_ByEverythingM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity BucketLeuron]
-getBucketLeurons_ByEverythingM m_sp _ = do
-  selectListDbE m_sp [BucketLeuronActive ==. True] [] BucketLeuronId
+-- | Handles all possible query parameters
+--
+getBucketLeurons_ParameterizedM :: Maybe StandardParams -> UserId -> BucketId -> HandlerErrorEff [Entity Leuron]
+getBucketLeurons_ParameterizedM m_sp user_id bucket_id = do
+  evalStateT go []
+  where
+  go = do
 
+    -- user_id=
+    ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
+      modify (\st->st <> [BucketLeuronUserId ==. lookup_user_id])
 
+    params <- ([BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True] <>) <$> StateT.get
 
-getBucketLeurons_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity BucketLeuron]
-getBucketLeurons_ByUserIdM m_sp _ lookup_user_id = do
-  selectListDbE m_sp [BucketLeuronUserId ==. lookup_user_id, BucketLeuronActive ==. True] [] BucketLeuronId
+    e_bucket_leurons <- lift $ selectListDbE m_sp params [] BucketLeuronId
+
+    rehtie e_bucket_leurons leftA $ \bucket_leurons -> do
+      v <- rights <$> mapM (\(Entity _ BucketLeuron{..}) -> lift $ getLeuronM user_id bucketLeuronLeuronId) bucket_leurons
+      rightA v
 
 
 
@@ -90,7 +95,7 @@ insertBucketLeuronM user_id bucket_id leuron_id = do
     bucketLeuron = BucketLeuron {
       bucketLeuronUserId     = user_id,
       bucketLeuronBucketId   = bucket_id,
-      bucketLeuronLeuronId = leuron_id,
+      bucketLeuronLeuronId   = leuron_id,
       bucketLeuronActive     = True,
       bucketLeuronCreatedAt  = Just ts
     }

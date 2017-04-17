@@ -277,11 +277,30 @@ deleteResourceM user_id resource_id = do
 countResourcesM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countResourcesM m_sp _ = do
 
-  case (lookupSpMay m_sp spUserId, lookupSpMay m_sp spUserIds) of
+  case lookupSpMay m_sp spBucketId of
 
-    -- TODO FIXME: not handling argument properly
-    _ -> do
-      n <- countDb [ResourceActive ==. True]
+
+    Just bucket_id -> flip evalStateT [] $ do
+      -- user_id=
+      ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
+        modify (\st->st <> [BucketResourceUserId ==. lookup_user_id])
+
+      modify (\st->st <> [BucketResourceBucketId ==. bucket_id, BucketResourceActive ==. True])
+
+      s <- StateT.get
+      n <- lift $ countDb s
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+    _ -> flip evalStateT [] $ do
+      -- user_id=
+      ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
+        modify (\st->st <> [ResourceUserId ==. lookup_user_id])
+
+      modify (\st->st <> [ResourceActive ==. True])
+
+      s <- StateT.get
+      n <- lift $ countDb s
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 

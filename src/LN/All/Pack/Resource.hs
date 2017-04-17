@@ -13,9 +13,9 @@ module LN.All.Pack.Resource (
 
 
 import           LN.All.Internal
+import           LN.All.BucketResource
 import           LN.All.Prelude
 import           LN.All.Resource
-import           LN.All.BucketResource
 import           LN.All.User
 
 
@@ -48,8 +48,6 @@ getResourcePackR thread_post_id = run $ do
 
 getResourcePacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourcePackResponses
 getResourcePacksM m_sp user_id = do
-
-  liftIO $ print m_sp
 
   e_resources <-
     case lookupSpMay m_sp spBucketId of

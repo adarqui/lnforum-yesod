@@ -13,6 +13,7 @@ module LN.All.Pack.Leuron (
 
 
 import           LN.All.Internal
+import           LN.All.BucketLeuron
 import           LN.All.Leuron
 import           LN.All.LeuronTraining
 import           LN.All.Prelude
@@ -50,7 +51,11 @@ getLeuronPackR leuron_id = run $ do
 getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackResponses
 getLeuronPacksM m_sp user_id = do
 
-  e_leurons <- getLeuronsM m_sp user_id
+  e_leurons <-
+    case lookupSpMay m_sp spBucketId of
+      Just bucket_id -> getBucketLeuronsM m_sp user_id bucket_id
+      _              -> getLeuronsM m_sp user_id
+
   rehtie e_leurons leftA $ \leurons -> do
 
     leuron_packs <- fmap rights $ mapM (\leuron -> getLeuronPack_ByLeuronM user_id leuron) leurons
