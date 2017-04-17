@@ -32,11 +32,10 @@ module LN.All.Resource (
 
 
 
-import Control.Monad.Trans.State
+import           Control.Monad.Trans.State
 import qualified Control.Monad.Trans.State as StateT
 
 import           LN.All.Prelude
-import qualified LN.T.Like      as L
 
 
 

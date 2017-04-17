@@ -7,8 +7,7 @@ module LN.All.BucketLeuron (
 
   -- Model/Internal
   getBucketLeuronsM,
-  getBucketLeurons_ByEverythingM,
-  getBucketLeurons_ByUserIdM,
+  getBucketLeurons_ParameterizedM,
   getBucketLeuronM,
   insertBucketLeuronM,
   deleteBucketLeuronM,
@@ -22,7 +21,11 @@ module LN.All.BucketLeuron (
 
 
 
+import           Control.Monad.Trans.State
+import qualified Control.Monad.Trans.State as StateT
+
 import           LN.All.Prelude
+import           LN.All.Leuron
 
 
 

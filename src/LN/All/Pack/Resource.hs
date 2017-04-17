@@ -15,6 +15,7 @@ module LN.All.Pack.Resource (
 import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.Resource
+import           LN.All.BucketResource
 import           LN.All.User
 
 
@@ -48,7 +49,13 @@ getResourcePackR thread_post_id = run $ do
 getResourcePacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff ResourcePackResponses
 getResourcePacksM m_sp user_id = do
 
-  e_resources <- getResourcesM m_sp user_id
+  liftIO $ print m_sp
+
+  e_resources <-
+    case lookupSpMay m_sp spBucketId of
+      Just bucket_id -> getBucketResourcesM m_sp user_id bucket_id
+      _              -> getResourcesM m_sp user_id
+
   rehtie e_resources leftA $ \resources -> do
 
     resource_packs <- rights <$> mapM (\resource -> getResourcePack_ByResourceM user_id resource) resources
