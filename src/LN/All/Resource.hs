@@ -204,14 +204,17 @@ getResources_ByUserIdM m_sp _ lookup_user_id = do
 
 
 
+-- | Handles all possible query parameters
+--
 getResources_ParameterizedM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity Resource]
 getResources_ParameterizedM m_sp _ = do
   evalStateT go []
   where
   go = do
-    case lookupSpMay m_sp spUserId of
-      Just lookup_user_id -> modify (\st->st <> [ResourceUserId ==. lookup_user_id])
-      _ -> pure ()
+
+    ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
+      modify (\st->st <> [ResourceUserId ==. lookup_user_id])
+
     params <- ([ResourceActive ==. True] <>) <$> StateT.get
     lift $ selectListDbE m_sp params [] ResourceId
 
