@@ -34,10 +34,13 @@ module LN.All.Leuron (
 
 
 
-import           LN.All.Prelude
+import           Control.Monad.Trans.State
+import qualified Control.Monad.Trans.State as StateT
 import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import qualified Database.Redis     as R
+
+import           LN.All.Prelude
 
 
 
@@ -406,19 +409,25 @@ deleteLeuronRedis user_id resource_id leuron_id = do
 countLeuronsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countLeuronsM m_sp _ = do
 
-  /*
-   * We're going to need all kinds of logic here:
-   * - count by everything
-   * - count by resource_id
-   * - count by resource_id's
-   */
-  let
-    extra_selectors = case lookupSpMay m_sp spResourceId of
-                           Nothing          -> []
-                           Just resource_id -> [LeuronResourceId ==. resource_id]
+  case lookupSpMay m_sp spBucketId of
 
-  n <- countDb $ [LeuronActive ==. True] <> extra_selectors
-  rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+    Just bucket_id -> flip evalStateT [] $ do
+      n <- lift $ countDb [BucketLeuronBucketId ==. bucket_id, BucketLeuronActive ==. True]
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+    _ -> flip evalStateT [] $ do
+      -- user_id=
+      ebyam (lookupSpMay m_sp spUserId) (pure ()) $ \lookup_user_id ->
+        modify (\st->st <> [LeuronUserId ==. lookup_user_id])
+
+      ebyam (lookupSpMay m_sp spResourceId) (pure ()) $ \resource_id ->
+        modify (\st->st <> [LeuronResourceId ==. resource_id])
+
+      modify (\st->st <> [LeuronActive ==. True])
+
+      s <- StateT.get
+      n <- lift $ countDb s
+      rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
 
 
 
