@@ -243,51 +243,51 @@ BucketRound
   bucketId         BucketId
 
   trainingStyles        [Text]
-  threshold        Int64
-  timeLimit        Int64
-
-  numTotal         Int64
-  numKnow          Int64
-  numDontKnow      Int64
-  numDontCare      Int64
-  numProtest       Int64
-
-  honorKnow        Int64
-  honorDontKnow    Int64
-  honorDontCare    Int64
-  honorProtest     Int64
+  threshold        Int64 default=0
+  timeLimit        Int64 default=0
+ default=0
+  numTotal         Int64 default=0
+  numKnow          Int64 default=0
+  numDontKnow      Int64 default=0
+  numDontCare      Int64 default=0
+  numProtest       Int64 default=0
+ default=0
+  honorKnow        Int64 default=0
+  honorDontKnow    Int64 default=0
+  honorDontCare    Int64 default=0
+  honorProtest     Int64 default=0
   honorKnowAt      UTCTime Maybe
   honorDontKnowAt  UTCTime Maybe
   honorDontCareAt  UTCTime Maybe
   honorProtestAt   UTCTime Maybe
-  booleanKnow      Int64
-  booleanDontKnow  Int64
-  booleanDontCare  Int64
-  booleanProtest   Int64
+  booleanKnow      Int64 default=0
+  booleanDontKnow  Int64 default=0
+  booleanDontCare  Int64 default=0
+  booleanProtest   Int64 default=0
   booleanKnowAt    UTCTime Maybe
   booleanDontKnowAt UTCTime Maybe
   booleanDontCareAt UTCTime Maybe
   booleanProtestAt  UTCTime Maybe
-  matchKnow        Int64
-  matchDontKnow    Int64
-  matchDontCare    Int64
-  matchProtest     Int64
+  matchKnow        Int64 default=0
+  matchDontKnow    Int64 default=0
+  matchDontCare    Int64 default=0
+  matchProtest     Int64 default=0
   matchKnowAt      UTCTime Maybe
   matchDontKnowAt  UTCTime Maybe
   matchDontCareAt  UTCTime Maybe
   matchProtestAt   UTCTime Maybe
-  subsKnow         Int64
-  subsDontKnow     Int64
-  subsDontCare     Int64
-  subsProtest      Int64
+  subsKnow         Int64 default=0
+  subsDontKnow     Int64 default=0
+  subsDontCare     Int64 default=0
+  subsProtest      Int64 default=0
   subsKnowAt       UTCTime Maybe
   subsDontKnowAt   UTCTime Maybe
   subsDontCareAt   UTCTime Maybe
   subsProtestAt    UTCTime Maybe
-  splitsKnow       Int64
-  splitsDontKnow   Int64
-  splitsDontCare   Int64
-  splitsProtest    Int64
+  splitsKnow       Int64 default=0
+  splitsDontKnow   Int64 default=0
+  splitsDontCare   Int64 default=0
+  splitsProtest    Int64 default=0
   splitsKnowAt     UTCTime Maybe
   splitsDontKnowAt UTCTime Maybe
   splitsDontCareAt UTCTime Maybe
@@ -311,7 +311,7 @@ BucketNode
   bucketId         BucketId
   leuronId         LeuronId
 
-  timeLimit        Int64
+  timeLimit        Int64 default=0
   timeLimitExceeded Bool
 
   trainingStyle         Text
@@ -347,48 +347,48 @@ LeurongNode
   userId           UserId
   leuronId         LeuronId
 
-  numTotal         Int64
-  numKnow          Int64
-  numDontKnow      Int64
-  numDontCare      Int64
-  numProtest       Int64
-
-  honorKnow        Int64
-  honorDontKnow    Int64
-  honorDontCare    Int64
-  honorProtest     Int64
+  numTotal         Int64 default=0
+  numKnow          Int64 default=0
+  numDontKnow      Int64 default=0
+  numDontCare      Int64 default=0
+  numProtest       Int64 default=0
+ default=0
+  honorKnow        Int64 default=0
+  honorDontKnow    Int64 default=0
+  honorDontCare    Int64 default=0
+  honorProtest     Int64 default=0
   honorKnowAt      UTCTime Maybe
   honorDontKnowAt  UTCTime Maybe
   honorDontCareAt  UTCTime Maybe
   honorProtestAt   UTCTime Maybe
-  booleanKnow      Int64
-  booleanDontKnow  Int64
-  booleanDontCare  Int64
-  booleanProtest   Int64
+  booleanKnow      Int64 default=0
+  booleanDontKnow  Int64 default=0
+  booleanDontCare  Int64 default=0
+  booleanProtest   Int64 default=0
   booleanKnowAt    UTCTime Maybe
   booleanDontKnowAt UTCTime Maybe
   booleanDontCareAt UTCTime Maybe
   booleanProtestAt  UTCTime Maybe
-  matchKnow        Int64
-  matchDontKnow    Int64
-  matchDontCare    Int64
-  matchProtest     Int64
+  matchKnow        Int64 default=0
+  matchDontKnow    Int64 default=0
+  matchDontCare    Int64 default=0
+  matchProtest     Int64 default=0
   matchKnowAt      UTCTime Maybe
   matchDontKnowAt  UTCTime Maybe
   matchDontCareAt  UTCTime Maybe
   matchProtestAt   UTCTime Maybe
-  subsKnow         Int64
-  subsDontKnow     Int64
-  subsDontCare     Int64
-  subsProtest      Int64
+  subsKnow         Int64 default=0
+  subsDontKnow     Int64 default=0
+  subsDontCare     Int64 default=0
+  subsProtest      Int64 default=0
   subsKnowAt       UTCTime Maybe
   subsDontKnowAt   UTCTime Maybe
   subsDontCareAt   UTCTime Maybe
   subsProtestAt    UTCTime Maybe
-  splitsKnow       Int64
-  splitsDontKnow   Int64
-  splitsDontCare   Int64
-  splitsProtest    Int64
+  splitsKnow       Int64 default=0
+  splitsDontKnow   Int64 default=0
+  splitsDontCare   Int64 default=0
+  splitsProtest    Int64 default=0
   splitsKnowAt     UTCTime Maybe
   splitsDontKnowAt UTCTime Maybe
   splitsDontCareAt UTCTime Maybe
