@@ -148,13 +148,45 @@ Bucket
   name        Text
   displayName Text default='null'
   description Text Maybe
-  rounds      Int
+
   scoreLo     Int default=-1000
   scoreHi     Int default=3
+
   leurons     [LeuronId]
   resources   [ResourceId]
   categories  [Text]
   filters     [LeuronId]
+
+  rounds           Int64
+  maxRounds        Int64
+  trainingStyles   [Text]
+  threshold        Int64
+  timeLimit        Int64
+
+  numKnow          Int64
+  numDontKnow      Int64
+  numDontCare      Int64
+  numProtest       Int64
+  honorKnow        Int64
+  honorDontKnow    Int64
+  honorDontCare    Int64
+  honorProtest     Int64
+  booleanKnow      Int64
+  booleanDontKnow  Int64
+  booleanDontCare  Int64
+  booleanProtest   Int64
+  matchKnow        Int64
+  matchDontKnow    Int64
+  matchDontCare    Int64
+  matchProtest     Int64
+  subsKnow         Int64
+  subsDontKnow     Int64
+  subsDontCare     Int64
+  subsProtest      Int64
+  splitsKnow       Int64
+  splitsDontKnow   Int64
+  splitsDontCare   Int64
+  splitsProtest    Int64
 
   active      Bool default=True
   guard       Int  default=0
@@ -206,6 +238,98 @@ BucketCategory
 
 
 
+BucketRound
+  userId           UserId
+  bucketId         BucketId
+
+  trainingStyles        [Text]
+  threshold        Int64
+  timeLimit        Int64
+
+  numTotal         Int64
+  numKnow          Int64
+  numDontKnow      Int64
+  numDontCare      Int64
+  numProtest       Int64
+
+  honorKnow        Int64
+  honorDontKnow    Int64
+  honorDontCare    Int64
+  honorProtest     Int64
+  honorKnowAt      UTCTime Maybe
+  honorDontKnowAt  UTCTime Maybe
+  honorDontCareAt  UTCTime Maybe
+  honorProtestAt   UTCTime Maybe
+  booleanKnow      Int64
+  booleanDontKnow  Int64
+  booleanDontCare  Int64
+  booleanProtest   Int64
+  booleanKnowAt    UTCTime Maybe
+  booleanDontKnowAt UTCTime Maybe
+  booleanDontCareAt UTCTime Maybe
+  booleanProtestAt  UTCTime Maybe
+  matchKnow        Int64
+  matchDontKnow    Int64
+  matchDontCare    Int64
+  matchProtest     Int64
+  matchKnowAt      UTCTime Maybe
+  matchDontKnowAt  UTCTime Maybe
+  matchDontCareAt  UTCTime Maybe
+  matchProtestAt   UTCTime Maybe
+  subsKnow         Int64
+  subsDontKnow     Int64
+  subsDontCare     Int64
+  subsProtest      Int64
+  subsKnowAt       UTCTime Maybe
+  subsDontKnowAt   UTCTime Maybe
+  subsDontCareAt   UTCTime Maybe
+  subsProtestAt    UTCTime Maybe
+  splitsKnow       Int64
+  splitsDontKnow   Int64
+  splitsDontCare   Int64
+  splitsProtest    Int64
+  splitsKnowAt     UTCTime Maybe
+  splitsDontKnowAt UTCTime Maybe
+  splitsDontCareAt UTCTime Maybe
+  splitsProtestAt  UTCTime Maybe
+
+  startedAt        UTCTime Maybe
+  finished         Bool default=False
+  finishedAt       UTCTime Maybe
+
+  active           Bool default=True
+  guard            Int  default=0
+  createdAt        UTCTime Maybe default=now()
+  modifiedAt       UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+BucketNode
+  userId           UserId
+  bucketId         BucketId
+  leuronId         LeuronId
+
+  timeLimit        Int64
+  timeLimitExceeded Bool
+
+  trainingStyle         Text
+  quiz             Text
+  quizResult       Text
+  correct          Bool
+
+  finishedAt       UTCTime Maybe
+
+  active           Bool default=True
+  guard            Int  default=0
+  createdAt        UTCTime Maybe default=now()
+  modifiedAt       UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
 LeuronTraining
   userId           UserId
   leuronId         LeuronId
@@ -215,6 +339,67 @@ LeuronTraining
   createdAt        UTCTime Maybe default=now()
   modifiedAt       UTCTime Maybe
 
+  deriving Eq Show Typeable
+
+
+
+LeurongNode
+  userId           UserId
+  leuronId         LeuronId
+
+  numTotal         Int64
+  numKnow          Int64
+  numDontKnow      Int64
+  numDontCare      Int64
+  numProtest       Int64
+
+  honorKnow        Int64
+  honorDontKnow    Int64
+  honorDontCare    Int64
+  honorProtest     Int64
+  honorKnowAt      UTCTime Maybe
+  honorDontKnowAt  UTCTime Maybe
+  honorDontCareAt  UTCTime Maybe
+  honorProtestAt   UTCTime Maybe
+  booleanKnow      Int64
+  booleanDontKnow  Int64
+  booleanDontCare  Int64
+  booleanProtest   Int64
+  booleanKnowAt    UTCTime Maybe
+  booleanDontKnowAt UTCTime Maybe
+  booleanDontCareAt UTCTime Maybe
+  booleanProtestAt  UTCTime Maybe
+  matchKnow        Int64
+  matchDontKnow    Int64
+  matchDontCare    Int64
+  matchProtest     Int64
+  matchKnowAt      UTCTime Maybe
+  matchDontKnowAt  UTCTime Maybe
+  matchDontCareAt  UTCTime Maybe
+  matchProtestAt   UTCTime Maybe
+  subsKnow         Int64
+  subsDontKnow     Int64
+  subsDontCare     Int64
+  subsProtest      Int64
+  subsKnowAt       UTCTime Maybe
+  subsDontKnowAt   UTCTime Maybe
+  subsDontCareAt   UTCTime Maybe
+  subsProtestAt    UTCTime Maybe
+  splitsKnow       Int64
+  splitsDontKnow   Int64
+  splitsDontCare   Int64
+  splitsProtest    Int64
+  splitsKnowAt     UTCTime Maybe
+  splitsDontKnowAt UTCTime Maybe
+  splitsDontCareAt UTCTime Maybe
+  splitsProtestAt  UTCTime Maybe
+
+  active           Bool default=True
+  guard            Int  default=0
+  createdAt        UTCTime Maybe default=now()
+  modifiedAt       UTCTime Maybe
+
+  UniqueLeuronTrainingNode userId leuronId
   deriving Eq Show Typeable
 
 
