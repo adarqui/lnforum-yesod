@@ -44,8 +44,11 @@ import           LN.All.Api
 import           LN.All.Bucket
 import           LN.All.BucketResource
 import           LN.All.BucketLeuron
+import           LN.All.BucketRound
+import           LN.All.BucketNode
 import           LN.All.Leuron
 import           LN.All.LeuronTraining
+import           LN.All.LeuronNode
 import           LN.All.Me
 import           LN.All.Pack.Bucket
 import           LN.All.Pack.Leuron

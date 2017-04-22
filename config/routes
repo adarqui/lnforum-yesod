@@ -25,6 +25,9 @@
 /api/bucket_resource_ids/#BucketId BucketResourceIdsR GET
 /api/bucket_leuron_ids/#BucketId BucketLeuronIdsR GET
 
+/api/bucket_rounds/#BucketRoundId BucketRoundR GET PUT DELETE
+/api/bucket_rounds BucketRoundsR GET POST
+
 /api/buckets/#BucketId BucketR GET PUT DELETE
 /api/buckets BucketsR GET POST
 
@@ -103,6 +106,7 @@
 /api/leurons_count LeuronsCountR GET
 /api/leuron_training_count LeuronTrainingCountR GET
 /api/buckets_count BucketsCountR GET
+/api/bucket_rounds_count BucketRoundsCountR GET
 
 
 

@@ -23,9 +23,12 @@ library
                      LN.All.Empty
                      LN.All.Leuron
                      LN.All.LeuronTraining
+                     LN.All.LeuronNode
                      LN.All.Bucket
                      LN.All.BucketResource
                      LN.All.BucketLeuron
+                     LN.All.BucketRound
+                     LN.All.BucketNode
                      LN.All.Me
                      LN.All.Prelude
                      LN.All.Profile

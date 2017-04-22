@@ -242,7 +242,7 @@ BucketRound
   userId           UserId
   bucketId         BucketId
 
-  trainingStyles        [Text]
+  trainingStyles   [Text]
   threshold        Int64
   timeLimit        Int64
 
