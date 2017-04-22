@@ -152,7 +152,9 @@ bucketToResponse (Entity bucket_id Bucket{..}) = BucketResponse {
   bucketResponseResources     = [], -- bucketResources,
   bucketResponseLeurons       = [], -- bucketLeurons,
   bucketResponseFilters       = [], -- bucketFilters,
+
   bucketResponseTrainingNode  = defaultTrainingNode,
+
   bucketResponseActive        = bucketActive,
   bucketResponseGuard         = bucketGuard,
   bucketResponseCreatedAt     = bucketCreatedAt,
