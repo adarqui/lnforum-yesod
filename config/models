@@ -335,7 +335,7 @@ LeuronTraining
   leuronId         LeuronId
   summary          LeuronTrainingSummary
   active           Bool default=True
-  guard            Int 
+  guard            Int
   createdAt        UTCTime Maybe default=now()
   modifiedAt       UTCTime Maybe
 
@@ -400,46 +400,4 @@ LeurongNode
   modifiedAt       UTCTime Maybe
 
   UniqueLeuronTrainingNode userId leuronId
-  deriving Eq Show Typeable
-
-
-
-LeuronTraining2
-  userId           UserId
-  leuronId         LeuronId
-  score            Int
-  skip             Int
-  skipAt           UTCTime Maybe
-  rawScore         Int
-  rawKnow          Int
-  rawKnowAt        UTCTime Maybe
-  rawDontKnow      Int
-  rawDontKnowAt    UTCTime Maybe
-  splitsScore      Int
-  splitsKnow       Int
-  splitsKnowAt     UTCTime Maybe
-  splitsDontKnow   Int
-  splitsDontKnowAt UTCTime Maybe
-  subsScore        Int
-  subsKnow         Int
-  subsKnowAt       UTCTime Maybe
-  subsDontKnow     Int
-  subsDontKnowAt   UTCTime Maybe
-  care             Bool
-  careAt           UTCTime Maybe
-  active           Bool
-  createdAt        UTCTime Maybe default=now()
-  modifiedAt       UTCTime Maybe
-
-  UniqueLeuronTraining userId leuronId
-  deriving Eq Show Typeable
-
-
-
-LeuronHistory
-  userId    UserId
-  leuronId  LeuronId
-  op        Text
-  createdAt UTCTime Maybe default=now()
-
   deriving Eq Show Typeable
