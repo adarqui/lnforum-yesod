@@ -93,7 +93,7 @@ bucketRoundRequestToBucketRound user_id bucket_id BucketRoundRequest{..} = Bucke
   bucketRoundUserId          = user_id,
   bucketRoundBucketId        = bucket_id,
 
-  bucketRoundTrainingStyles    = [],
+  bucketRoundTrainingStyles    = bucketRoundRequestTrainingStyles,
   bucketRoundThreshold         = 0,
   bucketRoundTimeLimit         = 0,
   bucketRoundNumTotal          = 0,
@@ -160,7 +160,7 @@ bucketRoundToResponse (Entity bucket_round_id BucketRound{..}) = BucketRoundResp
   bucketRoundResponseUserId         = keyToInt64 bucketRoundUserId,
   bucketRoundResponseBucketId       = keyToInt64 bucketRoundBucketId,
 
-  bucketRoundResponseTrainingStyles = [],
+  bucketRoundResponseTrainingStyles = bucketRoundTrainingStyles,
   bucketRoundResponseTrainingNode   = defaultTrainingNode,
   bucketRoundResponseThreshold      = bucketRoundThreshold,
   bucketRoundResponseTimeLimit      = bucketRoundTimeLimit,
@@ -221,17 +221,21 @@ getBucketRoundM _ bucket_round_id = do
 insertBucketRoundM :: Maybe StandardParams -> UserId -> BucketRoundRequest -> HandlerErrorEff (Entity BucketRound)
 insertBucketRoundM m_sp user_id bucket_round_request = do
 
-  case lookupSpMay m_sp spBucketId of
-    Just bucket_id -> do
+  rehtie (validateBucketRoundRequest bucket_round_request) (leftA . Error_Validation) $ const $ do
+  -- runEitherT $ do
+  --  mustT $ isValidAppM $ validateBucketRoundRequest bucket_round_request
 
-      ts <- timestampH'
+    case lookupSpMay m_sp spBucketId of
+      Just bucket_id -> do
 
-      let
-        bucketRound = (bucketRoundRequestToBucketRound user_id bucket_id bucket_round_request) { bucketRoundCreatedAt = Just ts }
+        ts <- timestampH'
 
-      insertEntityDbE bucketRound
+        let
+          bucketRound = (bucketRoundRequestToBucketRound user_id bucket_id bucket_round_request) { bucketRoundCreatedAt = Just ts }
 
-    _ -> leftA $ Error_InvalidArguments "bucket_id"
+        insertEntityDbE bucketRound
+
+      _ -> leftA $ Error_InvalidArguments "bucket_id"
 
 
 
