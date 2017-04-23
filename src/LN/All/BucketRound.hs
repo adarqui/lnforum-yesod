@@ -147,7 +147,7 @@ bucketRoundRequestToBucketRound user_id bucket_id BucketRoundRequest{..} = Bucke
   bucketRoundFinishedAt        = Nothing,
 
   bucketRoundActive          = True,
-  bucketRoundGuard           = bucketRoundRequestRequestGuard,
+  bucketRoundGuard           = bucketRoundRequestGuard,
   bucketRoundCreatedAt       = Nothing,
   bucketRoundModifiedAt      = Nothing
 }
@@ -156,21 +156,20 @@ bucketRoundRequestToBucketRound user_id bucket_id BucketRoundRequest{..} = Bucke
 
 bucketRoundToResponse :: Entity BucketRound -> BucketRoundResponse
 bucketRoundToResponse (Entity bucket_round_id BucketRound{..}) = BucketRoundResponse {
-  bucketRoundResponseId            = keyToInt64 bucket_round_id,
-  bucketRoundResponseUserId        = keyToInt64 bucketRoundUserId,
-  bucketRoundResponseBucketId      = keyToInt64 bucketRoundBucketId,
-  bucketRoundResponseBucketTrainingId = 0,
+  bucketRoundResponseId             = keyToInt64 bucket_round_id,
+  bucketRoundResponseUserId         = keyToInt64 bucketRoundUserId,
+  bucketRoundResponseBucketId       = keyToInt64 bucketRoundBucketId,
 
-  bucketRoundResponseStyles        = [],
-  bucketRoundResponseTrainingNode  = defaultTrainingNode,
-  bucketRoundResponseThreshold     = bucketRoundThreshold,
-  bucketRoundResponseTimeLimit     = bucketRoundTimeLimit,
+  bucketRoundResponseTrainingStyles = [],
+  bucketRoundResponseTrainingNode   = defaultTrainingNode,
+  bucketRoundResponseThreshold      = bucketRoundThreshold,
+  bucketRoundResponseTimeLimit      = bucketRoundTimeLimit,
 
-  bucketRoundResponseActive        = bucketRoundActive,
-  bucketRoundResponseGuard         = bucketRoundGuard,
-  bucketRoundResponseCreatedAt     = bucketRoundCreatedAt,
-  bucketRoundResponseModifiedAt    = bucketRoundModifiedAt,
-  bucketRoundResponseActivityAt    = Nothing
+  bucketRoundResponseActive         = bucketRoundActive,
+  bucketRoundResponseGuard          = bucketRoundGuard,
+  bucketRoundResponseCreatedAt      = bucketRoundCreatedAt,
+  bucketRoundResponseModifiedAt     = bucketRoundModifiedAt,
+  bucketRoundResponseActivityAt     = Nothing
 }
 
 

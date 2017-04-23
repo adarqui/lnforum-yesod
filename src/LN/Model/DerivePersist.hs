@@ -4,7 +4,8 @@ module LN.Model.DerivePersist (
   module A,
   Membership,
   Visibility,
-  LikeOpt
+  LikeOpt,
+  TrainingStyle
 ) where
 
 
@@ -16,6 +17,7 @@ import           LN.T.Like
 import           LN.T.Membership
 import           LN.T.Profile        as A
 import           LN.T.Visibility
+import           LN.T.Training
 
 
 
@@ -26,3 +28,4 @@ derivePersistField "Ent"
 derivePersistField "LeuronTrainingSummary"
 derivePersistField "LikeOpt"
 derivePersistField "ProfileGender"
+derivePersistField "TrainingStyle"

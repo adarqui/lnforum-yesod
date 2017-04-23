@@ -131,6 +131,7 @@ Leuron
   substitutions Text Maybe
   tags          [Text]
   style         Text Maybe
+  checksum      Text
 
   active        Bool default=True
   guard         Int  default=0
@@ -159,7 +160,7 @@ Bucket
 
   rounds           Int64
   maxRounds        Int64
-  trainingStyles   [Text]
+  trainingStyles   [TrainingStyle]
   threshold        Int64
   timeLimit        Int64
 
@@ -242,7 +243,7 @@ BucketRound
   userId           UserId
   bucketId         BucketId
 
-  trainingStyles   [Text]
+  trainingStyles   [TrainingStyle]
   threshold        Int64
   timeLimit        Int64
 
@@ -314,7 +315,7 @@ BucketNode
   timeLimit        Int64
   timeLimitExceeded Bool
 
-  trainingStyle         Text
+  trainingStyle    TrainingStyle
   quiz             Text
   quizResult       Text
   correct          Bool
