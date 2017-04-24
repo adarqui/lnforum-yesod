@@ -222,6 +222,7 @@ insertBucketRoundM :: Maybe StandardParams -> UserId -> BucketRoundRequest -> Ha
 insertBucketRoundM m_sp user_id bucket_round_request = do
 
   rehtie (validateBucketRoundRequest bucket_round_request) (leftA . Error_Validation) $ const $ do
+
   -- runEitherT $ do
   --  mustT $ isValidAppM $ validateBucketRoundRequest bucket_round_request
 
