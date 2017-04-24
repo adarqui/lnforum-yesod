@@ -27,7 +27,14 @@ module LN.All.BucketRound (
 
 
 
+import           Database.Esqueleto ((^.))
+import qualified Database.Esqueleto as E
+import qualified Database.Redis     as R
+
 import           LN.All.Prelude
+import           LN.All.BucketResource
+import           LN.All.Bucket
+import           LN.All.Resource
 
 
 
@@ -223,9 +230,6 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
   rehtie (validateBucketRoundRequest bucket_round_request) (leftA . Error_Validation) $ const $ do
 
-  -- runEitherT $ do
-  --  mustT $ isValidAppM $ validateBucketRoundRequest bucket_round_request
-
     case lookupSpMay m_sp spBucketId of
       Just bucket_id -> do
 
@@ -234,7 +238,45 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
         let
           bucketRound = (bucketRoundRequestToBucketRound user_id bucket_id bucket_round_request) { bucketRoundCreatedAt = Just ts }
 
-        insertEntityDbE bucketRound
+        lr <- insertEntityDbE bucketRound
+        rehtie lr leftA $ \entity@(Entity round_id BucketRound{..}) -> do
+
+          --
+          -- Grab resources & leurons, add them to redis bucket
+          --
+
+          lr_ <- runEitherT $ do
+
+            resources <- mustT $ getBucketResourcesM Nothing user_id bucket_id
+            -- bucket_leurons   <- mustT $ getBucketLeurons Nothing user_id Nothing user_id bucket_id
+            -- pure (ucket_resources, bucket_leurons)
+            --
+            pure resources
+
+          rehtie lr_ leftA $ \resources -> do
+
+            leuron_ids <- forM_ resources $ \(Entity resource_id Resource{..}) -> do
+
+              v <- _runDB
+                $ E.select
+                $ E.from $ \leuron -> do
+                  E.where_ (leuron ^. LeuronResourceId E.==. E.val resource_id)
+                  pure leuron
+
+              liftIO $ print v
+
+              pure ()
+
+  --              $ E.notExists
+  --                $ E.select
+  --                $ E.from $ \leuron_node -> do
+  --                    E.where_ (leuron ^. LeuronId E.== leuron_node ^. LeuronNodeLeuronId E.and leuron_node ^. LeuronNodeHonorKnow E.<= 3)
+  --                    pure leuron_node
+  --              pure leuron) -- ^. LeuronId)
+
+            rightA ()
+
+          rightA entity
 
       _ -> leftA $ Error_InvalidArguments "bucket_id"
 

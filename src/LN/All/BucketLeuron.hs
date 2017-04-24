@@ -36,7 +36,8 @@ import           LN.All.Leuron
 postBucketLeuronR :: BucketId -> LeuronId -> Handler Value
 postBucketLeuronR bucket_id leuron_id = run $ do
   user_id <- _requireAuthId
-  errorOrJSON (pure ()) $ insertBucketLeuronM user_id bucket_id leuron_id
+  sp      <- lookupStandardParams
+  errorOrJSON (pure ()) $ insertBucketLeuronM (pure sp) user_id bucket_id leuron_id
 
 
 
@@ -86,21 +87,26 @@ getBucketLeuronM _ bucket_leuron_id = do
 
 
 
-insertBucketLeuronM :: UserId -> BucketId -> LeuronId -> HandlerErrorEff (Entity BucketLeuron)
-insertBucketLeuronM user_id bucket_id leuron_id = do
+insertBucketLeuronM :: Maybe StandardParams -> UserId -> BucketId -> LeuronId -> HandlerErrorEff (Entity BucketLeuron)
+insertBucketLeuronM m_sp user_id bucket_id leuron_id = do
 
-  ts <- timestampH'
+  case lookupSpMay m_sp spResourceId of
+    Just resource_id -> do
+      ts <- timestampH'
 
-  let
-    bucketLeuron = BucketLeuron {
-      bucketLeuronUserId     = user_id,
-      bucketLeuronBucketId   = bucket_id,
-      bucketLeuronLeuronId   = leuron_id,
-      bucketLeuronActive     = True,
-      bucketLeuronCreatedAt  = Just ts
-    }
+      let
+        bucketLeuron = BucketLeuron {
+          bucketLeuronUserId     = user_id,
+          bucketLeuronBucketId   = bucket_id,
+          bucketLeuronResourceId = resource_id,
+          bucketLeuronLeuronId   = leuron_id,
+          bucketLeuronActive     = True,
+          bucketLeuronCreatedAt  = Just ts
+        }
 
-  insertEntityDbE bucketLeuron
+      insertEntityDbE bucketLeuron
+
+    _ -> leftA $ Error_InvalidArguments "resource_id"
 
 
 

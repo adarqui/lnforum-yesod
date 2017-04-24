@@ -203,18 +203,6 @@ Bucket
 
 
 
-BucketLeuron
-  userId     UserId
-  bucketId   BucketId
-  active     Bool
-  leuronId   LeuronId
-  createdAt  UTCTime Maybe default=now()
-
-  UniqueBucketLeuron userId bucketId leuronId
-  deriving Eq Show Typeable
-
-
-
 BucketResource
   userId     UserId
   bucketId   BucketId
@@ -223,6 +211,19 @@ BucketResource
   createdAt  UTCTime Maybe default=now()
 
   UniqueBucketResource userId bucketId resourceId
+  deriving Eq Show Typeable
+
+
+
+BucketLeuron
+  userId     UserId
+  bucketId   BucketId
+  resourceId ResourceId
+  leuronId   LeuronId
+  active     Bool
+  createdAt  UTCTime Maybe default=now()
+
+  UniqueBucketLeuron userId bucketId leuronId
   deriving Eq Show Typeable
 
 
@@ -344,8 +345,9 @@ LeuronTraining
 
 
 
-LeurongNode
+LeuronNode
   userId           UserId
+  resourceId       ResourceId
   leuronId         LeuronId
 
   numTotal         Int64
@@ -395,8 +397,8 @@ LeurongNode
   splitsDontCareAt UTCTime Maybe
   splitsProtestAt  UTCTime Maybe
 
-  active           Bool default=True
-  guard            Int 
+  active           Bool
+  guard            Int
   createdAt        UTCTime Maybe default=now()
   modifiedAt       UTCTime Maybe
 
