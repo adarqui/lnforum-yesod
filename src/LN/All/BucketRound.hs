@@ -259,25 +259,17 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
               v <- _runDB
                 $ E.select $ E.from $ \leuron -> do
+                    E.where_ ((leuron ^. LeuronResourceId) E.==. E.val resource_id)
                     E.where_ $ E.notExists $ E.from $ \leuron_node -> do
-                      E.where_ ((leuron ^. LeuronId) E.==. (leuron_node ^. LeuronNodeLeuronId)) -- E.and leuron_node ^. LeuronNodeHonorKnow E.<=. 3)
+                      E.where_ (
+                        ((leuron ^. LeuronId) E.==. (leuron_node ^. LeuronNodeLeuronId))
+                        E.&&. ((leuron_node ^. LeuronNodeUserId) E.==. E.val user_id)
+                        E.&&. ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3))
+                    pure (leuron ^. LeuronId)
 
               liftIO $ print v
 
               pure ()
-
-              -- v <- _runDB
-              --   $ E.select
-              --   $ E.from $ \leuron -> do
-              --     E.where_ (leuron ^. LeuronResourceId E.==. E.val resource_id)
-              --     pure leuron
-
-  --              $ E.notExists
-  --                $ E.select
-  --                $ E.from $ \leuron_node -> do
-  --                    E.where_ (leuron ^. LeuronId E.== leuron_node ^. LeuronNodeLeuronId E.and leuron_node ^. LeuronNodeHonorKnow E.<= 3)
-  --                    pure leuron_node
-  --              pure leuron) -- ^. LeuronId)
 
             rightA ()
 
