@@ -267,7 +267,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
                         E.&&. ((leuron_node ^. LeuronNodeUserId) E.==. E.val user_id)
                         -- calculation section
                         E.&&. ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3)
-                        E.&&. ((leuron_node ^. LeuronNodeHonorDontCare) E.==. E.val 0))
+                        E.&&. ((leuron_node ^. LeuronNodeHonorDontCare) E./=. E.val 0))
                     pure (leuron ^. LeuronId)
 
               liftIO $ print leuron_ids
