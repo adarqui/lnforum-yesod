@@ -255,19 +255,28 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
           rehtie lr_ leftA $ \resources -> do
 
-            leuron_ids <- forM_ resources $ \(Entity resource_id Resource{..}) -> do
+            leuron_ids <- forM resources $ \(Entity resource_id Resource{..}) -> do
 
-              v <- _runDB
+              leuron_ids <- _runDB
                 $ E.select $ E.from $ \leuron -> do
                     E.where_ ((leuron ^. LeuronResourceId) E.==. E.val resource_id)
                     E.where_ $ E.notExists $ E.from $ \leuron_node -> do
                       E.where_ (
                         ((leuron ^. LeuronId) E.==. (leuron_node ^. LeuronNodeLeuronId))
                         E.&&. ((leuron_node ^. LeuronNodeUserId) E.==. E.val user_id)
-                        E.&&. ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3))
+                        -- calculation section
+                        E.&&. ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3)
+                        E.&&. ((leuron_node ^. LeuronNodeHonorDontCare) E.==. E.val 0))
                     pure (leuron ^. LeuronId)
 
-              liftIO $ print v
+              liftIO $ print leuron_ids
+
+              let
+                l_ids = map (keyToInt64 . E.unValue) leuron_ids
+
+              red <- getsYesod appRed
+              liftIO $ R.runRedis red $ do
+                R.sadd "hello" []
 
               pure ()
 
