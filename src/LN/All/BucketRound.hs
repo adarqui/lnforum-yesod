@@ -35,6 +35,7 @@ import           LN.All.Prelude
 import           LN.All.BucketResource
 import           LN.All.Bucket
 import           LN.All.Resource
+import           LN.Misc
 
 
 
@@ -276,7 +277,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
               red <- getsYesod appRed
               liftIO $ R.runRedis red $ do
-                R.sadd "hello" []
+                R.sadd (cs $ "round:" <> show (keyToInt64 round_id)) $ map (cs . show) l_ids
 
               pure ()
 
