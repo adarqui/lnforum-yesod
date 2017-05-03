@@ -265,25 +265,28 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
                       -- TODO FIXME
                       let
+
+                        nop = (E.val False) E.==. (E.val False)
+
                         where_honor_know = if TS_Simple `elem` bucketRoundTrainingStyles
                                               then ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3)
-                                              else ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3)
+                                              else nop
 
                         where_boolean_know = if TS_Boolean `elem` bucketRoundTrainingStyles
                                                 then ((leuron_node ^. LeuronNodeBooleanKnow) E.>. E.val 3)
-                                                else ((leuron_node ^. LeuronNodeBooleanKnow) E.>. E.val 3)
+                                                else nop
 
                         where_matching_know = if TS_Matching `elem` bucketRoundTrainingStyles
                                                 then ((leuron_node ^. LeuronNodeMatchKnow) E.>. E.val 3)
-                                                else ((leuron_node ^. LeuronNodeMatchKnow) E.>. E.val 3)
+                                                else nop
 
                         where_subs_know = if TS_Subs `elem` bucketRoundTrainingStyles
                                                 then ((leuron_node ^. LeuronNodeSubsKnow) E.>. E.val 3)
-                                                else ((leuron_node ^. LeuronNodeSubsKnow) E.>. E.val 3)
+                                                else nop
 
                         where_splits_know = if TS_Splits `elem` bucketRoundTrainingStyles
                                                 then ((leuron_node ^. LeuronNodeSplitsKnow) E.>. E.val 3)
-                                                else ((leuron_node ^. LeuronNodeSplitsKnow) E.>. E.val 3)
+                                                else nop
                       E.where_ (
                         ((leuron ^. LeuronId) E.==. (leuron_node ^. LeuronNodeLeuronId))
                         E.&&. ((leuron_node ^. LeuronNodeUserId) E.==. E.val user_id)
