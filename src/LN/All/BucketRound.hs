@@ -27,7 +27,10 @@ module LN.All.BucketRound (
   getBucketRoundLeuronsCountR,
   getBucketRoundLeuronsM,
   getBucketRoundLeuronM,
-  countBucketRoundLeuronsM
+  countBucketRoundLeuronsM,
+
+  postBucketRoundLeuronOpR,
+  doBucketRoundLeuronOpM
 ) where
 
 
@@ -369,6 +372,14 @@ countBucketRoundsM m_sp _ = do
 
 
 
+
+
+--
+-- Bucket Round Leurons
+--
+--
+--
+
 getBucketRoundLeuronsM :: Maybe StandardParams -> UserId -> BucketRoundId -> HandlerErrorEff [Entity Leuron]
 getBucketRoundLeuronsM m_sp user_id bucket_round_id = do
   lr <- getBucketRoundLeuronM m_sp user_id bucket_round_id
@@ -405,3 +416,41 @@ countBucketRoundLeuronsM _ bucket_round_id = do
          R.scard (cs $ "round:" <> show (keyToInt64 bucket_round_id))
   rehtie lr (const $ leftA Error_Unknown) $ \scard -> do
     rightA $ CountResponse 0 (fromIntegral scard)
+
+
+
+-- TODO FIXME:
+-- Get rid of op_text and turn it into an ADT .. too tired to do it now.
+--
+postBucketRoundLeuronOpR :: BucketRoundId -> LeuronId -> Text -> Handler Value
+postBucketRoundLeuronOpR bucket_round_id leuron_id op_text = run $ do
+  user_id <- _requireAuthId
+  errorOrJSON id $ doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text
+
+
+
+doBucketRoundLeuronOpM :: UserId -> BucketRoundId -> LeuronId -> Text -> HandlerErrorEff ()
+doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text = do
+
+  let
+    bucket_round_updates = case op_text of
+      "know" -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
+      "dont_know" -> []
+      "dont_care" -> []
+      "flag" -> []
+  let
+    leuron_node_updates = case op_text of
+      "know" -> [ LeuronNodeNumKnow +=. 1, LeuronNodeHonorKnow +=. 1 ]
+      "dont_know" -> []
+      "dont_care" -> []
+      "flag" -> []
+
+  updateWhereDb
+    [ BucketRoundUserId ==. user_id, BucketRoundId ==. bucket_round_id, BucketRoundActive ==. True ]
+    bucket_round_updates
+
+  updateWhereDb
+    [ LeuronNodeUserId ==. user_id, LeuronNodeLeuronId ==. leuron_id, LeuronNodeActive ==. True ]
+    leuron_node_updates
+
+  rightA ()
