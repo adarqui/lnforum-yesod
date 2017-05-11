@@ -45,31 +45,32 @@ import           LN.T.Param
 
 
 data StandardParams = StandardParams {
-  spOffset           :: Maybe Int64,
-  spLimit            :: Maybe Int64,
-  spSortOrder        :: Maybe SortOrderBy,
-  spOrder            :: Maybe OrderBy,
-  spTs               :: Maybe UTCTime,
-  spUnixTs           :: Maybe Int64,
-  spCreatedTs        :: Maybe UTCTime,
-  spCreatedUnixTs    :: Maybe Int64,
-  spRealIp           :: Maybe Text,
-  spIp               :: Maybe Text,
+  spOffset        :: Maybe Int64,
+  spLimit         :: Maybe Int64,
+  spSortOrder     :: Maybe SortOrderBy,
+  spOrder         :: Maybe OrderBy,
+  spTs            :: Maybe UTCTime,
+  spUnixTs        :: Maybe Int64,
+  spCreatedTs     :: Maybe UTCTime,
+  spCreatedUnixTs :: Maybe Int64,
+  spRealIp        :: Maybe Text,
+  spIp            :: Maybe Text,
   -- id
-  spBucketId         :: Maybe BucketId,
-  spResourceId       :: Maybe ResourceId,
-  spLeuronId         :: Maybe LeuronId,
-  spUserId           :: Maybe UserId,
-  spParentId         :: Maybe Int64,
+  spBucketId      :: Maybe BucketId,
+  spBucketRoundId :: Maybe BucketRoundId,
+  spResourceId    :: Maybe ResourceId,
+  spLeuronId      :: Maybe LeuronId,
+  spUserId        :: Maybe UserId,
+  spParentId      :: Maybe Int64,
   -- ids
-  spUserIds          :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
+  spUserIds       :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
   -- names
-  spUserName         :: Maybe Text,
-  spResourceName     :: Maybe Text,
-  spParentName       :: Maybe Text,
-  spEmail            :: Maybe Text,
-  spSelf             :: Bool,
-  spWithResource     :: Bool
+  spUserName      :: Maybe Text,
+  spResourceName  :: Maybe Text,
+  spParentName    :: Maybe Text,
+  spEmail         :: Maybe Text,
+  spSelf          :: Bool,
+  spWithResource  :: Bool
 } deriving (Eq, Show)
 
 
@@ -89,6 +90,7 @@ defaultStandardParams = StandardParams {
   spIp               = Nothing,
   -- id
   spBucketId         = Nothing,
+  spBucketRoundId    = Nothing,
   spLeuronId         = Nothing,
   spResourceId       = Nothing,
   spUserId           = Nothing,
@@ -149,6 +151,7 @@ lookupStandardParams = do
   ip                 <- lookupGetParam $ tshow ParamTag_IP
   -- id
   bucket_id          <- lookupGetParam $ tshow ParamTag_ByBucketId
+  bucket_round_id    <- lookupGetParam $ tshow ParamTag_ByBucketRoundId
   leuron_id          <- lookupGetParam $ tshow ParamTag_ByLeuronId
   resource_id        <- lookupGetParam $ tshow ParamTag_ByResourceId
   user_id            <- lookupGetParam $ tshow ParamTag_ByUserId
@@ -177,6 +180,7 @@ lookupStandardParams = do
     spIp               = fmap tread ip,
     -- id
     spBucketId         = fmap textToKey' bucket_id,
+    spBucketRoundId    = fmap textToKey' bucket_round_id,
     spLeuronId         = fmap textToKey' leuron_id,
     spResourceId       = fmap textToKey' resource_id,
     spUserId           = fmap textToKey' user_id,

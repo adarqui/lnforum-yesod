@@ -52,9 +52,10 @@ getLeuronPacksM :: Maybe StandardParams -> UserId -> HandlerErrorEff LeuronPackR
 getLeuronPacksM m_sp user_id = do
 
   e_leurons <-
-    case lookupSpMay m_sp spBucketId of
-      Just bucket_id -> getBucketLeuronsM m_sp user_id bucket_id
-      _              -> getLeuronsM m_sp user_id
+    case (lookupSpMay m_sp spBucketId, lookupSpMay m_sp spBucketRoundId) of
+      (Just bucket_id, Nothing)       -> getBucketLeuronsM m_sp user_id bucket_id
+      (Nothing, Just bucket_round_id) -> getLeuronsM m_sp user_id
+      (_, _)                          -> getLeuronsM m_sp user_id
 
   rehtie e_leurons leftA $ \leurons -> do
 

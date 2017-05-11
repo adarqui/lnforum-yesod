@@ -190,7 +190,7 @@ Bucket
   splitsProtest    Int64
 
   active      Bool default=True
-  guard       Int 
+  guard       Int
 
   createdAt   UTCTime Maybe default=now()
   modifiedAt  UTCTime Maybe
@@ -324,7 +324,7 @@ BucketNode
   finishedAt       UTCTime Maybe
 
   active           Bool default=True
-  guard            Int 
+  guard            Int
   createdAt        UTCTime Maybe default=now()
   modifiedAt       UTCTime Maybe
 

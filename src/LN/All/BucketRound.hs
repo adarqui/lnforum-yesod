@@ -276,7 +276,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
                                                 then ((leuron_node ^. LeuronNodeBooleanKnow) E.>. E.val 3)
                                                 else nop
 
-                        where_matching_know = if TS_Matching `elem` bucketRoundTrainingStyles
+                        where_matching_know = if TS_Match `elem` bucketRoundTrainingStyles
                                                 then ((leuron_node ^. LeuronNodeMatchKnow) E.>. E.val 3)
                                                 else nop
 
