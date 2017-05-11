@@ -28,7 +28,7 @@
 /api/bucket_rounds/#BucketRoundId BucketRoundR GET PUT DELETE
 /api/bucket_rounds BucketRoundsR GET POST
 
-/api/bucket_round_leurons_op/#BucketRoundId/#LeuronId/#Text BucketRoundLeuronOpR POST
+/api/bucket_round_leuron_op/#BucketRoundId/#LeuronId/#Text BucketRoundLeuronOpR POST
 
 /api/buckets/#BucketId BucketR GET PUT DELETE
 /api/buckets BucketsR GET POST

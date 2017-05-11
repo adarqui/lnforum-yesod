@@ -449,6 +449,7 @@ doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text = do
     [ BucketRoundUserId ==. user_id, BucketRoundId ==. bucket_round_id, BucketRoundActive ==. True ]
     bucket_round_updates
 
+
   updateWhereDb
     [ LeuronNodeUserId ==. user_id, LeuronNodeLeuronId ==. leuron_id, LeuronNodeActive ==. True ]
     leuron_node_updates
