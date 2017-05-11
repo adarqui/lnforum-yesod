@@ -457,6 +457,10 @@ postBucketRoundLeuronOpR bucket_round_id leuron_id op_text = run $ do
 doBucketRoundLeuronOpM :: UserId -> BucketRoundId -> LeuronId -> Text -> HandlerErrorEff ()
 doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text = do
 
+  --
+  -- Insert LeuronNode if it doesn't exist
+  --
+
   let
     bucket_round_updates = case op_text of
       "know"      -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
