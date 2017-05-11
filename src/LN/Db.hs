@@ -14,6 +14,8 @@ module LN.Db (
   selectFirstDbE,
   insertDb,
   insertDbE,
+  insertUniqueDb,
+  insertUniqueDbE,
   insertEntityDb,
   insertEntityDbE,
   insertEntityByDbE,
@@ -260,6 +262,23 @@ insertDbE :: (PersistEntityBackend a1
              -> ControlMA (HandlerT site IO) (ErrorEff (ey a))
              -}
 insertDbE ent = Right <$> insertDb ent
+
+
+
+{-
+insertUniqueDb :: (PersistEntityBackend a
+             ~
+             BaseBackend (YesodPersistBackend site),
+             PersistEntity a, PersistStoreWrite (YesodPersistBackend site),
+             YesodPersist site) =>
+             a -> ControlMA (HandlerT site IO) (Maybe (Key a))
+             -}
+insertUniqueDb = _runDB . insertUnique
+
+
+
+insertUniqueDbE ent = Right <$> insertUniqueDb ent
+
 
 
 

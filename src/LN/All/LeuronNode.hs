@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 
 module LN.All.LeuronNode (
+  defaultLeuronNode
 ) where
 
 
@@ -10,15 +11,14 @@ import           LN.All.Prelude
 
 
 
-
 --
 -- Model/Function
 --
 
-defaultLeuronNode :: UserId -> LeuronId -> LeuronNode
-defaultLeuronNode user_id leuron_id = LeuronNode {
+defaultLeuronNode :: UserId -> ResourceId -> LeuronId -> LeuronNode
+defaultLeuronNode user_id resource_id leuron_id = LeuronNode {
   leuronNodeUserId          = user_id,
-  leuronNodeResourceId      = dummyId,
+  leuronNodeResourceId      = resource_id,
   leuronNodeLeuronId        = leuron_id,
 
   leuronNodeNumTotal          = 0,

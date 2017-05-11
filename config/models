@@ -402,5 +402,5 @@ LeuronNode
   createdAt        UTCTime Maybe default=now()
   modifiedAt       UTCTime Maybe
 
-  UniqueLeuronTrainingNode userId leuronId
+  UniqueLeuronNode userId leuronId
   deriving Eq Show Typeable

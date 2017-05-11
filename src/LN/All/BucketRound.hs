@@ -41,6 +41,7 @@ import qualified Database.Esqueleto as E
 import qualified Database.Redis     as R
 
 import           LN.All.Leuron
+import           LN.All.LeuronNode
 import           LN.All.Prelude
 import           LN.All.BucketResource
 import           LN.All.Bucket
@@ -460,30 +461,37 @@ doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text = do
   --
   -- Insert LeuronNode if it doesn't exist
   --
+  lr_leuron <- getLeuronM user_id leuron_id
+  rehtie lr_leuron leftA $ \(Entity _ Leuron{..}) -> do
 
-  let
-    bucket_round_updates = case op_text of
-      "know"      -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
-      "dont_know" -> [ BucketRoundNumDontKnow +=. 1, BucketRoundHonorDontKnow +=. 1 ]
-      "dont_care" -> [ BucketRoundNumDontCare +=. 1, BucketRoundHonorDontCare +=. 1 ]
-      "protest"   -> [ BucketRoundNumProtest +=. 1, BucketRoundHonorProtest +=. 1 ]
-      _           -> []
+    let
+      leuron_node = defaultLeuronNode user_id leuronResourceId leuron_id
 
-  let
-    leuron_node_updates = case op_text of
-      "know"      -> [ LeuronNodeNumKnow +=. 1, LeuronNodeHonorKnow +=. 1 ]
-      "dont_know" -> [ LeuronNodeNumDontKnow +=. 1, LeuronNodeHonorDontKnow +=. 1 ]
-      "dont_care" -> [ LeuronNodeNumDontCare +=. 1, LeuronNodeHonorDontCare +=. 1 ]
-      "protest"   -> [ LeuronNodeNumProtest +=. 1, LeuronNodeHonorProtest +=. 1 ]
-      _           -> []
+    insertUniqueDbE leuron_node
 
-  updateWhereDb
-    [ BucketRoundUserId ==. user_id, BucketRoundId ==. bucket_round_id, BucketRoundActive ==. True ]
-    bucket_round_updates
+    let
+      bucket_round_updates = case op_text of
+        "know"      -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
+        "dont_know" -> [ BucketRoundNumDontKnow +=. 1, BucketRoundHonorDontKnow +=. 1 ]
+        "dont_care" -> [ BucketRoundNumDontCare +=. 1, BucketRoundHonorDontCare +=. 1 ]
+        "protest"   -> [ BucketRoundNumProtest +=. 1, BucketRoundHonorProtest +=. 1 ]
+        _           -> []
+
+    let
+      leuron_node_updates = case op_text of
+        "know"      -> [ LeuronNodeNumKnow +=. 1, LeuronNodeHonorKnow +=. 1 ]
+        "dont_know" -> [ LeuronNodeNumDontKnow +=. 1, LeuronNodeHonorDontKnow +=. 1 ]
+        "dont_care" -> [ LeuronNodeNumDontCare +=. 1, LeuronNodeHonorDontCare +=. 1 ]
+        "protest"   -> [ LeuronNodeNumProtest +=. 1, LeuronNodeHonorProtest +=. 1 ]
+        _           -> []
+
+    updateWhereDb
+      [ BucketRoundUserId ==. user_id, BucketRoundId ==. bucket_round_id, BucketRoundActive ==. True ]
+      bucket_round_updates
 
 
-  updateWhereDb
-    [ LeuronNodeUserId ==. user_id, LeuronNodeLeuronId ==. leuron_id, LeuronNodeActive ==. True ]
-    leuron_node_updates
+    updateWhereDb
+      [ LeuronNodeUserId ==. user_id, LeuronNodeLeuronId ==. leuron_id, LeuronNodeActive ==. True ]
+      leuron_node_updates
 
-  rightA ()
+    rightA ()
