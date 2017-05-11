@@ -1,2 +1,4 @@
 leuron data checksum:
 - to prevent dups during auto ingest
+
+rename "TS_Simple" to "TS_Honor" .. simple -> honor

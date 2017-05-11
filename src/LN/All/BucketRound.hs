@@ -18,6 +18,7 @@ module LN.All.BucketRound (
   getBucketRoundsM,
   getBucketRounds_ByEverythingM,
   getBucketRounds_ByUserIdM,
+  getBucketRounds_ByBucketIdM,
   getBucketRoundM,
   insertBucketRoundM,
   updateBucketRoundM,
@@ -220,10 +221,11 @@ bucketRoundsToResponses bucketRounds = BucketRoundResponses {
 getBucketRoundsM :: Maybe StandardParams -> UserId -> HandlerErrorEff [Entity BucketRound]
 getBucketRoundsM m_sp user_id = do
 
-  case (lookupSpMay m_sp spUserId) of
+  case (lookupSpMay m_sp spUserId, lookupSpMay m_sp spBucketId) of
 
-    Just lookup_user_id -> getBucketRounds_ByUserIdM m_sp user_id lookup_user_id
-    _                   -> getBucketRounds_ByEverythingM m_sp user_id
+    (Just lookup_user_id, Nothing) -> getBucketRounds_ByUserIdM m_sp user_id lookup_user_id
+    (Nothing, Just bucket_id)      -> getBucketRounds_ByBucketIdM m_sp user_id bucket_id
+    _                              -> getBucketRounds_ByEverythingM m_sp user_id
 
 
 
@@ -236,6 +238,12 @@ getBucketRounds_ByEverythingM m_sp _ = do
 getBucketRounds_ByUserIdM :: Maybe StandardParams -> UserId -> UserId -> HandlerErrorEff [Entity BucketRound]
 getBucketRounds_ByUserIdM m_sp _ lookup_user_id = do
   selectListDbE m_sp [BucketRoundUserId ==. lookup_user_id, BucketRoundActive ==. True] [] BucketRoundId
+
+
+
+getBucketRounds_ByBucketIdM :: Maybe StandardParams -> UserId -> BucketId -> HandlerErrorEff [Entity BucketRound]
+getBucketRounds_ByBucketIdM m_sp _ bucket_id = do
+  selectListDbE m_sp [BucketRoundBucketId ==. bucket_id, BucketRoundActive ==. True] [] BucketRoundId
 
 
 
@@ -451,16 +459,19 @@ doBucketRoundLeuronOpM user_id bucket_round_id leuron_id op_text = do
 
   let
     bucket_round_updates = case op_text of
-      "know" -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
-      "dont_know" -> []
-      "dont_care" -> []
-      "flag" -> []
+      "know"      -> [ BucketRoundNumKnow +=. 1, BucketRoundHonorKnow +=. 1 ]
+      "dont_know" -> [ BucketRoundNumDontKnow +=. 1, BucketRoundHonorDontKnow +=. 1 ]
+      "dont_care" -> [ BucketRoundNumDontCare +=. 1, BucketRoundHonorDontCare +=. 1 ]
+      "protest"   -> [ BucketRoundNumProtest +=. 1, BucketRoundHonorProtest +=. 1 ]
+      _           -> []
+
   let
     leuron_node_updates = case op_text of
-      "know" -> [ LeuronNodeNumKnow +=. 1, LeuronNodeHonorKnow +=. 1 ]
-      "dont_know" -> []
-      "dont_care" -> []
-      "flag" -> []
+      "know"      -> [ LeuronNodeNumKnow +=. 1, LeuronNodeHonorKnow +=. 1 ]
+      "dont_know" -> [ LeuronNodeNumDontKnow +=. 1, LeuronNodeHonorDontKnow +=. 1 ]
+      "dont_care" -> [ LeuronNodeNumDontCare +=. 1, LeuronNodeHonorDontCare +=. 1 ]
+      "protest"   -> [ LeuronNodeNumProtest +=. 1, LeuronNodeHonorProtest +=. 1 ]
+      _           -> []
 
   updateWhereDb
     [ BucketRoundUserId ==. user_id, BucketRoundId ==. bucket_round_id, BucketRoundActive ==. True ]
