@@ -296,7 +296,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
 
                         nop = (E.val False) E.==. (E.val False)
 
-                        where_honor_know = if TS_Simple `elem` bucketRoundTrainingStyles
+                        where_honor_know = if TS_Honor `elem` bucketRoundTrainingStyles
                                               then ((leuron_node ^. LeuronNodeHonorKnow) E.<. E.val 3)
                                               else nop
 
@@ -389,12 +389,14 @@ deleteBucketRoundM user_id bucket_round_id = do
 countBucketRoundsM :: Maybe StandardParams -> UserId -> HandlerErrorEff CountResponses
 countBucketRoundsM m_sp _ = do
 
-  case (lookupSpMay m_sp spUserId, lookupSpMay m_sp spUserIds) of
+  case (lookupSpMay m_sp spBucketId) of
 
     -- TODO FIXME: not handling argument properly
-    _ -> do
-      n <- countDb [BucketRoundActive ==. True]
+    Just bucket_id -> do
+      n <- countDb [BucketRoundBucketId ==. bucket_id, BucketRoundActive ==. True]
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+    _ -> do
+      rightA $ CountResponses [CountResponse 0 0]
 
 
 
