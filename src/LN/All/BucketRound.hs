@@ -178,7 +178,17 @@ bucketRoundToResponse (Entity bucket_round_id BucketRound{..}) = BucketRoundResp
   bucketRoundResponseBucketId       = keyToInt64 bucketRoundBucketId,
 
   bucketRoundResponseTrainingStyles = bucketRoundTrainingStyles,
-  bucketRoundResponseTrainingNode   = defaultTrainingNode,
+  bucketRoundResponseTrainingNode   = defaultTrainingNode {
+                                          numTotal = bucketRoundNumTotal
+                                        , numKnow = bucketRoundNumKnow
+                                        , numDontKnow = bucketRoundNumDontKnow
+                                        , numDontCare = bucketRoundNumDontCare
+                                        , numProtest = bucketRoundNumProtest
+                                        , honorKnow = bucketRoundHonorKnow
+                                        , honorDontKnow = bucketRoundHonorDontKnow
+                                        , honorDontCare = bucketRoundHonorDontCare
+                                        , honorProtest = bucketRoundHonorProtest
+                                      },
   bucketRoundResponseThreshold      = bucketRoundThreshold,
   bucketRoundResponseTimeLimit      = bucketRoundTimeLimit,
 
@@ -249,7 +259,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
           bucketRound = (bucketRoundRequestToBucketRound user_id bucket_id bucket_round_request) { bucketRoundCreatedAt = Just ts }
 
         lr <- insertEntityDbE bucketRound
-        rehtie lr leftA $ \entity@(Entity round_id BucketRound{..}) -> do
+        rehtie lr leftA $ \entity@(Entity round_id round@BucketRound{..}) -> do
 
           --
           -- Grab resources & leurons, add them to redis bucket
@@ -326,11 +336,18 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
               liftIO $ R.runRedis red $ do
                 R.sadd (cs $ "round:" <> show (keyToInt64 round_id)) $ map (cs . show) l_ids
 
+              updateWhereDb
+                [ BucketRoundUserId ==. user_id, BucketRoundId ==. round_id, BucketRoundActive ==. True ]
+                [ BucketRoundNumTotal =. (fromIntegral $ length leuron_ids)
+                ]
+
               pure ()
 
             rightA ()
 
+
           rightA entity
+          -- rightA $ Entity round_id $ round { bucketRoundNumTotal = length leuron_ids }
 
       _ -> leftA $ Error_InvalidArguments "bucket_id"
 
