@@ -22,7 +22,10 @@ module LN.All.BucketRound (
   insertBucketRoundM,
   updateBucketRoundM,
   deleteBucketRoundM,
-  countBucketRoundsM
+  countBucketRoundsM,
+
+  getBucketRoundLeuronsM,
+  getBucketRoundLeuronM
 ) where
 
 
@@ -31,6 +34,7 @@ import           Database.Esqueleto ((^.))
 import qualified Database.Esqueleto as E
 import qualified Database.Redis     as R
 
+import           LN.All.Leuron
 import           LN.All.Prelude
 import           LN.All.BucketResource
 import           LN.All.Bucket
@@ -360,3 +364,25 @@ countBucketRoundsM m_sp _ = do
     _ -> do
       n <- countDb [BucketRoundActive ==. True]
       rightA $ CountResponses [CountResponse 0 (fromIntegral n)]
+
+
+
+getBucketRoundLeuronsM :: Maybe StandardParams -> UserId -> BucketRoundId -> HandlerErrorEff [Entity Leuron]
+getBucketRoundLeuronsM m_sp user_id bucket_round_id = do
+  lr <- getBucketRoundLeuronM m_sp user_id bucket_round_id
+  rehtie lr leftA $ \l -> rightA [l]
+
+
+
+getBucketRoundLeuronM :: Maybe StandardParams -> UserId -> BucketRoundId -> HandlerErrorEff (Entity Leuron)
+getBucketRoundLeuronM m_sp user_id bucket_round_id = do
+
+  red <- getsYesod appRed
+  lr <- liftIO $ R.runRedis red $ do
+         R.spop (cs $ "round:" <> show (keyToInt64 bucket_round_id))
+  rehtie lr (const $ leftA Error_Unknown) $ \m_v -> do
+    case m_v of
+      Nothing        -> leftA Error_Unknown
+      Just leuron_id_bs -> do
+        getLeuronM user_id (bscToKey' leuron_id_bs)
+

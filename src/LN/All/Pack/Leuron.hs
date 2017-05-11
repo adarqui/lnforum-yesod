@@ -14,6 +14,7 @@ module LN.All.Pack.Leuron (
 
 import           LN.All.Internal
 import           LN.All.BucketLeuron
+import           LN.All.BucketRound
 import           LN.All.Leuron
 import           LN.All.LeuronTraining
 import           LN.All.Prelude
@@ -54,7 +55,7 @@ getLeuronPacksM m_sp user_id = do
   e_leurons <-
     case (lookupSpMay m_sp spBucketId, lookupSpMay m_sp spBucketRoundId) of
       (Just bucket_id, Nothing)       -> getBucketLeuronsM m_sp user_id bucket_id
-      (Nothing, Just bucket_round_id) -> getLeuronsM m_sp user_id
+      (Nothing, Just bucket_round_id) -> getBucketRoundLeuronsM m_sp user_id bucket_round_id
       (_, _)                          -> getLeuronsM m_sp user_id
 
   rehtie e_leurons leftA $ \leurons -> do
