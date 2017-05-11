@@ -107,6 +107,7 @@
 /api/leuron_training_count LeuronTrainingCountR GET
 /api/buckets_count BucketsCountR GET
 /api/bucket_rounds_count BucketRoundsCountR GET
+/api/bucket_round_leurons_count/#BucketRoundId BucketRoundLeuronsCountR GET
 
 
 

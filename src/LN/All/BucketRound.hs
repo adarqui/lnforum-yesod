@@ -24,6 +24,7 @@ module LN.All.BucketRound (
   deleteBucketRoundM,
   countBucketRoundsM,
 
+  getBucketRoundLeuronsCountR,
   getBucketRoundLeuronsM,
   getBucketRoundLeuronM,
   countBucketRoundLeuronsM
@@ -389,11 +390,18 @@ getBucketRoundLeuronM m_sp user_id bucket_round_id = do
 
 
 
-countBucketRoundLeuronssM :: UserId -> BucketRoundId -> HandlerErrorEff CountResponses
-countBucketRoundLeuronssM _ bucket_round_id = do
+getBucketRoundLeuronsCountR :: BucketRoundId -> Handler Value
+getBucketRoundLeuronsCountR bucket_round_id = run $ do
+  user_id <- _requireAuthId
+  errorOrJSON id $ countBucketRoundLeuronsM user_id bucket_round_id
+
+
+
+countBucketRoundLeuronsM :: UserId -> BucketRoundId -> HandlerErrorEff CountResponse
+countBucketRoundLeuronsM _ bucket_round_id = do
 
   red <- getsYesod appRed
   lr <- liftIO $ R.runRedis red $ do
          R.scard (cs $ "round:" <> show (keyToInt64 bucket_round_id))
   rehtie lr (const $ leftA Error_Unknown) $ \scard -> do
-    rightA $ CountResponses [CountResponse 0 (fromIntegral scard)]
+    rightA $ CountResponse 0 (fromIntegral scard)
