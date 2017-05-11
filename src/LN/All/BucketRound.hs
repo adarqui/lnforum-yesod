@@ -289,7 +289,7 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
               leuron_ids <- _runDB
                 $ E.select $ E.from $ \leuron -> do
                     E.where_ ((leuron ^. LeuronResourceId) E.==. E.val resource_id)
-                    E.where_ $ E.notExists $ E.from $ \leuron_node -> do
+                    E.where_ $ E.exists $ E.from $ \leuron_node -> do
 
                       -- TODO FIXME
                       let
@@ -297,38 +297,38 @@ insertBucketRoundM m_sp user_id bucket_round_request = do
                         nop = (E.val False) E.==. (E.val False)
 
                         where_honor_know = if TS_Simple `elem` bucketRoundTrainingStyles
-                                              then ((leuron_node ^. LeuronNodeHonorKnow) E.>. E.val 3)
+                                              then ((leuron_node ^. LeuronNodeHonorKnow) E.<. E.val 3)
                                               else nop
 
                         where_boolean_know = if TS_Boolean `elem` bucketRoundTrainingStyles
-                                                then ((leuron_node ^. LeuronNodeBooleanKnow) E.>. E.val 3)
+                                                then ((leuron_node ^. LeuronNodeBooleanKnow) E.<. E.val 3)
                                                 else nop
 
                         where_matching_know = if TS_Match `elem` bucketRoundTrainingStyles
-                                                then ((leuron_node ^. LeuronNodeMatchKnow) E.>. E.val 3)
+                                                then ((leuron_node ^. LeuronNodeMatchKnow) E.<. E.val 3)
                                                 else nop
 
                         where_subs_know = if TS_Subs `elem` bucketRoundTrainingStyles
-                                                then ((leuron_node ^. LeuronNodeSubsKnow) E.>. E.val 3)
+                                                then ((leuron_node ^. LeuronNodeSubsKnow) E.<. E.val 3)
                                                 else nop
 
                         where_splits_know = if TS_Splits `elem` bucketRoundTrainingStyles
-                                                then ((leuron_node ^. LeuronNodeSplitsKnow) E.>. E.val 3)
+                                                then ((leuron_node ^. LeuronNodeSplitsKnow) E.<. E.val 3)
                                                 else nop
                       E.where_ (
                         ((leuron ^. LeuronId) E.==. (leuron_node ^. LeuronNodeLeuronId))
                         E.&&. ((leuron_node ^. LeuronNodeUserId) E.==. E.val user_id)
                         -- calculation section
                         E.&&. where_honor_know
-                        E.&&. ((leuron_node ^. LeuronNodeHonorDontCare) E.!=. E.val 0)
+                        E.&&. ((leuron_node ^. LeuronNodeHonorDontCare) E.==. E.val 0)
                         E.&&. where_boolean_know
-                        E.&&. ((leuron_node ^. LeuronNodeBooleanDontCare) E.!=. E.val 0)
+                        E.&&. ((leuron_node ^. LeuronNodeBooleanDontCare) E.==. E.val 0)
                         E.&&. where_matching_know
-                        E.&&. ((leuron_node ^. LeuronNodeMatchDontCare) E.!=. E.val 0)
+                        E.&&. ((leuron_node ^. LeuronNodeMatchDontCare) E.==. E.val 0)
                         E.&&. where_subs_know
-                        E.&&. ((leuron_node ^. LeuronNodeSubsDontCare) E.!=. E.val 0)
+                        E.&&. ((leuron_node ^. LeuronNodeSubsDontCare) E.==. E.val 0)
                         E.&&. where_splits_know
-                        E.&&. ((leuron_node ^. LeuronNodeSplitsDontCare) E.!=. E.val 0))
+                        E.&&. ((leuron_node ^. LeuronNodeSplitsDontCare) E.==. E.val 0))
                     pure (leuron ^. LeuronId)
 
 -- add bucketroundrequest to sanitize
