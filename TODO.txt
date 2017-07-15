@@ -2,3 +2,11 @@ leuron data checksum:
 - to prevent dups during auto ingest
 
 rename "TS_Simple" to "TS_Honor" .. simple -> honor
+
+add to buckets: should be able to filter by these, for rounds
+- length: select size less than or greater than length -> ie for running
+- know: ability to select notes we know
+- add the bucket round threshold into the esqueleto query
+
+
+WHEN DID I READ SOMETHING, AND WHEN DID I FORGET IT.
