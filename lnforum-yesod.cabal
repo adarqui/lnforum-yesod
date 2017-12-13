@@ -1,4 +1,4 @@
-name:              lnotes-yesod
+name:              lnforum-yesod
 version:           0.0.0
 cabal-version:     >= 1.22
 build-type:        Simple
@@ -184,9 +184,9 @@ library
                  , serversession-frontend-yesod
 
                  , ln-lib
-                 , lnotes-sanitize
-                 , lnotes-validate
-                 , haskell-lnotes-types
+                 , lnforum-sanitize
+                 , lnforum-validate
+                 , haskell-lnforum-types
                  , haskell-ebyam
                  , haskell-rehtie
                  , haskell-ifte
@@ -194,7 +194,7 @@ library
 
 
 
-executable         lnotes-yesod
+executable         lnforum-yesod
     default-language:  Haskell2010
 
     if flag(library-only)
@@ -202,13 +202,13 @@ executable         lnotes-yesod
 
     main-is:           main.hs
     hs-source-dirs:    app
-    build-depends:     base, lnotes-yesod
+    build-depends:     base, lnforum-yesod
 
     ghc-options:       -Wall -threaded -O0 -fobject-code -j
 
 
 
-executable         lnotes-bg
+executable         lnforum-bg
     default-language:  Haskell2010
 
     if flag(library-only)
@@ -216,12 +216,12 @@ executable         lnotes-bg
 
     main-is:           main.hs
     hs-source-dirs:    ln-bg
-    build-depends:     base, lnotes-yesod, haskell-lnotes-types
+    build-depends:     base, lnforum-yesod, haskell-lnforum-types
     ghc-options:       -Wall -Werror -threaded -O2 -rtsopts -with-rtsopts=-N  -fobject-code -j
 
 
 
-executable         lnotes-bg-test
+executable         lnforum-bg-test
     default-language:  Haskell2010
 
     if flag(library-only)
@@ -229,5 +229,5 @@ executable         lnotes-bg-test
 
     main-is:           main.hs
     hs-source-dirs:    ln-bg-test
-    build-depends:     base, lnotes-yesod, lnotes-validate, haskell-lnotes-types
+    build-depends:     base, lnforum-yesod, lnforum-validate, haskell-lnforum-types
     ghc-options:       -Wall -threaded -O0 -fobject-code -j
