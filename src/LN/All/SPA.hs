@@ -14,7 +14,7 @@ import           Text.Blaze.Internal
 
 
 getSPALnR :: Handler Html
-getSPALnR = getSPAR "lnotes.adarq.org" "/static/lnotes.dist/bundle.js"
+getSPALnR = getSPAR "lnforum.adarq.org" "/static/lnforum.dist/bundle.js"
 
 
 getSPAR :: MarkupM () -> Text -> Handler Html

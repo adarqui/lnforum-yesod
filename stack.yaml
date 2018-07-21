@@ -16,7 +16,7 @@ packages:
 - ../stm-lifted
 - ../yesod-auth-oauth2
 extra-deps:
-- html-entities-1.1.4
+- html-entities-1.1.4.2
 - random-extras-0.19
 - serversession-backend-persistent-1.0.3
 - load-env-0.1.1
