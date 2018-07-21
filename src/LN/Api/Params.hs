@@ -56,21 +56,15 @@ data StandardParams = StandardParams {
   spRealIp        :: Maybe Text,
   spIp            :: Maybe Text,
   -- id
-  spBucketId      :: Maybe BucketId,
-  spBucketRoundId :: Maybe BucketRoundId,
-  spResourceId    :: Maybe ResourceId,
-  spLeuronId      :: Maybe LeuronId,
   spUserId        :: Maybe UserId,
   spParentId      :: Maybe Int64,
   -- ids
   spUserIds       :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
   -- names
   spUserName      :: Maybe Text,
-  spResourceName  :: Maybe Text,
   spParentName    :: Maybe Text,
   spEmail         :: Maybe Text,
-  spSelf          :: Bool,
-  spWithResource  :: Bool
+  spSelf          :: Bool
 } deriving (Eq, Show)
 
 
@@ -89,21 +83,15 @@ defaultStandardParams = StandardParams {
   spRealIp           = Nothing,
   spIp               = Nothing,
   -- id
-  spBucketId         = Nothing,
-  spBucketRoundId    = Nothing,
-  spLeuronId         = Nothing,
-  spResourceId       = Nothing,
   spUserId           = Nothing,
   spParentId         = Nothing,
   -- ids
   spUserIds          = Nothing,
   -- names
   spUserName         = Nothing,
-  spResourceName     = Nothing,
   spParentName       = Nothing,
   spEmail            = Nothing,
-  spSelf             = False,
-  spWithResource     = False
+  spSelf             = False
 }
 
 
@@ -150,21 +138,14 @@ lookupStandardParams = do
   real_ip            <- lookupHeader "real_ip"  -- TODO FIXME: case insensitive bytestring $ tshow ParamTag_RealIP
   ip                 <- lookupGetParam $ tshow ParamTag_IP
   -- id
-  bucket_id          <- lookupGetParam $ tshow ParamTag_ByBucketId
-  bucket_round_id    <- lookupGetParam $ tshow ParamTag_ByBucketRoundId
-  leuron_id          <- lookupGetParam $ tshow ParamTag_ByLeuronId
-  resource_id        <- lookupGetParam $ tshow ParamTag_ByResourceId
   user_id            <- lookupGetParam $ tshow ParamTag_ByUserId
   parent_id          <- lookupGetParam $ tshow ParamTag_ByParentId
   -- ids
   user_ids           <- lookupGetParam $ tshow ParamTag_ByUsersIds
   -- names
   user_name          <- lookupGetParam $ tshow ParamTag_ByUserName
-  resource_name      <- lookupGetParam $ tshow ParamTag_ByResourceName
-  parent_name        <- lookupGetParam $ tshow ParamTag_ByParentName
   email              <- lookupGetParam $ tshow ParamTag_ByEmail
   self               <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_BySelf)
-  with_resource      <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithResource)
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
   pure $ StandardParams {
@@ -179,21 +160,14 @@ lookupStandardParams = do
     spRealIp           = fmap bread real_ip,
     spIp               = fmap tread ip,
     -- id
-    spBucketId         = fmap textToKey' bucket_id,
-    spBucketRoundId    = fmap textToKey' bucket_round_id,
-    spLeuronId         = fmap textToKey' leuron_id,
-    spResourceId       = fmap textToKey' resource_id,
     spUserId           = fmap textToKey' user_id,
     spParentId         = fmap tread parent_id,
     -- ids
     spUserIds          = fmap (nub . textToKeys') user_ids,
     --- names
     spUserName         = user_name,
-    spResourceName     = resource_name,
-    spParentName       = parent_name,
     spEmail            = email,
-    spSelf             = self,
-    spWithResource     = with_resource
+    spSelf             = self
   }
 
 
@@ -252,8 +226,6 @@ lookupGetParamStatus status param = do
 
 lookupEnt :: StandardParams -> Maybe (Ent, Int64)
 lookupEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
-lookupEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 lookupEnt _                            = Nothing
 
 
@@ -266,7 +238,6 @@ lookupLikeEntMay (Just sp) = lookupLikeEnt sp
 
 
 lookupLikeEnt :: StandardParams -> Maybe (Ent, Int64)
-lookupLikeEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 -- lookupLikeEnt (spComment -> Just v)     = Just (Ent_Comment, keyToInt64 v)
 lookupLikeEnt _                            = Nothing
 
@@ -279,8 +250,6 @@ lookupStarEntMay (Just sp) = lookupStarEnt sp
 
 lookupStarEnt :: StandardParams -> Maybe (Ent, Int64)
 lookupStarEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupStarEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
-lookupStarEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 lookupStarEnt _                            = Nothing
 
 
@@ -292,8 +261,6 @@ lookupViewEntMay (Just sp) = lookupViewEnt sp
 
 lookupViewEnt :: StandardParams -> Maybe (Ent, Int64)
 lookupViewEnt (spUserId -> Just v)         = Just (Ent_User, keyToInt64 v)
-lookupViewEnt (spResourceId -> Just v)     = Just (Ent_Resource, keyToInt64 v)
-lookupViewEnt (spLeuronId -> Just v)       = Just (Ent_Leuron, keyToInt64 v)
 lookupViewEnt _                            = Nothing
 
 

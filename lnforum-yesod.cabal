@@ -21,28 +21,15 @@ library
                      LN.All.Internal
                      LN.All.Api
                      LN.All.Empty
-                     LN.All.Leuron
-                     LN.All.LeuronTraining
-                     LN.All.LeuronNode
-                     LN.All.Bucket
-                     LN.All.BucketResource
-                     LN.All.BucketLeuron
-                     LN.All.BucketRound
-                     LN.All.BucketNode
                      LN.All.Me
                      LN.All.Prelude
                      LN.All.Profile
-                     LN.All.Resource
                      LN.All.SPA
                      LN.All.User
                      LN.All.User.Shared
                      LN.All.Pack.Me
                      LN.All.Pack.User
                      LN.All.Pack.Sanitized.User
-                     LN.All.Pack.Resource
-                     LN.All.Pack.Leuron
-                     LN.All.Pack.Bucket
-                     LN.All.Templates
                      LN.Access
                      LN.Cache
                      LN.Cache.Internal
@@ -180,7 +167,7 @@ library
                  , monad-loops
                  , data-default
                  , serversession
-                 -- , serversession-backend-persistent
+                 , serversession-backend-persistent
                  , serversession-frontend-yesod
 
                  , ln-lib

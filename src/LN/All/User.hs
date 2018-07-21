@@ -371,36 +371,10 @@ getUserStatsM _ _ = leftA Error_NotImplemented
 getUserStatM :: UserId -> UserId -> HandlerErrorEff UserSanitizedStatResponse
 getUserStatM _ lookup_user_id = do
 
-  (a,b) <- qUserStats lookup_user_id
-
-  let (resources,leurons) = (E.unValue a, E.unValue b)
-
   rightA $ UserSanitizedStatResponse {
     userSanitizedStatResponseUserId      = keyToInt64 lookup_user_id,
     userSanitizedStatResponseThreads     = 0,
     userSanitizedStatResponseThreadPosts = 0,
     userSanitizedStatResponseRespect     = 0,
-    userSanitizedStatResponseResources   = resources,
-    userSanitizedStatResponseLeurons     = leurons,
     userSanitizedStatResponseWorkouts    = 0
   }
-
-
-
-qUserStats
-  :: forall site.  (YesodPersist site, YesodPersistBackend site ~ SqlBackend)
-  => Key User
-  -> ControlMA (HandlerT site IO) (E.Value Int64, E.Value Int64)
-qUserStats user_id = do
-  _runDB $ do
-    (leurons:[]) <- E.select
-      $ E.from $ \leuron -> do
-      E.where_ $ leuron ^. LeuronUserId E.==. E.val user_id
-      pure (E.countDistinct $ leuron ^. LeuronId)
-
-    (resources:[]) <- E.select
-      $ E.from $ \resource -> do
-      E.where_ $ resource ^. ResourceUserId E.==. E.val user_id
-      pure (E.countDistinct $ resource ^. ResourceId)
-
-    pure (resources :: E.Value Int64, leurons :: E.Value Int64)
