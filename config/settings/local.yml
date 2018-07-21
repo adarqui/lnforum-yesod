@@ -1,0 +1,37 @@
+# Values formatted like "_env:ENV_VAR_NAME:default_value" can be overridden by the specified environment variable.
+# See https://github.com/yesodweb/yesod/wiki/Configuration#overriding-configuration-values-with-environment-variables
+
+static-dir:     "_env:STATIC_DIR:static"
+host:           "_env:HOST:127.0.0.1" # any IPv4 host
+port:           "_env:PORT:1682"
+approot:        "_env:APPROOT:http://local.adarq.org:1682"
+ip-from-header: "_env:IP_FROM_HEADER:false"
+
+# Optional values with the following production defaults.
+# In development, they default to the inverse.
+#
+development: true
+# detailed-logging: false
+# should-log-all: false
+# reload-templates: false
+# mutable-static: false
+# skip-combining: false
+#
+# send-mail: true
+# allow-dummy-auth: false
+# force-ssl: true
+
+database:
+  user:     "_env:PGUSER:x"
+  password: "_env:PGPASS:"
+  host:     "_env:PGHOST:local.adarq.org"
+  port:     "_env:PGPORT:5432"
+  database: "_env:PGDATABASE:leuro"
+  poolsize: "_env:PGPOOLSIZE:10"
+
+copyright: leuro (C)
+#analytics: UA-YOURCODE
+
+env: "development"
+
+redis-host: "local.adarq.org"
