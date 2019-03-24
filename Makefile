@@ -53,7 +53,7 @@ mbp-yesod-bg:
 	make exec-dev-workers-exe
 
 mbp-yesod:
-	make exec-dev
+	make exec-local
 
 pkg-check:
 	stack exec -- ghc-pkg check
