@@ -26,8 +26,6 @@ import           LN.Model.Misc                   as A
 import           LN.Parent                       as A
 import           LN.Sanitize                     as A
 import           LN.Sanitize.Internal            as A
-import           LN.T                            as A hiding (LikeOpt (..),
-                                                       Membership (..),
-                                                       Visibility (..))
+import           LN.T                            as A hiding (LikeOpt (..), Visibility (..))
 import           LN.Validate                     as A
 import           LN.Validate.Internal            as A

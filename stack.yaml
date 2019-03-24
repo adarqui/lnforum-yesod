@@ -1,14 +1,16 @@
+resolver: lts-8.5
 flags:
   lnforum-yesod:
     library-only: false
     dev: false
+allow-newer: true
 packages:
 - .
-- ../ln-lib
+- ../lnforum-lib
 - ../lnforum-sanitize
 - ../lnforum-validate
+- ../lnforum-types-gen
 - ../haskell-api-helpers-shared
-- ../haskell-lnforum-types
 - ../haskell-either-helpers
 - ../haskell-ebyam
 - ../haskell-rehtie
@@ -20,4 +22,3 @@ extra-deps:
 - random-extras-0.19
 - serversession-backend-persistent-1.0.4
 - load-env-0.1.1
-resolver: lts-8.5

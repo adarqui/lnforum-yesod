@@ -1,4 +1,4 @@
-# ln-yesod
+# lnforum-yesod
 
 ***LN Project: Major work in progress***
 

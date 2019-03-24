@@ -54,3 +54,6 @@ mbp-yesod-bg:
 
 mbp-yesod:
 	make exec-dev
+
+pkg-check:
+	stack exec -- ghc-pkg check

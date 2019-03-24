@@ -1,5 +1,5 @@
 name:              lnforum-yesod
-version:           0.0.0
+version:           0.0.1
 cabal-version:     >= 1.22
 build-type:        Simple
 
@@ -170,10 +170,10 @@ library
                  , serversession-backend-persistent
                  , serversession-frontend-yesod
 
-                 , ln-lib
+                 , lnforum-lib
                  , lnforum-sanitize
                  , lnforum-validate
-                 , haskell-lnforum-types
+                 , lnforum-types-gen
                  , haskell-ebyam
                  , haskell-rehtie
                  , haskell-ifte
@@ -202,8 +202,8 @@ executable         lnforum-bg
         Buildable: False
 
     main-is:           main.hs
-    hs-source-dirs:    ln-bg
-    build-depends:     base, lnforum-yesod, haskell-lnforum-types
+    hs-source-dirs:    lnforum-bg
+    build-depends:     base, lnforum-yesod, lnforum-types-gen
     ghc-options:       -Wall -Werror -threaded -O2 -rtsopts -with-rtsopts=-N  -fobject-code -j
 
 
@@ -215,6 +215,6 @@ executable         lnforum-bg-test
         Buildable: False
 
     main-is:           main.hs
-    hs-source-dirs:    ln-bg-test
-    build-depends:     base, lnforum-yesod, lnforum-validate, haskell-lnforum-types
+    hs-source-dirs:    lnforum-bg-test
+    build-depends:     base, lnforum-yesod, lnforum-validate, lnforum-types-gen
     ghc-options:       -Wall -threaded -O0 -fobject-code -j

@@ -132,7 +132,6 @@ getUserSanitizedPack_ByUserM user_id lookup_user = do
       userSanitizedPackResponseUserId    = keyToInt64 lookup_user_id,
       userSanitizedPackResponseStat      = stats,
       userSanitizedPackResponseLike      = Nothing,
-      userSanitizedPackResponseStar      = Nothing,
       userSanitizedPackResponseProfile   = profileToResponse profile,
       userSanitizedPackResponseProfileId = entityKeyToInt64 profile
     }
