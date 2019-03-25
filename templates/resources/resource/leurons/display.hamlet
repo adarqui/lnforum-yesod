@@ -1,6 +1,0 @@
-<a .btn .btn-info role="button" href="@{ResourceLeuronsCreateH resource_id}">New Leuron</a>
-
-<ul .list-group>
-  $forall (Entity leuron_id leuron) <- leurons
-    <li .list-group-item>
-      <a href="@{LeuronDisplayH leuron_id}">#{toPathPiece leuron_id} : #{leuronTypeToTextM leuron}</a>

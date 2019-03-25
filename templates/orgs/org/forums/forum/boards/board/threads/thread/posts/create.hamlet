@@ -1,3 +1,0 @@
-<form method=post action=@{OrganizationForumBoardThreadThreadPostsCreateH organization_id forum_id board_id thread_id} enctype=#{enctype}>
-  ^{widget}
-  <button class="btn btn-success">reply

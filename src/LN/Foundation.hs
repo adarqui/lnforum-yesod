@@ -132,7 +132,7 @@ instance Yesod App where
       -- you to use normal widget features in default-layout.
 
       pc <- widgetToPageContent $ do
-        $(widgetFile "default-layout")
+         $(widgetFile "default-layout")
       withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
   -- The page to be redirected to when authentication is required.

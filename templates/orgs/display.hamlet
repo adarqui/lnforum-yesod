@@ -1,8 +1,0 @@
-<p>org
-
-<a href=@{OrganizationEditH organization_id}>edit
-<a href=@{OrganizationDeleteH organization_id}>delete
-
-$# <ul>
-$#  $forall (Entity forum_id forum) <- forums
-$#    <li><a href="@{OrganizationForumDisplayH organization_id forum_id}">#{forumName forum}</a>

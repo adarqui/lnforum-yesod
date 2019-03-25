@@ -1,3 +1,0 @@
-<form method=post action=@{ResourcesCreateH} enctype=#{enctype}>
- ^{widget}
- <button class="btn btn-success">Create Resource

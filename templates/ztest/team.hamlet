@@ -1,4 +1,0 @@
-<p>hi
-<form method=post action=@{TeamsR} enctype=#{enctype}>
-  ^{widget}
-  <button class="btn btn-success">Create Team

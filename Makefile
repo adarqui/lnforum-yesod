@@ -16,6 +16,8 @@ exec-prod:
 	~/.local/bin/lnforum-yesod ./config/settings/production.yml ./config/settings/role/web.yml ./private/settings/production.yml
 
 exec-local:
+	make build
+	make install
 	~/.local/bin/lnforum-yesod ./config/settings/local.yml ./config/settings/role/web.yml ./private/settings/local.yml
 
 exec-dev:

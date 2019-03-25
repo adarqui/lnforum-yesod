@@ -1,6 +1,0 @@
-<p>Forum
-
-<a href=@{OrganizationForumEditH organization_id forum_id}>edit
-<a href=@{OrganizationForumDeleteH organization_id forum_id}>delete
-
-<a href=@{OrganizationForumBoardsDisplayH organization_id forum_id}>boards

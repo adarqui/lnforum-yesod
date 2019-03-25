@@ -24,8 +24,10 @@ $doctype 5
     $else
 
       <link rel="stylesheet" href="/static/assets/bootstrap.css">
-      <script src="/static/assets/jquery.js"></script>
-      <script src="/static/assets/bootstrap.js"></script>
+      <script type="text/javascript" src="/static/assets/jquery.js"></script>
+      <script type="text/javascript" src="/static/assets/bootstrap.js"></script>
+      <script type="text/javascript" src="static/assets/react.js"></script>
+      <script type="text/javascript" src="static/assets/react-dom.js"></script>
 
 
 
