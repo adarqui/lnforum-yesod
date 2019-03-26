@@ -10,7 +10,7 @@ Super
 
 
 
-User
+User sql=users
   name            Text
   displayName     Text default='null'
   fullName        Text default='null'
@@ -48,7 +48,7 @@ User
 
 
 
-Profile
+Profile sql=profiles
   userId     UserId
   gender     ProfileGender
   birthdate  UTCTime
@@ -83,4 +83,129 @@ Api
 
   UniqueApiKey key
 
+  deriving Eq Show Typeable
+
+
+
+
+Forum sql=forums
+  userId               UserId
+  name                 Text
+  displayName          Text default='null'
+  description          Text Maybe
+  threadsPerBoard      Int default=20
+  threadPostsPerThread Int default=20
+  recentThreadsLimit   Int default=10
+  recentPostsLimit     Int default=10
+  motwLimit            Int default=10
+  icon                 Text Maybe
+  tags                 [Text]
+  visibility           Visibility
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueForum            name
+  UniqueForumDisplayName displayName
+
+  deriving Eq Show Typeable
+
+
+
+Board sql=boards
+  userId             UserId
+  parentId           BoardId Maybe
+  name               Text
+  displayName        Text         default='null'
+  description        Text         Maybe
+  isAnonymous        Bool         default=False
+  canCreateBoards    Bool         default=True
+  canCreateThreads   Bool         default=True
+  icon               Text Maybe
+  tags               [Text]
+
+  active             Bool default=True
+  guard              Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  UniqueBoard            name
+  UniqueBoardDisplayName displayName
+
+  deriving Eq Show Typeable
+
+
+
+Thread sql=threads
+  userId       UserId
+  boardId      BoardId
+  name         Text
+  displayName  Text default='null'
+  description  Text Maybe
+  sticky       Bool
+  locked       Bool
+  poll         Text Maybe -- embed some poll crap here..
+  icon         Text Maybe
+  tags         [Text]
+
+  active       Bool default=True
+  guard        Int  default=0
+
+  createdAt    UTCTime Maybe default=now()
+  modifiedBy   UserId Maybe
+  modifiedAt   UTCTime Maybe
+  activityAt   UTCTime Maybe
+
+  UniqueThread boardId name
+  UniqueThreadDisplayName boardId displayName
+
+  deriving Eq Show Typeable
+
+
+
+ThreadPost sql=thread_posts
+  userId      UserId
+  boardId     BoardId
+  threadId    ThreadId
+  parentId    ThreadPostId Maybe
+  title       Text Maybe
+  body        Text
+  tags        [Text]
+  privateTags [Text]
+
+  active      Bool default=True
+  guard       Int  default=0
+
+  createdAt   UTCTime Maybe default=now()
+  modifiedBy  UserId Maybe
+  modifiedAt  UTCTime Maybe
+  activityAt  UTCTime Maybe
+
+  deriving Eq Show Typeable
+
+
+
+Like sql=likes
+  userId       UserId
+  ent          Ent
+  entId        Int64
+  opt          LikeOpt
+  score        Int
+  reason       Text Maybe
+
+  active       Bool default=True
+  guard        Int  default=0
+
+  createdAt    UTCTime Maybe default=now()
+  modifiedAt   UTCTime Maybe
+
+  UniqueLike userId ent entId
   deriving Eq Show Typeable

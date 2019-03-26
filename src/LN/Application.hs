@@ -41,7 +41,9 @@ import           System.Log.FastLogger                (defaultBufSize,
                                                        toLogStr)
 
 import           LN.All.Api
+import           LN.All.Forum
 import           LN.All.Me
+import           LN.All.Pack.Forum
 import           LN.All.Pack.Me
 import           LN.All.Pack.Sanitized.User
 import           LN.All.Pack.User

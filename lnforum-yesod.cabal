@@ -20,6 +20,7 @@ library
                      LN.Api.Params
                      LN.All.Internal
                      LN.All.Api
+                     LN.All.Forum
                      LN.All.Empty
                      LN.All.Me
                      LN.All.Prelude
@@ -28,6 +29,7 @@ library
                      LN.All.User
                      LN.All.User.Shared
                      LN.All.Pack.Me
+                     LN.All.Pack.Forum
                      LN.All.Pack.User
                      LN.All.Pack.Sanitized.User
                      LN.Access
@@ -104,8 +106,8 @@ library
                  , classy-prelude-yesod
                  , bytestring
                  , text
-                 , persistent
-                 , persistent-postgresql
+                 , persistent == 2.9.1
+                 , persistent-postgresql == 2.9.0
                  , persistent-template
                  , template-haskell
                  , shakespeare

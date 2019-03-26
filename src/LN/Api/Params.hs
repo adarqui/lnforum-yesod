@@ -56,6 +56,7 @@ data StandardParams = StandardParams {
   -- id
   spUserId        :: Maybe UserId,
   spParentId      :: Maybe Int64,
+  spForumId       :: Maybe ForumId,
   -- ids
   spUserIds       :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
   -- names

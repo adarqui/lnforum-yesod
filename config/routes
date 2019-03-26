@@ -53,3 +53,11 @@
 
 
 /api/users_count UsersCountR GET
+
+
+
+/api/forum/#ForumId ForumR GET PUT DELETE
+
+/api/forum_stat/#ForumId ForumStatR GET
+
+/api/forum_pack/#ForumId ForumPackR GET

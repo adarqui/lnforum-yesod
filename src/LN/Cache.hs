@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns   #-}
 {-# LANGUAGE ExplicitForAll #-}
 
 module LN.Cache (
@@ -6,12 +5,11 @@ module LN.Cache (
   CacheEntry (..),
   defaultCache,
   emptyCache
---  cacheRun
 ) where
 
 
 
-import qualified Data.Map                as M
+import qualified Data.Map  as M
 import           LN.Import
 
 
@@ -27,8 +25,9 @@ type CacheMap a b = M.Map a (CacheEntry b)
 
 
 data Cache = Cache {
-  cacheMe                :: !(Maybe User),
-  cacheUsers             :: !(CacheMap UserId (Entity User))
+  cacheMe    :: !(Maybe User),
+  cacheUsers :: !(CacheMap UserId (Entity User)),
+  cacheForum :: !(Maybe (Entity Forum))
 }
 
 
@@ -41,5 +40,6 @@ emptyCache = M.empty
 defaultCache :: Cache
 defaultCache = Cache {
   cacheMe                = Nothing,
-  cacheUsers             = emptyCache
+  cacheUsers             = emptyCache,
+  cacheForum             = Nothing
 }

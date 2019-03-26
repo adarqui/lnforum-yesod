@@ -11,7 +11,9 @@ module LN.Cache.Internal (
   modifyCache,
   getsCache,
   getUserC,
-  putUserC
+  putUserC,
+  getForumC,
+  putForumC
 ) where
 
 
@@ -108,3 +110,18 @@ getUserC user_id = do
 putUserC :: UserId -> CacheEntry (Entity User) -> HandlerEff ()
 putUserC user_id c_user = do
   modifyCache (\st@Cache{..}->st{ cacheUsers = Map.insert user_id c_user cacheUsers })
+
+
+
+getForumC :: ForumId -> HandlerEff (Maybe (CacheEntry (Entity Forum)))
+getForumC forum_id = do
+  m_c_forum <- getsCache cacheForum
+  case m_c_forum of
+    Nothing      -> pure Nothing
+    Just c_forum -> pure $ Just $ CacheEntry c_forum
+
+
+
+putForumC :: ForumId -> CacheEntry (Entity Forum) -> HandlerEff ()
+putForumC forum_id CacheMissing = modifyCache (\st@Cache{..}->st { cacheForum = Nothing })
+putForumC forum_id (CacheEntry forum_entity) = modifyCache (\st@Cache{..}->st{ cacheForum = Just forum_entity })

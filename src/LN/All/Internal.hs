@@ -2,7 +2,9 @@
 
 module LN.All.Internal (
   getUserM,
-  getUserMaybeM
+  getUserMaybeM,
+  getForumM,
+  getForumMaybeM,
 ) where
 
 
@@ -32,3 +34,21 @@ getUserMaybeM _ lookup_user_id = do
       m_user
       (putUserC lookup_user_id CacheMissing *> pure Nothing)
       (\user -> putUserC lookup_user_id (CacheEntry user) *> pure (Just user))
+
+
+
+getForumM :: UserId -> ForumId -> HandlerErrorEff (Entity Forum)
+getForumM user_id forum_id = do
+  maybe (leftA Error_NotFound) rightA =<< getForumMaybeM user_id forum_id
+
+
+
+getForumMaybeM :: UserId -> ForumId -> HandlerEff (Maybe (Entity Forum))
+getForumMaybeM _ forum_id = do
+  m_c_forum <- getForumC forum_id
+  cacheRunMaybe' m_c_forum $ do
+    m_forum <- selectFirstDb [ForumId ==. forum_id, ForumActive ==. True] []
+    ebyam
+      m_forum
+      (putForumC forum_id CacheMissing *> pure Nothing)
+      (\forum -> putForumC forum_id (CacheEntry forum) *> pure (Just forum))
