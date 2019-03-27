@@ -39,7 +39,10 @@ import           Network.Wai.Middleware.RequestLogger (Destination (Logger),
 import           System.Log.FastLogger                (defaultBufSize,
                                                        newStdoutLoggerSet,
                                                        toLogStr)
+import Control.Exception (SomeException)
+import qualified Control.Monad.Catch as Catch (catch)
 
+import           LN.Db
 import           LN.All.Api
 import           LN.All.Forum
 import           LN.All.Me
@@ -52,6 +55,9 @@ import           LN.All.SPA
 import           LN.All.User
 import           LN.Handler.Common
 import           LN.Import
+import LN.Misc.Codec
+
+import LN.T
 
 import qualified Data.Proxy                           as P
 import qualified Web.ServerSession.Backend.Persistent as SS
@@ -123,10 +129,49 @@ makeFoundation appSettings appSettingsLN appSettingsKeys = do
   let app = mkFoundation pool
   (app_super_users :: [Entity Super]) <- db' app (selectList [] [])
 
+  -- Bootstrap tables etc
+  db' app $ bootstrapUser
+  db' app $ bootstrapSuper
+  db' app $ bootstrapForum
+
   -- Return the foundation
   pure $ app {
     appSuperUsers = app_super_users
   }
+
+
+bootstrapForum = do
+  let v = forumRequestToForum (int64ToKey' 1) $ ForumRequest {
+    forumRequestDisplayName = "main",
+    forumRequestDescription = Nothing,
+    forumRequestThreadsPerBoard = 20,
+    forumRequestThreadPostsPerThread = 20,
+    forumRequestRecentThreadsLimit = 10,
+    forumRequestRecentPostsLimit = 2,
+    forumRequestMotwLimit = 10,
+    forumRequestIcon = Nothing,
+    forumRequestTags = [],
+    forumRequestVisibility = Public,
+    forumRequestGuard = 1
+  }
+  (insert_ v) `Catch.catch` (\(SomeException e) -> return ())
+
+bootstrapUser = do
+  let v = userRequestToUser $ UserRequest {
+    userRequestDisplayName = "admin",
+    userRequestFullName = "admin",
+    userRequestEmail = "admin@localhost",
+    -- TODO FIXME: default? constant definition somewhere?
+    userRequestPlugin = "smf",
+    userRequestAcceptTOS = Nothing
+  }
+  (insert_ v) `Catch.catch` (\(SomeException e) -> return ())
+
+bootstrapSuper = do
+  let v = Super {
+    superUserId = int64ToKey' 1
+  }
+  (insert_ v) `Catch.catch` (\(SomeException e) -> pure ())
 
 
 

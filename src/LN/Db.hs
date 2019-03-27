@@ -19,6 +19,7 @@ module LN.Db (
   insertEntityDb,
   insertEntityDbE,
   insertEntityByDbE,
+  insertEntityDbF,
   updateDb,
   updateDbE,
   updateWhereDb,
@@ -354,6 +355,13 @@ insertEntityByDbE entity = do
     Right key -> do
       m_entity <- _runDB $ get key
       pure $ maybe (Left Error_NotFound) (Right . Entity key) m_entity
+
+
+
+
+-- F = Fondation
+insertEntityDbF ent = insertDb ent
+
 
 
 
