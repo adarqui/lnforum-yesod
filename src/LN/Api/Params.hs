@@ -68,7 +68,10 @@ data StandardParams = StandardParams {
   spUserName      :: Maybe Text,
   spParentName    :: Maybe Text,
   spEmail         :: Maybe Text,
-  spSelf          :: Bool
+  spSelf          :: Bool,
+  spWithBoard        :: Bool,
+  spWithThread       :: Bool,
+  spWithThreadPosts  :: Bool
 } deriving (Eq, Show)
 
 
@@ -95,7 +98,10 @@ defaultStandardParams = StandardParams {
   spUserName         = Nothing,
   spParentName       = Nothing,
   spEmail            = Nothing,
-  spSelf             = False
+  spSelf             = False,
+  spWithBoard        = False,
+  spWithThread       = False,
+  spWithThreadPosts  = False
 }
 
 

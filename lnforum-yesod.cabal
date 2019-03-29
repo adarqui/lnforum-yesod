@@ -21,6 +21,10 @@ library
                      LN.All.Internal
                      LN.All.Api
                      LN.All.Forum
+                     LN.All.Board
+                     LN.All.Thread
+                     LN.All.ThreadPost
+                     LN.All.Like
                      LN.All.Empty
                      LN.All.Me
                      LN.All.Prelude
@@ -30,6 +34,9 @@ library
                      LN.All.User.Shared
                      LN.All.Pack.Me
                      LN.All.Pack.Forum
+                     LN.All.Pack.Board
+                     LN.All.Pack.Thread
+                     LN.All.Pack.ThreadPost
                      LN.All.Pack.User
                      LN.All.Pack.Sanitized.User
                      LN.Access
