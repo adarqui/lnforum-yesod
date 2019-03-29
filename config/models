@@ -119,7 +119,6 @@ Forum sql=forums
 
 Board sql=boards
   userId             UserId
-  parentId           BoardId Maybe
   name               Text
   displayName        Text         default='null'
   description        Text         Maybe

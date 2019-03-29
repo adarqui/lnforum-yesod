@@ -13,7 +13,13 @@ module LN.Cache.Internal (
   getUserC,
   putUserC,
   getForumC,
-  putForumC
+  putForumC,
+  getBoardC,
+  putBoardC,
+  getThreadC,
+  putThreadC,
+  getThreadPostC,
+  putThreadPostC
 ) where
 
 
@@ -125,3 +131,54 @@ getForumC forum_id = do
 putForumC :: ForumId -> CacheEntry (Entity Forum) -> HandlerEff ()
 putForumC forum_id CacheMissing = modifyCache (\st@Cache{..}->st { cacheForum = Nothing })
 putForumC forum_id (CacheEntry forum_entity) = modifyCache (\st@Cache{..}->st{ cacheForum = Just forum_entity })
+
+
+
+getBoardC :: BoardId -> HandlerEff (Maybe (CacheEntry (Entity Board)))
+getBoardC board_id = do
+  c_boards <- getsCache cacheBoards
+  let
+    m_c_board = Map.lookup board_id c_boards
+  case m_c_board of
+    Nothing     -> pure Nothing
+    Just c_board -> pure $ Just c_board
+
+
+
+putBoardC :: BoardId -> CacheEntry (Entity Board) -> HandlerEff ()
+putBoardC board_id c_board = do
+  modifyCache (\st@Cache{..}->st{ cacheBoards = Map.insert board_id c_board cacheBoards })
+
+
+
+getThreadC :: ThreadId -> HandlerEff (Maybe (CacheEntry (Entity Thread)))
+getThreadC thread_id = do
+  c_threads <- getsCache cacheThreads
+  let
+    m_c_thread = Map.lookup thread_id c_threads
+  case m_c_thread of
+    Nothing     -> pure Nothing
+    Just c_thread -> pure $ Just c_thread
+
+
+
+putThreadC :: ThreadId -> CacheEntry (Entity Thread) -> HandlerEff ()
+putThreadC thread_id c_thread = do
+  modifyCache (\st@Cache{..}->st{ cacheThreads = Map.insert thread_id c_thread cacheThreads })
+
+
+
+getThreadPostC :: ThreadPostId -> HandlerEff (Maybe (CacheEntry (Entity ThreadPost)))
+getThreadPostC post_id = do
+  c_posts <- getsCache cacheThreadPosts
+  let
+    m_c_post = Map.lookup post_id c_posts
+  case m_c_post of
+    Nothing     -> pure Nothing
+    Just c_post -> pure $ Just c_post
+
+
+
+putThreadPostC :: ThreadPostId -> CacheEntry (Entity ThreadPost) -> HandlerEff ()
+putThreadPostC post_id c_post = do
+  modifyCache (\st@Cache{..}->st{ cacheThreadPosts = Map.insert post_id c_post cacheThreadPosts })

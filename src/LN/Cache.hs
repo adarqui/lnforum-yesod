@@ -25,9 +25,12 @@ type CacheMap a b = M.Map a (CacheEntry b)
 
 
 data Cache = Cache {
-  cacheMe    :: !(Maybe User),
-  cacheUsers :: !(CacheMap UserId (Entity User)),
-  cacheForum :: !(Maybe (Entity Forum))
+  cacheMe          :: !(Maybe User),
+  cacheUsers       :: !(CacheMap UserId (Entity User)),
+  cacheForum       :: !(Maybe (Entity Forum)),
+  cacheBoards      :: !(CacheMap BoardId (Entity Board)),
+  cacheThreads     :: !(CacheMap ThreadId (Entity Thread)),
+  cacheThreadPosts :: !(CacheMap ThreadPostId (Entity ThreadPost))
 }
 
 
@@ -41,5 +44,8 @@ defaultCache :: Cache
 defaultCache = Cache {
   cacheMe                = Nothing,
   cacheUsers             = emptyCache,
-  cacheForum             = Nothing
+  cacheForum             = Nothing,
+  cacheBoards            = emptyCache,
+  cacheThreads           = emptyCache,
+  cacheThreadPosts       = emptyCache
 }
