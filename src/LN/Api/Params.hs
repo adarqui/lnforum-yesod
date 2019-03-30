@@ -43,35 +43,38 @@ import           LN.T.Param
 
 
 data StandardParams = StandardParams {
-  spOffset        :: Maybe Int64,
-  spLimit         :: Maybe Int64,
-  spSortOrder     :: Maybe SortOrderBy,
-  spOrder         :: Maybe OrderBy,
-  spTs            :: Maybe UTCTime,
-  spUnixTs        :: Maybe Int64,
-  spCreatedTs     :: Maybe UTCTime,
-  spCreatedUnixTs :: Maybe Int64,
-  spRealIp        :: Maybe Text,
-  spIp            :: Maybe Text,
+  spOffset          :: Maybe Int64,
+  spLimit           :: Maybe Int64,
+  spSortOrder       :: Maybe SortOrderBy,
+  spOrder           :: Maybe OrderBy,
+  spTs              :: Maybe UTCTime,
+  spUnixTs          :: Maybe Int64,
+  spCreatedTs       :: Maybe UTCTime,
+  spCreatedUnixTs   :: Maybe Int64,
+  spRealIp          :: Maybe Text,
+  spIp              :: Maybe Text,
   -- id
-  spUserId        :: Maybe UserId,
-  spParentId      :: Maybe Int64,
-  spForumId       :: Maybe ForumId,
-  spBoardId       :: Maybe BoardId,
-  spThreadId      :: Maybe ThreadId,
-  spThreadIds      :: Maybe [ThreadId],
-  spThreadPostId  :: Maybe ThreadPostId,
-  spThreadPostIds  :: Maybe [ThreadPostId],
+  spUserId          :: Maybe UserId,
+  spParentId        :: Maybe Int64,
+  spForumId         :: Maybe ForumId,
+  spBoardId         :: Maybe BoardId,
+  spThreadId        :: Maybe ThreadId,
+  spThreadIds       :: Maybe [ThreadId],
+  spThreadPostId    :: Maybe ThreadPostId,
+  spThreadPostIds   :: Maybe [ThreadPostId],
   -- ids
-  spUserIds       :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
+  spUserIds         :: Maybe [UserId], -- TODO FIXME: change to spUsersIds, same for the others below
   -- names
-  spUserName      :: Maybe Text,
-  spParentName    :: Maybe Text,
-  spEmail         :: Maybe Text,
-  spSelf          :: Bool,
-  spWithBoard        :: Bool,
-  spWithThread       :: Bool,
-  spWithThreadPosts  :: Bool
+  spUserName        :: Maybe Text,
+  spParentName      :: Maybe Text,
+  spBoardName       :: Maybe Text,
+  spThreadName      :: Maybe Text,
+  spThreadPostName  :: Maybe Text,
+  spEmail           :: Maybe Text,
+  spSelf            :: Bool,
+  spWithBoard       :: Bool,
+  spWithThread      :: Bool,
+  spWithThreadPosts :: Bool
 } deriving (Eq, Show)
 
 
@@ -92,13 +95,21 @@ defaultStandardParams = StandardParams {
   -- id
   spUserId           = Nothing,
   spParentId         = Nothing,
+  spBoardId          = Nothing,
+  spThreadId         = Nothing,
+  spThreadPostId     = Nothing,
   -- ids
   spUserIds          = Nothing,
+  spThreadIds        = Nothing,
+  spThreadPostIds    = Nothing,
   -- names
   spUserName         = Nothing,
   spParentName       = Nothing,
   spEmail            = Nothing,
   spSelf             = False,
+  spBoardName        = Nothing,
+  spThreadName       = Nothing,
+  spThreadPostName   = Nothing,
   spWithBoard        = False,
   spWithThread       = False,
   spWithThreadPosts  = False
@@ -150,12 +161,24 @@ lookupStandardParams = do
   -- id
   user_id            <- lookupGetParam $ tshow ParamTag_ByUserId
   parent_id          <- lookupGetParam $ tshow ParamTag_ByParentId
+  board_id           <- lookupGetParam $ tshow ParamTag_ByBoardId
+  thread_id          <- lookupGetParam $ tshow ParamTag_ByThreadId
+  thread_post_id     <- lookupGetParam $ tshow ParamTag_ByThreadPostId
   -- ids
   user_ids           <- lookupGetParam $ tshow ParamTag_ByUsersIds
+  thread_ids         <- lookupGetParam $ tshow ParamTag_ByThreadsIds
+  thread_post_ids    <- lookupGetParam $ tshow ParamTag_ByThreadPostsIds
   -- names
   user_name          <- lookupGetParam $ tshow ParamTag_ByUserName
   email              <- lookupGetParam $ tshow ParamTag_ByEmail
   self               <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_BySelf)
+  board_name         <- lookupGetParam $ tshow ParamTag_ByBoardName
+  thread_name        <- lookupGetParam $ tshow ParamTag_ByThreadName
+  thread_post_name   <- lookupGetParam $ tshow ParamTag_ByThreadPostName
+  with_board         <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithBoard)
+  with_thread        <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThread)
+  with_thread_posts  <- (maybe False (const True)) <$> (lookupGetParam $ tshow ParamTag_WithThreadPosts)
+
 
   -- TODO: FIXME: need to safely tread, because the value may not read properly (incorrect input)
   pure $ StandardParams {
@@ -172,12 +195,21 @@ lookupStandardParams = do
     -- id
     spUserId           = fmap textToKey' user_id,
     spParentId         = fmap tread parent_id,
+    spBoardId          = fmap textToKey' board_id,
+    spThreadId         = fmap textToKey' thread_id,
+    spThreadPostId     = fmap textToKey' thread_post_id,
     -- ids
     spUserIds          = fmap (nub . textToKeys') user_ids,
     --- names
     spUserName         = user_name,
     spEmail            = email,
-    spSelf             = self
+    spSelf             = self,
+    spBoardName        = board_name,
+    spThreadName       = thread_name,
+    spThreadPostName   = thread_post_name,
+    spWithBoard        = with_board,
+    spWithThread       = with_thread,
+    spWithThreadPosts  = with_thread_posts
   }
 
 

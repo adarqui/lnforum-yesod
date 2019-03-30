@@ -79,3 +79,19 @@
 /api/board_packs BoardPacksR GET
 /api/board_pack/#BoardId BoardPackR GET
 !/api/board_pack/#Text BoardPackH GET
+
+
+
+--
+-- Threads
+--
+/api/threads ThreadsR GET POST
+/api/thread/#ThreadId ThreadR GET PUT DELETE
+!/api/thread/#Text ThreadH GET
+
+/api/thread_stats ThreadStatsR GET
+/api/thread_stat/#ThreadId ThreadStatR GET
+
+/api/thread_packs ThreadPacksR GET
+/api/thread_pack/#ThreadId ThreadPackR GET
+!/api/thread_pack/#Text ThreadPackH GET

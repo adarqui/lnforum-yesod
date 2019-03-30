@@ -3,7 +3,7 @@
 module LN.All.Thread (
   -- Handler
   getThreadsR,
-  postThreadR0,
+  postThreadsR,
   getThreadR,
   getThreadH,
   putThreadR,
@@ -52,8 +52,8 @@ getThreadsR = run $ do
 
 
 
-postThreadR0 :: Handler Value
-postThreadR0 = run $ do
+postThreadsR :: Handler Value
+postThreadsR = run $ do
   user_id        <- _requireAuthId
   thread_request <- requireJsonBody
   sp             <- lookupStandardParams

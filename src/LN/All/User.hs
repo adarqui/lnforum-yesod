@@ -264,10 +264,12 @@ insertUsersM user_id user_request = do
   -- TODO FIXME SECURITY
   -- User Super table, loaded into appSuperUsers
   --
-  is_super_user <- isSuperM user_id
-  if is_super_user
-    then insertUsersM' user_id user_request
-    else leftA Error_PermissionDenied
+  -- TODO FIXME: bring back perms
+  -- is_super_user <- isSuperM user_id
+  -- if is_super_user
+  --  then insertUsersM' user_id user_request
+  --  else leftA Error_PermissionDenied
+  insertUsersM' user_id user_request
 
 
 
