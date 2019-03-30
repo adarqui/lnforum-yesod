@@ -7,11 +7,12 @@
 module LN.All.User (
   -- Handler
   getUsersR,
-  postUserR0,
-  getUserR,
-  getUserH,
-  putUserR,
-  deleteUserR,
+  getUsersSanitizedR,
+  postUsersR,
+  getUserSanitizedR,
+  getUserSanitizedH,
+  putUserSanitizedR,
+  deleteUserSanitizedR,
   getUsersCountR,
   getUserStatsR,
   getUserStatR,
@@ -61,20 +62,28 @@ getUsersR :: Handler Value
 getUsersR = run $ do
   user_id <- _requireAuthId
   sp      <- lookupStandardParams
+  errorOrJSON usersToResponses $ getUsersM (pure sp) user_id
+
+
+
+getUsersSanitizedR :: Handler Value
+getUsersSanitizedR = run $ do
+  user_id <- _requireAuthId
+  sp      <- lookupStandardParams
   errorOrJSON usersToSanitizedResponses $ getUsersM (pure sp) user_id
 
 
 
-postUserR0 :: Handler Value
-postUserR0 = run $ do
+postUsersR :: Handler Value
+postUsersR = run $ do
   user_id      <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   errorOrJSON userToResponse $ insertUsersM user_id user_request
 
 
 
-getUserR :: UserId -> Handler Value
-getUserR lookup_user_id = run $ do
+getUserSanitizedR :: UserId -> Handler Value
+getUserSanitizedR lookup_user_id = run $ do
   user_id <- _requireAuthId
   e_user <- getUserM user_id lookup_user_id
   if (user_id == lookup_user_id)
@@ -83,8 +92,8 @@ getUserR lookup_user_id = run $ do
 
 
 
-getUserH :: Text -> Handler Value
-getUserH _ = run $ do
+getUserSanitizedH :: Text -> Handler Value
+getUserSanitizedH _ = run $ do
   errorOrJSON id $ go
   where
   go :: HandlerErrorEff ()
@@ -93,16 +102,16 @@ getUserH _ = run $ do
 
 
 
-putUserR :: UserId -> Handler Value
-putUserR lookup_user_id = run $ do
+putUserSanitizedR :: UserId -> Handler Value
+putUserSanitizedR lookup_user_id = run $ do
   user_id       <- _requireAuthId
   user_request <- requireJsonBody :: HandlerEff UserRequest
   errorOrJSON userToResponse $ updateUserM user_id lookup_user_id user_request
 
 
 
-deleteUserR :: UserId -> Handler Value
-deleteUserR lookup_user_id = run $ do
+deleteUserSanitizedR :: UserId -> Handler Value
+deleteUserSanitizedR lookup_user_id = run $ do
   user_id <- _requireAuthId
   errorOrJSON id $ deleteUserM user_id lookup_user_id
 
@@ -289,6 +298,7 @@ insertUsersM' _ user_request = do
       }
 
     new_user <- mustT $ insertEntityByDbE user
+
     -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
     void $ liftIO $ insertUsers_TasksM new_user
     pure new_user

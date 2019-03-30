@@ -30,11 +30,10 @@
 
 -- TODO FIXME: Also add non-sanitized versions for admin-hack
 -- TODO FIXME: rename UserBlah to UserSanitizedBlah in handlers/models etc
-/api/user UserR0 POST
-/api/users_sanitized UsersR GET
--- /api/user_sanitized UserR0 POST
-/api/user_sanitized/#UserId UserR GET PUT DELETE
-!/api/user_sanitized/#Text UserH GET
+/api/users UsersR POST
+/api/users_sanitized UsersSanitizedR GET
+/api/user_sanitized/#UserId UserSanitizedR GET PUT DELETE
+!/api/user_sanitized/#Text UserSanitizedH GET
 
 /api/user_sanitized_stats UserStatsR GET
 /api/user_sanitized_stat/#UserId UserStatR GET

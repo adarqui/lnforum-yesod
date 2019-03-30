@@ -15,7 +15,7 @@ User sql=users
   displayName     Text default='null'
   fullName        Text default='null'
   email           Text
-  emailMD5        Text
+  emailMD5        Text sql=email_md5
   plugin          Text
 
   -- Specific OAuth2 services
