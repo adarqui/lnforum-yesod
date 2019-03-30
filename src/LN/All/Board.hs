@@ -4,7 +4,7 @@
 module LN.All.Board (
   -- Handler
   getBoardsR,
-  postBoardR0,
+  postBoardsR,
   getBoardR,
   getBoardH,
   putBoardR,
@@ -50,8 +50,8 @@ getBoardsR = run $ do
 
 
 
-postBoardR0 :: Handler Value
-postBoardR0 = run $ do
+postBoardsR :: Handler Value
+postBoardsR = run $ do
   user_id       <- _requireAuthId
   board_request <- requireJsonBody :: HandlerEff BoardRequest
   sp            <- lookupStandardParams

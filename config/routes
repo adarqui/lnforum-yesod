@@ -69,8 +69,7 @@
 --
 -- Boards
 --
-/api/boards BoardsR GET
-/api/board BoardR0 POST
+/api/boards BoardsR GET POST
 /api/board/#BoardId BoardR GET PUT DELETE
 !/api/board/#Text BoardH GET
 
