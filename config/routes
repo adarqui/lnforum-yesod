@@ -24,11 +24,9 @@
 
 
 
-/api/user_profiles ProfilesR GET
-/api/user_profile/#ProfileId ProfileR GET PUT
-
-
-
+--
+-- Users
+--
 
 -- TODO FIXME: Also add non-sanitized versions for admin-hack
 -- TODO FIXME: rename UserBlah to UserSanitizedBlah in handlers/models etc
@@ -50,14 +48,24 @@
 /api/user_pack/#UserId UserPackR GET
 !/api/user_pack/#Text UserPackH GET
 
-
-
 /api/users_count UsersCountR GET
+
+
+
+--
+-- User Profiles
+--
+
+/api/user_profiles ProfilesR GET
+/api/user_profile/#ProfileId ProfileR GET PUT
+
+
 
 
 --
 -- Forums
 --
+
 /api/forum/#ForumId ForumR GET PUT DELETE
 
 /api/forum_stat/#ForumId ForumStatR GET
@@ -69,6 +77,7 @@
 --
 -- Boards
 --
+
 /api/boards BoardsR GET POST
 /api/board/#BoardId BoardR GET PUT DELETE
 !/api/board/#Text BoardH GET
@@ -85,6 +94,7 @@
 --
 -- Threads
 --
+
 /api/threads ThreadsR GET POST
 /api/thread/#ThreadId ThreadR GET PUT DELETE
 !/api/thread/#Text ThreadH GET
@@ -95,3 +105,18 @@
 /api/thread_packs ThreadPacksR GET
 /api/thread_pack/#ThreadId ThreadPackR GET
 !/api/thread_pack/#Text ThreadPackH GET
+
+
+
+--
+-- Thread Posts
+--
+
+/api/thread_posts ThreadPostsR GET POST
+/api/thread_post/#ThreadPostId ThreadPostR GET PUT DELETE
+
+/api/thread_post_stats ThreadPostStatsR GET
+/api/thread_post_stat/#ThreadPostId ThreadPostStatR GET
+
+/api/thread_post_packs ThreadPostPacksR GET
+/api/thread_post_pack/#ThreadPostId ThreadPostPackR GET
