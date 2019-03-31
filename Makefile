@@ -59,3 +59,9 @@ mbp-yesod:
 
 pkg-check:
 	stack exec -- ghc-pkg check
+
+db-export:
+	pg_dump leuro > /tmp/lnforum.pgsql
+
+db-import:
+	psql leuro < /tmp/lnforum.pgsql
