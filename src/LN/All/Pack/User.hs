@@ -118,8 +118,7 @@ getUserPack_ByUserM _ user_id lookup_user@(Entity lookup_user_id _) = do
     stats       <- mustT $ getUserStatM user_id lookup_user_id
     profile     <- mustT $ getProfile_ByUserIdM user_id lookup_user_id
 
-    pure (stats
-         ,profile)
+    pure (stats, profile)
 
   rehtie lr leftA $ \(stats, profile) -> do
     rightA $ UserPackResponse {

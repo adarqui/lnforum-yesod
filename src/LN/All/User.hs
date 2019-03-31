@@ -51,6 +51,8 @@ import qualified Database.Esqueleto as E
 import           LN.All.Internal
 import           LN.All.Prelude
 import           LN.All.User.Shared (insertUsers_TasksM)
+import LN.All.Profile
+import LN.All.Api
 
 
 
@@ -297,10 +299,12 @@ insertUsersM' _ user_request = do
         , userActive    = True -- TODO FIXME: for now, just make all users active if they are added via this routine
       }
 
-    new_user <- mustT $ insertEntityByDbE user
-
-    -- TODO FIXME: can't call this because of circular dependency issue, need to figure this out!!
-    void $ liftIO $ insertUsers_TasksM new_user
+    new_user@(Entity new_user_id _) <- mustT $ insertEntityByDbE user
+    --
+    -- a new user gets a default profile & a default api entry
+    --
+    mustT $ insertProfileM new_user_id defaultProfileRequest
+    mustT $ insertApiM new_user_id defaultApiRequest
     pure new_user
 
 

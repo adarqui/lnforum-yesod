@@ -29,7 +29,4 @@ import           Prelude                (IO, pure, ($))
 insertUsers_TasksM :: Entity User -> IO ()
 insertUsers_TasksM (Entity new_user_id _) = do
 
-  void $ mkJob_CreateUserProfile new_user_id defaultProfileRequest
-  void $ mkJob_CreateUserApi new_user_id defaultApiRequest
-
   pure ()
